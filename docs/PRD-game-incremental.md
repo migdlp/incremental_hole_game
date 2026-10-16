@@ -118,7 +118,9 @@ Antes de ajustar costes debe existir una tabla editable con intervalos de genera
 
 Flutter para menús, resultados y árbol; Flame para el tablero, movimiento, colisiones y efectos. Esta es la opción recomendada, pendiente de validación mediante el primer prototipo. No se incorporará un motor de física adicional hasta comprobar si el movimiento sencillo resulta insuficiente.
 
-Separar la simulación del tablero, el estado del ciclo, la economía y el catálogo de mejoras. La transición entre día y noche debe tener una única autoridad para evitar duplicar recompensas.
+Organizar una única aplicación y paquete Dart en módulos funcionales: tablero, ciclo diario, economía, mejoras, automatización y progreso. Cada módulo controla su estado y expone contratos explícitos; las reglas usan Dart puro y no dependen de Flutter, Flame ni almacenamiento. La composición de la aplicación conecta los módulos y coordina compras y cierre sin duplicar recompensas. La estructura y sus límites se detallan en [Arquitectura y stack](arquitectura.md).
+
+Preparar el crecimiento mediante catálogos de contenido, IDs estables y guardado migrable. No implementar funcionalidades futuras ni añadir frameworks, paquetes separados o abstracciones sin una necesidad concreta. El alcance sigue siendo el del MVP; la organización modular se aplica desde el primer prototipo.
 
 ### Muchos objetos y rendimiento
 

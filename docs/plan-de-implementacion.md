@@ -4,13 +4,14 @@ Estado: backlog inicial sin fechas comprometidas. El [PRD](PRD-game-incremental.
 
 ## 0. Preparación
 
-- Localizar el repositorio de Game Incremental y leer sus instrucciones antes de modificarlo.
-- Crear la rama nueva solicitada conservando el historial. La sustitución de la aplicación anterior se hará dentro de esa rama.
+- Leer las instrucciones del repositorio `migdlp/incremental_hole_game` antes de modificarlo.
+- Crear la rama de desarrollo conservando el historial de documentación existente.
 - Crear el proyecto Flutter, fijar SDK y dependencias compatibles, verificar build Android.
+- Establecer la composición en `app/` y los módulos funcionales según [arquitectura](arquitectura.md), creando solo los necesarios para cada entrega. Mantener dominio en Dart puro, contratos públicos y propiedad única de datos.
 - Incorporar esta documentación y enlazarla desde el README del proyecto.
 - Configurar formato, análisis y pruebas en CI cuando esté disponible el acceso al repositorio.
 
-Estado actual: repositorio `migdlp/incremental_hole_game` localizado y documentación preparada para su publicación en `main`. La aplicación y la rama de desarrollo todavía no se han creado. No interpretar esta lista como trabajo ya realizado.
+Estado actual: repositorio `migdlp/incremental_hole_game` localizado y documentación publicada en `main`. La aplicación y la rama de desarrollo todavía no se han creado. No interpretar esta lista como trabajo ya realizado.
 
 ## 1. Prototipo de interacción
 
@@ -19,6 +20,7 @@ Dependencia: preparación. Objetivo: comprobar el gesto antes de dedicar tiempo 
 - Tablero lógico adaptable a pantalla vertical y dibujo mediante primitivas.
 - Pala con entrada de un dedo, bolas con rozamiento y colisiones, hoyo y generador.
 - Monedas con valor, aterrizaje y recogida mediante toque o arrastre.
+- Mantener movimiento y captura en el dominio de `board` y representación en su presentación Flame; emitir eventos explícitos hacia la sesión para contabilizar en `economy`.
 - Agrupación de monedas y límites iniciales; controles internos para generar carga de prueba.
 - Bocetos de jornada y noche según la dirección visual, sin exigir arte final.
 
@@ -33,6 +35,7 @@ Dependencia: interacción aceptable.
 - Ingreso diario separado del saldo bancado, resultado, récord y pérdida explícita de pendientes.
 - Comenzar siguiente día, también sin comprar nada.
 - Guardado mínimo consistente del cierre para no construir la economía sobre un saldo provisional.
+- Incorporar `day_cycle` y `progression`; coordinar el cierre en `GameSession` sin que los módulos modifiquen directamente el estado de otros. Separar serialización y archivos de las reglas.
 
 Entrega: ciclo jugable repetible. Salida: el día termina una vez; toda moneda no recogida se pierde y el ahorro se mantiene. Probar recogida justo en el límite, cierre repetido y entrada en segundo plano.
 
@@ -46,6 +49,7 @@ Dependencia: ciclo y economía consistentes.
 - Robot básico con búsqueda, empuje y recuperación de bloqueos.
 - Imán ligado al dedo y mejoras numéricas con límites.
 - Persistencia de compras.
+- Añadir `upgrades` y `automation` mediante sus contratos: compra consistente entre coste y nivel, robot que devuelve órdenes al tablero y catálogos con IDs estables.
 
 Entrega: ciclo con decisiones y automatización inicial. Salida: verificar cada mejora y jugar hasta desbloquear robot, comparar ramas y comprobar que no hay compras con saldo negativo o requisito incumplido.
 
@@ -58,6 +62,7 @@ Dependencia: progresión completa.
 - Aplicar la dirección visual validada, zonas táctiles y contraste.
 - Sesiones de balance y perfil con todas las mejoras.
 - Completar pruebas automáticas de los riesgos económicos y prueba integrada del ciclo.
+- Revisar dependencias entre módulos y ausencia de Flutter/Flame en dominio; validar compatibilidad de partidas e IDs al cambiar contenido. No extraer paquetes ni introducir frameworks solo por previsión.
 - Generar build Android instalable, instrucciones de ejecución y limitaciones conocidas.
 
 Entrega: primer MVP con las cuatro partes terminadas. Salida: diez ciclos consecutivos, reapertura durante jornada y noche, compras persistentes, conservación del valor y carga máxima en dispositivo de referencia.
@@ -74,4 +79,4 @@ Los candidatos posteriores están en el PRD: mejores bolas, robots de dinero y e
 
 ## Siguiente paso ejecutable
 
-Resolver el acceso al repositorio y preparar la rama; después construir la parte 1. Android vertical y Flame son la base de trabajo propuesta. La elección de un móvil de referencia debe quedar registrada antes de aprobar rendimiento, y la apariencia final se revisará con los primeros bocetos.
+Preparar la rama de desarrollo y construir la parte 1 con los límites modulares documentados. Android vertical y Flame son la base de trabajo propuesta. La elección de un móvil de referencia debe quedar registrada antes de aprobar rendimiento, y la apariencia final se revisará con los primeros bocetos.

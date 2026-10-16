@@ -8,7 +8,7 @@ Este paquete permite iniciar el prototipo del MVP. La aplicación todavía no se
 
 1. [PRD y alcance](PRD-game-incremental.md): producto, reglas y exclusiones.
 2. [Diseño de juego](diseno-de-juego.md): interacción, ciclo y comportamiento de objetos.
-3. [Arquitectura y stack](arquitectura.md): responsabilidades, guardado y rendimiento.
+3. [Arquitectura y stack](arquitectura.md): módulos funcionales, propiedad de datos, dependencias, guardado y rendimiento.
 4. [Dirección de arte y experiencia](direccion-de-arte.md): propuesta visual, pantallas y recursos.
 5. [Economía y balance](economia.md): parámetros y criterios de ajuste; [tabla editable](balance.csv).
 6. [Plan de implementación](plan-de-implementacion.md): entregas, dependencias y validación.
@@ -24,6 +24,8 @@ Si hay contradicciones, prevalecen las reglas acordadas del PRD. Los cambios de 
 ## Base propuesta para empezar
 
 Android en vertical, Flutter + Flame, un tablero, controles con un dedo y persistencia local. Estilo 2D cenital de objetos redondeados, con un taller nocturno para las mejoras. No se necesita backend.
+
+La estructura será modular desde el MVP: tablero, ciclo diario, economía, mejoras, automatización y progreso. Una sola aplicación y paquete Dart, con reglas independientes de Flutter/Flame, coordinación explícita y catálogos con IDs estables. Las capas y abstracciones se crean cuando se necesitan, sin implementar contenido futuro.
 
 ## Decisiones que se revisarán
 

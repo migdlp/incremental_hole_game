@@ -1,6 +1,6 @@
 # Arquitectura y stack
 
-Estado: base de implementación propuesta; no describe código ya creado.
+Estado: diseño objetivo del MVP. Algunas decisiones ya están aplicadas y otras siguen siendo propuestas. La [implementación actual](implementacion.md) describe el código real; [estado actual](estado-actual.md) enumera diferencias y pendientes. Este documento no acredita por sí solo que existan todas las clases, capas o pruebas que propone.
 
 ## Herramientas
 
@@ -142,7 +142,7 @@ Ensayo inicial: 200 bolas, 100 pilas y 150 partículas simultáneas. Medir en mo
 
 ## Calidad y CI
 
-En pull requests: `dart format --output=none --set-exit-if-changed .`, `flutter analyze`, `flutter test` y build Android de depuración. La primera entrega instalable debe probarse en dispositivo. La CI no prueba por sí sola fluidez ni diversión. Configurar CI al disponer del repositorio; no hay publicación automática ni firma de producción en el MVP.
+La [CI actual](ci.md) ejecuta formato sobre `lib test`, análisis, pruebas y build Android de depuración únicamente al lanzarla manualmente, por decisión del usuario. No se activa con pushes o pull requests. La primera entrega instalable debe probarse en dispositivo; la CI no acredita fluidez ni diversión. No hay publicación automática en tiendas ni firma de producción en el MVP.
 
 Pruebas prioritarias: conservación del valor al fusionar monedas, recogida única, límite exacto del día, compras inválidas, cierre repetido, guardado/restauración, interrupción de escritura y dependencias del árbol. Prueba de integración de un ciclo con compra y siguiente día. Validación manual del gesto, robot, legibilidad y rendimiento.
 

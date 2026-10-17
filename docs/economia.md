@@ -4,11 +4,11 @@ Estado: hipótesis para empezar a medir; los precios no están validados. Fuente
 
 ## Lectura de la tabla
 
-`level=0` indica configuración base. Para una mejora, `level` es el nivel que se compra y `cost` su precio incremental, no acumulado. `effect_value` es el valor absoluto resultante. `requires` usa `id:nivel`; vacío significa disponible desde la primera noche. `cap` describe el máximo aplicable a esa propiedad.
+`level=0` indica configuración base. Para una mejora, `level` es el nivel que se compra y `cost` su precio incremental, no acumulado. `effect_value` es el valor absoluto resultante. `requires` usa `id:nivel`; vacío significa disponible desde la primera noche. `cap` describe el máximo previsto de esa propiedad; el cargador actual no valida esa columna por separado. Los límites efectivos resultan de los valores base y niveles disponibles. Ver [catálogo implementado](implementacion.md#balance-y-mejoras).
 
 Unidades: segundos, unidades lógicas del tablero, unidades/segundo y monedas enteras. La duración base de producción no incluye los 5 segundos de cierre. El radio de pala y el radio de recogida son propiedades distintas.
 
-El saldo comienza en cero. La primera bola aparece al iniciar el día y después se aplica el intervalo; el cierre no genera bolas. A intervalo base de 0,75 s hay hasta 80 emisiones en 60 s si no hay bloqueos. Cada bola vale inicialmente 2 monedas: techo teórico de 160, sin asumir que el jugador lo consiga.
+El saldo comienza en cero. El primer intento de emisión llega al acumular el intervalo de generación, aproximadamente a los 0,75 s con la configuración base; no hay una bola inicial inmediata. Si la salida está bloqueada, espera al siguiente intento. El cierre no genera bolas. A intervalo base de 0,75 s hay hasta 80 emisiones en 60 s si no hay bloqueos. Cada bola vale inicialmente 2 monedas: techo teórico de 160, sin asumir que el jugador lo consiga.
 
 La primera ampliación de pala cuesta 20, equivalente a recoger diez recompensas iniciales. Eso permite comprobar si la primera compra es alcanzable con rendimiento modesto. No garantizarla mediante ingresos ocultos: ajustar precio o generación si las pruebas muestran que no lo es.
 

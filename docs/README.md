@@ -1,41 +1,41 @@
-# Documentación de Game Incremental
+# Documentación de Jardín mecánico
 
-Versión inicial · 15 de octubre de 2026
+Actualizada el 17 de octubre de 2026. Describe el prototipo `0.1.0+1` y la pipeline incorporados a `main` hasta `44d0aeb`. La documentación distingue implementación, evidencias de prueba y objetivos pendientes.
 
-Esta documentación acompaña la primera implementación jugable del prototipo. Ver [ejecución y alcance](../README.md) y [registro de validación](validacion-prototipo.md). La validación final del MVP en móvil sigue pendiente.
+## Empieza por tu tarea
 
-## Orden de lectura
+| Quiero… | Leer |
+| --- | --- |
+| Saber qué está terminado y qué falta | [Estado actual](estado-actual.md) |
+| Ejecutar el proyecto y completar una primera partida | [Guía de desarrollo](guia-desarrollo.md) |
+| Descargar o generar un APK | [Pipeline manual](ci.md) |
+| Entender los módulos y el ciclo de ejecución | [Implementación actual](implementacion.md) |
+| Entender el guardado y recuperar una partida | [Referencia de persistencia](persistencia.md) |
+| Cambiar precios, requisitos o efectos | [Economía](economia.md), [CSV](balance.csv) y [catálogo implementado](implementacion.md#balance-y-mejoras) |
+| Consultar pruebas y resultados observados | [Registro de validación](validacion-prototipo.md) |
+| Entender por qué se eligió esta solución | [Decisiones técnicas](decisiones.md) |
+| Actualizar esta documentación | [Guía para documentar](guia-documentacion.md) |
+| Consultar la evolución de la entrega | [Historial de cambios](../CHANGELOG.md) |
 
-1. [PRD y alcance](PRD-game-incremental.md): producto, reglas y exclusiones.
-2. [Diseño de juego](diseno-de-juego.md): interacción, ciclo y comportamiento de objetos.
-3. [Arquitectura y stack](arquitectura.md): módulos funcionales, propiedad de datos, dependencias, guardado y rendimiento.
-4. [Dirección de arte y experiencia](direccion-de-arte.md): propuesta visual, pantallas y recursos.
-5. [Economía y balance](economia.md): parámetros y criterios de ajuste; [tabla editable](balance.csv).
-6. [Plan de implementación](plan-de-implementacion.md): entregas, dependencias y validación.
+Para incorporarse al desarrollo: estado actual → guía de desarrollo → implementación → persistencia → decisiones. Para probar el APK, basta con la guía de CI y los escenarios manuales de la guía de desarrollo.
 
-## Cómo interpretar las decisiones
+## Producto y diseño objetivo
 
-- **Regla acordada:** parte del producto ya definido en el PRD.
-- **Base de implementación:** elección recomendada para poder construir el prototipo; se puede revisar con evidencia.
-- **Hipótesis:** requiere una prueba de interacción, balance o rendimiento.
+Estos documentos conservan requisitos, propuestas e hipótesis que no equivalen a funciones ya entregadas:
 
-Si hay contradicciones, prevalecen las reglas acordadas del PRD. Los cambios de alcance deben reflejarse primero allí y después en los documentos relacionados. Los números del balance viven en `balance.csv`; los documentos explican su significado.
+- [PRD y alcance](PRD-game-incremental.md): reglas acordadas y exclusiones.
+- [Diseño de juego](diseno-de-juego.md): interacción y criterios de sensación.
+- [Arquitectura objetivo](arquitectura.md): límites y dirección de crecimiento.
+- [Dirección de arte](direccion-de-arte.md): presentación y recursos finales propuestos.
+- [Plan de implementación](plan-de-implementacion.md): entregas y aceptación.
 
-## Base propuesta para empezar
+El PRD define lo que se quiere construir; [implementación](implementacion.md) y código describen lo que existe. Una diferencia debe registrarse en [estado actual](estado-actual.md), no resolverse atribuyendo al prototipo una función futura. Los valores editables viven únicamente en [balance.csv](balance.csv).
 
-Android en vertical, Flutter + Flame, un tablero, controles con un dedo y persistencia local. Estilo 2D cenital de objetos redondeados, con un taller nocturno para las mejoras. No se necesita backend.
+## Convenciones de estado
 
-La estructura será modular desde el MVP: tablero, ciclo diario, economía, mejoras, automatización y progreso. Una sola aplicación y paquete Dart, con reglas independientes de Flutter/Flame, coordinación explícita y catálogos con IDs estables. Las capas y abstracciones se crean cuando se necesitan, sin implementar contenido futuro.
+- **Implementado:** existe en el código; se enlaza su ubicación.
+- **Verificado:** hay una prueba o ejecución identificable, con sus condiciones y límites.
+- **Pendiente:** falta trabajo o evidencia de aceptación.
+- **Fuera de alcance:** el PRD lo excluye de este MVP; no es una tarea pendiente de esta entrega.
 
-## Decisiones que se revisarán
-
-| Decisión | Base actual | Cuándo revisarla |
-| --- | --- | --- |
-| Plataforma | Android vertical; web solo como apoyo si resulta útil | Antes de preparar la entrega instalable |
-| Motor | Flame sin Forge2D | Al probar empuje de grupos |
-| Duración | 60 s de producción + 5 s de cierre | Al completar varios ciclos |
-| Objetos entre días | Tablero limpio, sin monedas ni bolas heredadas | Al probar el cierre |
-| Arte | Jardín mecánico sencillo, vista cenital | Tras revisar los primeros bocetos |
-| Rendimiento | 60 FPS; dispositivo físico por elegir | Antes de aprobar el ensayo de carga |
-
-No hacen falta más sistemas de juego para iniciar. Sí hace falta medir el prototipo antes de fijar el balance y producir arte definitivo.
+La estructura adapta [Diátaxis](https://diataxis.fr/) a este repositorio: recorrido inicial, guías para tareas, referencia y explicación. Los criterios y las fuentes consultadas están en la [guía de documentación](guia-documentacion.md).

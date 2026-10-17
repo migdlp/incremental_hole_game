@@ -2,6 +2,8 @@
 
 Prototipo jugable de un incremental en Flutter + Flame. Empuja piedras con una pala circular hacia el hoyo, recoge las monedas físicas y compra mejoras durante la noche.
 
+La aplicación y su pipeline manual de APK están fusionadas en `main`. La aceptación del MVP en un Android físico sigue pendiente. Empieza por el [índice de documentación](docs/README.md), el [estado actual](docs/estado-actual.md) o la [guía de desarrollo](docs/guia-desarrollo.md).
+
 ## Ejecutar
 
 Flutter **3.35.7 estable**, Dart **3.9.2**. La versión está fijada en `.fvmrc` y las dependencias resueltas están en `pubspec.lock` (Flame 1.35.1).
@@ -50,8 +52,8 @@ La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisi
 
 Es una primera implementación jugable, no una validación final del MVP. Falta probar en un móvil físico el gesto, el balance, el acceso al robot en 3–5 días y los 60 FPS bajo carga. No hay dispositivo de referencia acordado. Los sonidos son clics del sistema con opción de silencio; no hay efectos de audio propios ni control independiente de volumen. El taller presenta las ramas y requisitos en una lista, sin el grafo visual definitivo.
 
-No hay progreso sin conexión. Un cierre forzado puede perder hasta los últimos cinco segundos desde el punto de control; al restaurar no se simula el tiempo cerrado. Si falla el guardado se avisa y se permite reintentarlo. Si el archivo y su copia están dañados, se pide una acción explícita antes de comenzar una partida nueva. La copia de seguridad puede recuperar un estado anterior.
+El juego mantiene su progreso localmente y no genera ingresos mientras está cerrado. Se solicitan puntos de control cada cinco segundos de avance activo. Un cierre forzado puede perder progreso desde la última escritura correcta, y la recuperación de una copia puede retroceder más; al restaurar no se simula el tiempo cerrado. Si falla el guardado se avisa y se permite reintentarlo. Si el archivo y su copia están dañados, se pide una acción explícita antes de comenzar una partida nueva. La copia de seguridad puede recuperar un estado anterior.
 
-Gráficos dibujados mediante primitivas, iconos Material/Cupertino incluidos por Flutter y fuentes del sistema; sin arte externo ni descargas de fuentes añadidas por la aplicación. Los iconos de instalación son todavía los de la plantilla de Flutter.
+Gráficos dibujados mediante primitivas, iconos Material/Cupertino incluidos por Flutter y tipografía predeterminada de Flutter; sin arte externo ni descargas de fuentes añadidas por la aplicación. Los iconos de instalación son todavía los de la plantilla de Flutter.
 
-Ver el [registro de validación](docs/validacion-prototipo.md) y el [índice de diseño](docs/README.md).
+Ver [cómo está implementado](docs/implementacion.md), el [formato de guardado](docs/persistencia.md), las [decisiones técnicas](docs/decisiones.md), el [registro de validación](docs/validacion-prototipo.md) y el [historial de cambios](CHANGELOG.md).

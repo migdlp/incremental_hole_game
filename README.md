@@ -39,6 +39,8 @@ dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test
 flutter build apk --debug
+# Con un teléfono Android conectado:
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 

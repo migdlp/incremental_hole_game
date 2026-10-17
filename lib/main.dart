@@ -58,7 +58,9 @@ class _BootstrapState extends State<Bootstrap> {
     } on Object catch (failure) {
       if (mounted) {
         setState(() {
-          error = failure.toString();
+          error = failure is FormatException
+              ? failure.message.toString()
+              : 'No se pudo iniciar el juego o acceder al guardado local. Vuelve a intentarlo.';
         });
       }
     }

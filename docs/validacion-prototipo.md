@@ -15,6 +15,7 @@ Flutter 3.35.7 estable, Dart 3.9.2, Flame 1.35.1. Linux Debian 13, Chromium 154 
 | `flutter analyze` | Sin incidencias |
 | `flutter test` | 17 pruebas superadas |
 | Compilación web sin CDN de CanvasKit | Correcta |
+| `flutter build apk --debug --no-pub` | APK generado correctamente; firma verificada con apksigner |
 | Navegador: apertura, comienzo de jornada y pausa | Correcto; sin errores de JavaScript |
 | Navegador: recarga de jornada interrumpida | Restaurada pausada, con botón Continuar |
 | Navegador: empuje y recogida mediante ratón | 3 capturas, 6 monedas cobradas, 0 pendientes, sin errores de JavaScript |
@@ -39,3 +40,9 @@ Las pruebas de simulación introducen objetos controlados para verificar invaria
 - Completar audio propio, control de volumen, grafo visual del árbol e iconos de instalación.
 
 No hay progresión sin conexión. Un cierre abrupto puede perder el trabajo desde el último punto de control de cinco segundos. La recuperación de la copia de seguridad puede retroceder al estado anterior.
+
+## Preparación Android comprobada
+
+Se instalaron el JDK completo Temurin 21.0.12.1, SDK Platforms 35 y 36, Build Tools 35.0.0, NDK 27.0.12077973 y CMake 3.22.1. Se configuraron proxy y confianza de certificados del entorno para Gradle. El ajuste del proyecto limita Gradle a 3 GB de heap y dos workers para evitar agotar la memoria de este entorno.
+
+APK de depuración generado en `build/app/outputs/flutter-apk/app-debug.apk`. La compilación y su firma son correctas; esto no sustituye una prueba de instalación y juego en un teléfono físico.

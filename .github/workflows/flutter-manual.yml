@@ -1,16 +1,24 @@
-name: Flutter - validación manual
+name: Flutter - APK de prueba
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
 
+concurrency:
+  group: android-apk-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate:
-    name: Comprobar Flutter
+  android:
+    name: Validar y compilar APK debug
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 40
     env:
       FLUTTER_VERSION: 3.35.7
       FLUTTER_SHA256: 146df531f9ac6a11a918013c1a70faafc053d4811c8cb69a413fd70748d51c3d
@@ -18,67 +26,103 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Instalar Flutter estable y verificar integridad
+      - name: Preparar registros
+        shell: bash
+        run: mkdir -p "$RUNNER_TEMP/flutter-logs"
+
+      - name: Instalar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar herramientas Android
         shell: bash
         run: |
           set -euo pipefail
-          curl -fL --retry 3 --connect-timeout 20 \
+          sdkmanager --install "platforms;android-36" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
+
+      - name: Instalar Flutter y verificar integridad
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 20 --max-time 600 \
             "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
             -o "$RUNNER_TEMP/flutter.tar.xz"
           printf '%s  %s\n' "$FLUTTER_SHA256" "$RUNNER_TEMP/flutter.tar.xz" | sha256sum -c -
           tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
-          mkdir -p "$RUNNER_TEMP/flutter-logs"
 
-      - name: Comprobar SDK y entorno
+      - name: Comprobar entorno
         shell: bash
         run: |
           set -euo pipefail
+          test -f pubspec.yaml
           flutter config --no-analytics
-          flutter --version | tee "$RUNNER_TEMP/flutter-logs/version.log"
-          dart --version 2>&1 | tee "$RUNNER_TEMP/flutter-logs/dart.log"
+          flutter --version 2>&1 | tee "$RUNNER_TEMP/flutter-logs/version.log"
           flutter doctor -v 2>&1 | tee "$RUNNER_TEMP/flutter-logs/doctor.log"
 
-      - name: Seleccionar aplicación o prueba del entorno
+      - name: Resolver dependencias fijadas
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -f "$GITHUB_WORKSPACE/pubspec.yaml" ]]; then
-            echo "PROJECT_DIR=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
-            echo '### Validación de la aplicación Flutter' >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo '### Validación exclusiva del entorno' >> "$GITHUB_STEP_SUMMARY"
-            echo 'El repositorio todavía no contiene una aplicación Flutter. Se comprueba un proyecto temporal generado por Flutter; este resultado no valida el juego.' >> "$GITHUB_STEP_SUMMARY"
-            flutter create --platforms=android,web --project-name flutter_env_check "$RUNNER_TEMP/flutter_env_check"
-            echo "PROJECT_DIR=$RUNNER_TEMP/flutter_env_check" >> "$GITHUB_ENV"
-          fi
+          flutter pub get --enforce-lockfile 2>&1 | tee "$RUNNER_TEMP/flutter-logs/pub-get.log"
 
-      - name: Resolver dependencias
+      - name: Comprobar formato
         shell: bash
         run: |
           set -euo pipefail
-          cd "$PROJECT_DIR"
-          flutter pub get 2>&1 | tee "$RUNNER_TEMP/flutter-logs/pub-get.log"
+          dart format --output=none --set-exit-if-changed lib test 2>&1 | tee "$RUNNER_TEMP/flutter-logs/format.log"
 
       - name: Analizar código
         shell: bash
         run: |
           set -euo pipefail
-          cd "$PROJECT_DIR"
-          flutter analyze 2>&1 | tee "$RUNNER_TEMP/flutter-logs/analyze.log"
+          flutter analyze --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/analyze.log"
 
       - name: Ejecutar pruebas
         shell: bash
         run: |
           set -euo pipefail
-          cd "$PROJECT_DIR"
-          flutter test 2>&1 | tee "$RUNNER_TEMP/flutter-logs/test.log"
+          flutter test --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/test.log"
 
-      - name: Guardar registros
+      - name: Compilar APK instalable de depuración
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build apk --debug --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/build-apk.log"
+          test -s build/app/outputs/flutter-apk/app-debug.apk
+          sha256sum build/app/outputs/flutter-apk/app-debug.apk > build/app/outputs/flutter-apk/app-debug.apk.sha256
+
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: incremental-hole-game-debug-${{ github.run_number }}
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            build/app/outputs/flutter-apk/app-debug.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Indicar descarga
+        shell: bash
+        run: |
+          {
+            echo '### APK de prueba disponible'
+            echo 'Descarga el artefacto incremental-hole-game-debug de esta ejecución y descomprime el ZIP.'
+            echo 'Instala app-debug.apk en Android permitiendo la instalación desde esa fuente cuando el teléfono lo solicite.'
+            echo 'Es una compilación debug del prototipo, no una versión firmada para publicar en una tienda.'
+            echo "Commit: $GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guardar registros incluso si falla
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-validation-logs
+          name: flutter-validation-logs-${{ github.run_number }}
           path: ${{ runner.temp }}/flutter-logs/
           if-no-files-found: warn
           retention-days: 14

@@ -44,7 +44,7 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 
-La [pipeline manual](docs/ci.md) detecta la aplicación de la raíz y ejecuta doctor, dependencias, análisis y pruebas sobre ella. No se dispara con cada push.
+La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisis y pruebas, compila el APK de depuración y lo guarda como artefacto descargable junto con su SHA-256. Se activa en **Actions → Flutter - APK manual → Run workflow**; no se dispara con cada push.
 
 ## Límites de esta entrega
 

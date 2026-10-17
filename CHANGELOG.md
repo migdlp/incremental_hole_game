@@ -2,6 +2,12 @@
 
 Se registran entregas y cambios observables. `0.1.0+1` es la versión declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Diseño de herramientas y recogida — 2026-10-17
+
+- Lluvia de ideas de herramientas para agrupar, transportar y lanzar bolas; son candidatas, sin implementación ni precios aprobados.
+- Cambio confirmado y pendiente: monedas por pulsación al inicio; recoger arrastrando requiere comprar la mejora de barrido.
+- Plan, PRD y diseño actualizados; el prototipo aún permite barrido desde el inicio. Sin cambios de código ni de balance.
+
 ## Plan de siguiente iteración — 2026-10-17
 
 - Regla confirmada: bolas y monedas pendientes desaparecen al entrar en la noche; cada día nuevo empieza sin objetos heredados.

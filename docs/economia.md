@@ -14,9 +14,9 @@ La primera ampliación de pala cuesta 20, equivalente a recoger diez recompensas
 
 ## Mejoras
 
-Las ramas y requisitos coinciden con el PRD: pala y radio de recogida; generador y recompensa; duración tras generador 1; imán tras recogida 1; robot tras pala 1; velocidad tras robot.
+Para los ocho tipos implementados, las ramas y requisitos son: pala y radio de recogida; generador y recompensa; duración tras generador 1; imán tras recogida 1; robot tras pala 1; velocidad tras robot.
 
-La recompensa progresa de 2 a 3, 4 y 5 monedas por bola. Se entrega como valor de una moneda física, no como cinco objetos. El día puede llegar hasta 75 s de producción más cierre. El imán tiene alcance fijo al desbloquearse; no añade una novena mejora.
+La recompensa progresa de 2 a 3, 4 y 5 monedas por bola. Se entrega como valor de una moneda física, no como cinco objetos. El día puede llegar hasta 75 s de producción más cierre. El imán tiene alcance fijo al desbloquearse. El catálogo actual tiene ocho tipos. Está confirmado añadir recogida por barrido, con precio, identificador y dependencias por definir: al inicio solo se recogerá pulsando. No se modifica el CSV durante este brainstorming; ver [plan de cambios](plan-siguiente-iteracion.md).
 
 El robot cuesta 160 después del requisito de pala. El objetivo de conseguirlo en 3–5 días supone partidas de rendimiento modesto y algunas compras; no debe bloquear ahorrar para obtenerlo antes. El objetivo se valida observando sesiones, no solo con la aritmética de precios.
 

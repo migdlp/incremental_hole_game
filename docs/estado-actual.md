@@ -48,6 +48,8 @@ Las pruebas de simulación usan objetos controlados. La revisión del navegador 
 
 El [plan de cambios](plan-siguiente-iteracion.md) prioriza verificar la limpieza obligatoria de bolas y monedas al pasar a la noche y el inicio de cada nuevo día con tablero vacío. La coordinación actual ya descarta el tablero y crea otro nuevo; queda reforzar la cobertura específica indicada en el plan.
 
+También está confirmado cambiar las monedas: pulsación al inicio y barrido al comprar una mejora. **Pendiente de implementación:** actualmente toque y arrastre recogen desde el primer día; el catálogo sigue teniendo ocho tipos. Las [ideas de herramientas para bolas](ideas-herramientas-bolas.md) son candidatas de diseño, no funciones entregadas ni una selección de alcance.
+
 ## Pendiente de aceptación
 
 | Prioridad | Tarea | Evidencia para cerrarla |

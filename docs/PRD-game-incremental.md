@@ -15,7 +15,7 @@ La experiencia debe combinar un gesto agradable de recoger y ordenar, decisiones
 - El generador produce bolas durante el día.
 - El jugador arrastra el dedo para empujarlas con una pala circular hacia el hoyo.
 - Introducir una bola en el hoyo produce monedas físicas en el tablero. El ingreso no se añade automáticamente al saldo.
-- Las monedas se recogen al pulsarlas o al pasar el dedo por encima de ellas.
+- Al inicio las monedas se recogen pulsándolas. Recogerlas pasando el dedo por encima requiere comprar la mejora de recogida por barrido.
 - El día tiene tiempo limitado y su duración puede mejorarse.
 - Al terminar el día, las monedas no recogidas y las bolas restantes desaparecen al pasar a la noche. Cada día nuevo empieza sin bolas ni monedas.
 - El dinero recogido y no gastado sí se conserva.
@@ -34,7 +34,7 @@ El tablero muestra el hoyo, el generador, la pala, las bolas, las monedas y el r
 
 Propuesta inicial: 60 segundos de producción y 5 segundos finales de recogida. En esos 5 segundos el generador se detiene, pero el jugador y el robot pueden seguir moviendo bolas y recogiendo monedas. Ambos tiempos son provisionales; los 5 segundos forman parte del día y se comunican claramente en pantalla.
 
-El dedo desplaza una pala que empuja grupos de bolas. El hoyo tiene una pequeña zona de captura para evitar que acertar resulte frustrante. Pasar sobre una moneda la recoge sin exigir un toque por objeto. La recogida y el empuje funcionan con un mismo gesto, sin cambiar de herramienta.
+El dedo desplaza una pala que empuja grupos de bolas. El hoyo tiene una pequeña zona de captura para evitar que acertar resulte frustrante. Al inicio hay que pulsar las monedas para cobrarlas: arrastrar para empujar bolas no las recoge. Tras comprar recogida por barrido, pasar el dedo sobre una moneda también la cobra; entonces recogida y empuje pueden compartir gesto, sin cambiar de herramienta.
 
 ### Final del día
 
@@ -58,10 +58,10 @@ Objetivo: demostrar que el ciclo manual resulta agradable y que comprar mejoras 
 | --- | --- |
 | Tablero | Una arena, un hoyo y un generador |
 | Movimiento | Pala circular controlada con un dedo; empuje de grupos y captura por el hoyo |
-| Recompensa | Monedas visibles al introducir bolas; recogida por toque o arrastre |
+| Recompensa | Monedas visibles al introducir bolas; recogida por toque y arrastre desbloqueable |
 | Ciclo | Día limitado, aviso de cierre, fin del día y noche sin temporizador |
 | Resultados | Ingreso diario, bolas introducidas, monedas perdidas, récord y comparación anterior |
-| Progresión | Árbol pequeño con dependencias y ocho tipos de mejora |
+| Progresión | Árbol pequeño con los ocho tipos actuales y un desbloqueo de recogida por barrido pendiente |
 | Automatización | Un robot básico que empuja bolas y una mejora de imán para dinero |
 | Persistencia | Guardado local del saldo, mejoras, número de día y resultados |
 | Controles básicos | Pausa, volumen de efectos y explicación breve durante el primer día |
@@ -74,6 +74,7 @@ Tres ramas visibles desde la primera noche. Las dependencias deben entenderse an
 | Rama | Nodo | Efecto | Dependencia propuesta |
 | --- | --- | --- | --- |
 | Control | Pala más ancha | Permite empujar grupos mayores | Nodo inicial |
+| Control | Recogida por barrido | Permite cobrar monedas al arrastrar por encima; antes solo por pulsación | Por definir; cambio confirmado, pendiente |
 | Control | Radio de recogida | Recoge monedas desde más distancia | Nodo inicial |
 | Control | Imán | Atrae y recoge automáticamente monedas dentro de un radio corto alrededor de la pala | Radio de recogida, nivel 1 |
 | Producción | Generador más rápido | Reduce el intervalo entre bolas | Nodo inicial |
@@ -81,6 +82,8 @@ Tres ramas visibles desde la primera noche. Las dependencias deben entenderse an
 | Producción | Día más largo | Aumenta el tiempo de producción, con límite | Generador, nivel 1 |
 | Automatización | Robot básico | Empuja bolas hacia el hoyo durante el día | Pala, nivel 1 |
 | Automatización | Velocidad del robot | Mejora su desplazamiento | Robot desbloqueado |
+
+El catálogo implementado aún contiene ocho tipos y permite barrido desde el inicio. El nuevo desbloqueo exige cambios de entrada, catálogo y guardado; su precio y relación con radio e imán están por definir en el [plan de cambios](plan-siguiente-iteracion.md). Las [ideas de herramientas para bolas](ideas-herramientas-bolas.md) siguen en exploración y no amplían automáticamente este alcance.
 
 El robot básico no recoge monedas. El imán está ligado a la pala, de modo que recoger dinero sigue requiriendo posicionarse. Un robot independiente de dinero se reserva para una ampliación.
 
@@ -146,7 +149,7 @@ El cierre del día y su ingreso deben registrarse de forma consistente para impe
 | --- | --- | --- |
 | 1. Prototipo de interacción | Tablero, pala, bolas, hoyo y monedas | Empujar grupos y recoger resulta cómodo con un dedo; prueba inicial de carga |
 | 2. Ciclo completo | Temporizador, cierre, noche, saldo y resultados | Ninguna moneda pendiente pasa al día siguiente y el ingreso se calcula una sola vez |
-| 3. Progresión | Árbol, ocho tipos de mejora, robot e imán | Comprar cambia el siguiente día y las dependencias se entienden |
+| 3. Progresión | Árbol, mejoras existentes y desbloqueo de barrido, robot e imán | Comprar cambia el siguiente día y las dependencias se entienden |
 | 4. MVP verificable | Guardado, pausa, primera experiencia y ajuste de rendimiento/economía | Varias jornadas consecutivas funcionan sin bloquear la progresión ni perder el estado |
 
 La primera entrega técnica es la parte 1; el primer MVP comprende las cuatro partes. No se comprometen fechas hasta validar interacción, plataformas y herramientas.
@@ -155,10 +158,10 @@ La primera entrega técnica es la parte 1; el primer MVP comprende las cuatro pa
 
 1. El jugador puede completar al menos diez ciclos consecutivos de día y noche, comprar mejoras y ahorrar sin bloqueos.
 2. Una bola capturada produce su recompensa una sola vez y desaparece del tablero.
-3. Las monedas se pueden recoger por toque y arrastre, y el saldo coincide con su valor acumulado.
+3. Al inicio solo pulsar recoge monedas; arrastrar solo las recoge tras comprar barrido. El toque sigue funcionando y cada valor se cobra una sola vez.
 4. Al terminar el día, todas las bolas y monedas pendientes desaparecen al pasar a la noche. Las monedas no recogidas no se suman al saldo, las bolas retiradas no producen recompensa y cada día nuevo empieza sin bolas ni monedas.
 5. El saldo sin gastar se conserva entre días y al reiniciar la aplicación.
-6. Las ocho mejoras respetan precio, dependencias, niveles y efectos; robot e imán funcionan durante el día.
+6. Las mejoras existentes y el nuevo desbloqueo de barrido respetan los precios, dependencias y efectos que se definan; robot e imán funcionan durante el día.
 7. El primer día permite una compra con un rendimiento modesto, y el ritmo de acceso al robot se valida jugando.
 8. Pausar o salir a segundo plano detiene el temporizador y la simulación; reanudar no duplica ingresos.
 9. La agrupación de monedas conserva su valor incluso al alcanzar el límite de objetos.

@@ -16,8 +16,8 @@ Usar coordenadas lógicas con escala uniforme y márgenes para otras proporcione
 - La aparición de la pala no desplaza bruscamente un montón: se separan solapamientos con corrección limitada.
 - Al moverla, empuja bolas mediante su contorno circular. No se pueden agarrar ni transportar bolas individualmente.
 - Limitar velocidad e interpolar el recorrido para evitar atravesar objetos con un gesto rápido.
-- Recoger monedas a lo largo del segmento recorrido, no solo en el último punto recibido.
-- Un toque también recoge monedas dentro del radio de recogida. Las monedas no bloquean bolas ni pala.
+- Solo tras comprar recogida por barrido, recoger monedas a lo largo del segmento recorrido, no solo en el último punto recibido. Antes, arrastrar no cobra monedas.
+- Al inicio solo pulsar recoge monedas dentro del radio de recogida; el toque sigue disponible después de desbloquear barrido. Las monedas no bloquean bolas ni pala.
 - Solo el primer puntero controla el tablero; botones y menús consumen su propia entrada.
 - Al pausar, terminar el día o perder el foco se cancela el gesto activo.
 
@@ -34,6 +34,8 @@ El hoyo atrae suavemente dentro de un radio local. Una bola entra al cruzar el r
 Cada bola genera un objeto con valor entero, según la mejora de recompensa activa. La moneda salta visualmente desde el hoyo hasta un punto cercano dentro del tablero. El salto es presentación; al aterrizar queda disponible para recoger. Propuesta: aterrizaje en unos 0,2 s, a validar.
 
 La recogida muestra destello y cambio de contador. No exige ver terminar la animación para registrar el ingreso. Las pilas próximas se fusionan conservando todo su valor. En saturación, integrar la recompensa nueva en una pila existente; nunca borrarla por alcanzar un límite.
+
+La mejora de barrido habilita cobrar arrastrando; no es un aumento de radio ni desbloquea el imán. Precio y dependencias quedan por definir en el [plan de cambios](plan-siguiente-iteracion.md). El prototipo todavía permite barrer sin compra; este apartado describe el objetivo confirmado.
 
 El imán funciona dentro de un radio alrededor del dedo mientras está apoyado: atrae monedas y las cobra al llegar al radio de recogida. No recoge todo el tablero ni actúa al levantar el dedo. Las pilas muestran su valor, evitando depender únicamente del tamaño.
 
@@ -65,7 +67,7 @@ Al agotarse el tiempo, procesar solo la fracción de simulación anterior al lí
 
 ## Primera experiencia y noche
 
-El primer día utiliza dos mensajes breves: «Arrastra para empujar las bolas al hoyo» y, al aparecer la primera moneda, «Toca o desliza para recoger monedas». No añadir un tutorial separado obligatorio.
+El primer día utiliza dos mensajes breves: «Arrastra para empujar las bolas al hoyo» y, al aparecer la primera moneda, «Toca para recoger monedas». Tras comprar barrido, indicar «Toca o desliza para recoger monedas». No añadir un tutorial separado obligatorio.
 
 La noche presenta ingreso diario, récord y resumen; el árbol es accesible en la misma pantalla mediante desplazamiento. Cada nodo tiene nombre, efecto actual y siguiente, precio y requisito. Estados: disponible, sin saldo, bloqueado por requisito y completado. Comprar requiere una acción explícita sin confirmación adicional. No permitir compras durante el día.
 
@@ -74,7 +76,7 @@ Al completar todos los niveles se puede seguir jugando para mejorar el récord; 
 ## Pruebas de sensación
 
 - Empujar diez bolas juntas sin que atraviesen la pala ni salgan del tablero.
-- Recoger una línea de monedas con un gesto rápido.
+- Tras comprar barrido, recoger una línea de monedas con un gesto rápido; antes, cruzarla arrastrando no debe cobrarla.
 - Entender, sin explicación verbal, que introducir bolas y cobrar son acciones distintas.
 - Entender el aviso de cierre y la pérdida de monedas.
 - Percibir la primera ampliación de pala y la ayuda del robot.

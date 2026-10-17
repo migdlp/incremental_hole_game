@@ -1,0 +1,84 @@
+name: Flutter - validación manual
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Comprobar Flutter
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      FLUTTER_VERSION: 3.35.7
+      FLUTTER_SHA256: 146df531f9ac6a11a918013c1a70faafc053d4811c8cb69a413fd70748d51c3d
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Flutter estable y verificar integridad
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 20 \
+            "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
+            -o "$RUNNER_TEMP/flutter.tar.xz"
+          printf '%s  %s\n' "$FLUTTER_SHA256" "$RUNNER_TEMP/flutter.tar.xz" | sha256sum -c -
+          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/flutter-logs"
+
+      - name: Comprobar SDK y entorno
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter config --no-analytics
+          flutter --version | tee "$RUNNER_TEMP/flutter-logs/version.log"
+          dart --version 2>&1 | tee "$RUNNER_TEMP/flutter-logs/dart.log"
+          flutter doctor -v 2>&1 | tee "$RUNNER_TEMP/flutter-logs/doctor.log"
+
+      - name: Seleccionar aplicación o prueba del entorno
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f "$GITHUB_WORKSPACE/pubspec.yaml" ]]; then
+            echo "PROJECT_DIR=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+            echo '### Validación de la aplicación Flutter' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo '### Validación exclusiva del entorno' >> "$GITHUB_STEP_SUMMARY"
+            echo 'El repositorio todavía no contiene una aplicación Flutter. Se comprueba un proyecto temporal generado por Flutter; este resultado no valida el juego.' >> "$GITHUB_STEP_SUMMARY"
+            flutter create --platforms=android,web --project-name flutter_env_check "$RUNNER_TEMP/flutter_env_check"
+            echo "PROJECT_DIR=$RUNNER_TEMP/flutter_env_check" >> "$GITHUB_ENV"
+          fi
+
+      - name: Resolver dependencias
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PROJECT_DIR"
+          flutter pub get 2>&1 | tee "$RUNNER_TEMP/flutter-logs/pub-get.log"
+
+      - name: Analizar código
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PROJECT_DIR"
+          flutter analyze 2>&1 | tee "$RUNNER_TEMP/flutter-logs/analyze.log"
+
+      - name: Ejecutar pruebas
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PROJECT_DIR"
+          flutter test 2>&1 | tee "$RUNNER_TEMP/flutter-logs/test.log"
+
+      - name: Guardar registros
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-validation-logs
+          path: ${{ runner.temp }}/flutter-logs/
+          if-no-files-found: warn
+          retention-days: 14

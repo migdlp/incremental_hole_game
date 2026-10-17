@@ -10,11 +10,15 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-and-build:
     name: Validar y generar APK de depuración
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       FLUTTER_VERSION: 3.35.7
       FLUTTER_SHA256: 146df531f9ac6a11a918013c1a70faafc053d4811c8cb69a413fd70748d51c3d
@@ -36,6 +40,9 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Preparar herramientas Android
         run: |
           sdkmanager --sdk_root="$ANDROID_HOME" \
@@ -46,7 +53,7 @@ jobs:
 
       - name: Instalar Flutter estable y verificar integridad
         run: |
-          curl -fL --retry 3 --connect-timeout 20 \
+          curl -fL --retry 3 --connect-timeout 20 --max-time 600 \
             "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
             -o "$RUNNER_TEMP/flutter.tar.xz"
           printf '%s  %s\n' "$FLUTTER_SHA256" "$RUNNER_TEMP/flutter.tar.xz" | sha256sum -c -
@@ -61,10 +68,10 @@ jobs:
           flutter doctor -v 2>&1 | tee "$RUNNER_TEMP/flutter-logs/doctor.log"
 
       - name: Resolver dependencias
-        run: flutter pub get 2>&1 | tee "$RUNNER_TEMP/flutter-logs/pub-get.log"
+        run: flutter pub get --enforce-lockfile 2>&1 | tee "$RUNNER_TEMP/flutter-logs/pub-get.log"
 
       - name: Comprobar formato
-        run: dart format --output=none --set-exit-if-changed lib test
+        run: dart format --output=none --set-exit-if-changed lib test 2>&1 | tee "$RUNNER_TEMP/flutter-logs/format.log"
 
       - name: Analizar código
         run: flutter analyze --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/analyze.log"

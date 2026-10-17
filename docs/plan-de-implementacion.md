@@ -11,7 +11,7 @@ Estado: backlog inicial sin fechas comprometidas. El [PRD](PRD-game-incremental.
 - Incorporar esta documentación y enlazarla desde el README del proyecto.
 - Configurar formato, análisis y pruebas en CI cuando esté disponible el acceso al repositorio.
 
-Estado actual: repositorio `migdlp/incremental_hole_game` localizado y documentación publicada en `main`. La aplicación y la rama de desarrollo todavía no se han creado. No interpretar esta lista como trabajo ya realizado.
+Estado actual: primera aplicación Flutter creada en `feat/playable-prototype`, con tablero Flame, ciclo, mejoras, robot, imán y persistencia. Ver [validación del prototipo](validacion-prototipo.md). Los criterios de sensación, balance y rendimiento en dispositivo físico siguen abiertos; las listas siguientes conservan el plan de aceptación, no certifican su cumplimiento.
 
 ## 1. Prototipo de interacción
 
@@ -79,4 +79,4 @@ Los candidatos posteriores están en el PRD: mejores bolas, robots de dinero y e
 
 ## Siguiente paso ejecutable
 
-Preparar la rama de desarrollo y construir la parte 1 con los límites modulares documentados. Android vertical y Flame son la base de trabajo propuesta. La elección de un móvil de referencia debe quedar registrada antes de aprobar rendimiento, y la apariencia final se revisará con los primeros bocetos.
+Probar la primera implementación en un móvil Android físico, revisar el empuje de grupos y la recogida, y medir tres jornadas de carga máxima. Registrar el dispositivo antes de aprobar rendimiento. Ajustar balance y presentación a partir de esas pruebas, sin dar por aceptado el MVP por pasar pruebas automáticas.

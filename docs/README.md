@@ -2,7 +2,7 @@
 
 Versión inicial · 15 de octubre de 2026
 
-Este paquete permite iniciar el prototipo del MVP. La aplicación todavía no se ha creado.
+Esta documentación acompaña la primera implementación jugable del prototipo. Ver [ejecución y alcance](../README.md) y [registro de validación](validacion-prototipo.md). La validación final del MVP en móvil sigue pendiente.
 
 ## Orden de lectura
 

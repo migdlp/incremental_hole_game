@@ -61,7 +61,7 @@ stateDiagram-v2
 
 La pausa conserva la fase anterior; no reinicia tiempo. El cierre mantiene pala y robot, detiene el generador y muestra «Últimos segundos: recoge las monedas». No es una fase de compras.
 
-Al agotarse el tiempo, procesar solo la fracción de simulación anterior al límite; después bloquear entrada y liquidar. Los efectos visuales pueden terminar, pero no conceden ingresos posteriores. Toda moneda pendiente, incluso en animación de salida, cuenta como perdida. Base propuesta: retirar también las bolas restantes.
+Al agotarse el tiempo, procesar solo la fracción de simulación anterior al límite; después bloquear entrada y liquidar. Los efectos visuales pueden terminar, pero no conceden ingresos posteriores. Toda moneda pendiente, incluso en animación de salida, cuenta como perdida. Regla acordada: retirar también todas las bolas restantes al pasar a la noche. Cada día nuevo empieza sin bolas ni monedas. El ahorro ya recogido y los niveles de mejora se conservan. La verificación está desglosada en el [plan de la siguiente iteración](plan-siguiente-iteracion.md).
 
 ## Primera experiencia y noche
 

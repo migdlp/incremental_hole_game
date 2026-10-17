@@ -7,6 +7,7 @@ Actualizada el 17 de octubre de 2026. Describe el prototipo `0.1.0+1` y la pipel
 | Quiero… | Leer |
 | --- | --- |
 | Saber qué está terminado y qué falta | [Estado actual](estado-actual.md) |
+| Preparar los cambios de la siguiente iteración | [Plan de la siguiente iteración](plan-siguiente-iteracion.md) |
 | Ejecutar el proyecto y completar una primera partida | [Guía de desarrollo](guia-desarrollo.md) |
 | Descargar o generar un APK | [Pipeline manual](ci.md) |
 | Entender los módulos y el ciclo de ejecución | [Implementación actual](implementacion.md) |

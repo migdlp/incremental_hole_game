@@ -44,6 +44,10 @@ Las pruebas de simulación usan objetos controlados. La revisión del navegador 
 | Suite `integration_test` y perfil en móvil | Existen pruebas de reglas/sesión y widgets; no hay suite `integration_test` ni mediciones físicas |
 | Primera bola inmediata en la propuesta económica inicial | El código espera a acumular el intervalo de generación; se ha corregido la explicación de economía |
 
+## Siguiente iteración
+
+El [plan de cambios](plan-siguiente-iteracion.md) prioriza verificar la limpieza obligatoria de bolas y monedas al pasar a la noche y el inicio de cada nuevo día con tablero vacío. La coordinación actual ya descarta el tablero y crea otro nuevo; queda reforzar la cobertura específica indicada en el plan.
+
 ## Pendiente de aceptación
 
 | Prioridad | Tarea | Evidencia para cerrarla |

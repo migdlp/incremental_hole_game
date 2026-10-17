@@ -2,6 +2,12 @@
 
 Se registran entregas y cambios observables. `0.1.0+1` es la versión declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Plan de siguiente iteración — 2026-10-17
+
+- Regla confirmada: bolas y monedas pendientes desaparecen al entrar en la noche; cada día nuevo empieza sin objetos heredados.
+- Plan de regresión para cierre, dinero perdido, conservación de ahorro/mejoras y reapertura nocturna.
+- La coordinación actual ya crea y descarta tableros; esta actualización documenta el alcance y las comprobaciones pendientes, sin cambiar código.
+
 ## Documentación del estado actual — 2026-10-17
 
 - Índice por tareas, inventario de funciones entregadas y pendientes con evidencias.

@@ -17,7 +17,7 @@ La experiencia debe combinar un gesto agradable de recoger y ordenar, decisiones
 - Introducir una bola en el hoyo produce monedas físicas en el tablero. El ingreso no se añade automáticamente al saldo.
 - Las monedas se recogen al pulsarlas o al pasar el dedo por encima de ellas.
 - El día tiene tiempo limitado y su duración puede mejorarse.
-- Al terminar el día, las monedas no recogidas desaparecen. No pasan al día siguiente.
+- Al terminar el día, las monedas no recogidas y las bolas restantes desaparecen al pasar a la noche. Cada día nuevo empieza sin bolas ni monedas.
 - El dinero recogido y no gastado sí se conserva.
 - Por la noche se muestra el resultado del día y se compran mejoras.
 - El árbol permite mejorar la interacción manual, la producción, las recompensas y la automatización.
@@ -40,7 +40,7 @@ El dedo desplaza una pala que empuja grupos de bolas. El hoyo tiene una pequeña
 
 Al llegar el tiempo a cero se bloquea la interacción, se detienen los robots y se calcula el resultado una sola vez. Las monedas sin recoger desaparecen sin sumarse al saldo.
 
-Propuesta para revisar: las bolas restantes también se retiran, y cada día comienza con un tablero limpio y la misma configuración inicial de generación. Esto permite comparar resultados sin arrastrar objetos entre días.
+Regla acordada: al pasar a la noche se retiran todas las bolas y monedas restantes, incluidas las monedas en aterrizaje. El día siguiente comienza sin bolas ni monedas; después funciona el generador con la configuración correspondiente a las mejoras. Se conservan el dinero ya recogido y no gastado y el progreso. Ver [plan de la siguiente iteración](plan-siguiente-iteracion.md).
 
 ### Noche
 
@@ -156,7 +156,7 @@ La primera entrega técnica es la parte 1; el primer MVP comprende las cuatro pa
 1. El jugador puede completar al menos diez ciclos consecutivos de día y noche, comprar mejoras y ahorrar sin bloqueos.
 2. Una bola capturada produce su recompensa una sola vez y desaparece del tablero.
 3. Las monedas se pueden recoger por toque y arrastre, y el saldo coincide con su valor acumulado.
-4. Al terminar el día, el dinero pendiente desaparece y nunca se suma al saldo ni reaparece al día siguiente.
+4. Al terminar el día, todas las bolas y monedas pendientes desaparecen al pasar a la noche. Las monedas no recogidas no se suman al saldo, las bolas retiradas no producen recompensa y cada día nuevo empieza sin bolas ni monedas.
 5. El saldo sin gastar se conserva entre días y al reiniciar la aplicación.
 6. Las ocho mejoras respetan precio, dependencias, niveles y efectos; robot e imán funcionan durante el día.
 7. El primer día permite una compra con un rendimiento modesto, y el ritmo de acceso al robot se valida jugando.

@@ -4,6 +4,81 @@ Fecha: 18 de octubre de 2026. Base revisada: `main`, commit `1bf1efa`, prototipo
 
 Estado actual: `0.2.1+3` entregado con APK; pendiente validación en Android físico y OK de jugabilidad. Los resultados y límites se registran al final de este archivo. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. La documentación general se ha actualizado por petición del usuario el 18 de octubre; esto no sustituye la aceptación de jugabilidad ni el balance final.
 
+## Hoja de ruta vigente — cambios pendientes del 18 de octubre de 2026
+
+**Esta sección recoge requisitos futuros, no cambios implementados ni entregados.** Cuando contradiga objetivos anteriores, prevalece como dirección de la próxima implementación; los registros de entregas y pruebas que siguen se conservan como historia y no se reescriben como si ya incluyeran estos cambios.
+
+Este documento será el seguimiento vivo de los cambios futuros y se actualizará conforme se acuerden prioridades y se observe cada resultado. El usuario ha autorizado publicar y mantener este seguimiento en GitHub; cada publicación se confirmará con su commit, sin dar por entregadas las funciones pendientes.
+
+### Prioridades confirmadas y pendientes
+
+| Prioridad | Cambios | Estado |
+| --- | --- | --- |
+| **Muy importante, al mismo nivel** | Mano siempre activa y escoba como objeto disponible desde el inicio; cierre con cinco segundos de recogida, tablero oscurecido y objetos congelados | Pendientes de implementar |
+| **Por acordar** | Mejora de escoba en V, mejora de mano para dos monedas, acceso al árbol desde el resultado y simplificación visual del árbol | Pendientes de comparar con el usuario; sin orden relativo asignado |
+| **Baja, más a futuro** | Experiencia sensorial: satisfacción, vibración háptica y sonidos coordinados | Pendiente de implementar; posterior a las prioridades muy importantes |
+
+Las secciones siguientes agrupan los cambios por área. Su orden no fija la prioridad entre áreas ni entre elementos cuya importancia siga pendiente. Las siguientes comparaciones se harán con el usuario, una cada vez, sin inventar un orden.
+
+### Gameplay — mano activa y escoba física
+
+**Prioridad: muy importante.**
+
+- [ ] Mantener siempre la mano como control activo: permite agarrar y arrastrar bolas o coger la escoba para barrerlas.
+- [ ] Hacer que la escoba aparezca como un objeto más del tablero, comparable a una bola en su disponibilidad para agarrarlo y arrastrarlo, no como un modo que sustituya a la mano.
+- [ ] Disponer de la escoba desde el inicio. La esquina superior derecha es una ubicación sugerida, no una posición definitiva acordada.
+
+Este objetivo sustituye para el futuro el desbloqueo inicial de la escoba y el selector de herramientas descritos en los registros históricos; no afirma que ese cambio ya esté implementado.
+
+### Mejoras y habilidades — escoba y mano
+
+**Prioridad relativa: pendiente de acordar.**
+
+- [ ] Convertir la escoba en V en una mejora que transforma o reemplaza la misma escoba. No será una herramienta independiente en un selector separado de la mano o de la escoba recta.
+- [ ] Añadir una mejora de mano para recoger dos monedas a la vez: recoger la primera atrae la siguiente moneda cercana, con un efecto parecido a un pequeño imán que simule el agarre múltiple.
+
+La mejora de mano no implica recogida automática general. Quedan por concretar costes, alcance y detalles de progresión; no se asignan valores ni se cambia aquí el balance existente.
+
+### Flujo de pantallas — recogida final y resultado
+
+**Recogida final: muy importante, al mismo nivel que la mano activa y la escoba física.**
+
+- [ ] Al terminar el día, ofrecer cinco segundos finales dedicados exclusivamente a recoger monedas.
+- [ ] Oscurecer toda la pantalla salvo las monedas, que seguirán brillando para concentrar la atención en su recogida.
+- [ ] Congelar las bolas y la escoba durante esos cinco segundos y bloquear su movimiento o arrastre. La única interacción jugable permitida será recoger monedas.
+- [ ] Al agotar los cinco segundos, abrir el pop-up existente de fin del día, conservando el resto de su funcionamiento salvo el cambio de botón indicado debajo.
+
+**Acceso desde el resultado: prioridad relativa pendiente de acordar.**
+
+- [ ] Dejar en el pop-up de fin del día únicamente el botón para ir al árbol de mejoras. No permitir comenzar el siguiente día desde ese pop-up.
+
+El balance histórico ya registra una fase final de cinco segundos dentro del contador total. Este requisito pide su presentación oscurecida y su restricción a monedas; no autoriza por sí solo otros cinco segundos adicionales al balance ni un cambio en la duración de producción.
+
+### Estilos — árbol de mejoras más minimalista
+
+**Prioridad relativa: pendiente de acordar.**
+
+- [ ] Eliminar el texto de ayuda «arrastra para explorar y pellizca para acercarte»; quitar la explicación visible no implica eliminar esos gestos.
+- [ ] Eliminar el contador del total de mejoras adquiridas.
+- [ ] Eliminar el texto que indica que las mejoras se aplican el próximo día; esto no cambia por sí solo cuándo se aplican.
+- [ ] Revisar más adelante los estilos del árbol para hacerlo más minimalista. La dirección visual concreta queda pendiente de definición con el usuario, sin un rediseño inventado en este plan.
+
+### Experiencia sensorial — satisfacción y sonido
+
+**Prioridad: baja, más a futuro.**
+
+- [ ] Hacer satisfactoria la entrada de una bola en el agujero y la aparición de una moneda, con respuesta háptica y sonidos gratificantes.
+- [ ] Cuidar las secuencias rápidas de monedas al enviar muchas bolas: un «tin, tin, tin» reconocible, con ritmo y capas de sonido que tengan sentido al solaparse.
+- [ ] Evitar una mezcla extraña, áspera o excesivamente saturada. Se permite cierta densidad intencional para reforzar la recompensa, sin perder claridad.
+
+### Próximo paso del plan vigente
+
+Continuar comparando con el usuario las prioridades aún no acordadas y mantener esta hoja de ruta actualizada en el repositorio. Todas las casillas de esta nueva tanda siguen pendientes; documentarlas no autoriza ni acredita una implementación de gameplay.
+
+## Plan y entregas anteriores — registro histórico
+
+Los apartados siguientes documentan decisiones y entregas anteriores. Su orden de ejecución y sus objetivos se interpretan como históricos cuando la hoja de ruta vigente los sustituya.
+
 ## Forma de trabajar
 
 1. Implementar los bloques en el orden de este archivo, con cambios pequeños y revisables.

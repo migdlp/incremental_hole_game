@@ -50,7 +50,7 @@ No hay un campo de historial completo ni se guarda una fecha para generar progre
 `run` contiene `remaining` (segundos), `collected`, `generated`, `settings`, `balanceVersion` y `board`.
 
 - `settings` contiene las bases y efectos comprados al iniciar el día. La carga exige igualdad con el catálogo de esos niveles y de la versión de balance correspondiente.
-- `balanceVersion = 2` identifica el balance actual: 10 + 5 s y emisión base cada 3 s. `1` identifica el anterior: 60 + 5 s y emisión base cada 0,75 s. No es la versión del esquema JSON.
+- `balanceVersion = 3` identifica el balance actual: 10 + 5 s y emisión base de 1,5 bolas/s. `2` conserva 10 + 5 s y emisión cada 3 s; `1`, 60 + 5 s y emisión cada 0,75 s. No es la versión del esquema JSON.
 - `board.random` conserva el estado entero del generador congruencial; la semilla inicial es `day * 7919`.
 - `board.nextId`, `captured` y `spawnClock` conservan identificadores, capturas y progreso del intervalo de emisión.
 - `board.balls` contiene objetos `{id, p: [x, y], v: [vx, vy]}`.
@@ -65,11 +65,11 @@ La posición del robot y su objetivo se conservan; sus temporizadores internos d
 | --- | --- |
 | v1 | No incluye herramienta. Quien tenía `paddle` comprado recibe `broom: 1` y selecciona escoba; el resto selecciona mano. No se concede barrido. Se valida la configuración original sin los desbloqueos nuevos |
 | v2 | Conserva herramienta y compras. La jornada activa pertenece al balance anterior |
-| v3 | Exige herramienta válida y `run.balanceVersion` entero, `1` o `2`; valida los valores exactos contra esa versión |
+| v3 | Exige herramienta válida y `run.balanceVersion` entero, `1`, `2` o `3`; valida los valores exactos contra esa versión |
 
-Saldo, resultados, niveles y objetos de la misma jornada se conservan. Una jornada v1/v2 restaurada mantiene sus tiempos e intervalo originales hasta terminar, y se abre pausada. Al volver a guardar se escribe v3 con `balanceVersion: 1`, para poder reabrirla de nuevo. El siguiente `startDay` usa el balance actual (`2`). Un guardado nocturno antiguo comienza directamente con el balance nuevo.
+Saldo, resultados, niveles y objetos de la misma jornada se conservan. Una jornada v1/v2 restaurada mantiene sus tiempos e intervalo originales hasta terminar, y se abre pausada. Al volver a guardar se escribe v3 con `balanceVersion: 1`, para poder reabrirla de nuevo. El siguiente `startDay` usa el balance actual (`3`). Un guardado nocturno antiguo comienza directamente con el balance nuevo.
 
-Los valores históricos de duración e intervalo están conservados en `UpgradeCatalog.settings(..., balanceVersion: 1)` para validar partidas antiguas; no son una segunda tabla de balance para ajustar partidas nuevas. La validación completa precede a la aplicación del estado. `load` conserva como copia la instantánea leída; la escritura v3 ocurre al siguiente guardado normal.
+Los valores históricos de duración e intervalo están conservados en `UpgradeCatalog.settings` para `balanceVersion: 1` y `2` para validar partidas antiguas; no son una segunda tabla de balance para ajustar partidas nuevas. La validación completa precede a la aplicación del estado. `load` conserva como copia la instantánea leída; la escritura v3 ocurre al siguiente guardado normal.
 
 ## Cuándo y cómo se escribe
 
@@ -117,3 +117,5 @@ Una segunda llamada a `finishDay()` se ignora al no haber jornada. Tras cargar u
 - Firma de APK y formato del guardado son asuntos distintos. Una APK con certificado diferente puede exigir desinstalar la anterior y borrar sus datos; consultar [desarrollo](guia-desarrollo.md) antes de hacerlo.
 
 La evidencia de archivo disponible procede de pruebas Linux y la de web de recargas en Chromium. La aceptación de recuperación y cierre forzado en Android físico sigue pendiente en [estado actual](estado-actual.md).
+
+El tablero congelado detrás del pop-up de resultados es un detalle de presentación en memoria. `run` sigue siendo `null` al cerrar y no se guarda ese fondo; al reabrir una noche se muestra un tablero vacío detenido con los resultados y las compras conservados.

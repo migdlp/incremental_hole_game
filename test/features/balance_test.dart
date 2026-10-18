@@ -18,45 +18,62 @@ void main() {
     advance(session, 600);
     expect(session.phase, DayPhase.closing);
     expect(session.cycle!.remaining, closeTo(5, .001));
-    expect(session.board!.balls.length, 3);
+    expect(session.board!.balls.length, 15);
     advance(session, 299);
     expect(session.running, isTrue);
-    expect(session.board!.balls.length, 3); // no production during closing
+    expect(session.board!.balls.length, 15); // no production during closing
     advance(session, 1);
     expect(session.running, isFalse);
   });
 
-  test('generation is four times slower across all upgrade levels', () {
-    for (var level = 0; level <= 3; level++) {
-      final levels = {'generator': level};
-      final old = catalog.settings(levels, balanceVersion: 1);
-      final current = catalog.settings(levels);
-      expect(
-        current['spawn_interval'],
-        closeTo(old['spawn_interval'] * 4, 1e-9),
-      );
-      expect(current['production_duration'], 10);
-    }
-    for (var level = 1; level <= 3; level++) {
-      expect(
-        catalog.settings({
-          'generator': 1,
-          'duration': level,
-        })['production_duration'],
-        10 + level * 5,
-      );
-    }
-  });
+  test(
+    'generation starts at 1.5 balls per second and every upgrade is faster',
+    () {
+      for (var level = 0; level <= 3; level++) {
+        final levels = {'generator': level};
+        final old = catalog.settings(levels, balanceVersion: 2);
+        final current = catalog.settings(levels);
+        expect(
+          current['spawn_interval'],
+          closeTo(old['spawn_interval'] * 2 / 9, 1e-9),
+        );
+        expect(current['production_duration'], 10);
+        if (level == 0) {
+          expect(1 / current['spawn_interval'], closeTo(1.5, 1e-9));
+        }
+        if (level > 0) {
+          expect(
+            current['spawn_interval'],
+            lessThan(
+              catalog.settings({'generator': level - 1})['spawn_interval'],
+            ),
+          );
+        }
+      }
+      for (var level = 1; level <= 3; level++) {
+        expect(
+          catalog.settings({
+            'generator': 1,
+            'duration': level,
+          })['production_duration'],
+          10 + level * 5,
+        );
+      }
+    },
+  );
 
-  test('first ball waits three seconds, then generation continues slowly', () {
-    final session = GameSession(catalog, MemoryStore())..startDay();
-    advance(session, 179);
-    expect(session.board!.balls, isEmpty);
-    advance(session, 2);
-    expect(session.board!.balls.length, 1);
-    advance(session, 180);
-    expect(session.board!.balls.length, 2);
-  });
+  test(
+    'first ball waits two thirds of a second, then three spawn every two seconds',
+    () {
+      final session = GameSession(catalog, MemoryStore())..startDay();
+      advance(session, 39);
+      expect(session.board!.balls, isEmpty);
+      advance(session, 1);
+      expect(session.board!.balls.length, 1);
+      advance(session, 80);
+      expect(session.board!.balls.length, 3);
+    },
+  );
 
   test('old v2 run survives reload until next day adopts the new balance', () {
     final session = GameSession(catalog, MemoryStore());
@@ -83,10 +100,31 @@ void main() {
     reopened.finishDay();
     reopened.startDay();
     expect(reopened.cycle!.remaining, 25);
-    expect(reopened.board!.settings['spawn_interval'], 2.6);
-    expect(reopened.board!.settings.balanceVersion, 2);
+    expect(
+      reopened.board!.settings['spawn_interval'],
+      closeTo(2.6 * 2 / 9, 1e-9),
+    );
+    expect(reopened.board!.settings.balanceVersion, 3);
     expect(reopened.economy.balance, 123);
     expect(reopened.levels, session.levels);
+  });
+
+  test('saved balance 2 keeps its cadence until the next day', () {
+    final session = GameSession(catalog, MemoryStore())..startDay();
+    final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
+    json['run']['balanceVersion'] = 2;
+    json['run']['settings'] = catalog.settings({}, balanceVersion: 2).toJson();
+    final restored = GameSession(catalog, MemoryStore())
+      ..restore(jsonEncode(json));
+    expect(restored.paused, isTrue);
+    expect(restored.board!.settings['spawn_interval'], 3);
+    final reloaded = GameSession(catalog, MemoryStore())
+      ..restore(restored.snapshot());
+    expect(reloaded.board!.settings.balanceVersion, 2);
+    reloaded.finishDay();
+    reloaded.startDay();
+    expect(1 / reloaded.board!.settings['spawn_interval'], closeTo(1.5, 1e-9));
+    expect(reloaded.board!.settings.balanceVersion, 3);
   });
 
   test(

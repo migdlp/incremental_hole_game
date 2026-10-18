@@ -19,7 +19,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 2});
+  DaySettings(this.values, {this.balanceVersion = 3});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -125,7 +125,7 @@ class UpgradeCatalog {
     return (owned[parts[0]] ?? 0) >= int.parse(parts[1]);
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 2}) {
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 3}) {
     final values = Map.of(base);
     for (final definition in definitions) {
       final level = owned[definition.id] ?? 0;
@@ -146,6 +146,14 @@ class UpgradeCatalog {
         .65,
         .55,
         .45,
+      ][owned['generator'] ?? 0];
+    }
+    if (balanceVersion == 2) {
+      values['spawn_interval'] = const [
+        3.0,
+        2.6,
+        2.2,
+        1.8,
       ][owned['generator'] ?? 0];
     }
     return DaySettings(values, balanceVersion: balanceVersion);

@@ -2,6 +2,15 @@
 
 Se registran entregas y cambios observables. `0.2.1+3` es la versión actual declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Resultados modales y generador inicial — 2026-10-18 · 0.2.2+4
+
+- Generación inicial de 1,5 bolas/s (intervalo ⅔ s); los niveles del generador conservan sus aumentos relativos de velocidad y sus precios.
+- Resumen y acceso al árbol en un pop-up sobre el tablero congelado. El árbol mantiene su pantalla independiente; volver muestra el mismo resumen. El fondo, su foco y sus controles están bloqueados y Atrás no cierra el pop-up.
+- El motor se detiene durante los resultados. Comenzar el siguiente día cierra el pop-up y reanuda el mismo visor con tablero vacío, ahorro y mejoras conservados.
+- Balance nuevo `3`; las jornadas ya guardadas con balance `1` o `2` conservan su cadencia hasta terminar. El esquema JSON sigue siendo v3.
+- El fondo del cierre es solo presentación y no se guarda como jornada activa; al restaurar una noche se reconstruye vacío detrás del pop-up.
+- Verificación local: análisis sin incidencias, 51 pruebas correctas y revisión visual de resumen/pantalla del árbol en 360 × 640. Android físico pendiente.
+
 ## Documentación actualizada — 2026-10-18
 
 - Inicio rápido, diseño y arquitectura real alineados con mano y escobas recta/V, pulsación inicial y barrido comprado.

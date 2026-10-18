@@ -29,7 +29,7 @@ void main() {
     final max = catalog.settings(levels);
     expect(max['production_duration'], 25);
     expect(max['ball_value'], 5);
-    expect(max['spawn_interval'], 1.8);
+    expect(max['spawn_interval'], .4);
     expect(
       () => UpgradeCatalog.fromCsv('invalid\nbase,x'),
       throwsFormatException,

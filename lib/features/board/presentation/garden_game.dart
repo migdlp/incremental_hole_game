@@ -8,7 +8,35 @@ import '../domain/board.dart';
 import '../domain/tool.dart';
 
 class GardenGame extends FlameGame {
-  GardenGame(this.session);
+  GardenGame(this.session)
+    : _displayBoard =
+          session.board ?? Board(session.catalog.settings(session.levels));
+  // Presentation only: the completed day has already been banked and discarded
+  // by the session. Keeping this reference cannot generate or collect income.
+  Board _displayBoard;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    session.addListener(_syncEngine);
+    _syncEngine();
+  }
+
+  void _syncEngine() {
+    if (session.board != null) _displayBoard = session.board!;
+    if (session.running && !session.paused) {
+      resumeEngine();
+    } else {
+      pauseEngine();
+    }
+  }
+
+  @override
+  void onRemove() {
+    session.removeListener(_syncEngine);
+    super.onRemove();
+  }
+
   final GameSession session;
   double _time = 0;
   final _labels = <String, TextPainter>{};
@@ -29,9 +57,11 @@ class GardenGame extends FlameGame {
   Color backgroundColor() => const Color(0xff111c2e);
   @override
   void update(double dt) {
+    if (!session.running || session.paused) return;
+    _displayBoard = session.board!;
     super.update(dt);
     session.tick(dt);
-    if (!session.paused) _time += dt;
+    if (session.running && !session.paused) _time += dt;
   }
 
   Paint paint(Color color, {double? stroke}) => Paint()
@@ -71,8 +101,8 @@ class GardenGame extends FlameGame {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    final board = session.board;
-    if (board == null || scale <= 0) return;
+    final board = session.board ?? _displayBoard;
+    if (scale <= 0) return;
     canvas.save();
     canvas.translate(origin.dx, origin.dy);
     canvas.scale(scale);

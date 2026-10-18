@@ -4,11 +4,11 @@ Implementado en `main` como `1720fba` ([PR #12](https://github.com/migdlp/increm
 
 ## Recorrido del jugador
 
-1. De noche, pulsar **Abrir árbol de mejoras** en el taller.
+1. De noche, el pop-up muestra el resumen de la jornada y **Abrir árbol de mejoras**. Ese botón abre una pantalla independiente; el juego sigue detenido.
 2. En una partida nueva aparece solo el primer nivel de generador. Pulsar un nodo consulta efecto, valores, porcentaje y coste.
 3. Mantener pulsado **3 segundos** en el nodo ya seleccionado o en su ficha para comprar. La compra ocurre al completar el progreso, una sola vez; pulsar brevemente no compra.
 4. Soltar antes, mover más de 10 píxeles lógicos, añadir otro dedo, interrumpir/cancelar o pasar a segundo plano cancela el progreso sin gastar.
-5. Arrastrar para explorar; pellizcar para zoom o usar Acercar/Alejar. **Centrar selección** devuelve el nodo al centro. Volver al taller para iniciar el siguiente día.
+5. Arrastrar para explorar; pellizcar para zoom o usar Acercar/Alejar. **Centrar selección** devuelve el nodo al centro. Volver desde el árbol al mismo pop-up y pulsar **Comenzar día** para cerrar el resumen e iniciar la siguiente jornada.
 
 Nodos asequibles iluminados, sin saldo oscurecidos y adquiridos con marca verde. La ficha usa descripciones del efecto; los porcentajes se comparan con el nivel anterior. Para generación expresa aumento de frecuencia (`intervaloAnterior / intervaloNuevo - 1`), no reducción porcentual del intervalo. Un desbloqueo sin base no necesita porcentaje.
 
@@ -43,7 +43,7 @@ Una compra válida por API de sesión no implica que el nodo esté disponible to
 
 ## Relación con el balance
 
-Con el día base de 15 s, tres bolas y valor 2, el máximo inicial es 6 monedas. La primera compra visible cuesta **30** (generador 1): al menos **cinco jornadas perfectas**, sin bloqueos ni pérdidas. El desbloqueo de escoba de 20 monedas necesita además ese avance previo en la UI. Los precios siguen provisionales; no afirmar que hay compra en el primer día ni que el robot llega en 3–5 días.
+Con el día base de 15 s, diez de producción a 1,5 bolas/s y valor 2, el máximo inicial es 30 monedas. La primera compra visible cuesta **30** (generador 1): se puede alcanzar tras una jornada perfecta, sin bloqueos ni pérdidas. El desbloqueo de escoba de 20 monedas necesita además ese avance previo en la UI. Los precios siguen provisionales; no garantizar una compra en el primer día ni que el robot llegue en 3–5 días.
 
 ## Código y comprobaciones
 

@@ -98,8 +98,31 @@ class _SessionScreenState extends State<SessionScreen>
                     ],
                   ),
                 Expanded(
-                  child: widget.session.running
-                      ? DayScreen(session: widget.session)
+                  child:
+                      widget.session.running ||
+                          widget.session.progress.last != null
+                      ? Stack(
+                          children: [
+                            Positioned.fill(
+                              child: ExcludeFocus(
+                                excluding: !widget.session.running,
+                                child: ExcludeSemantics(
+                                  excluding: !widget.session.running,
+                                  child: IgnorePointer(
+                                    ignoring: !widget.session.running,
+                                    child: DayScreen(session: widget.session),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (!widget.session.running)
+                              Positioned.fill(
+                                child: _DayResultsOverlay(
+                                  session: widget.session,
+                                ),
+                              ),
+                          ],
+                        )
                       : NightScreen(session: widget.session),
                 ),
               ],
@@ -130,7 +153,7 @@ class _DayScreenState extends State<DayScreen> {
   }
 
   void _changes() {
-    if (widget.session.paused) pointer = null;
+    if (!widget.session.running || widget.session.paused) pointer = null;
     if (widget.session.economy.collected > lastIncome &&
         widget.session.sound &&
         DateTime.now().difference(lastSound).inMilliseconds > 150) {
@@ -161,7 +184,7 @@ class _DayScreenState extends State<DayScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'DÍA ${session.progress.day}',
+                      'DÍA ${session.running ? session.progress.day : session.progress.last?.day ?? session.progress.day}',
                       style: const TextStyle(
                         fontSize: 12,
                         letterSpacing: 2,
@@ -169,7 +192,7 @@ class _DayScreenState extends State<DayScreen> {
                       ),
                     ),
                     Text(
-                      '${session.cycle!.remaining.ceil()} s',
+                      '${session.cycle?.remaining.ceil() ?? 0} s',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w800,
@@ -202,10 +225,12 @@ class _DayScreenState extends State<DayScreen> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
             child: LinearProgressIndicator(
-              value:
-                  (session.cycle!.remaining /
-                          (session.cycle!.production + session.cycle!.closing))
-                      .clamp(0, 1),
+              value: session.cycle == null
+                  ? 0
+                  : (session.cycle!.remaining /
+                            (session.cycle!.production +
+                                session.cycle!.closing))
+                        .clamp(0, 1),
               minHeight: 5,
               backgroundColor: surface,
               color: closing
@@ -217,7 +242,9 @@ class _DayScreenState extends State<DayScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 5),
           child: Text(
-            closing
+            !session.running
+                ? 'Jornada finalizada'
+                : closing
                 ? 'ÚLTIMOS SEGUNDOS · Recoge las monedas'
                 : session.economy.generated > 0
                 ? (session.board!.sweepEnabled
@@ -347,123 +374,139 @@ class _DayScreenState extends State<DayScreen> {
   }
 }
 
+class _DayResultsOverlay extends StatelessWidget {
+  const _DayResultsOverlay({required this.session});
+  final GameSession session;
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+    canPop: false,
+    child: Stack(
+      children: [
+        const Positioned.fill(
+          child: ModalBarrier(dismissible: false, color: Color(0x99111c2e)),
+        ),
+        Dialog(
+          key: const ValueKey('day-results-popup'),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 24,
+          ),
+          backgroundColor: ink,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: const BorderSide(color: Color(0xff41516a)),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620, maxHeight: 740),
+            child: Semantics(
+              scopesRoute: true,
+              explicitChildNodes: true,
+              namesRoute: true,
+              label: 'Resultados y mejoras de la jornada',
+              child: FocusScope(
+                autofocus: true,
+                child: NightScreen(session: session),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class NightScreen extends StatelessWidget {
   const NightScreen({super.key, required this.session});
   final GameSession session;
+
   @override
   Widget build(BuildContext context) {
     final last = session.progress.last;
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  last == null
+                      ? 'JARDÍN MECÁNICO'
+                      : 'Día ${last.day} completado',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Icon(Icons.monetization_on_outlined, color: gold, size: 21),
+              const SizedBox(width: 6),
+              Text(
+                '${session.economy.balance}',
+                style: const TextStyle(
+                  color: gold,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(22, 26, 22, 12),
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 16),
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.spa_outlined,
-                    color: Color(0xff69b4a5),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text(
-                      'JARDÍN MECÁNICO',
-                      style: TextStyle(
-                        fontSize: 13,
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: session.sound
-                        ? 'Silenciar sonidos'
-                        : 'Activar sonidos',
-                    onPressed: () => session.setSound(!session.sound),
-                    icon: Icon(
-                      session.sound
-                          ? Icons.volume_up_outlined
-                          : Icons.volume_off_outlined,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 26),
               Text(
                 last == null
                     ? 'Un pequeño gesto.\nUn jardín que crece.'
-                    : 'La noche trae\nnuevas posibilidades.',
+                    : 'Resumen de la jornada',
                 style: const TextStyle(
-                  fontSize: 32,
+                  fontSize: 26,
                   fontWeight: FontWeight.w800,
                   height: 1.15,
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               Text(
                 last == null
                     ? 'Agarra una bola, llévala al hoyo y pulsa sus monedas. Desbloquea escobas para mover grupos.'
-                    : 'Día ${last.day} completado. Invierte lo recogido o ahorra para más adelante.',
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Color(0xffb5bdc9),
-                  height: 1.5,
-                ),
+                    : 'Invierte lo recogido o ahorra para más adelante. El juego está detenido hasta el próximo día.',
+                style: const TextStyle(color: Color(0xffb5bdc9), height: 1.4),
               ),
-              if (session.recoveryMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    session.recoveryMessage!,
-                    style: const TextStyle(color: gold),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              ToolSelector(session: session),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
               Card(
                 margin: EdgeInsets.zero,
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
                         'SALDO DISPONIBLE',
                         style: TextStyle(
+                          color: Color(0xffb5bdc9),
                           fontSize: 11,
                           letterSpacing: 1.5,
-                          color: Color(0xffb5bdc9),
                         ),
                       ),
-                      const SizedBox(height: 7),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.monetization_on_rounded,
-                            color: gold,
-                            size: 34,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            '${session.economy.balance}',
-                            style: const TextStyle(
-                              fontSize: 38,
-                              color: gold,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        '${session.economy.balance} monedas',
+                        style: const TextStyle(
+                          fontSize: 26,
+                          color: gold,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       if (last != null) ...[
-                        const Divider(height: 28),
+                        const Divider(height: 24),
                         Wrap(
-                          spacing: 22,
+                          spacing: 24,
                           runSpacing: 16,
                           children: [
-                            _stat('Recogidas', '${last.income}'),
+                            _stat('Monedas ganadas', '${last.income}'),
+                            _stat('Generadas', '${last.generated}'),
                             _stat('Sin recoger', '${last.lost}'),
                             _stat('Bolas al hoyo', '${last.captured}'),
                             _stat(
@@ -482,71 +525,54 @@ class NightScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 28),
-              const Text(
-                'El taller',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Cada mejora empieza a funcionar el próximo día.',
-                style: TextStyle(color: Color(0xffb5bdc9)),
-              ),
-              const SizedBox(height: 18),
-              Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.account_tree_outlined,
-                        color: gold,
-                        size: 38,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Descubre nuevos caminos',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Compra una mejora para revelar las siguientes. Explora el árbol y mantén pulsado para comprar.',
-                      ),
-                      const SizedBox(height: 18),
-                      FilledButton.icon(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => SkillTreeScreen(session: session),
-                          ),
-                        ),
-                        icon: const Icon(Icons.account_tree_outlined),
-                        label: const Text('Abrir árbol de mejoras'),
-                      ),
-                    ],
+              if (session.recoveryMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    session.recoveryMessage!,
+                    style: const TextStyle(color: gold),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
+              if (last == null) ...[
+                const SizedBox(height: 16),
+                ToolSelector(session: session),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Sonidos del sistema'),
+                  value: session.sound,
+                  onChanged: session.setSound,
+                ),
+              ],
             ],
           ),
         ),
         Container(
-          padding: const EdgeInsets.fromLTRB(22, 12, 22, 16),
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
           decoration: const BoxDecoration(
-            color: ink,
             border: Border(top: BorderSide(color: surface)),
           ),
           child: SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: session.startDay,
-              icon: const Icon(Icons.wb_sunny_outlined),
-              label: Text('Comenzar día ${session.progress.day}'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => SkillTreeScreen(session: session),
+                    ),
+                  ),
+                  icon: const Icon(Icons.account_tree_outlined),
+                  label: const Text('Abrir árbol de mejoras'),
+                ),
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: session.startDay,
+                  icon: const Icon(Icons.wb_sunny_outlined),
+                  label: Text('Comenzar día ${session.progress.day}'),
+                ),
+              ],
             ),
           ),
         ),

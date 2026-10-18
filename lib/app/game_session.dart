@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import '../core/vec.dart';
 import '../features/board/domain/board.dart';
+import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/economy/domain/economy.dart';
 import '../features/progression/domain/progress.dart';
@@ -16,6 +17,7 @@ class GameSession extends ChangeNotifier {
   final economy = Economy();
   final progress = Progress();
   final levels = <String, int>{};
+  BallTool selectedTool = BallTool.hand;
   Board? board;
   DayCycle? cycle;
   bool paused = false;
@@ -52,7 +54,11 @@ class GameSession extends ChangeNotifier {
   void startDay() {
     if (running) return;
     final settings = catalog.settings(levels);
-    board = Board(settings, randomState: progress.day * 7919);
+    board = Board(
+      settings,
+      randomState: progress.day * 7919,
+      tool: selectedTool,
+    );
     cycle = DayCycle(
       production: settings['production_duration'],
       closing: settings['closing_duration'],
@@ -116,6 +122,7 @@ class GameSession extends ChangeNotifier {
       captured: board!.captured,
       previousIncome: progress.last?.income,
     );
+    release(cancel: true);
     economy.bank();
     progress.finish(result);
     board = null;
@@ -126,26 +133,48 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  void touch(Vec position) {
+  void touch(Vec position, {double? time}) {
     if (!running || paused) return;
-    economy.collect(board!.touch(position));
+    economy.collect(board!.touch(position, time: time));
     notifyListeners();
   }
 
-  void drag(Vec position) {
+  void drag(Vec position, {double? time}) {
     if (running && !paused) {
-      final collected = board!.drag(position);
+      final collected = board!.drag(position, time: time);
       economy.collect(collected);
       if (collected > 0) notifyListeners();
     }
   }
 
-  void release() => board?.releasePointer();
+  void release({bool cancel = false, double? time}) {
+    final collected = board?.releasePointer(cancel: cancel, time: time) ?? 0;
+    economy.collect(collected);
+    if (collected > 0) notifyListeners();
+  }
+
+  bool toolAvailable(BallTool tool) {
+    final settings = catalog.settings(levels);
+    return switch (tool) {
+      BallTool.hand => true,
+      BallTool.broom => settings['broom_unlocked'] > 0,
+      BallTool.vee => settings['v_unlocked'] > 0,
+    };
+  }
+
+  void selectTool(BallTool tool) {
+    if (!toolAvailable(tool) || (running && paused)) return;
+    selectedTool = tool;
+    board?.selectTool(tool);
+    save();
+    notifyListeners();
+  }
+
   void pause() {
     if (!running || paused) return;
     paused = true;
     _accumulator = 0;
-    release();
+    release(cancel: true);
     save();
     notifyListeners();
   }
@@ -183,13 +212,16 @@ class GameSession extends ChangeNotifier {
     final level = levels[definition.id] ?? 0;
     if (!economy.spend(definition.levels[level].cost)) return false;
     levels[definition.id] = level + 1;
+    if (definition.id == 'broom') selectedTool = BallTool.broom;
+    if (definition.id == 'broom_v') selectedTool = BallTool.vee;
     save();
     notifyListeners();
     return true;
   }
 
   String snapshot() => jsonEncode({
-    'version': 1,
+    'version': 2,
+    'tool': selectedTool.name,
     'day': progress.day,
     'balance': economy.balance,
     'record': progress.record,
@@ -209,7 +241,8 @@ class GameSession extends ChangeNotifier {
 
   void restore(String raw) {
     final json = jsonDecode(raw) as Map<String, dynamic>;
-    if (json['version'] != 1) {
+    final legacy = json['version'] == 1;
+    if (!legacy && json['version'] != 2) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -221,7 +254,21 @@ class GameSession extends ChangeNotifier {
     final savedLevels = (json['levels'] as Map<String, dynamic>).map(
       (k, v) => MapEntry(k, v as int),
     );
+    // Old paddle purchases become width upgrades and retain access to the broom.
+    if (legacy && (savedLevels['paddle'] ?? 0) > 0) savedLevels['broom'] = 1;
     catalog.validateLevels(savedLevels);
+    final restoredTool = legacy
+        ? ((savedLevels['broom'] ?? 0) > 0 ? BallTool.broom : BallTool.hand)
+        : BallTool.values.firstWhere(
+            (tool) => tool.name == json['tool'],
+            orElse: () => throw const FormatException('Herramienta inválida'),
+          );
+    final expectedSettings = catalog.settings(savedLevels);
+    if ((restoredTool == BallTool.broom &&
+            expectedSettings['broom_unlocked'] == 0) ||
+        (restoredTool == BallTool.vee && expectedSettings['v_unlocked'] == 0)) {
+      throw const FormatException('Herramienta sin desbloquear');
+    }
     final last = json['last'] == null
         ? null
         : DayResult.fromJson(json['last'] as Map<String, dynamic>);
@@ -238,13 +285,19 @@ class GameSession extends ChangeNotifier {
     DayCycle? restoredCycle;
     var collected = 0, generated = 0;
     if (run != null) {
-      final settings = DaySettings.fromJson(
+      final savedSettings = DaySettings.fromJson(
         run['settings'] as Map<String, dynamic>,
       );
-      final expected = catalog.settings(savedLevels).values;
-      if (!mapEquals(settings.values, expected)) {
+      final expected = Map.of(expectedSettings.values);
+      if (legacy) {
+        expected.remove('broom_unlocked');
+        expected.remove('v_unlocked');
+        expected.remove('coin_sweep');
+      }
+      if (!mapEquals(savedSettings.values, expected)) {
         throw const FormatException('Configuración de jornada inválida');
       }
+      final settings = expectedSettings;
       final remaining = (run['remaining'] as num).toDouble();
       if (!remaining.isFinite ||
           remaining <= 0 ||
@@ -261,6 +314,7 @@ class GameSession extends ChangeNotifier {
         settings,
         run['board'] as Map<String, dynamic>,
       );
+      restoredBoard.tool = restoredTool;
       collected = run['collected'] as int;
       generated = run['generated'] as int;
       if (collected < 0 ||
@@ -281,6 +335,12 @@ class GameSession extends ChangeNotifier {
     levels
       ..clear()
       ..addAll(savedLevels);
+    selectedTool = restoredTool;
+    if (legacy) {
+      recoveryMessage =
+          'Partida actualizada: conservas saldo y mejoras. '
+          'Las monedas se recogen pulsando; el barrido se compra aparte.';
+    }
     board = restoredBoard;
     cycle = restoredCycle;
     sound = savedSound;

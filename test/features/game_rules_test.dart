@@ -23,23 +23,18 @@ void capture(GameSession session) {
 
 void main() {
   final catalog = testCatalog();
-  test(
-    'balance source has eight upgrades, prerequisites and documented effects',
-    () {
-      expect(catalog.definitions.length, 8);
-      final levels = {
-        for (final d in catalog.definitions) d.id: d.levels.length,
-      };
-      final max = catalog.settings(levels);
-      expect(max['production_duration'], 75);
-      expect(max['ball_value'], 5);
-      expect(max['spawn_interval'], .45);
-      expect(
-        () => UpgradeCatalog.fromCsv('invalid\nbase,x'),
-        throwsFormatException,
-      );
-    },
-  );
+  test('balance source includes tool and coin unlocks with prerequisites', () {
+    expect(catalog.definitions.length, 11);
+    final levels = {for (final d in catalog.definitions) d.id: d.levels.length};
+    final max = catalog.settings(levels);
+    expect(max['production_duration'], 75);
+    expect(max['ball_value'], 5);
+    expect(max['spawn_interval'], .45);
+    expect(
+      () => UpgradeCatalog.fromCsv('invalid\nbase,x'),
+      throwsFormatException,
+    );
+  });
   test('timer reaches closing and exact end without overshooting', () {
     final clock = DayCycle(production: 60, closing: 5);
     expect(clock.advance(60), 60);
@@ -59,7 +54,9 @@ void main() {
     expect(session.economy.generated, 2);
     final coin = session.board!.coins.single;
     session.touch(coin.position);
+    session.release();
     session.touch(coin.position);
+    session.release();
     expect(session.economy.collected, 2);
     expect(session.board!.pending, 0);
   });
@@ -76,7 +73,7 @@ void main() {
     expect(restored.pending, 5000);
   });
   test('fast pointer sweep collects between endpoints exactly once', () {
-    final board = Board(catalog.settings({}));
+    final board = Board(catalog.settings({'sweep': 1}));
     board.coins.add(Coin(board.nextId++, const Vec(120, 300), 7, landing: 0));
     board.touch(const Vec(30, 300));
     var collected = board.drag(const Vec(240, 300));
@@ -92,13 +89,19 @@ void main() {
     for (var day = 1; day <= 10; day++) {
       session.startDay();
       expect(session.board!.coins, isEmpty);
+      expect(session.board!.balls, isEmpty);
       capture(session);
       advance(session, .3);
       session.touch(session.board!.coins.single.position);
       session.release();
+      session.board!.balls.add(
+        Ball(session.board!.nextId++, const Vec(40, 450), Vec.zero),
+      );
       capture(session);
       advance(session, 66);
       expect(session.running, isFalse);
+      expect(session.board, isNull);
+      expect(jsonDecode(session.snapshot())['run'], isNull);
       expect(session.economy.balance, day * 2);
       expect(session.progress.last!.lost, 2);
       expect(session.progress.last!.income, 2);
@@ -114,17 +117,19 @@ void main() {
       final session = GameSession(catalog, MemoryStore());
       final robot = catalog.definitions.firstWhere((d) => d.id == 'robot');
       final paddle = catalog.definitions.firstWhere((d) => d.id == 'paddle');
+      final broom = catalog.definitions.firstWhere((d) => d.id == 'broom');
       session.economy.balance = 1000;
       expect(session.purchase(robot), isFalse);
       expect(session.economy.balance, 1000);
+      expect(session.purchase(broom), isTrue);
       expect(session.purchase(paddle), isTrue);
       expect(session.purchase(robot), isTrue);
-      expect(session.economy.balance, 820);
+      expect(session.economy.balance, 800);
       expect(session.purchase(robot), isFalse);
       session.startDay();
       expect(session.board!.settings['robot_count'], 1);
       expect(session.purchase(paddle), isFalse);
-      expect(session.economy.balance, 820);
+      expect(session.economy.balance, 800);
       session.finishDay();
       session.economy.balance = 0;
       expect(session.purchase(paddle), isFalse);
@@ -163,6 +168,7 @@ void main() {
       restored.resume();
       advance(restored, .3);
       restored.touch(restored.board!.coins.single.position);
+      restored.release();
       restored.finishDay();
       restored.finishDay();
       expect(restored.economy.balance, 2);
@@ -227,38 +233,43 @@ void main() {
       expect(restored.paused, isTrue);
     },
   );
-  test('spatial collisions keep a packed group inside board bounds', () {
-    final board = Board(catalog.settings({}));
-    for (var i = 0; i < 10; i++) {
-      board.balls.add(
-        Ball(
-          board.nextId++,
-          Vec(100 + i % 5 * 11.0, 200 + i ~/ 5 * 11.0),
-          Vec.zero,
+  test(
+    'spatial collisions conserve packed balls or capture them inside bounds',
+    () {
+      final board = Board(catalog.settings({}));
+      for (var i = 0; i < 10; i++) {
+        board.balls.add(
+          Ball(
+            board.nextId++,
+            Vec(100 + i % 5 * 11.0, 200 + i ~/ 5 * 11.0),
+            Vec.zero,
+          ),
+        );
+      }
+      board.touch(const Vec(90, 200));
+      board.drag(const Vec(170, 270));
+      for (var i = 0; i < 300; i++) {
+        board.update(1 / 60, producing: false);
+      }
+      expect(board.balls.length + board.captured, 10);
+      expect(
+        board.balls.every(
+          (b) =>
+              b.position.x >= 6 &&
+              b.position.x <= 354 &&
+              b.position.y >= 6 &&
+              b.position.y <= 554,
         ),
+        isTrue,
       );
-    }
-    board.touch(const Vec(90, 200));
-    board.drag(const Vec(170, 270));
-    for (var i = 0; i < 300; i++) {
-      board.update(1 / 60, producing: false);
-    }
-    expect(board.balls.length, 10);
-    expect(
-      board.balls.every(
-        (b) =>
-            b.position.x >= 6 &&
-            b.position.x <= 354 &&
-            b.position.y >= 6 &&
-            b.position.y <= 554,
-      ),
-      isTrue,
-    );
-  });
+    },
+  );
   test(
     'robot pushes a reachable ball to the hole without collecting coins',
     () {
-      final board = Board(catalog.settings({'paddle': 1, 'robot': 1}));
+      final board = Board(
+        catalog.settings({'broom': 1, 'paddle': 1, 'robot': 1}),
+      );
       board.balls.add(Ball(board.nextId++, const Vec(180, 340), Vec.zero));
       var captured = 0;
       for (var i = 0; i < 60 * 30; i++) {

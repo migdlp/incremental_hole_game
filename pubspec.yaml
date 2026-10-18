@@ -1,7 +1,7 @@
 name: incremental_hole_game
 description: Jardín mecánico, un juego incremental de empujar y recoger.
 publish_to: none
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: '>=3.9.2 <4.0.0'

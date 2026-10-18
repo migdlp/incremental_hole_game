@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
+import '../domain/tool.dart';
 
 class GardenGame extends FlameGame {
   GardenGame(this.session);
@@ -271,17 +272,55 @@ class GardenGame extends FlameGame {
           paint(const Color(0x50247d73), stroke: 1),
         );
       }
-      canvas.drawCircle(
-        p,
-        board.settings['paddle_radius'],
-        paint(const Color(0x20247d73)),
-      );
-      canvas.drawCircle(
-        p,
-        board.settings['paddle_radius'],
-        paint(const Color(0xff247d73), stroke: 3),
-      );
-      canvas.drawCircle(p, 3, paint(const Color(0xff247d73)));
+      if (board.tool == BallTool.hand) {
+        final ball = board.heldBall;
+        final center = ball == null ? p : offset(ball.position);
+        canvas.drawCircle(
+          center,
+          board.radius + 7,
+          paint(const Color(0x40247d73)),
+        );
+        canvas.drawCircle(
+          center,
+          board.radius + 7,
+          paint(const Color(0xff247d73), stroke: 2),
+        );
+        if (ball != null) {
+          canvas.drawLine(p, center, paint(const Color(0xff247d73), stroke: 2));
+        }
+      } else {
+        for (final segment in board.segments) {
+          final a = offset(segment.a), b = offset(segment.b);
+          canvas.drawLine(
+            a + const Offset(0, 3),
+            b + const Offset(0, 3),
+            paint(const Color(0x40644c2d), stroke: Board.broomThickness * 2 + 2)
+              ..strokeCap = StrokeCap.round,
+          );
+          canvas.drawLine(
+            a,
+            b,
+            paint(const Color(0xff247d73), stroke: Board.broomThickness * 2)
+              ..strokeCap = StrokeCap.round,
+          );
+          canvas.drawLine(
+            a,
+            b,
+            paint(const Color(0xff8fc7ba), stroke: 2)
+              ..strokeCap = StrokeCap.round,
+          );
+        }
+        final direction = Vec(
+          math.cos(board.toolAngle),
+          math.sin(board.toolAngle),
+        );
+        canvas.drawLine(
+          p,
+          offset(point - direction * 21),
+          paint(const Color(0xff756347), stroke: 4)
+            ..strokeCap = StrokeCap.round,
+        );
+      }
     }
     canvas.restore();
   }

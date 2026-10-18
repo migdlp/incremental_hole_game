@@ -4,6 +4,18 @@ Fecha: 18 de octubre de 2026. Base revisada: `main`, commit `1bf1efa`, prototipo
 
 Estado actual: `0.2.1+3` entregado con APK; pendiente validación en Android físico y OK de jugabilidad. Los resultados y límites se registran al final de este archivo. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. La documentación general se ha actualizado por petición del usuario el 18 de octubre; esto no sustituye la aceptación de jugabilidad ni el balance final.
 
+## Referencias vivas del árbol — actualización de diseño
+
+Por indicación del usuario, el árbol de mejoras queda como trabajo futuro y lo iremos editando conforme se añadan ideas y se acuerden cambios.
+
+- **Lo que existe:** [Árbol actual](arbol-de-mejoras.md), contrastado con el modelo del árbol y el CSV.
+- **Lo que estamos diseñando:** [Cambios futuros del árbol](cambios-futuros-arbol-mejoras.md), referencia principal y editable de nodos, conexiones, colores y progresión propuesta.
+- **Balance ejecutado por el juego:** [balance.csv](balance.csv). El documento futuro no sustituye sus valores.
+
+Estado: diseño en revisión, sin implementar y sin prioridad adicional asignada. Los colores por tipo y la intención de progresión creciente son dirección de diseño; los costes, multiplicadores, capacidad de bolas, raíz del árbol y requisitos concretos siguen siendo propuestas. La escoba inicial y la transformación de esa misma escoba en V se conservan como dirección ya acordada. La mejora de recoger dos monedas continúa pendiente y es distinta del agarre de varias bolas.
+
+Esta actualización documenta el estado actual y la propuesta futura; no publica cambios de jugabilidad ni un APK. Cuando se implemente un nodo, se actualizará la referencia actual con su evidencia y se marcará aquí su estado real, sin mantener dos diseños futuros divergentes.
+
 ## Hoja de ruta vigente — cambios pendientes del 18 de octubre de 2026
 
 **Actualización de entrega — 18 de octubre de 2026:** implementación publicada en `main`, commit `f7bcdef7b80b917102e78545b9729513e927a1e7`. APK de prueba generado localmente con Flutter 3.35.7 y firma verificada: `build/app/outputs/flutter-apk/app-debug.apk` (140 MiB), SHA-256 `cd006dc4316a21c77d0d6deb6a4bf07812b79d54b6a9a0f97930cfa71ccb2b88`. Las 63 pruebas, el análisis y el formato pasan. GitHub Actions no se ejecutó porque GitHub CLI no tiene sesión iniciada. Siguen pendientes la instalación en Android físico y el OK de jugabilidad. Esta actualización sustituye el estado de publicación pendiente de las notas locales que siguen, conservadas como registro de implementación.

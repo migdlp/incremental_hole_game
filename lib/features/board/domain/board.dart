@@ -35,7 +35,9 @@ class BoardEvents {
 }
 
 class Board {
-  Board(this.settings, {this.randomState = 42, this.tool = BallTool.hand});
+  Board(this.settings, {this.randomState = 42, this.tool = BallTool.hand}) {
+    broomPosition = Vec(width - broomHalfWidth - 20, 100);
+  }
   static const width = 360.0, height = 560.0;
   static const hole = Vec(180, 412);
   static const generator = Vec(180, 60);
@@ -44,6 +46,18 @@ class Board {
   final coins = <Coin>[];
   final robot = Robot();
   Vec? paddle, target;
+  late Vec broomPosition;
+  Vec _broomGrabOffset = Vec.zero;
+  bool holdingBroom = false;
+  bool coinOnly = false;
+  BallTool get broomTool =>
+      settings['v_unlocked'] > 0 ? BallTool.vee : BallTool.broom;
+
+  void enterClosing() {
+    releasePointer(cancel: true);
+    coinOnly = true;
+  }
+
   BallTool tool;
   Ball? heldBall;
   Vec _grabOffset = Vec.zero;
@@ -55,13 +69,12 @@ class Board {
   static const broomThickness = 3.5;
   double get broomHalfWidth => settings['paddle_radius'] * 2;
   bool get sweepEnabled => settings['coin_sweep'] > 0;
-  List<ToolSegment> get segments => paddle == null
-      ? const []
-      : broomSegments(tool, paddle!, toolAngle, broomHalfWidth);
+  List<ToolSegment> get segments =>
+      broomSegments(broomTool, broomPosition, toolAngle, broomHalfWidth);
 
   bool canUse(BallTool value) => switch (value) {
     BallTool.hand => true,
-    BallTool.broom => settings['broom_unlocked'] > 0,
+    BallTool.broom => true,
     BallTool.vee => settings['v_unlocked'] > 0,
   };
 
@@ -91,6 +104,7 @@ class Board {
       collected = _collect(_downPoint!, _downPoint!);
     }
     heldBall = null;
+    holdingBroom = false;
     paddle = null;
     target = null;
     _downPoint = null;
@@ -144,14 +158,27 @@ class Board {
     _heldDuringGesture = false;
     _samples.clear();
     _sample(paddle!, time ?? _clock);
-    final initial = hole - paddle!;
-    toolAngle = _desiredAngle = math.atan2(initial.y, initial.x);
+    _desiredAngle = toolAngle;
     final onCoin = coins.any(
       (c) =>
           c.landing <= 0 &&
           (c.position - paddle!).length <= settings['collection_radius'],
     );
-    if (tool == BallTool.hand && !onCoin) {
+    final handle =
+        broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
+    holdingBroom =
+        !coinOnly &&
+        !onCoin &&
+        (segments.any(
+              (segment) => (segment.closest(paddle!) - paddle!).length <= 12,
+            ) ||
+            segmentDistance(paddle!, broomPosition, handle) <= 12);
+    tool = holdingBroom ? broomTool : BallTool.hand;
+    if (holdingBroom) {
+      _broomGrabOffset = broomPosition - paddle!;
+      _heldDuringGesture = true;
+    }
+    if (!coinOnly && !holdingBroom && !onCoin) {
       Ball? nearest;
       var distance = radius + 12;
       for (final ball in balls) {
@@ -182,6 +209,8 @@ class Board {
     }
     final amount = sweepEnabled ? _collect(target!, destination) : 0;
     target = destination;
+    // Closing still tracks the coin-collection cursor, not physical objects.
+    if (coinOnly) paddle = destination;
     _sample(destination, time ?? _clock);
     return amount;
   }
@@ -227,7 +256,7 @@ class Board {
     for (final coin in coins) {
       coin.landing = math.max(0, coin.landing - dt);
     }
-    if (producing) {
+    if (producing && !coinOnly) {
       spawnClock += dt;
       if (spawnClock + 1e-9 >= settings['spawn_interval']) {
         spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
@@ -251,6 +280,7 @@ class Board {
         collected += _collect(start, start);
       }
     }
+    if (coinOnly) return BoardEvents(0, collected);
     if (settings['robot_count'] > 0) {
       final goal = robot.direction(dt, [
         for (final ball in balls) (id: ball.id, position: ball.position),
@@ -315,19 +345,23 @@ class Board {
       // Used only for contact response; snapshots never restore an active grip.
       ball.velocity = (ball.position - previous) * (1 / dt);
     }
-    if (tool == BallTool.hand) return;
+    if (!holdingBroom) return;
+    final previousBroom = broomPosition;
+    final goal = (target! + _broomGrabOffset).inside(
+      broomHalfWidth + broomThickness,
+    );
+    broomPosition = previousBroom + (goal - previousBroom).limit(900 * dt);
     var angle = (_desiredAngle - toolAngle + math.pi) % (2 * math.pi) - math.pi;
-    if (tool == BallTool.broom) {
+    if (broomTool == BallTool.broom) {
       if (angle > math.pi / 2) angle -= math.pi;
       if (angle < -math.pi / 2) angle += math.pi;
     }
     final turn = angle.clamp(-3 * dt, 3 * dt);
     toolAngle = (toolAngle + turn) % (2 * math.pi);
-    _contactBroom((paddle! - start) * (1 / dt), turn / dt);
+    _contactBroom((broomPosition - previousBroom) * (1 / dt), turn / dt);
   }
 
   void _contactBroom(Vec velocity, double rotation) {
-    if (tool == BallTool.hand || paddle == null) return;
     for (final segment in segments) {
       for (final ball in balls) {
         final contact = segment.closest(ball.position);
@@ -338,7 +372,7 @@ class Board {
             ? Vec(math.cos(toolAngle), math.sin(toolAngle))
             : difference.unit;
         ball.position = (ball.position + normal * overlap).inside(radius);
-        final arm = contact - paddle!;
+        final arm = contact - broomPosition;
         final rotating = Vec(-arm.y, arm.x) * rotation;
         final surface = (velocity + rotating.limit(80)).limit(380);
         final relative = surface - ball.velocity;
@@ -424,6 +458,8 @@ class Board {
     'nextId': nextId,
     'captured': captured,
     'spawnClock': spawnClock,
+    'broomPosition': broomPosition.toJson(),
+    'broomAngle': toolAngle,
     'balls': balls
         .map(
           (b) => b == heldBall
@@ -438,6 +474,21 @@ class Board {
 
   factory Board.fromJson(DaySettings settings, Map<String, dynamic> json) {
     final board = Board(settings, randomState: json['random'] as int);
+    if (json.containsKey('broomPosition')) {
+      board.broomPosition = Vec.fromJson(json['broomPosition']);
+    }
+    if (json.containsKey('broomAngle')) {
+      final angle = json['broomAngle'];
+      if (angle is! num || !angle.isFinite) {
+        throw const FormatException('Invalid broom angle');
+      }
+      board.toolAngle = board._desiredAngle = angle.toDouble() % (2 * math.pi);
+    }
+    final margin = board.broomHalfWidth + broomThickness;
+    final boundedBroom = board.broomPosition.inside(margin);
+    if ((boundedBroom - board.broomPosition).length > .0001) {
+      throw const FormatException('Invalid broom position');
+    }
     board.nextId = json['nextId'] as int;
     board.captured = json['captured'] as int;
     board.spawnClock = (json['spawnClock'] as num).toDouble();

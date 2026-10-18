@@ -5,7 +5,6 @@ import 'package:flutter/painting.dart';
 import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
-import '../domain/tool.dart';
 
 class GardenGame extends FlameGame {
   GardenGame(this.session)
@@ -61,7 +60,9 @@ class GardenGame extends FlameGame {
     _displayBoard = session.board!;
     super.update(dt);
     session.tick(dt);
-    if (session.running && !session.paused) _time += dt;
+    if (session.running && !session.paused && !session.board!.coinOnly) {
+      _time += dt;
+    }
   }
 
   Paint paint(Color color, {double? stroke}) => Paint()
@@ -229,29 +230,6 @@ class GardenGame extends FlameGame {
         paint(const Color(0xff97a2ad)),
       );
     }
-    for (final coin in board.coins) {
-      final t = (1 - coin.landing / .2).clamp(0.0, 1.0);
-      final p =
-          offset(Board.hole + (coin.position - Board.hole) * t) -
-          Offset(0, math.sin(t * math.pi) * 25);
-      canvas.drawCircle(
-        p + const Offset(0, 3),
-        10,
-        paint(const Color(0x40644c2d)),
-      );
-      canvas.drawCircle(p, 10, paint(const Color(0xffad7416)));
-      canvas.drawCircle(
-        p - const Offset(0, 1),
-        8.5,
-        paint(const Color(0xfff5b83d)),
-      );
-      canvas.drawCircle(
-        p - const Offset(0, 1),
-        5.5,
-        paint(const Color(0xffb47e20), stroke: 1),
-      );
-      label(canvas, '${coin.value}', p - const Offset(0, 1), fontSize: 9);
-    }
     if (board.settings['robot_count'] > 0) {
       final p = offset(board.robot.position);
       canvas.drawCircle(
@@ -302,7 +280,7 @@ class GardenGame extends FlameGame {
           paint(const Color(0x50247d73), stroke: 1),
         );
       }
-      if (board.tool == BallTool.hand) {
+      if (!board.holdingBroom) {
         final ball = board.heldBall;
         final center = ball == null ? p : offset(ball.position);
         canvas.drawCircle(
@@ -318,39 +296,67 @@ class GardenGame extends FlameGame {
         if (ball != null) {
           canvas.drawLine(p, center, paint(const Color(0xff247d73), stroke: 2));
         }
-      } else {
-        for (final segment in board.segments) {
-          final a = offset(segment.a), b = offset(segment.b);
-          canvas.drawLine(
-            a + const Offset(0, 3),
-            b + const Offset(0, 3),
-            paint(const Color(0x40644c2d), stroke: Board.broomThickness * 2 + 2)
-              ..strokeCap = StrokeCap.round,
-          );
-          canvas.drawLine(
-            a,
-            b,
-            paint(const Color(0xff247d73), stroke: Board.broomThickness * 2)
-              ..strokeCap = StrokeCap.round,
-          );
-          canvas.drawLine(
-            a,
-            b,
-            paint(const Color(0xff8fc7ba), stroke: 2)
-              ..strokeCap = StrokeCap.round,
-          );
-        }
-        final direction = Vec(
-          math.cos(board.toolAngle),
-          math.sin(board.toolAngle),
+      }
+    }
+    {
+      final point = board.broomPosition;
+      final p = offset(point);
+      for (final segment in board.segments) {
+        final a = offset(segment.a), b = offset(segment.b);
+        canvas.drawLine(
+          a + const Offset(0, 3),
+          b + const Offset(0, 3),
+          paint(const Color(0x40644c2d), stroke: Board.broomThickness * 2 + 2)
+            ..strokeCap = StrokeCap.round,
         );
         canvas.drawLine(
-          p,
-          offset(point - direction * 21),
-          paint(const Color(0xff756347), stroke: 4)
+          a,
+          b,
+          paint(const Color(0xff247d73), stroke: Board.broomThickness * 2)
+            ..strokeCap = StrokeCap.round,
+        );
+        canvas.drawLine(
+          a,
+          b,
+          paint(const Color(0xff8fc7ba), stroke: 2)
             ..strokeCap = StrokeCap.round,
         );
       }
+      final direction = Vec(
+        math.cos(board.toolAngle),
+        math.sin(board.toolAngle),
+      );
+      canvas.drawLine(
+        p,
+        offset(point - direction * 21),
+        paint(const Color(0xff756347), stroke: 4)..strokeCap = StrokeCap.round,
+      );
+    }
+    if (board.coinOnly) {
+      canvas.drawRect(bounds, paint(const Color(0xa6000000)));
+    }
+    for (final coin in board.coins) {
+      final t = (1 - coin.landing / .2).clamp(0.0, 1.0);
+      final p =
+          offset(Board.hole + (coin.position - Board.hole) * t) -
+          Offset(0, math.sin(t * math.pi) * 25);
+      canvas.drawCircle(
+        p + const Offset(0, 3),
+        10,
+        paint(const Color(0x40644c2d)),
+      );
+      canvas.drawCircle(p, 10, paint(const Color(0xffad7416)));
+      canvas.drawCircle(
+        p - const Offset(0, 1),
+        8.5,
+        paint(const Color(0xfff5b83d)),
+      );
+      canvas.drawCircle(
+        p - const Offset(0, 1),
+        5.5,
+        paint(const Color(0xffb47e20), stroke: 1),
+      );
+      label(canvas, '${coin.value}', p - const Offset(0, 1), fontSize: 9);
     }
     canvas.restore();
   }

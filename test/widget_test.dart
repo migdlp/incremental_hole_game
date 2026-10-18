@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
-import 'package:incremental_hole_game/features/board/domain/tool.dart';
 import 'package:incremental_hole_game/features/board/presentation/garden_game.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_app.dart';
@@ -118,7 +117,7 @@ void main() {
     },
   );
 
-  testWidgets('owned tools can be switched in the playable screen', (
+  testWidgets('hand picks up the owned physical V broom without a selector', (
     tester,
   ) async {
     final session = GameSession(testCatalog(), MemoryStore());
@@ -131,16 +130,51 @@ void main() {
     session.startDay();
     await tester.pumpWidget(GardenApp(session: session));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Mano'));
-    await tester.pump();
-    expect(session.board!.tool, BallTool.hand);
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Escoba'));
-    await tester.pump();
-    expect(session.board!.tool, BallTool.broom);
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Escoba en V'));
-    await tester.pump();
-    expect(session.board!.tool, BallTool.vee);
+    expect(find.byType(ChoiceChip), findsNothing);
+    final finder = find.byWidgetPredicate((widget) => widget is GameWidget);
+    final game = (tester.widget(finder) as GameWidget).game as GardenGame;
+    Offset screen(Vec point) =>
+        tester.getTopLeft(finder) +
+        game.origin +
+        Offset(point.x, point.y) * game.scale;
+    final board = session.board!;
+    expect(board.segments, hasLength(2));
+    final gesture = await tester.startGesture(screen(board.broomPosition));
+    expect(board.holdingBroom, isTrue);
+    await gesture.moveBy(const Offset(-30, 40));
+    await tester.pump(const Duration(milliseconds: 100));
+    final parked = board.broomPosition;
+    await gesture.up();
+    expect(board.holdingBroom, isFalse);
+    expect(board.segments, hasLength(2));
+    expect(board.broomPosition, parked);
+    final ball = Ball(board.nextId++, const Vec(100, 250), Vec.zero);
+    board.balls.add(ball);
+    final hand = await tester.startGesture(screen(ball.position));
+    expect(board.heldBall, same(ball));
+    await hand.up();
     expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    await session.pendingWrites;
+    session.dispose();
+  });
+  testWidgets('closing dims the HUD while retaining pause controls', (
+    tester,
+  ) async {
+    final session = GameSession(testCatalog(), MemoryStore())..startDay();
+    await tester.pumpWidget(GardenApp(session: session));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
+    session.cycle!.remaining = 5 + 1 / 60;
+    for (var i = 0; i < 10; i++) {
+      session.tick(1 / 60);
+    }
+    await tester.pump();
+    expect(find.byKey(const ValueKey('closing-hud-dim')), findsOneWidget);
+    await tester.tap(find.byTooltip('Pausar'));
+    await tester.pump();
+    expect(session.paused, isTrue);
+    expect(find.text('Continuar'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     await session.pendingWrites;
     session.dispose();

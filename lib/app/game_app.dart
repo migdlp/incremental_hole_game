@@ -3,7 +3,6 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../features/board/presentation/garden_game.dart';
-import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
@@ -175,94 +174,115 @@ class _DayScreenState extends State<DayScreen> {
     final closing = session.phase == DayPhase.closing;
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'DÍA ${session.running ? session.progress.day : session.progress.last?.day ?? session.progress.day}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        letterSpacing: 2,
-                        color: Color(0xffb5bdc9),
+        Stack(
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'DÍA ${session.running ? session.progress.day : session.progress.last?.day ?? session.progress.day}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                letterSpacing: 2,
+                                color: Color(0xffb5bdc9),
+                              ),
+                            ),
+                            Text(
+                              '${session.cycle?.remaining.ceil() ?? 0} s',
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w800,
+                                color: closing
+                                    ? const Color(0xffffae83)
+                                    : cream,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${session.cycle?.remaining.ceil() ?? 0} s',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w800,
-                        color: closing ? const Color(0xffffae83) : cream,
+                      const Icon(
+                        Icons.monetization_on_rounded,
+                        color: gold,
+                        size: 27,
                       ),
+                      const SizedBox(width: 7),
+                      Text(
+                        '${session.economy.collected}',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        tooltip: 'Pausar',
+                        onPressed: session.pause,
+                        icon: const Icon(Icons.pause_rounded),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(5),
+                    child: LinearProgressIndicator(
+                      value: session.cycle == null
+                          ? 0
+                          : (session.cycle!.remaining /
+                                    (session.cycle!.production +
+                                        session.cycle!.closing))
+                                .clamp(0, 1),
+                      minHeight: 5,
+                      backgroundColor: surface,
+                      color: closing
+                          ? const Color(0xffd1764c)
+                          : const Color(0xff69b4a5),
                     ),
-                  ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 5),
+                  child: Text(
+                    !session.running
+                        ? 'Jornada finalizada'
+                        : closing
+                        ? 'ÚLTIMOS SEGUNDOS · Recoge las monedas'
+                        : session.economy.generated > 0
+                        ? (session.board!.sweepEnabled
+                              ? 'Toca o desliza para recoger las monedas'
+                              : 'Pulsa las monedas para recogerlas')
+                        : 'Agarra una bola o recoge la escoba para barrer',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: closing
+                          ? const Color(0xffffae83)
+                          : const Color(0xffc6cfdb),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (closing)
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: ColoredBox(
+                    key: ValueKey('closing-hud-dim'),
+                    color: Color(0xa6000000),
+                  ),
                 ),
               ),
-              const Icon(Icons.monetization_on_rounded, color: gold, size: 27),
-              const SizedBox(width: 7),
-              Text(
-                '${session.economy.collected}',
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: 12),
-              IconButton(
-                tooltip: 'Pausar',
-                onPressed: session.pause,
-                icon: const Icon(Icons.pause_rounded),
-              ),
-            ],
-          ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: LinearProgressIndicator(
-              value: session.cycle == null
-                  ? 0
-                  : (session.cycle!.remaining /
-                            (session.cycle!.production +
-                                session.cycle!.closing))
-                        .clamp(0, 1),
-              minHeight: 5,
-              backgroundColor: surface,
-              color: closing
-                  ? const Color(0xffd1764c)
-                  : const Color(0xff69b4a5),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 5),
-          child: Text(
-            !session.running
-                ? 'Jornada finalizada'
-                : closing
-                ? 'ÚLTIMOS SEGUNDOS · Recoge las monedas'
-                : session.economy.generated > 0
-                ? (session.board!.sweepEnabled
-                      ? 'Toca o desliza para recoger las monedas'
-                      : 'Pulsa las monedas para recogerlas')
-                : session.selectedTool == BallTool.hand
-                ? 'Agarra una bola · Arrastra y suelta para lanzar'
-                : 'Barre hacia donde arrastras el dedo',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: closing
-                  ? const Color(0xffffae83)
-                  : const Color(0xffc6cfdb),
-            ),
-          ),
-        ),
-        ToolSelector(session: session),
         Expanded(
           child: Stack(
             children: [
@@ -535,7 +555,6 @@ class NightScreen extends StatelessWidget {
                 ),
               if (last == null) ...[
                 const SizedBox(height: 16),
-                ToolSelector(session: session),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Sonidos del sistema'),
@@ -592,32 +611,5 @@ class NightScreen extends StatelessWidget {
         style: const TextStyle(color: Color(0xffb5bdc9), fontSize: 11),
       ),
     ],
-  );
-}
-
-class ToolSelector extends StatelessWidget {
-  const ToolSelector({super.key, required this.session});
-  final GameSession session;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-    child: Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 8,
-      children: [
-        for (final tool in BallTool.values)
-          ChoiceChip(
-            label: Text(tool.label),
-            avatar: session.toolAvailable(tool)
-                ? null
-                : const Icon(Icons.lock_outline, size: 15),
-            selected: session.selectedTool == tool,
-            onSelected: session.toolAvailable(tool) && !session.paused
-                ? (_) => session.selectTool(tool)
-                : null,
-          ),
-      ],
-    ),
   );
 }

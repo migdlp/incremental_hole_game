@@ -110,6 +110,7 @@ void main() {
     'broom follows perpendicular, limits rotation and holds still on stop',
     () {
       final board = Board(catalog.settings({'broom': 1}), tool: BallTool.broom);
+      board.broomPosition = const Vec(180, 180);
       board.touch(const Vec(180, 180));
       final initial = board.toolAngle;
       board.drag(const Vec(230, 180));
@@ -133,6 +134,7 @@ void main() {
     final balls = [
       for (final x in [155.0, 180.0, 205.0]) addBall(board, Vec(x, 210)),
     ];
+    board.broomPosition = const Vec(180, 180);
     board.touch(const Vec(180, 180));
     for (var i = 1; i <= 60; i++) {
       board.drag(Vec(180, 180 + i * 1.0));
@@ -151,6 +153,7 @@ void main() {
         tool: BallTool.broom,
       );
       final ball = addBall(board, const Vec(235, 210));
+      board.broomPosition = const Vec(180, 180);
       board.touch(const Vec(180, 180));
       for (var i = 1; i <= 60; i++) {
         board.drag(Vec(180, 180 + i * 1.0));
@@ -171,6 +174,7 @@ void main() {
     final left = addBall(board, const Vec(150, 215));
     final right = addBall(board, const Vec(210, 215));
     final outside = addBall(board, const Vec(50, 220));
+    board.broomPosition = const Vec(180, 180);
     board.touch(const Vec(180, 180));
     expect(board.segments.length, 2);
     for (var i = 1; i <= 120; i++) {

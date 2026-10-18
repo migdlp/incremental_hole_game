@@ -110,6 +110,9 @@ class GameSession extends ChangeNotifier {
       board!.releaseCoin(value);
     }
     cycle!.advance(dt);
+    if (producing && cycle!.phase == DayPhase.closing) {
+      board!.enterClosing();
+    }
     if (cycle!.phase == DayPhase.night) finishDay();
   }
 
@@ -157,7 +160,7 @@ class GameSession extends ChangeNotifier {
     final settings = catalog.settings(levels);
     return switch (tool) {
       BallTool.hand => true,
-      BallTool.broom => settings['broom_unlocked'] > 0,
+      BallTool.broom => true,
       BallTool.vee => settings['v_unlocked'] > 0,
     };
   }
@@ -265,9 +268,7 @@ class GameSession extends ChangeNotifier {
             orElse: () => throw const FormatException('Herramienta inválida'),
           );
     final expectedSettings = catalog.settings(savedLevels);
-    if ((restoredTool == BallTool.broom &&
-            expectedSettings['broom_unlocked'] == 0) ||
-        (restoredTool == BallTool.vee && expectedSettings['v_unlocked'] == 0)) {
+    if (restoredTool == BallTool.vee && expectedSettings['v_unlocked'] == 0) {
       throw const FormatException('Herramienta sin desbloquear');
     }
     final last = json['last'] == null
@@ -324,6 +325,9 @@ class GameSession extends ChangeNotifier {
         run['board'] as Map<String, dynamic>,
       );
       restoredBoard.tool = restoredTool;
+      if (restoredCycle.phase == DayPhase.closing) {
+        restoredBoard.enterClosing();
+      }
       collected = run['collected'] as int;
       generated = run['generated'] as int;
       if (collected < 0 ||

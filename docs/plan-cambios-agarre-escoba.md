@@ -6,7 +6,7 @@ Estado actual: `0.2.1+3` entregado con APK; pendiente validación en Android fí
 
 ## Hoja de ruta vigente — cambios pendientes del 18 de octubre de 2026
 
-**Esta sección recoge requisitos futuros, no cambios implementados ni entregados.** Cuando contradiga objetivos anteriores, prevalece como dirección de la próxima implementación; los registros de entregas y pruebas que siguen se conservan como historia y no se reescriben como si ya incluyeran estos cambios.
+**Esta sección distingue requisitos pendientes de implementación local verificada.** Los dos cambios muy importantes ya están implementados localmente; no se declara nueva entrega Android ni publicación del código. Cuando contradiga objetivos anteriores, prevalece como dirección vigente; los registros históricos se conservan sin atribuirles cambios posteriores.
 
 Este documento será el seguimiento vivo de los cambios futuros y se actualizará conforme se acuerden prioridades y se observe cada resultado. El usuario ha autorizado publicar y mantener este seguimiento en GitHub; cada publicación se confirmará con su commit, sin dar por entregadas las funciones pendientes.
 
@@ -14,7 +14,7 @@ Este documento será el seguimiento vivo de los cambios futuros y se actualizar�
 
 | Prioridad | Cambios | Estado |
 | --- | --- | --- |
-| **Muy importante, al mismo nivel** | Mano siempre activa y escoba como objeto disponible desde el inicio; cierre con cinco segundos de recogida, tablero oscurecido y objetos congelados | Pendientes de implementar |
+| **Muy importante, al mismo nivel** | Mano siempre activa y escoba como objeto disponible desde el inicio; cierre con cinco segundos de recogida, tablero oscurecido y objetos congelados | Implementados y verificados localmente; prueba física y OK de jugabilidad pendientes |
 | **Por acordar** | Mejora de escoba en V, mejora de mano para dos monedas, acceso al árbol desde el resultado y simplificación visual del árbol | Pendientes de comparar con el usuario; sin orden relativo asignado |
 | **Baja, más a futuro** | Experiencia sensorial: satisfacción, vibración háptica y sonidos coordinados | Pendiente de implementar; posterior a las prioridades muy importantes |
 
@@ -24,11 +24,11 @@ Las secciones siguientes agrupan los cambios por área. Su orden no fija la prio
 
 **Prioridad: muy importante.**
 
-- [ ] Mantener siempre la mano como control activo: permite agarrar y arrastrar bolas o coger la escoba para barrerlas.
-- [ ] Hacer que la escoba aparezca como un objeto más del tablero, comparable a una bola en su disponibilidad para agarrarlo y arrastrarlo, no como un modo que sustituya a la mano.
-- [ ] Disponer de la escoba desde el inicio. La esquina superior derecha es una ubicación sugerida, no una posición definitiva acordada.
+- [x] Mantener siempre la mano como control activo: permite agarrar y arrastrar bolas o coger la escoba para barrerlas.
+- [x] Hacer que la escoba aparezca como un objeto más del tablero, comparable a una bola en su disponibilidad para agarrarlo y arrastrarlo, no como un modo que sustituya a la mano.
+- [x] Disponer de la escoba desde el inicio. La esquina superior derecha es una ubicación sugerida, no una posición definitiva acordada.
 
-Este objetivo sustituye para el futuro el desbloqueo inicial de la escoba y el selector de herramientas descritos en los registros históricos; no afirma que ese cambio ya esté implementado.
+Implementado localmente: escoba física inicial arriba a la derecha, mano disponible en cada gesto y selector eliminado. Al soltar, conserva posición y orientación; sigue colisionando con bolas. Los guardados antiguos reciben una posición segura y los nuevos conservan la pose sin restaurar un agarre. Se conserva la V ya comprada como geometría de esa escoba, sin concederla a quien no la tenga ni rediseñar su progresión. Catálogo, identificadores, costes y requisitos históricos se mantienen para no incluir aquí el cambio de progresión pendiente.
 
 ### Mejoras y habilidades — escoba y mano
 
@@ -43,10 +43,10 @@ La mejora de mano no implica recogida automática general. Quedan por concretar 
 
 **Recogida final: muy importante, al mismo nivel que la mano activa y la escoba física.**
 
-- [ ] Al terminar el día, ofrecer cinco segundos finales dedicados exclusivamente a recoger monedas.
-- [ ] Oscurecer toda la pantalla salvo las monedas, que seguirán brillando para concentrar la atención en su recogida.
-- [ ] Congelar las bolas y la escoba durante esos cinco segundos y bloquear su movimiento o arrastre. La única interacción jugable permitida será recoger monedas.
-- [ ] Al agotar los cinco segundos, abrir el pop-up existente de fin del día, conservando el resto de su funcionamiento salvo el cambio de botón indicado debajo.
+- [x] Al terminar el día, ofrecer cinco segundos finales dedicados exclusivamente a recoger monedas.
+- [x] Oscurecer toda la pantalla salvo las monedas, que seguirán brillando para concentrar la atención en su recogida.
+- [x] Congelar las bolas y la escoba durante esos cinco segundos y bloquear su movimiento o arrastre. La única interacción jugable permitida será recoger monedas.
+- [x] Al agotar los cinco segundos, abrir el pop-up existente de fin del día, conservando el resto de su funcionamiento salvo el cambio de botón indicado debajo.
 
 **Acceso desde el resultado: prioridad relativa pendiente de acordar.**
 
@@ -73,7 +73,18 @@ El balance histórico ya registra una fase final de cinco segundos dentro del co
 
 ### Próximo paso del plan vigente
 
-Continuar comparando con el usuario las prioridades aún no acordadas y mantener esta hoja de ruta actualizada en el repositorio. Todas las casillas de esta nueva tanda siguen pendientes; documentarlas no autoriza ni acredita una implementación de gameplay.
+Probar jugando los dos cambios prioritarios y recoger el OK del usuario. Continuar comparando las prioridades aún no acordadas, sin implementarlas hasta su autorización, y mantener este seguimiento actualizado. La implementación local de esta tanda no se presenta como una nueva publicación de código o APK.
+
+### Implementación local de las prioridades muy importantes — 18 de octubre de 2026
+
+- **Controles:** mano y escoba física conviven sin modo permanente. El agarre conserva su desplazamiento respecto al dedo; soltar no elimina ni reinicia la escoba. Se reutilizan segmentos y colisiones, también con V previamente comprada. No se implementan nuevas mejoras de mano ni cambios de progresión de V.
+- **Cierre:** se reutilizan los cinco segundos existentes, sin ampliar el día. Al cruzar el límite de producción se cancela cualquier agarre sin lanzar ni cobrar una pulsación incompleta. Bolas, escoba y robot quedan congelados; no hay nuevas emisiones ni capturas. Solo siguen las monedas y sus capacidades de recogida ya compradas, incluido el aterrizaje de monedas emitidas antes del cierre.
+- **Presentación y continuidad:** tablero y cabecera se oscurecen; las monedas se dibujan después de la capa oscura y conservan su brillo. Pausar sigue accesible. Reabrir en cierre conserva tiempo y congelación, inicialmente en pausa. Al agotar el tiempo se mantiene el resultado existente y la liquidación única. Sus botones NO se cambian en esta tanda.
+- **Entorno aislado:** Flutter `3.35.7` / Dart `3.9.2`, versión que fija CI, instalado aparte con SHA-256 oficial verificado. No se modifica el SDK global ni el lockfile. Una prueba con SDK estable más nuevo se descartó porque la instalación con lock estricto exigía cambiar dependencias.
+- **Pruebas observadas:** base de 51 pruebas correctas; cuatro fallos funcionales nuevos antes de implementar, después corregidos. Regresiones posteriores observaron fallo y corrección de la protección de emisiones en cierre, del oscurecimiento de cabecera y del seguimiento del dedo por el imán comprado durante el cierre. Esta última regresión fue detectada por verificación independiente: se actualiza solo el cursor de recogida, sin reactivar objetos. Resultado final: **63 pruebas correctas**, análisis sin incidencias, formato correcto, `git diff --check` correcto y compilación web correcta.
+- **Cobertura nueva:** disponibilidad inicial, agarrar/soltar y volver a mano, colisiones de escoba aparcada, pose guardada y valores antiguos/incorrectos, límite exacto de cierre, agarres cancelados, robot y bolas congelados, recogida con/sin barrido, pausa/restauración, cobro único y píxeles renderizados (monedas con el mismo color y resto oscurecido). La entrada de puntero se prueba en widgets, incluida la V comprada y el botón de pausa durante el cierre.
+- **Publicación y APK solicitados:** el usuario autorizó publicar el código y ejecutar la pipeline, pero el acceso del navegador a `github.com` fue rechazado por la restricción de origen. No se usa otro canal para eludirla: publicación de esta implementación pendiente, pipeline NO ejecutada y APK nuevo NO generado. Se conserva la publicación documental anterior, sin atribuirle este código.
+- **Límites:** sin prueba de jugabilidad en navegador ni Android físico en esta tanda, sin medición de rendimiento en dispositivo y sin OK del usuario. La comprobación visual automatizada de píxeles no equivale a una sesión manual. No hay nueva publicación de código, commit de implementación, APK ni ejecución remota. La publicación de estas notas se confirmará por separado.
 
 ## Plan y entregas anteriores — registro histórico
 

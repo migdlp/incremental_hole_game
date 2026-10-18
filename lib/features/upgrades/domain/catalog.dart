@@ -19,7 +19,8 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values);
+  DaySettings(this.values, {this.balanceVersion = 2});
+  final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
   Map<String, double> toJson() => Map.of(values);
@@ -124,7 +125,7 @@ class UpgradeCatalog {
     return (owned[parts[0]] ?? 0) >= int.parse(parts[1]);
   }
 
-  DaySettings settings(Map<String, int> owned) {
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 2}) {
     final values = Map.of(base);
     for (final definition in definitions) {
       final level = owned[definition.id] ?? 0;
@@ -132,7 +133,22 @@ class UpgradeCatalog {
         values[definition.effect] = definition.levels[level - 1].value;
       }
     }
-    return DaySettings(values);
+    // Historical values keep in-progress v1/v2 saves playable until that day ends.
+    if (balanceVersion == 1) {
+      values['production_duration'] = const [
+        60.0,
+        65.0,
+        70.0,
+        75.0,
+      ][owned['duration'] ?? 0];
+      values['spawn_interval'] = const [
+        .75,
+        .65,
+        .55,
+        .45,
+      ][owned['generator'] ?? 0];
+    }
+    return DaySettings(values, balanceVersion: balanceVersion);
   }
 
   void validateLevels(Map<String, int> levels) {

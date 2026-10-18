@@ -47,7 +47,7 @@ La creación inicial de este archivo fue solo planificación. Esta tanda impleme
 | 3 | Escoba en V | Barrido recto estable | Sí | Pruebas; sensación en Android pendiente | Pendiente |
 | 4 | Monedas: pulsación y desbloqueo de barrido | Gestos de herramientas definidos | Sí | Pruebas y recogida por toque en navegador | Pendiente |
 | 5 | Limpieza nocturna y persistencia completas | Revisión desde bloque 1; cierre tras 4 | Sí | Diez ciclos, noche, pausa, carga y migración en pruebas | Pendiente |
-| 6 | Revisión integrada y APK manual | Bloques 1–5 | En curso | Pipeline pendiente; ver registro de entrega | Pendiente |
+| 6 | Revisión integrada y APK manual | Bloques 1–5 | Sí | Pipeline correcta, firma verificada y APK publicado | Pendiente |
 | Posterior | Rediseño del árbol de habilidades | Indicaciones del usuario | No iniciado | Pendiente | Pendiente |
 | Posterior | Balance de precios y ritmo de progreso | Controles validados; coordinar con árbol | No iniciado | Pendiente | Pendiente |
 | Cierre | Actualizar documentación general | Todo el alcance acordado terminado y OK explícito | Pendiente | Pendiente | Pendiente |
@@ -65,10 +65,10 @@ El detalle del árbol y del balance se añadirá cuando se acuerde. No son requi
 
 Aceptación pendiente:
 
-- [ ] Un gesto mueve solo una pelota agarrada; las demás responden únicamente a contactos físicos válidos.
-- [ ] En una zona plana, sin contactos y lejos del hoyo, colocar despacio o parar y soltar no produce un disparo artificial.
-- [ ] Un lanzamiento rápido recorre más que uno suave en condiciones equivalentes y sigue la dirección final del gesto.
-- [ ] Gesto equivalente con distinta frecuencia de eventos produce resultados comparables; velocidad y posiciones permanecen finitas.
+- [x] Un gesto mueve solo una pelota agarrada; las demás responden únicamente a contactos físicos válidos.
+- [x] En una zona plana, sin contactos y lejos del hoyo, colocar despacio o parar y soltar no produce un disparo artificial.
+- [x] Un lanzamiento rápido recorre más que uno suave en condiciones equivalentes y sigue la dirección final del gesto.
+- [x] Gesto equivalente con distinta frecuencia de eventos produce resultados comparables; velocidad y posiciones permanecen finitas.
 - [ ] No atraviesa paredes o bolas por saltos del puntero, ni se duplica al capturar, pausar o restaurar.
 
 Los valores de suavizado, límites y tolerancias se medirán y anotarán al implementar; no se dan aquí por calibrados. La sensación se comprobará también jugando.
@@ -83,8 +83,8 @@ Los valores de suavizado, límites y tolerancias se medirán y anotarán al impl
 
 Aceptación pendiente:
 
-- [ ] Un grupo situado frente a la escoba avanza con el barrido sin el efecto de billar del empujador circular.
-- [ ] Una versión más ancha alcanza bolas que la estrecha deja fuera, con geometría visible fiel.
+- [x] Un grupo situado frente a la escoba avanza con el barrido sin el efecto de billar del empujador circular.
+- [x] Una versión más ancha alcanza bolas que la estrecha deja fuera, con geometría visible fiel.
 - [ ] Esquinas, extremos y cambios de dirección no provocan teletransporte, vibración continua o bolas atrapadas permanentemente.
 
 ### Bloque 3: escoba en V
@@ -95,9 +95,9 @@ Aceptación pendiente:
 
 Aceptación pendiente:
 
-- [ ] Bolas que encuentra cada brazo se reúnen durante un barrido controlado.
-- [ ] Se pueden llevar y liberar grupos cerca del hoyo sin atasco permanente ni recompensas por estar dentro de la V.
-- [ ] La mejora se distingue de una escoba recta simplemente más ancha.
+- [x] Bolas que encuentra cada brazo se reúnen durante un barrido controlado.
+- [x] Se pueden llevar y liberar grupos cerca del hoyo sin atasco permanente ni recompensas por estar dentro de la V.
+- [x] La mejora se distingue de una escoba recta simplemente más ancha.
 
 ### Bloque 4: monedas por pulsación y mejora de barrido
 
@@ -109,8 +109,8 @@ Aceptación pendiente:
 
 Aceptación pendiente:
 
-- [ ] Sin mejora, solo pulsa y cobra; con mejora, también barre y cobra; nunca se suma dos veces una moneda.
-- [ ] Tienda y mensajes explican el cambio; compra y efecto sobreviven a noches y reaperturas.
+- [x] Sin mejora, solo pulsa y cobra; con mejora, también barre y cobra; nunca se suma dos veces una moneda.
+- [x] Tienda y mensajes explican el cambio; compra y efecto sobreviven a noches y reaperturas.
 - [ ] El gesto de recoger monedas no provoca un lanzamiento involuntario de una pelota.
 
 ### Bloque 5: noche, pausa y guardado
@@ -124,10 +124,10 @@ Aceptación pendiente:
 
 Aceptación pendiente:
 
-- [ ] Cerrar agarrando una pelota y con monedas pendientes deja la noche y el siguiente día limpios.
-- [ ] Reabrir de noche no recupera objetos descartados; ahorro y desbloqueos siguen correctos.
-- [ ] Diez ciclos y un cierre repetido no duplican ingresos ni arrastran objetos.
-- [ ] Cargar un guardado anterior aplica la política de compatibilidad registrada y conserva el progreso que corresponda.
+- [x] Cerrar agarrando una pelota y con monedas pendientes deja la noche y el siguiente día limpios.
+- [x] Reabrir de noche no recupera objetos descartados; ahorro y desbloqueos siguen correctos.
+- [x] Diez ciclos y un cierre repetido no duplican ingresos ni arrastran objetos.
+- [x] Cargar un guardado anterior aplica la política de compatibilidad registrada y conserva el progreso que corresponda.
 
 ### Bloque 6: revisión integrada
 
@@ -153,7 +153,9 @@ La aspiradora permanece como idea aparcada, sin prioridad para esta tanda.
 
 | Fecha | Bloque | Cambio o decisión | Evidencia / pendiente |
 | --- | --- | --- | --- |
-| 2026-10-18 | Planificación | Orden acordado: agarre individual → escoba ampliable → V; monedas y noche conservadas; árbol y balance posteriores | Solo planificación; sin cambios de juego ni OK final |
+| 2026-10-18 | Planificación | Orden acordado: agarre individual → escoba ampliable → V; monedas y noche conservadas; árbol y balance posteriores | Plan inicial, sin OK final |
+| 2026-10-18 | Bloques 1–5 | Implementados en `1a8fed7`, PR #8 integrada | 36 pruebas y navegador correctos; revisión en móvil y OK pendientes |
+| 2026-10-18 | Bloque 6 | Pipeline manual 39136783858 completada; APK `0.2.0+2` publicado | Firma verificada; enlace en evidencia de entrega |
 
 Para cada implementación añadir commit, pruebas ejecutadas y resultado, revisión manual y pendientes. Registrar el OK del usuario únicamente cuando lo haya dado. Actualizar este plan durante el trabajo; actualizar la documentación general al cierre acordado.
 
@@ -195,5 +197,7 @@ Se conservan el resto de precios y efectos. `paddle_radius` se mantiene como cla
 - Formato y `flutter analyze --no-pub`: correctos.
 - `flutter test --no-pub`: 36 pruebas superadas (32 de dominio/sesión y 4 de widgets). Cubren colocación suave, pausa antes de soltar, lanzamiento a 30/60/120 Hz de eventos, orientación, grupos, anchura, V, entrada real de puntero en widgets, monedas, guardado v1/v2 y diez ciclos limpios.
 - Compilación web correcta. Navegador Chromium a 390×844, con generación normal y puntero: 2 bolas capturadas, 4 monedas recogidas por pulsación y recarga pausada conservando ingreso, sin errores JavaScript. Cambio entre herramientas compradas y persistencia del barrido también comprobados, sin errores JavaScript; esta parte usa un guardado aislado de prueba, no se presenta como progreso obtenido jugando.
-- Pendientes: sensación con dedo en Android físico, medición de rendimiento en dispositivo, OK del usuario, diseño definitivo del árbol y balance. Las casillas de aceptación anteriores no se cierran en bloque con las pruebas automáticas.
-- Pipeline manual y enlace de APK: se añadirán al registro cuando termine la ejecución.
+- Pendientes: sensación con dedo en Android físico, medición de rendimiento en dispositivo, OK del usuario, diseño definitivo del árbol y balance. Las casillas marcadas cuentan con evidencia automática o de navegador; las restantes requieren revisión adicional. Esto no sustituye el OK del usuario ni la prueba física en Android.
+- Pipeline manual [39136783858](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858): completada correctamente sobre `main`, commit `1a8fed78ced1e92b2d16b46bb3d7b1a78b8493d5` ([PR #8 integrada](https://github.com/migdlp/incremental_hole_game/pull/8)). Formato, análisis, 36 pruebas, compilación Android y verificación de firma correctos.
+- [Descargar APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858/artifacts/12140570505): artefacto `jardin-mecanico-debug-apk`, ZIP con `jardin-mecanico-debug.apk` y su suma. Versión `0.2.0+2`, APK de depuración para pruebas. Caduca el 1 de noviembre de 2026; puede regenerarse con la pipeline manual.
+- Se registra el resultado en un cambio posterior de este archivo; el APK corresponde al commit de código indicado, no a ese registro documental posterior.

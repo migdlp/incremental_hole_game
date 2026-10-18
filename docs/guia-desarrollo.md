@@ -90,14 +90,16 @@ Abre el servidor desde un navegador que tenga acceso a ese entorno. El puerto es
 ## 3. Primera partida y resultado esperado
 
 1. Con almacenamiento vacío aparece el taller, saldo cero y «Comenzar día 1».
-2. Inicia el día: el contador incluye 60 s de producción y 5 de cierre. La primera bola se intenta emitir tras el intervalo inicial.
-3. Arrastra desde detrás de las bolas hacia el hoyo. Una captura produce una moneda visible; el contador diario no sube hasta recogerla.
-4. Toca o pasa sobre las monedas aterrizadas. Pulsa pausa: tiempo y simulación deben detenerse; al continuar no se recupera tiempo de pared.
+2. Inicia el día: el contador empieza en 15 s: 10 de producción y 5 de cierre. La primera bola se intenta emitir a los 3 s y no hay bola inmediata.
+3. Pulsa una bola para agarrarla y arrástrala al hoyo; suelta despacio para colocar o con un gesto final rápido para lanzar. Una captura produce una moneda visible; el contador diario no sube hasta recogerla.
+4. Pulsa y levanta sobre las monedas aterrizadas para cobrarlas. Cruzarlas arrastrando no cobra sin comprar barrido. Pulsa pausa: tiempo y simulación deben detenerse; al continuar no se recupera tiempo de pared.
 5. En los últimos cinco segundos aparece el aviso de recogida y se detiene el generador.
 6. Al acabar, el taller muestra ingreso, pérdida pendiente, capturas, récord y saldo. Compra si alcanza el saldo o ahorra; el siguiente día puede iniciarse sin comprar.
 7. Sal a segundo plano durante una jornada y vuelve: debe abrirse pausada. Una recarga web recupera el último guardado disponible, también pausado.
 
-El primer día debe permitir evaluar una compra, pero su accesibilidad está pendiente de balance. No se entrega dinero oculto ni se presume que un jugador nuevo alcance cierto resultado.
+El día base produce tres bolas sin bloqueos y puede generar seis monedas si entran todas; una compra de veinte requiere ahorrar varias jornadas. Costes y ritmo siguen provisionales. Comprar escoba recta, anchura y V permite comparar controles; selecciona las herramientas compradas con los botones Mano / Escoba / Escoba en V. Ambas escobas giran según tu arrastre, con suavizado.
+
+Si cargas una jornada v1/v2, terminará con sus tiempos anteriores: el día siguiente adopta el balance nuevo. No borres la partida para aplicar el cambio. Ver [migraciones](persistencia.md#compatibilidad-entre-versiones).
 
 ## 4. Validar y generar instalables
 
@@ -119,7 +121,7 @@ El APK local es de depuración. La [pipeline manual](ci.md) genera otro instalab
 | --- | --- | --- |
 | Precios, valores y niveles existentes | [balance.csv](balance.csv) | Catálogo, compras, progresión y compatibilidad de jornadas guardadas |
 | Nueva mejora o comportamiento | [catálogo](../lib/features/upgrades/domain/catalog.dart), tablero/sesión y UI | IDs estables, efecto, requisitos, guardado y pruebas; no basta añadir una fila |
-| Física o geometría | [Board](../lib/features/board/domain/board.dart), [Vec](../lib/core/vec.dart) y render | Colisiones, barrido, captura, límites y gesto real |
+| Física o geometría | [Board](../lib/features/board/domain/board.dart), [geometría de herramientas](../lib/features/board/domain/tool.dart), [Vec](../lib/core/vec.dart) y render | Colisiones, barrido, captura, límites y gesto real |
 | Fases, reloj o cierre | [GameSession](../lib/app/game_session.dart), [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart) | Límite temporal, cobro único y restauración |
 | Guardado | [Referencia](persistencia.md) y adaptadores | Principal/copia, fallos, versiones y partidas previas |
 | Pantallas y sonido | [game_app.dart](../lib/app/game_app.dart) | Recorrido de widgets, pausa y prueba visual/sonora en destino |

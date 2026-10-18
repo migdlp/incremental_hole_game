@@ -2,7 +2,7 @@
 
 Fecha: 18 de octubre de 2026. Base revisada: `main`, commit `1bf1efa`, prototipo `0.1.0+1`.
 
-Estado: implementación `0.2.0+2` en validación para entregar un APK de prueba; pendiente el OK del usuario. Los resultados y límites se registran al final de este archivo. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. El resto de la documentación describe la entrega anterior o propuestas previas hasta el cierre acordado.
+Estado actual: `0.2.1+3` entregado con APK; pendiente validación en Android físico y OK de jugabilidad. Los resultados y límites se registran al final de este archivo. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. La documentación general se ha actualizado por petición del usuario el 18 de octubre; esto no sustituye la aceptación de jugabilidad ni el balance final.
 
 ## Forma de trabajar
 
@@ -27,7 +27,7 @@ La creación inicial de este archivo fue solo planificación. Esta tanda impleme
 - Se mantiene la recogida de monedas por pulsación al inicio y la mejora comprable para recogerlas al arrastrar.
 - Al pasar a la noche desaparecen las bolas y monedas pendientes; cada día nuevo comienza vacío. Se conservan ahorro y mejoras compradas.
 
-## Punto de partida observado
+## Punto de partida histórico, antes de esta implementación
 
 | Área | Estado actual | Cambio necesario |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ La creación inicial de este archivo fue solo planificación. Esta tanda impleme
 | 6 | Revisión integrada y APK manual | Bloques 1–5 | Sí | Pipeline correcta, firma verificada y APK publicado | Pendiente |
 | Posterior | Rediseño del árbol de habilidades | Indicaciones del usuario | No iniciado | Pendiente | Pendiente |
 | Posterior | Balance de precios y ritmo de progreso | Controles validados; coordinar con árbol | No iniciado | Pendiente | Pendiente |
-| Cierre | Actualizar documentación general | Todo el alcance acordado terminado y OK explícito | Pendiente | Pendiente | Pendiente |
+| Documentación | Actualizar documentación general | Autorizado expresamente por el usuario el 18 de octubre | Sí | Referencias, valores y enlaces comprobados | Solicitud recibida; no equivale al OK físico del MVP |
 
 El detalle del árbol y del balance se añadirá cuando se acuerde. No son requisitos para empezar el agarre ni autorizan un rediseño anticipado. Si se incorporan a esta tanda, su finalización forma parte del cierre documental.
 
@@ -159,7 +159,7 @@ La aspiradora permanece como idea aparcada, sin prioridad para esta tanda.
 
 Para cada implementación añadir commit, pruebas ejecutadas y resultado, revisión manual y pendientes. Registrar el OK del usuario únicamente cuando lo haya dado. Actualizar este plan durante el trabajo; actualizar la documentación general al cierre acordado.
 
-## Implementación para probar — 18 de octubre de 2026
+## Controles entregados en 0.2.0+2 — 18 de octubre de 2026
 
 ### Controles y decisiones de integración
 
@@ -215,3 +215,8 @@ Estado: implementado para probar en `0.2.1+3`; balance definitivo y OK pendiente
 - Se mantiene el acuerdo de actualizar la documentación general después del OK; esta sección registra únicamente esta implementación y sus evidencias.
 - Entrega Android: [PR #10 integrada](https://github.com/migdlp/incremental_hole_game/pull/10), código en `1d71843dd96fa32b745bc770bfc154c42720ab7a`. [Pipeline manual 39138119402](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402) completada correctamente: análisis, 41 pruebas, compilación y firma.
 - [Descargar APK 0.2.1+3 y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218). Artefacto ZIP de pruebas disponible hasta el 1 de noviembre de 2026; descomprimir e instalar `jardin-mecanico-debug.apk`. El APK anterior 0.2.0+2 no incluye este balance.
+
+
+## Actualización documental autorizada — 18 de octubre de 2026
+
+El usuario pidió actualizar la documentación general después de las entregas 0.2.0+2 y 0.2.1+3. Se alinean README, índice, PRD, diseño, implementación, economía, guardado v3, guías y evidencias de APK. Se conserva la historia de las pruebas y se distingue la revisión de navegador de controles del nuevo balance probado por CI. Árbol definitivo, precios, pruebas Android físicas y aceptación de jugabilidad siguen pendientes; esta actualización no los declara terminados.

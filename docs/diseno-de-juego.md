@@ -1,6 +1,6 @@
 # Diseño de juego del MVP
 
-Estado: especificación inicial. Las reglas económicas proceden del [PRD](PRD-game-incremental.md); geometría y sensaciones son hipótesis de prototipo.
+Actualizado para `0.2.1+3`: reglas implementadas y objetivos de sensación todavía por validar en Android. Las reglas económicas proceden del [PRD](PRD-game-incremental.md); geometría y sensaciones son hipótesis de prototipo.
 
 ## Objetivo de la interacción
 
@@ -12,16 +12,14 @@ Base: arena rectangular con esquinas redondeadas, un generador cerca del borde s
 
 Usar coordenadas lógicas con escala uniforme y márgenes para otras proporciones de pantalla; no deformar círculos. El tamaño mínimo de referencia del tablero es 360 × 560 unidades lógicas. Los tamaños finales se ajustan en móvil.
 
-- Al apoyar el dedo aparece la pala en su posición. Al soltar, desaparece su efecto físico.
-- La aparición de la pala no desplaza bruscamente un montón: se separan solapamientos con corrección limitada.
-- Al moverla, empuja bolas mediante su contorno circular. No se pueden agarrar ni transportar bolas individualmente.
-- Limitar velocidad e interpolar el recorrido para evitar atravesar objetos con un gesto rápido.
-- Solo tras comprar recogida por barrido, recoger monedas a lo largo del segmento recorrido, no solo en el último punto recibido. Antes, arrastrar no cobra monedas.
-- Al inicio solo pulsar recoge monedas dentro del radio de recogida; el toque sigue disponible después de desbloquear barrido. Las monedas no bloquean bolas ni pala.
-- Solo el primer puntero controla el tablero; botones y menús consumen su propia entrada.
-- Al pausar, terminar el día o perder el foco se cancela el gesto activo.
+- La mano inicial agarra una sola bola, que se arrastra o se lanza al soltar. Dejarla despacio o detenerse antes de soltar debe producir poco movimiento residual; un gesto final rápido le da inercia en esa dirección.
+- Después se compra escoba recta, se amplía su anchura y se desbloquea escoba en V. Se puede volver a herramientas compradas desde el selector.
+- La escoba es perpendicular al arrastre, con giro suave y orientación conservada al parar. Al tocar se orienta hacia el hoyo. Evitar dispersión radial de la antigua pala circular.
+- La V abre hacia el barrido y reúne hacia el centro por contacto; no aspira. El frente visible y su colisión comparten geometría. Los valores implementados están en [implementación](implementacion.md#física-e-interacción).
+- Al inicio solo pulsar recoge monedas; arrastrar sobre ellas no cobra. Tras comprar barrido se recoge por todo el segmento entre eventos y el toque sigue funcionando. Las monedas no bloquean bolas ni herramienta.
+- Solo el primer puntero controla el tablero. Al pausar, cancelar, terminar o perder foco se cancela el gesto sin lanzar ni cobrar una pulsación pendiente.
 
-Las bolas tienen rozamiento y rebote suave, colisionan entre sí y con los bordes. Se propone movimiento arcade con velocidad máxima, sin saltos físicos ni apilamiento vertical. La pala y el robot pueden mover grupos, pero no deben provocar vibraciones permanentes.
+Las bolas tienen fricción y rebote suave, chocan entre sí y con bordes; no hay apilamiento vertical. Validar comodidad, extremos, giros y posibles atascos en dispositivo real. La aspiradora está aparcada y los [otros métodos](ideas-herramientas-bolas.md) siguen siendo candidatos.
 
 ## Generación y hoyo
 
@@ -35,7 +33,7 @@ Cada bola genera un objeto con valor entero, según la mejora de recompensa acti
 
 La recogida muestra destello y cambio de contador. No exige ver terminar la animación para registrar el ingreso. Las pilas próximas se fusionan conservando todo su valor. En saturación, integrar la recompensa nueva en una pila existente; nunca borrarla por alcanzar un límite.
 
-La mejora de barrido habilita cobrar arrastrando; no es un aumento de radio ni desbloquea el imán. Precio y dependencias quedan por definir en el [plan de cambios](plan-siguiente-iteracion.md). El prototipo todavía permite barrer sin compra; este apartado describe el objetivo confirmado.
+La mejora de barrido habilita cobrar arrastrando; no es un aumento de radio ni desbloquea el imán. Está implementada como `sweep`, desbloqueo de 20 monedas sin requisito. El precio es provisional; ver [economía](economia.md).
 
 El imán funciona dentro de un radio alrededor del dedo mientras está apoyado: atrae monedas y las cobra al llegar al radio de recogida. No recoge todo el tablero ni actúa al levantar el dedo. Las pilas muestran su valor, evitando depender únicamente del tamaño.
 
@@ -43,7 +41,7 @@ El imán funciona dentro de un radio alrededor del dedo mientras está apoyado: 
 
 Un robot, desbloqueado de forma permanente. Durante el día selecciona una bola, se coloca detrás de ella respecto al hoyo y avanza empujándola. Recalcula si la bola entra, desaparece o deja de progresar. Si no hay objetivo, espera.
 
-La elección se actualiza cada 0,25 s como punto de partida. Detectar bloqueo por falta de avance durante aproximadamente 1 s y buscar otra posición u objetivo. Priorizar comportamiento estable frente a planificación perfecta. El robot no recoge monedas y no bloquea la pala; probar separación suave de bolas a su alrededor.
+La elección se actualiza cada 0,25 s como punto de partida. Detectar bloqueo por falta de avance durante aproximadamente 1 s y buscar otra posición u objetivo. Priorizar comportamiento estable frente a planificación perfecta. El robot no recoge monedas y no bloquea la herramienta; probar separación suave de bolas a su alrededor.
 
 ## Estados del ciclo
 
@@ -61,13 +59,13 @@ stateDiagram-v2
     Pausa --> Cierre: Continuar fase de cierre
 ```
 
-La pausa conserva la fase anterior; no reinicia tiempo. El cierre mantiene pala y robot, detiene el generador y muestra «Últimos segundos: recoge las monedas». No es una fase de compras.
+La pausa conserva la fase anterior; no reinicia tiempo. El día base dura 15 s en total: 10 de producción y 5 de cierre. La primera bola se intenta emitir a los 3 s. El cierre mantiene herramienta y robot, detiene el generador y muestra «Últimos segundos: recoge las monedas». No es una fase de compras.
 
-Al agotarse el tiempo, procesar solo la fracción de simulación anterior al límite; después bloquear entrada y liquidar. Los efectos visuales pueden terminar, pero no conceden ingresos posteriores. Toda moneda pendiente, incluso en animación de salida, cuenta como perdida. Regla acordada: retirar también todas las bolas restantes al pasar a la noche. Cada día nuevo empieza sin bolas ni monedas. El ahorro ya recogido y los niveles de mejora se conservan. La verificación está desglosada en el [plan de la siguiente iteración](plan-siguiente-iteracion.md).
+Al agotarse el tiempo, procesar solo la fracción de simulación anterior al límite; después bloquear entrada y liquidar. Los efectos visuales pueden terminar, pero no conceden ingresos posteriores. Toda moneda pendiente, incluso en animación de salida, cuenta como perdida. Regla acordada: retirar también todas las bolas restantes al pasar a la noche. Cada día nuevo empieza sin bolas ni monedas. El ahorro ya recogido y los niveles de mejora se conservan. La verificación está desglosada en el [seguimiento de cambios](plan-cambios-agarre-escoba.md).
 
 ## Primera experiencia y noche
 
-El primer día utiliza dos mensajes breves: «Arrastra para empujar las bolas al hoyo» y, al aparecer la primera moneda, «Toca para recoger monedas». Tras comprar barrido, indicar «Toca o desliza para recoger monedas». No añadir un tutorial separado obligatorio.
+El primer día utiliza dos mensajes breves: «Agarra una bola · Arrastra y suelta para lanzar» y, al aparecer la primera moneda, «Pulsa las monedas para recogerlas». Tras comprar barrido, indicar «Toca o desliza para recoger las monedas». No añadir un tutorial separado obligatorio.
 
 La noche presenta ingreso diario, récord y resumen; el árbol es accesible en la misma pantalla mediante desplazamiento. Cada nodo tiene nombre, efecto actual y siguiente, precio y requisito. Estados: disponible, sin saldo, bloqueado por requisito y completado. Comprar requiere una acción explícita sin confirmación adicional. No permitir compras durante el día.
 
@@ -75,9 +73,10 @@ Al completar todos los niveles se puede seguir jugando para mejorar el récord; 
 
 ## Pruebas de sensación
 
-- Empujar diez bolas juntas sin que atraviesen la pala ni salgan del tablero.
+- Colocar una bola suavemente, lanzar rápido y parar antes de soltar; comprobar dirección e inercia con el dedo.
+- Barrer grupos con recta y V, comparar anchuras y revisar extremos y giros sin atascos ni golpes exagerados.
 - Tras comprar barrido, recoger una línea de monedas con un gesto rápido; antes, cruzarla arrastrando no debe cobrarla.
 - Entender, sin explicación verbal, que introducir bolas y cobrar son acciones distintas.
 - Entender el aviso de cierre y la pérdida de monedas.
-- Percibir la primera ampliación de pala y la ayuda del robot.
-- Revisar si el dedo tapa el hoyo; probar un pequeño desplazamiento visual de la pala solo si las sesiones lo justifican.
+- Percibir la primera ampliación de escoba y la ayuda del robot.
+- Revisar si el dedo tapa el hoyo; probar un pequeño desplazamiento visual de la herramienta solo si las sesiones lo justifican.

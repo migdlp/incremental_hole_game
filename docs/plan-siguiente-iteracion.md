@@ -1,4 +1,6 @@
-# Plan de cambios — siguiente iteración
+# Plan de cambios — antecedente de la siguiente iteración
+
+**Archivo histórico del 17 de octubre.** El orden y seguimiento vigente están en [agarre, escobas y balance](plan-cambios-agarre-escoba.md); el comportamiento entregado se describe en [estado actual](estado-actual.md). Las tareas y casillas de este documento conservan su estado de planificación original, no indican que esos cambios sigan sin implementar.
 
 Fecha: 17 de octubre de 2026. Estado: planificado. Base revisada: prototipo `0.1.0+1`, código en `main` hasta `c41ca10`.
 

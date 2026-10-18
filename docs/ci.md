@@ -24,7 +24,11 @@ gh workflow run flutter-manual.yml --repo migdlp/incremental_hole_game --ref mai
 gh run list --repo migdlp/incremental_hole_game --workflow flutter-manual.yml --event workflow_dispatch
 ```
 
-La [ejecución 39020361800](https://github.com/migdlp/incremental_hole_game/actions/runs/39020361800) terminó correctamente sobre `44d0aeb`. Es evidencia histórica; consultar el commit y resultado de la ejecución que se descargue. Los artefactos pueden caducar aunque la ejecución fuese correcta.
+Última entrega de código comprobada: **0.2.1+3**, commit `1d71843dd96fa32b745bc770bfc154c42720ab7a`, [ejecución 39138119402](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402). Terminó correctamente el 18 de octubre: formato, análisis, **41 pruebas**, APK y firma.
+
+**[Descargar APK y SHA-256 actuales](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218)**. GitHub descarga un ZIP: extraer e instalar `jardin-mecanico-debug.apk`. Caduca el 1 de noviembre de 2026. Este es el build con día inicial de 15 segundos y generación base cada 3 s; el APK anterior `0.2.0+2` conserva el balance previo.
+
+Antecedentes: [0.2.0+2 / 36 pruebas](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858) y [0.1.0+1 / 17 pruebas](https://github.com/migdlp/incremental_hole_game/actions/runs/39020361800). Consultar siempre commit y resultado de la ejecución descargada. La documentación puede tener commits posteriores sin cambiar el código del APK; una descarga caducada tampoco indica fallo de compilación.
 
 El job usa Ubuntu 24.04 y tiene un límite de 40 minutos. Bash propaga errores de tuberías con `pipefail`; los registros se guardan con `tee`. Una nueva ejecución sobre la misma referencia cancela otra que siga en curso, según el grupo de concurrencia del workflow. La comparación de lockfile es estricta mediante `flutter pub get --enforce-lockfile`.
 

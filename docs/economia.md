@@ -1,43 +1,56 @@
 # Economía inicial y balance
 
-Estado: hipótesis para empezar a medir; los precios no están validados. Fuente editable: [balance.csv](balance.csv).
+Estado de `0.2.1+3`: valores implementados para probar; precios y ritmo de compras todavía provisionales. Fuente editable del balance actual: [balance.csv](balance.csv).
 
 ## Lectura de la tabla
 
-`level=0` indica configuración base. Para una mejora, `level` es el nivel que se compra y `cost` su precio incremental, no acumulado. `effect_value` es el valor absoluto resultante. `requires` usa `id:nivel`; vacío significa disponible desde la primera noche. `cap` describe el máximo previsto de esa propiedad; el cargador actual no valida esa columna por separado. Los límites efectivos resultan de los valores base y niveles disponibles. Ver [catálogo implementado](implementacion.md#balance-y-mejoras).
+`level=0` indica base. En una mejora, `level` es el nivel comprado y `cost` su precio incremental. `effect_value` es el valor absoluto resultante; `requires` usa `id:nivel`. `cap` es descriptivo, no un validador adicional del cargador. El parser admite nueve columnas simples, sin comas entrecomilladas. Ver [catálogo](implementacion.md#balance-y-mejoras).
 
-Unidades: segundos, unidades lógicas del tablero, unidades/segundo y monedas enteras. La duración base de producción no incluye los 5 segundos de cierre. El radio de pala y el radio de recogida son propiedades distintas.
+Duración de producción y cierre se suman para obtener el contador visible. `paddle_radius` conserva su clave histórica, pero el frente completo de escoba mide cuatro veces su valor; no es el radio de recogida de monedas.
 
-El saldo comienza en cero. El primer intento de emisión llega al acumular el intervalo de generación, aproximadamente a los 0,75 s con la configuración base; no hay una bola inicial inmediata. Si la salida está bloqueada, espera al siguiente intento. El cierre no genera bolas. A intervalo base de 0,75 s hay hasta 80 emisiones en 60 s si no hay bloqueos. Cada bola vale inicialmente 2 monedas: techo teórico de 160, sin asumir que el jugador lo consiga.
+## Jornada y generación actuales
 
-La primera ampliación de pala cuesta 20, equivalente a recoger diez recompensas iniciales. Eso permite comprobar si la primera compra es alcanzable con rendimiento modesto. No garantizarla mediante ingresos ocultos: ajustar precio o generación si las pruebas muestran que no lo es.
+| Nivel | Producción | Cierre | Contador total | Intervalo del generador |
+| --- | --- | --- | --- | --- |
+| Base | 10 s | 5 s | **15 s** | **3 s** |
+| Mejora 1 | 15 s | 5 s | 20 s | 2,6 s |
+| Mejora 2 | 20 s | 5 s | 25 s | 2,2 s |
+| Mejora 3 | 25 s | 5 s | 30 s | 1,8 s |
+
+Duración y generador son mejoras independientes; cada columna muestra sus propios niveles. Duración requiere generador nivel 1. La frecuencia de emisión es cuatro veces menor que antes en todos los niveles; antes los intervalos eran 0,75/0,65/0,55/0,45 s.
+
+La primera bola llega tras acumular el intervalo, no inmediatamente. Una salida bloqueada o el límite de población pierde ese intento, sin cola. En cierre no hay producción. El día base sin bloqueos intenta emitir a los 3, 6 y 9 s: **tres bolas**, frente al máximo teórico anterior de 80 en 60 s. Cada bola vale 2 monedas, por lo que se generan como máximo 6 si entran las tres; solo se ingresan al recogerlas.
 
 ## Mejoras
 
-Para los ocho tipos implementados, las ramas y requisitos son: pala y radio de recogida; generador y recompensa; duración tras generador 1; imán tras recogida 1; robot tras pala 1; velocidad tras robot.
+| ID | Compra | Costes por nivel | Efecto y requisito |
+| --- | --- | --- | --- |
+| `broom` | Escoba recta | 20 | Frente 80; sin requisito |
+| `paddle` | Anchura | 20 / 70 / 160 | Frentes 96 / 112 / 128; requiere escoba; afecta también a la V |
+| `broom_v` | Escoba en V | 80 | Reúne por contacto; requiere anchura 1 |
+| `sweep` | Barrido de monedas | 20 | Desbloquea recogida por recorrido; sin requisito |
+| `collection` | Radio de recogida | 25 / 80 / 180 | Radios 24 / 30 / 36; base 18; no desbloquea barrido |
+| `magnet` | Imán | 120 | Radio 65 mientras se toca; requiere recogida 1, independiente de barrido |
+| `generator` | Generación | 30 / 100 / 220 | Intervalos 2,6 / 2,2 / 1,8 s |
+| `reward` | Recompensa | 40 / 140 / 300 | Valores 3 / 4 / 5 por bola; base 2 |
+| `duration` | Duración | 60 / 160 / 320 | Producción 15 / 20 / 25 s; requiere generador 1 |
+| `robot` | Robot | 160 | Un robot; requiere anchura 1; no recoge monedas |
+| `robot_speed` | Velocidad del robot | 80 / 200 / 400 | 55 / 70 / 85 u/s; requiere robot; base 45 |
 
-La recompensa progresa de 2 a 3, 4 y 5 monedas por bola. Se entrega como valor de una moneda física, no como cinco objetos. El día puede llegar hasta 75 s de producción más cierre. El imán tiene alcance fijo al desbloquearse. El catálogo actual tiene ocho tipos. Está confirmado añadir recogida por barrido, con precio, identificador y dependencias por definir: al inicio solo se recogerá pulsando. No se modifica el CSV durante este brainstorming; ver [plan de cambios](plan-siguiente-iteracion.md).
+Escoba, V, barrido, imán y robot son desbloqueos únicos; las otras mejoras tienen tres niveles. La mano inicial no cuesta dinero. Comprar una herramienta la selecciona; se puede volver a otras ya compradas. Los efectos de compra comienzan el día siguiente. La recompensa aumenta valor, no necesariamente número de objetos físicos.
 
-El robot cuesta 160 después del requisito de pala. El objetivo de conseguirlo en 3–5 días supone partidas de rendimiento modesto y algunas compras; no debe bloquear ahorrar para obtenerlo antes. El objetivo se valida observando sesiones, no solo con la aritmética de precios.
+## Ritmo pendiente de ajuste
+
+Con seis monedas máximas por día base y una primera compra de veinte, no se puede comprar el primer día. Ahorrando sin otras compras y cobrando las tres bolas cada día, se llega a veinte en la cuarta jornada. Esto es un límite aritmético, no una prueba de comodidad o accesibilidad.
+
+La hipótesis anterior de compra inicial inmediata y robot en 3–5 días queda pendiente de redefinición tras este cambio; no describe un ritmo verificado ni un requisito que la entrega cumpla. Se mantuvieron los precios anteriores por petición de trabajar primero los controles y después el balance. No se compensa con ingresos ocultos. Próximo trabajo: acordar precios y revisar progreso junto al futuro árbol.
 
 ## Registro de sesiones
 
-Para cada jornada anotar: niveles, bolas emitidas/capturadas, valor generado/recogido/perdido, compras, duración y comentarios de comodidad. Registrar manualmente o en logs locales de desarrollo; no hace falta un servicio de analítica.
-
-Métricas útiles:
-
-- Eficiencia de captura = bolas capturadas / emitidas.
-- Eficiencia de recogida = valor recogido / generado.
-- Ingreso por segundo = ingreso / duración jugada.
-- Días hasta primera compra y primer robot.
-- Tiempo en el límite de población y número de bloqueos del robot.
-
-Si el denominador es cero, mostrar «sin datos». El valor perdido incluye toda recompensa generada que no llegó a recogerse antes del cierre, incluidas monedas aún en animación.
+Anotar niveles, bolas emitidas/capturadas, valor generado/recogido/perdido, compras, duración y comodidad. Métricas: captura/producción, recogida/valor generado, ingreso/segundo, días hasta primera compra y robot, bloqueos y saturación. Si un denominador es cero, indicar «sin datos». No hace falta telemetría externa.
 
 ## Ajuste del MVP
 
-Probar primero sin mejoras, después cada rama y finalmente todas al máximo. Comparar sesiones con la misma semilla cuando sirva para aislar un cambio. Cambiar pocos parámetros cada vez y conservar los resultados anteriores.
+Comparar base, cada rama y máximos, usando una misma semilla cuando ayude. Cambiar pocos parámetros por prueba. No exigir récord cada día ni convertir duración en compra obligatoria. Los precios permanecen provisionales hasta observar sesiones.
 
-Buscar una primera compra visible, opciones razonables entre ramas y crecimiento sin saturación permanente. No exigir que cada jornada supere a la anterior. Alargar el día no debe convertirse en la única compra útil. Si producción supera recogida de forma frustrante, ajustar radios, imán o emisiones antes de añadir nuevos sistemas.
-
-Las variables de renderizado pueden ajustarse para mejorar rendimiento sin alterar las recompensas. Reducir población de bolas sí cambia la producción y exige volver a revisar balance.
+El valor perdido incluye pilas y monedas en aterrizaje que no se cobraron al cierre. Bolas y monedas desaparecen de noche; ahorro y compras permanecen. Las jornadas antiguas guardadas terminan con su balance anterior; el siguiente día adopta estos valores. Ver [compatibilidad](persistencia.md#compatibilidad-entre-versiones).

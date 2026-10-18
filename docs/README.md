@@ -1,13 +1,13 @@
 # Documentación de Jardín mecánico
 
-Actualizada el 17 de octubre de 2026. Describe el prototipo `0.1.0+1` y la pipeline incorporados a `main` hasta `44d0aeb`. La documentación distingue implementación, evidencias de prueba y objetivos pendientes.
+Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` hasta `1d71843` y registro de entrega hasta `b0e20c0`. La documentación distingue implementación, evidencias de prueba y objetivos pendientes.
 
 ## Empieza por tu tarea
 
 | Quiero… | Leer |
 | --- | --- |
 | Saber qué está terminado y qué falta | [Estado actual](estado-actual.md) |
-| Preparar los cambios de la siguiente iteración | [Plan de la siguiente iteración](plan-siguiente-iteracion.md) |
+| Preparar los cambios de la siguiente iteración | [Seguimiento de agarre, escobas y balance](plan-cambios-agarre-escoba.md) |
 | Explorar herramientas para recoger y lanzar bolas | [Ideas de herramientas](ideas-herramientas-bolas.md) |
 | Ejecutar el proyecto y completar una primera partida | [Guía de desarrollo](guia-desarrollo.md) |
 | Descargar o generar un APK | [Pipeline manual](ci.md) |
@@ -30,6 +30,7 @@ Estos documentos conservan requisitos, propuestas e hipótesis que no equivalen 
 - [Arquitectura objetivo](arquitectura.md): límites y dirección de crecimiento.
 - [Dirección de arte](direccion-de-arte.md): presentación y recursos finales propuestos.
 - [Plan de implementación](plan-de-implementacion.md): entregas y aceptación.
+- [Seguimiento de cambios](plan-cambios-agarre-escoba.md): decisiones, implementación y evidencias de esta tanda. El [plan anterior](plan-siguiente-iteracion.md) se conserva como antecedente.
 
 El PRD define lo que se quiere construir; [implementación](implementacion.md) y código describen lo que existe. Una diferencia debe registrarse en [estado actual](estado-actual.md), no resolverse atribuyendo al prototipo una función futura. Los valores editables viven únicamente en [balance.csv](balance.csv).
 

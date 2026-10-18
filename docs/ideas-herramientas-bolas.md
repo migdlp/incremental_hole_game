@@ -1,6 +1,6 @@
 # Ideas: recoger y lanzar bolas
 
-Fecha: 17 de octubre de 2026. Estado: **brainstorming**, sin implementación ni selección definitiva de herramientas. La aspiradora con capacidad ampliable, la mano y las aspas parten de ideas del usuario; las demás son propuestas para comparar. El prototipo actual utiliza una pala que empuja.
+Fecha: 17 de octubre de 2026. Estado: **brainstorming histórico**, con actualización del 18 de octubre: mano individual, escoba recta ampliable y V ya seleccionadas e implementadas; aspiradora aparcada. El resto sigue sin compromiso de implementación. La aspiradora con capacidad ampliable, la mano y las aspas parten de ideas del usuario; las demás son propuestas para comparar. El seguimiento actual está en el [plan de cambios](plan-cambios-agarre-escoba.md).
 
 ## Qué debe mejorar la progresión
 
@@ -24,9 +24,9 @@ Cada avance debe aliviar una dificultad reconocible: reunir bolas dispersas, tra
 
 Los gestos son hipótesis para prototipar. En especial, probar la descarga de aspiradora con una mano antes de fijar botones o modos. No se fijan todavía capacidades, precios, requisitos ni duraciones.
 
-## Progresión que probaría primero
+## Propuesta original y selección posterior
 
-**Pala → recogedor o mano → aspiradora → ayudas como aspas y cinta.** Es una propuesta, no una secuencia aprobada. La pala en V puede servir de primer alivio barato; la mano introduce transportar grupos y la aspiradora añade la satisfacción de llenar y vaciar un depósito. Aspas, parachoques y cinta pueden ser apoyos colocados en el tablero, sin obligar a sustituir siempre la herramienta manual.
+**Pala → recogedor o mano → aspiradora → ayudas como aspas y cinta.** Fue la propuesta inicial; la selección posterior es **mano → escoba recta ampliable → V**, y la aspiradora queda aparcada. La pala en V puede servir de primer alivio barato; la mano introduce transportar grupos y la aspiradora añade la satisfacción de llenar y vaciar un depósito. Aspas, parachoques y cinta pueden ser apoyos colocados en el tablero, sin obligar a sustituir siempre la herramienta manual.
 
 Prototiparía mano y aspiradora por separado, manteniendo iguales producción y recompensa para comparar comodidad. Observar: gestos necesarios para llevar un grupo al hoyo, bolas que se escapan, errores de descarga, tiempo dedicado a apuntar y preferencia del jugador. Elegir primero una herramienta principal; no llenar la pantalla de controles para todas las candidatas.
 
@@ -40,6 +40,6 @@ Prototiparía mano y aspiradora por separado, manteniendo iguales producción y 
 
 ## Cambio confirmado: monedas
 
-Al principio las monedas requieren **pulsar para recogerlas**. Comprar la mejora de **recogida por barrido** permite cobrarlas también arrastrando el dedo por encima; el toque sigue funcionando. Es distinta de aumentar radio y del imán. Su precio, requisitos y relación con esas mejoras quedan por definir.
+Al principio las monedas requieren **pulsar para recogerlas**. Comprar la mejora de **recogida por barrido** permite cobrarlas también arrastrando el dedo por encima; el toque sigue funcionando. Es distinta de aumentar radio y del imán. Se implementó como `sweep`: 20 monedas, sin requisito, con precio todavía provisional.
 
-Este cambio sí forma parte del [plan de la siguiente iteración](plan-siguiente-iteracion.md). El código actual aún permite barrer desde el inicio: esta documentación no implementa el nuevo bloqueo. Las herramientas de esta lluvia de ideas no se incorporan automáticamente al alcance de esa iteración.
+El cambio está implementado y probado: arrastrar sin compra ya no cobra. Ver [seguimiento actual](plan-cambios-agarre-escoba.md). Mantener las demás ideas como candidatas no implica que estén entregadas.

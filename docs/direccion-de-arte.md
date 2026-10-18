@@ -34,7 +34,7 @@ Son colores de exploración, no combinaciones de contraste garantizado. Comproba
 - Robot: cuerpo compacto, dirección visible y pieza frontal que indica por dónde empuja. Sin animaciones complejas de extremidades.
 - Generador: tolva sencilla con salida identificable y pequeño movimiento al emitir.
 
-Escala de partida para 360 unidades de ancho: bola de radio 6, pala de radio 20 y hoyo de captura de radio 22. Son hipótesis de interacción, recogidas en el balance. Las zonas táctiles de menús tendrán al menos 48 × 48 píxeles lógicos; no confundir el tamaño visible de una moneda con su área de recogida.
+Escala de partida para 360 unidades de ancho: bola de radio 6 y hoyo de captura de radio 22. El control actual es mano con indicador de agarre y escoba recta/V, con frente base de 80 unidades y grosor 7; la clave histórica `paddle_radius` ya no representa un empujador circular. Ajustar la presentación tras prueba táctil. Las zonas táctiles de menús tendrán al menos 48 × 48 píxeles lógicos; no confundir el tamaño visible de una moneda con su área de recogida.
 
 ## Pantallas
 
@@ -69,7 +69,7 @@ Duraciones provisionales. Agrupar respuestas cuando entran muchas bolas: no repr
 
 ## Recursos de la primera entrega
 
-Primero dibujar primitivas desde código: bolas, hoyo, pala, monedas y robot. Crear dos bocetos de pantalla —jornada y noche— antes de producir un atlas definitivo. Recursos finales mínimos: generador, robot, moneda/pila y ocho iconos de mejora; cuatro efectos sonoros reutilizables. Los iconos llevan nombre visible, no sustituyen la explicación.
+Primero dibujar primitivas desde código: bolas, hoyo, mano/escobas, monedas y robot. Crear dos bocetos de pantalla —jornada y noche— antes de producir un atlas definitivo. Recursos finales mínimos: generador, robot, moneda/pila y iconos para los once tipos de mejora actuales; cuatro efectos sonoros reutilizables. Los iconos llevan nombre visible, no sustituyen la explicación.
 
 Usar tipografía del sistema al inicio. Si se incorpora otra, empaquetarla y registrar su licencia. Guardar origen y licencia de todo recurso externo. No añadir dependencia de descarga de fuentes ni imágenes en ejecución.
 

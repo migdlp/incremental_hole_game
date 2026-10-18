@@ -28,6 +28,7 @@ python3 -m http.server 8123 --directory build/web
 - Escoba recta perpendicular al arrastre, giro suavizado, anchura mejorable y escoba en V; selector de herramientas compradas.
 - Monedas con valor entero, aterrizaje, recogida por pulsación al inicio y por barrido tras comprar la mejora, fusión y límite de pilas sin perder valor.
 - Día inicial de **15 segundos en total: 10 de producción y 5 de recogida**. Una bola cada **3 segundos**; pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
+- Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 3 segundos; las compras revelan nuevos caminos.
 - Once tipos de mejora, con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
 - Resultados, récord, comparación entre días, ahorro y compras persistentes.
 - Guardado JSON v3 con compatibilidad v1/v2, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
@@ -49,13 +50,13 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 
-La versión actual tiene 41 pruebas superadas y una ejecución Android correcta sobre `1d71843`; ver [evidencia y límites](docs/validacion-prototipo.md).
+La entrega de balance tiene 41 pruebas superadas; el árbol posterior incorpora siete pruebas más. Consultar el commit y la [evidencia de cada entrega](docs/validacion-prototipo.md), porque ambas conservan el número de paquete `0.2.1+3`.
 
 La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisis y pruebas, compila el APK de depuración y lo guarda como artefacto descargable junto con su SHA-256. Se activa en **Actions → Flutter - APK manual → Run workflow**; no se dispara con cada push.
 
 ## Límites de esta entrega
 
-Es una primera implementación jugable, no una validación final del MVP. Falta probar en un móvil físico el agarre, los lanzamientos, el giro de ambas escobas, el balance y los 60 FPS bajo carga. Los precios siguen provisionales; con tres bolas de valor 2, el primer día no permite comprar una mejora de 20 monedas. No hay dispositivo de referencia acordado. Los sonidos son clics del sistema con opción de silencio; no hay efectos de audio propios ni control independiente de volumen. El taller presenta las ramas y requisitos en una lista, sin el grafo visual definitivo.
+Es una primera implementación jugable, no una validación final del MVP. Falta probar en un móvil físico el agarre, los lanzamientos, el giro de ambas escobas, el balance y los 60 FPS bajo carga. Los precios siguen provisionales; con tres bolas de valor 2, el primer día no permite comprar una mejora de 20 monedas. No hay dispositivo de referencia acordado. Los sonidos son clics del sistema con opción de silencio; no hay efectos de audio propios ni control independiente de volumen. El taller abre un árbol progresivo; su revisión táctil y el ajuste final de precios siguen pendientes. Ver [cómo se explora y compra](docs/arbol-de-mejoras.md).
 
 El juego mantiene su progreso localmente y no genera ingresos mientras está cerrado. Se solicitan puntos de control cada cinco segundos de avance activo. Un cierre forzado puede perder progreso desde la última escritura correcta, y la recuperación de una copia puede retroceder más; al restaurar no se simula el tiempo cerrado. Si falla el guardado se avisa y se permite reintentarlo. Si el archivo y su copia están dañados, se pide una acción explícita antes de comenzar una partida nueva. La copia de seguridad puede recuperar un estado anterior.
 

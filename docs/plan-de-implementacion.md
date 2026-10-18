@@ -13,14 +13,14 @@ Estado: backlog inicial sin fechas comprometidas. El [PRD](PRD-game-incremental.
 - Incorporar esta documentación y enlazarla desde el README del proyecto.
 - Configurar formato, análisis y pruebas en CI cuando esté disponible el acceso al repositorio.
 
-Estado actual: primera aplicación Flutter creada en `feat/playable-prototype`, con tablero Flame, ciclo, mejoras, robot, imán y persistencia. Ver [validación del prototipo](validacion-prototipo.md). Los criterios de sensación, balance y rendimiento en dispositivo físico siguen abiertos; las listas siguientes conservan el plan de aceptación, no certifican su cumplimiento.
+Preparación completada. La entrega actual incluye mano/escobas, día corto, guardado v3 y árbol progresivo en `1720fba`. Ver [validación del prototipo](validacion-prototipo.md). Los criterios de sensación, balance y rendimiento en dispositivo físico siguen abiertos; las listas siguientes conservan el plan de aceptación, no certifican su cumplimiento.
 
 ## 1. Prototipo de interacción
 
 Dependencia: preparación. Objetivo: comprobar el gesto antes de dedicar tiempo a recursos definitivos.
 
 - Tablero lógico adaptable a pantalla vertical y dibujo mediante primitivas.
-- Pala con entrada de un dedo, bolas con rozamiento y colisiones, hoyo y generador.
+- Mano y escobas con entrada de un dedo, bolas con rozamiento y colisiones, hoyo y generador.
 - Monedas con valor, aterrizaje, pulsación inicial y barrido mediante compra.
 - Mantener movimiento y captura en el dominio de `board` y representación en su presentación Flame; emitir eventos explícitos hacia la sesión para contabilizar en `economy`.
 - Agrupación de monedas y límites iniciales; controles internos para generar carga de prueba.
@@ -81,4 +81,4 @@ Los candidatos posteriores están en el PRD: mejores bolas, robots de dinero y e
 
 ## Siguiente paso ejecutable
 
-Probar el APK 0.2.1+3 en Android físico, revisar agarre, inercia, recta/V y monedas, acordar rediseño del árbol y precios, y medir tres jornadas de carga máxima. Registrar el dispositivo antes de aprobar rendimiento. Ajustar balance y presentación a partir de esas pruebas, sin dar por aceptado el MVP por pasar pruebas automáticas.
+Probar el APK 0.2.1+3 en Android físico, revisar agarre, inercia, recta/V y monedas, validar el árbol progresivo y acordar precios, y medir tres jornadas de carga máxima. Registrar el dispositivo antes de aprobar rendimiento. Ajustar balance y presentación a partir de esas pruebas, sin dar por aceptado el MVP por pasar pruebas automáticas.

@@ -48,7 +48,7 @@ La creación inicial de este archivo fue solo planificación. Esta tanda impleme
 | 4 | Monedas: pulsación y desbloqueo de barrido | Gestos de herramientas definidos | Sí | Pruebas y recogida por toque en navegador | Pendiente |
 | 5 | Limpieza nocturna y persistencia completas | Revisión desde bloque 1; cierre tras 4 | Sí | Diez ciclos, noche, pausa, carga y migración en pruebas | Pendiente |
 | 6 | Revisión integrada y APK manual | Bloques 1–5 | Sí | Pipeline correcta, firma verificada y APK publicado | Pendiente |
-| Posterior | Rediseño del árbol de habilidades | Indicaciones del usuario | No iniciado | Pendiente | Pendiente |
+| Posterior | Árbol de habilidades progresivo | Entrega posterior PR #12 | Implementado en `1720fba` | Pruebas propias y CI; revisar registro actual | Aceptación táctil pendiente |
 | Posterior | Balance de precios y ritmo de progreso | Controles validados; coordinar con árbol | No iniciado | Pendiente | Pendiente |
 | Documentación | Actualizar documentación general | Autorizado expresamente por el usuario el 18 de octubre | Sí | Referencias, valores y enlaces comprobados | Solicitud recibida; no equivale al OK físico del MVP |
 
@@ -219,4 +219,9 @@ Estado: implementado para probar en `0.2.1+3`; balance definitivo y OK pendiente
 
 ## Actualización documental autorizada — 18 de octubre de 2026
 
-El usuario pidió actualizar la documentación general después de las entregas 0.2.0+2 y 0.2.1+3. Se alinean README, índice, PRD, diseño, implementación, economía, guardado v3, guías y evidencias de APK. Se conserva la historia de las pruebas y se distingue la revisión de navegador de controles del nuevo balance probado por CI. Árbol definitivo, precios, pruebas Android físicas y aceptación de jugabilidad siguen pendientes; esta actualización no los declara terminados.
+El usuario pidió actualizar la documentación general después de las entregas 0.2.0+2 y 0.2.1+3. Se alinean README, índice, PRD, diseño, implementación, economía, guardado v3, guías y evidencias de APK. Se conserva la historia de las pruebas y se distingue la revisión de navegador de controles del nuevo balance probado por CI. La entrega posterior del árbol se registra debajo. Precios, pruebas Android físicas y aceptación de jugabilidad siguen pendientes; esta actualización no los declara terminados.
+
+
+## Entrega posterior incluida en documentación
+
+Al actualizar se incorporó `1720fba` (PR #12), que implementa el árbol progresivo con zoom, descubrimiento y compra cancelable de tres segundos. Se conserva el código de esa entrega y sus notas; ver [árbol](arbol-de-mejoras.md). El número de paquete sigue siendo 0.2.1+3: identificar cada APK por commit y ejecución, no solo por versión. Las decisiones iniciales de este plan se conservan como historia; ya no describen el árbol como una tarea sin iniciar.

@@ -67,7 +67,7 @@ Al agotarse el tiempo, procesar solo la fracción de simulación anterior al lí
 
 El primer día utiliza dos mensajes breves: «Agarra una bola · Arrastra y suelta para lanzar» y, al aparecer la primera moneda, «Pulsa las monedas para recogerlas». Tras comprar barrido, indicar «Toca o desliza para recoger las monedas». No añadir un tutorial separado obligatorio.
 
-La noche presenta ingreso diario, récord y resumen; el árbol es accesible en la misma pantalla mediante desplazamiento. Cada nodo tiene nombre, efecto actual y siguiente, precio y requisito. Estados: disponible, sin saldo, bloqueado por requisito y completado. Comprar requiere una acción explícita sin confirmación adicional. No permitir compras durante el día.
+La noche presenta ingreso diario, récord y resumen; el botón Abrir árbol de mejoras abre el [árbol progresivo](arbol-de-mejoras.md), con arrastre y zoom. Cada nodo tiene nombre, efecto actual y siguiente, precio y requisito. Estados: disponible, sin saldo, bloqueado por requisito y completado. Un toque consulta; mantener tres segundos en el nodo seleccionado o ficha compra una vez. Soltar antes, mover, añadir otro dedo o interrumpir cancela sin gastar. No permitir compras durante el día.
 
 Al completar todos los niveles se puede seguir jugando para mejorar el récord; mostrar «Mejoras del MVP completadas», sin prometer contenido que no existe.
 

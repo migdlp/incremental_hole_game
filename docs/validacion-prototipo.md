@@ -17,7 +17,6 @@ La revisión de navegador corresponde al control de `0.2.0+2`; no se presenta co
 
 ## Primera implementación — registro histórico
 
-
 Fecha: 17 de octubre de 2026. La implementación original de `feat/playable-prototype` quedó fusionada en `main` como `70556fb` mediante la [PR #2](https://github.com/migdlp/incremental_hole_game/pull/2). Este registro conserva evidencia histórica; no equivale a repetir las pruebas en cada modificación documental.
 
 ## Entorno
@@ -42,7 +41,7 @@ Las pruebas automáticas cubren diez ciclos completos, conservación de valor al
 
 Las pruebas de simulación introducen objetos controlados para verificar invariantes; no certifican dificultad, diversión ni balance. La prueba del navegador usa el generador y gestos reales de puntero.
 
-## Presentación observada
+## Presentación observada del prototipo 0.1.0+1
 
 ![Taller nocturno](imagenes/prototipo-noche.png)
 
@@ -71,7 +70,7 @@ La [PR #3](https://github.com/migdlp/incremental_hole_game/pull/3) incorporó la
 
 Los artefactos `jardin-mecanico-debug-apk` y `flutter-validation-logs` tienen retención de 14 días, hasta el 31 de octubre de 2026 para esa ejecución. Una descarga caducada no implica que fallase el build: se puede lanzar una nueva ejecución mediante la [guía de CI](ci.md).
 
-## Dónde está cada prueba
+## Dónde está cada prueba — suite actual
 
 | Grupo | Ubicación | Alcance comprobado |
 | --- | --- | --- |
@@ -83,6 +82,7 @@ Los artefactos `jardin-mecanico-debug-apk` y `flutter-validation-logs` tienen re
 | Física y automatización | [game_rules_test.dart](../test/features/game_rules_test.dart) | Grupo dentro de bordes, robot en caso alcanzable e imán solo con puntero activo |
 | Control de bolas | [ball_controls_test.dart](../test/features/ball_controls_test.dart) | Agarre único, inercia, frecuencia de eventos, escobas, anchura, captura en V y guardados |
 | Balance y compatibilidad | [balance_test.dart](../test/features/balance_test.dart) | Contador 15 s, tres emisiones, cierre, niveles y compatibilidad del balance anterior |
+| Árbol progresivo | [skill_tree_test.dart](../test/features/skill_tree_test.dart) | Dos pruebas de dominio y cinco de widgets: descubrimiento, compras heredadas, compra por pulsación, cancelación, saldo y zoom |
 | Recorrido de pantalla | [widget_test.dart](../test/widget_test.dart) | Taller/ciclo, entrada real de puntero para monedas y mano, y cambio de herramientas sin excepción de widgets |
 
-El mapa anterior apunta a las suites actuales: 16 de reglas/sesión, 16 de controles, 5 de balance y 4 de widgets (41 en total). La primera entrega tenía 17; se conserva arriba como evidencia histórica. La prueba de archivo sustituye el principal por contenido inválido; no reproduce todos los instantes de un corte eléctrico ni prueba el sistema de archivos Android. No hay suite `integration_test` ni un resultado de perfil físico registrado.
+El mapa anterior apunta a las suites actuales: 16 de reglas/sesión, 16 de controles, 5 de balance, 2 de dominio del árbol, 4 de widgets generales y 5 de widgets del árbol (48 en total). La primera entrega tenía 17; se conserva arriba como evidencia histórica. La prueba de archivo sustituye el principal por contenido inválido; no reproduce todos los instantes de un corte eléctrico ni prueba el sistema de archivos Android. No hay suite `integration_test` ni un resultado de perfil físico registrado.

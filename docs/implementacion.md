@@ -1,6 +1,6 @@
 # Cómo está implementado el juego
 
-Referencia de `0.2.1+3`, código entregado hasta `1d71843`. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
+Referencia de `0.2.1+3`, código entregado hasta `1720fba`. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
 
 ## Contexto y límites
 
@@ -10,6 +10,8 @@ Una aplicación Flutter, un paquete Dart y una partida local. Flutter presenta m
 flowchart TD
     BOOT[Bootstrap: balance y carga] --> SESSION[GameSession: coordinación]
     UI[Widgets Flutter: taller, HUD y pausa] --> SESSION
+    UI --> TREE[SkillTree: descubrimiento]
+    TREE --> UP
     VIEW[GardenGame: update y render] --> SESSION
     VIEW --> BOARD[Board: simulación]
     SESSION --> BOARD
@@ -31,7 +33,7 @@ Las flechas representan uso de datos o llamadas; la fábrica de persistencia eli
 | Ruta | Responsabilidad y entrada útil |
 | --- | --- |
 | [main.dart](../lib/main.dart) | Inicializa Flutter, pide orientación vertical, carga `docs/balance.csv`, crea almacenamiento y sesión; muestra errores y recuperación explícita |
-| [app/game_app.dart](../lib/app/game_app.dart) | `GardenApp`, `SessionScreen`, `DayScreen`, `NightScreen`, `UpgradeCard`, `ToolSelector`; ciclo de vida y entrada del puntero |
+| [app/game_app.dart](../lib/app/game_app.dart) | `GardenApp`, `SessionScreen`, `DayScreen`, `NightScreen`, `ToolSelector`; ciclo de vida y entrada del puntero |
 | [app/game_session.dart](../lib/app/game_session.dart) | `startDay`, `tick`, `touch`, `drag`, `pause`, `purchase`, `finishDay`, `snapshot`, `restore`, `save` |
 | [board/domain/board.dart](../lib/features/board/domain/board.dart) | `Board`, `Ball`, `Coin`, `BoardEvents`; generación, movimiento, colisiones, captura y recogida |
 | [board/domain/tool.dart](../lib/features/board/domain/tool.dart) | `BallTool`, `ToolSegment`, `broomSegments`: herramientas y geometría común a colisión y render |
@@ -39,6 +41,8 @@ Las flechas representan uso de datos o llamadas; la fábrica de persistencia eli
 | [day_cycle/domain/day_cycle.dart](../lib/features/day_cycle/domain/day_cycle.dart) | Tiempo restante y fase derivada; `advance` limita el tiempo consumido |
 | [economy/domain/economy.dart](../lib/features/economy/domain/economy.dart) | Saldo, ingreso recogido y generado; validación de gasto y recogida |
 | [upgrades/domain/catalog.dart](../lib/features/upgrades/domain/catalog.dart) | Catálogo CSV, requisitos, validación de niveles y configuración efectiva |
+| [upgrades/domain/skill_tree.dart](../lib/features/upgrades/domain/skill_tree.dart) | Nodos por nivel, padres y descubrimiento derivado de compras |
+| [upgrades/presentation/skill_tree_screen.dart](../lib/features/upgrades/presentation/skill_tree_screen.dart) | Árbol con arrastre/zoom, ficha y compra cancelable de 3 s |
 | [automation/domain/robot.dart](../lib/features/automation/domain/robot.dart) | Selección de bola y punto objetivo; no cobra ni escribe archivos |
 | [progression/domain/progress.dart](../lib/features/progression/domain/progress.dart) | Día siguiente, récord y último resultado |
 | [core/vec.dart](../lib/core/vec.dart) | Vectores, límites del tablero y distancia de un punto a un segmento |
@@ -156,6 +160,6 @@ El imán actúa sobre monedas aterrizadas dentro de su radio mientras el dedo es
 
 ## Presentación y mantenimiento
 
-`GardenGame.render` dibuja suelo, generador, bolas, hoyo, monedas, indicador de agarre, escobas y robot con primitivas; reutiliza un caché limitado de etiquetas. No hay atlas ni componentes Flame por objeto. La UI presenta el taller como lista de tres ramas y consume los mismos niveles/catálogo que la sesión.
+`GardenGame.render` dibuja suelo, generador, bolas, hoyo, monedas, indicador de agarre, escobas y robot con primitivas; reutiliza un caché limitado de etiquetas. No hay atlas ni componentes Flame por objeto. El taller abre `SkillTreeScreen`: 23 nodos de once tipos, conexiones, visibilidad derivada de niveles, visor con zoom y ficha. Mantener 3 s en la selección compra una vez; movimiento, segundo dedo o interrupción cancelan. La UI comprueba descubrimiento además de los requisitos de sesión. Ver [contrato del árbol](arbol-de-mejoras.md); no hay un segundo guardado de nodos visibles.
 
 `SessionScreen` observa el ciclo de vida y pausa al abandonar `resumed`. Los sonidos se solicitan desde la UI mediante `SystemSound`; no alteran la contabilidad. Las decisiones y sus consecuencias se resumen en [decisiones técnicas](decisiones.md).

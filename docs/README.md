@@ -1,6 +1,6 @@
 # Documentación de Jardín mecánico
 
-Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` hasta `1d71843` y registro de entrega hasta `b0e20c0`. La documentación distingue implementación, evidencias de prueba y objetivos pendientes.
+Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` hasta `1720fba`, incluido el árbol progresivo. La documentación distingue implementación, evidencias de prueba y objetivos pendientes.
 
 ## Empieza por tu tarea
 
@@ -11,6 +11,7 @@ Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` 
 | Explorar herramientas para recoger y lanzar bolas | [Ideas de herramientas](ideas-herramientas-bolas.md) |
 | Ejecutar el proyecto y completar una primera partida | [Guía de desarrollo](guia-desarrollo.md) |
 | Descargar o generar un APK | [Pipeline manual](ci.md) |
+| Explorar y comprar en el árbol | [Árbol de mejoras](arbol-de-mejoras.md) |
 | Entender los módulos y el ciclo de ejecución | [Implementación actual](implementacion.md) |
 | Entender el guardado y recuperar una partida | [Referencia de persistencia](persistencia.md) |
 | Cambiar precios, requisitos o efectos | [Economía](economia.md), [CSV](balance.csv) y [catálogo implementado](implementacion.md#balance-y-mejoras) |

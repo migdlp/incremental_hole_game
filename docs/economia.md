@@ -23,7 +23,7 @@ La primera bola llega tras acumular el intervalo, no inmediatamente. Una salida 
 
 ## Mejoras
 
-| ID | Compra | Costes por nivel | Efecto y requisito |
+| ID | Compra | Costes por nivel | Efecto y requisito del CSV |
 | --- | --- | --- | --- |
 | `broom` | Escoba recta | 20 | Frente 80; sin requisito |
 | `paddle` | Anchura | 20 / 70 / 160 | Frentes 96 / 112 / 128; requiere escoba; afecta también a la V |
@@ -39,11 +39,13 @@ La primera bola llega tras acumular el intervalo, no inmediatamente. Una salida 
 
 Escoba, V, barrido, imán y robot son desbloqueos únicos; las otras mejoras tienen tres niveles. La mano inicial no cuesta dinero. Comprar una herramienta la selecciona; se puede volver a otras ya compradas. Los efectos de compra comienzan el día siguiente. La recompensa aumenta valor, no necesariamente número de objetos físicos.
 
+Los requisitos de la tabla son los de sesión/CSV. El [árbol progresivo](arbol-de-mejoras.md) añade padres de descubrimiento: inicialmente solo se ve generador 1; escoba, barrido y radio se revelan tras comprarlo, y recompensa tras generador 2. Esto no modifica compras históricas ni concede padres gratis.
+
 ## Ritmo pendiente de ajuste
 
-Con seis monedas máximas por día base y una primera compra de veinte, no se puede comprar el primer día. Ahorrando sin otras compras y cobrando las tres bolas cada día, se llega a veinte en la cuarta jornada. Esto es un límite aritmético, no una prueba de comodidad o accesibilidad.
+Con seis monedas máximas por día base y la primera compra visible de treinta (generador 1), no se puede comprar el primer día. Ahorrando y cobrando las tres bolas cada día se llega a treinta en la quinta jornada; una compra de veinte llegaría en la cuarta por aritmética, pero no es la raíz disponible en la UI. Esto es un límite aritmético, no una prueba de comodidad o accesibilidad.
 
-La hipótesis anterior de compra inicial inmediata y robot en 3–5 días queda pendiente de redefinición tras este cambio; no describe un ritmo verificado ni un requisito que la entrega cumpla. Se mantuvieron los precios anteriores por petición de trabajar primero los controles y después el balance. No se compensa con ingresos ocultos. Próximo trabajo: acordar precios y revisar progreso junto al futuro árbol.
+La hipótesis anterior de compra inicial inmediata y robot en 3–5 días queda pendiente de redefinición tras este cambio; no describe un ritmo verificado ni un requisito que la entrega cumpla. Se mantuvieron los precios anteriores por petición de trabajar primero los controles y después el balance. No se compensa con ingresos ocultos. Próximo trabajo: acordar precios y revisar progreso con el árbol implementado.
 
 ## Registro de sesiones
 

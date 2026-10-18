@@ -82,3 +82,16 @@ Registrado el 17 de octubre de 2026 a partir del PRD, la propuesta de arquitectu
 **Consecuencias:** no se pierde progreso ni se recorta una jornada guardada. Hay dos versiones de balance conocidas, no soporte de configuraciones arbitrarias; futuras modificaciones requieren extender la política y sus pruebas. La tabla editable de partidas nuevas sigue siendo el CSV.
 
 **Evidencia:** [guardado](persistencia.md#compatibilidad-entre-versiones), [catálogo](../lib/features/upgrades/domain/catalog.dart), [pruebas de balance](../test/features/balance_test.dart), [PR #10](https://github.com/migdlp/incremental_hole_game/pull/10).
+
+
+## ADR-007 — Descubrimiento del árbol separado del catálogo histórico
+
+**Estado:** implementado en `1720fba`; aceptación táctil pendiente.
+
+**Contexto:** se quiere revelar caminos progresivamente sin invalidar compras o guardados anteriores ni cambiar precios durante el rediseño.
+
+**Decisión:** `SkillTree` crea un nodo por nivel y añade padres de descubrimiento a los requisitos existentes. La UI comprueba ambos antes de iniciar/completar la compra de tres segundos; la sesión conserva las condiciones históricas del CSV. Visibilidad derivada de niveles, sin nueva versión de guardado.
+
+**Consecuencias:** una partida nueva ve solo generador 1 y la primera compra visible cuesta treinta, aunque otras mejoras del catálogo cuesten veinte. Las compras antiguas siguen activas y muestran sus antecesores sin concederlos. Futuros cambios deben distinguir requisito de compra del dominio y descubrimiento de UI; deben probarse alcance y ausencia de ciclos.
+
+**Evidencia:** [árbol y recorrido](arbol-de-mejoras.md), [modelo](../lib/features/upgrades/domain/skill_tree.dart), [pruebas](../test/features/skill_tree_test.dart).

@@ -97,7 +97,7 @@ Abre el servidor desde un navegador que tenga acceso a ese entorno. El puerto es
 6. Al acabar, el taller muestra ingreso, pérdida pendiente, capturas, récord y saldo. Compra si alcanza el saldo o ahorra; el siguiente día puede iniciarse sin comprar.
 7. Sal a segundo plano durante una jornada y vuelve: debe abrirse pausada. Una recarga web recupera el último guardado disponible, también pausado.
 
-El día base produce tres bolas sin bloqueos y puede generar seis monedas si entran todas; una compra de veinte requiere ahorrar varias jornadas. Costes y ritmo siguen provisionales. Comprar escoba recta, anchura y V permite comparar controles; selecciona las herramientas compradas con los botones Mano / Escoba / Escoba en V. Ambas escobas giran según tu arrastre, con suavizado.
+El día base produce tres bolas sin bloqueos y puede generar seis monedas si entran todas; una compra de veinte requiere ahorrar varias jornadas. Costes y ritmo siguen provisionales. De noche, abre el árbol: empieza solo con generador 1 (30 monedas, al menos cinco días base perfectos). Toca para consultar y mantén 3 s en la selección o ficha para comprar; arrastra o usa zoom para explorar. Ver [descubrimiento y cancelación](arbol-de-mejoras.md). Comprar escoba recta, anchura y V permite comparar controles; selecciona las herramientas compradas con los botones Mano / Escoba / Escoba en V. Ambas escobas giran según tu arrastre, con suavizado.
 
 Si cargas una jornada v1/v2, terminará con sus tiempos anteriores: el día siguiente adopta el balance nuevo. No borres la partida para aplicar el cambio. Ver [migraciones](persistencia.md#compatibilidad-entre-versiones).
 

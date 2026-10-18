@@ -44,7 +44,7 @@ Regla acordada: al pasar a la noche se retiran todas las bolas y monedas restant
 
 ### Noche
 
-Una pantalla reúne el resumen y el taller por ramas; el rediseño visual del árbol sigue pendiente. El resumen muestra monedas recogidas, bolas introducidas, valor de monedas perdidas y récord diario. Si existe un día anterior, muestra la diferencia respecto a él.
+Una pantalla reúne el resumen y el taller por ramas; el árbol progresivo se abre desde el taller y su aceptación táctil sigue pendiente. El resumen muestra monedas recogidas, bolas introducidas, valor de monedas perdidas y récord diario. Si existe un día anterior, muestra la diferencia respecto a él.
 
 La puntuación principal es el dinero recogido ese día, independientemente del saldo ahorrado. El saldo disponible para comprar es el ahorro anterior más el ingreso del día. Cada compra lo descuenta inmediatamente y sus efectos comienzan el siguiente día.
 
@@ -61,15 +61,15 @@ Objetivo: demostrar que el ciclo manual resulta agradable y que comprar mejoras 
 | Recompensa | Monedas visibles al introducir bolas; recogida por toque y arrastre desbloqueable |
 | Ciclo | Día limitado, aviso de cierre, fin del día y noche sin temporizador |
 | Resultados | Ingreso diario, bolas introducidas, monedas perdidas, récord y comparación anterior |
-| Progresión | Once tipos implementados en una lista por ramas; rediseño visual del árbol pendiente |
+| Progresión | Once tipos y 23 nodos con descubrimiento progresivo, conexiones, zoom y compra de 3 s |
 | Automatización | Un robot básico que empuja bolas y una mejora de imán para dinero |
 | Persistencia | Guardado local del saldo, mejoras, número de día y resultados |
 | Controles básicos | Pausa, silencio y explicación breve entregados; volumen independiente pendiente |
 | Presentación | Primitivas y animación de monedas; arte/audio final y partículas pendientes |
 
-### Catálogo actual y árbol pendiente
+### Catálogo y descubrimiento actuales
 
-Tres ramas visibles desde la primera noche. Las dependencias deben entenderse antes de comprar; cada nodo muestra efecto actual, siguiente efecto, precio y requisito.
+Una partida nueva muestra generador 1; comprar revela sucesores. Los nodos numéricos representan niveles individuales. Las dependencias deben entenderse antes de comprar; cada nodo muestra efecto actual, siguiente efecto, precio y requisito.
 
 | Rama | Nodo | Efecto | Requisito actual |
 | --- | --- | --- | --- |
@@ -85,7 +85,7 @@ Tres ramas visibles desde la primera noche. Las dependencias deben entenderse an
 | Automatización | Robot básico | Empuja bolas hacia el hoyo durante el día | Anchura, nivel 1 |
 | Automatización | Velocidad del robot | Mejora su desplazamiento | Robot desbloqueado |
 
-El catálogo contiene once tipos. Mano inicial gratuita; escoba, V, barrido, imán y robot son desbloqueos únicos, las mejoras numéricas tienen tres niveles. Costes y efectos actuales están en [economía](economia.md) y [CSV](balance.csv). La aspiradora y otros métodos del [brainstorming](ideas-herramientas-bolas.md) no amplían automáticamente el alcance.
+El catálogo contiene once tipos. El [árbol](arbol-de-mejoras.md) añade requisitos de descubrimiento a los de la tabla y conserva compras antiguas; la primera compra visible es generador 1, por 30 monedas. Mano inicial gratuita; escoba, V, barrido, imán y robot son desbloqueos únicos, las mejoras numéricas tienen tres niveles. Costes y efectos actuales están en [economía](economia.md) y [CSV](balance.csv). La aspiradora y otros métodos del [brainstorming](ideas-herramientas-bolas.md) no amplían automáticamente el alcance.
 
 El robot no recoge monedas. El imán funciona alrededor del dedo apoyado y es independiente del barrido de monedas. Este último requiere compra desde el inicio, sin otros requisitos.
 
@@ -186,4 +186,4 @@ Prioridad orientativa después de validar el MVP:
 
 Android vertical y web de apoyo ya están configurados. iOS queda fuera de esta entrega; falta fijar un teléfono Android de referencia.
 
-Validar agarre suave/fuerte, orientación y anchura de escobas, V, interferencia con monedas y el día inicial de 15 segundos. La limpieza nocturna y las migraciones cuentan con pruebas automáticas; falta aceptación física. Rediseño del árbol y ajuste de precios se acordarán después. Ver [estado actual](estado-actual.md) y [plan de cambios](plan-cambios-agarre-escoba.md).
+Validar agarre suave/fuerte, orientación y anchura de escobas, V, interferencia con monedas y el día inicial de 15 segundos. La limpieza nocturna y las migraciones cuentan con pruebas automáticas; falta aceptación física. El árbol progresivo ya está implementado; su aceptación táctil y el ajuste de precios siguen pendientes. Ver [estado actual](estado-actual.md) y [plan de cambios](plan-cambios-agarre-escoba.md).

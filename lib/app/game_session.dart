@@ -291,7 +291,7 @@ class GameSession extends ChangeNotifier {
       );
       final balanceVersion = json['version'] == 3 ? run['balanceVersion'] : 1;
       if (balanceVersion is! int ||
-          (balanceVersion != 1 && balanceVersion != 2)) {
+          (balanceVersion != 1 && balanceVersion != 2 && balanceVersion != 3)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(

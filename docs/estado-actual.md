@@ -1,6 +1,6 @@
 # Estado actual del prototipo
 
-Corte: 18 de octubre de 2026, aplicación `0.2.1+3`, código en `main` hasta `1720fba`. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está pendiente.
+Corte: 18 de octubre de 2026, aplicación `0.2.2+4`, con resultados modales y generación inicial de 1,5 bolas/s. La evidencia histórica de APK se identifica debajo por commit. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está pendiente.
 
 ## Qué está implementado
 
@@ -10,13 +10,13 @@ Corte: 18 de octubre de 2026, aplicación `0.2.1+3`, código en `main` hasta `17
 | Tablero | Arena 360 × 560, un generador, un hoyo, bolas circulares, mano individual y escobas recta/en V con un puntero | [Board](../lib/features/board/domain/board.dart), [GardenGame](../lib/features/board/presentation/garden_game.dart) | Empuje y recogida observados; sensación en móvil pendiente |
 | Física | Fricción, bordes, separación e impulso entre bolas mediante rejilla espacial | [Board](../lib/features/board/domain/board.dart) | Pruebas de agarre, inercia, orientación, anchura, V y límites; no certifican comodidad en móvil |
 | Monedas | Captura genera valor físico, aterrizaje, pulsación inicial y barrido comprado, fusión y límite de pilas | [Board](../lib/features/board/domain/board.dart) | Pruebas de cobro único y conservación del valor |
-| Ciclo | Producción, cierre, pausa y noche; 10 + 5 s como base; emisión cada 3 s; noche sin límite | [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart), [GameSession](../lib/app/game_session.dart) | Diez ciclos controlados y límite temporal probados |
+| Ciclo | Producción, cierre, pausa y noche; 10 + 5 s como base; emisión de 1,5 bolas/s; noche sin límite | [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart), [GameSession](../lib/app/game_session.dart) | Diez ciclos controlados y límite temporal probados |
 | Economía | Enteros; ingreso diario separado del ahorro; cierre único; pendientes perdidos | [Economy](../lib/features/economy/domain/economy.dart), [GameSession](../lib/app/game_session.dart) | Cierre repetido y compras inválidas probados |
 | Mejoras | Once tipos, tres ramas, costes, niveles y requisitos; efectos al siguiente día | [Catálogo](../lib/features/upgrades/domain/catalog.dart), [CSV](balance.csv) | Validación de catálogo, dependencias y compras |
 | Automatización | Un robot que empuja, velocidad mejorable e imán alrededor del dedo activo | [Robot](../lib/features/automation/domain/robot.dart), [Board](../lib/features/board/domain/board.dart) | Casos controlados de robot e imán superados |
 | Progreso | Ahorro, niveles, día, récord, último resultado y comparación con el anterior | [Progress](../lib/features/progression/domain/progress.dart) | Guardado/restauración y ciclos probados; no hay historial completo |
 | Persistencia | JSON v3, migración v1/v2 y versión de balance por jornada; cola de escrituras; principal y copia; restauración pausada | [Referencia](persistencia.md) | Recuperación en archivos temporales Linux; falta ensayo en Android real |
-| Interfaz | Jornada, pausa, taller y árbol progresivo con arrastre/zoom, ficha y compra de 3 s | [game_app.dart](../lib/app/game_app.dart) | Pruebas de widgets de descubrimiento y compra/cancelación; Android físico pendiente |
+| Interfaz | Jornada, pausa, resultados en pop-up bloqueante y árbol progresivo con arrastre/zoom, ficha y compra de 3 s | [game_app.dart](../lib/app/game_app.dart) | Pruebas de widgets de descubrimiento y compra/cancelación; Android físico pendiente |
 | Sonido | Clic del sistema al cobrar/comprar, con opción de silencio | [game_app.dart](../lib/app/game_app.dart) | Sin audio propio ni volumen independiente; sonido real no certificado en todos los destinos |
 | Entrega | Android vertical y web de apoyo; SDK fijado y lockfile versionado | [Configuración](../pubspec.yaml), [.fvmrc](../.fvmrc) | APK y web compilados; sin validación en teléfono |
 | CI | Activación exclusivamente manual, formato, análisis, pruebas, APK, firma y artefactos | [Workflow](../.github/workflows/flutter-manual.yml) | Ejecución manual correcta en `main`; ver [CI](ci.md) |

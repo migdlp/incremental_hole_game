@@ -1,6 +1,6 @@
 # Economía inicial y balance
 
-Estado de `0.2.1+3`: valores implementados para probar; precios y ritmo de compras todavía provisionales. Fuente editable del balance actual: [balance.csv](balance.csv).
+Estado de `0.2.2+4`: valores implementados para probar; precios y ritmo de compras todavía provisionales. Fuente editable del balance actual: [balance.csv](balance.csv).
 
 ## Lectura de la tabla
 
@@ -12,14 +12,14 @@ Duración de producción y cierre se suman para obtener el contador visible. `pa
 
 | Nivel | Producción | Cierre | Contador total | Intervalo del generador |
 | --- | --- | --- | --- | --- |
-| Base | 10 s | 5 s | **15 s** | **3 s** |
-| Mejora 1 | 15 s | 5 s | 20 s | 2,6 s |
-| Mejora 2 | 20 s | 5 s | 25 s | 2,2 s |
-| Mejora 3 | 25 s | 5 s | 30 s | 1,8 s |
+| Base | 10 s | 5 s | **15 s** | **⅔ s (1,5 bolas/s)** |
+| Mejora 1 | 15 s | 5 s | 20 s | ≈ 0,578 s |
+| Mejora 2 | 20 s | 5 s | 25 s | ≈ 0,489 s |
+| Mejora 3 | 25 s | 5 s | 30 s | 0,4 s |
 
-Duración y generador son mejoras independientes; cada columna muestra sus propios niveles. Duración requiere generador nivel 1. La frecuencia de emisión es cuatro veces menor que antes en todos los niveles; antes los intervalos eran 0,75/0,65/0,55/0,45 s.
+Duración y generador son mejoras independientes; cada columna muestra sus propios niveles. Duración requiere generador nivel 1. La base emite 1,5 bolas por segundo. Los intervalos de los niveles se reducen en la misma proporción (2/9 del balance anterior de 3/2,6/2,2/1,8 s), conservando sus aumentos relativos de velocidad.
 
-La primera bola llega tras acumular el intervalo, no inmediatamente. Una salida bloqueada o el límite de población pierde ese intento, sin cola. En cierre no hay producción. El día base sin bloqueos intenta emitir a los 3, 6 y 9 s: **tres bolas**, frente al máximo teórico anterior de 80 en 60 s. Cada bola vale 2 monedas, por lo que se generan como máximo 6 si entran las tres; solo se ingresan al recogerlas.
+La primera bola llega tras acumular el intervalo, no inmediatamente. Una salida bloqueada o el límite de población pierde ese intento, sin cola. En cierre no hay producción. El día base sin bloqueos intenta emitir cada dos tercios de segundo: **quince bolas** durante los diez segundos de producción. Cada bola vale 2 monedas, hasta 30 si entran las quince; solo se ingresan al recogerlas. La comparación del reloj usa tolerancia numérica para no perder la emisión del límite por redondeo.
 
 ## Mejoras
 
@@ -31,7 +31,7 @@ La primera bola llega tras acumular el intervalo, no inmediatamente. Una salida 
 | `sweep` | Barrido de monedas | 20 | Desbloquea recogida por recorrido; sin requisito |
 | `collection` | Radio de recogida | 25 / 80 / 180 | Radios 24 / 30 / 36; base 18; no desbloquea barrido |
 | `magnet` | Imán | 120 | Radio 65 mientras se toca; requiere recogida 1, independiente de barrido |
-| `generator` | Generación | 30 / 100 / 220 | Intervalos 2,6 / 2,2 / 1,8 s |
+| `generator` | Generación | 30 / 100 / 220 | Intervalos ≈ 0,578 / 0,489 / 0,4 s |
 | `reward` | Recompensa | 40 / 140 / 300 | Valores 3 / 4 / 5 por bola; base 2 |
 | `duration` | Duración | 60 / 160 / 320 | Producción 15 / 20 / 25 s; requiere generador 1 |
 | `robot` | Robot | 160 | Un robot; requiere anchura 1; no recoge monedas |
@@ -43,9 +43,9 @@ Los requisitos de la tabla son los de sesión/CSV. El [árbol progresivo](arbol-
 
 ## Ritmo pendiente de ajuste
 
-Con seis monedas máximas por día base y la primera compra visible de treinta (generador 1), no se puede comprar el primer día. Ahorrando y cobrando las tres bolas cada día se llega a treinta en la quinta jornada; una compra de veinte llegaría en la cuarta por aritmética, pero no es la raíz disponible en la UI. Esto es un límite aritmético, no una prueba de comodidad o accesibilidad.
+Con treinta monedas teóricas por día base y la primera compra visible de treinta (generador 1), la compra inicial puede llegar al terminar la primera jornada si se capturan y cobran todas las bolas sin bloqueos ni pérdidas. Esto es un límite aritmético, no una prueba de comodidad o accesibilidad.
 
-La hipótesis anterior de compra inicial inmediata y robot en 3–5 días queda pendiente de redefinición tras este cambio; no describe un ritmo verificado ni un requisito que la entrega cumpla. Se mantuvieron los precios anteriores por petición de trabajar primero los controles y después el balance. No se compensa con ingresos ocultos. Próximo trabajo: acordar precios y revisar progreso con el árbol implementado.
+Los precios no cambian en esta iteración y siguen pendientes de balance. El ritmo del robot en 3–5 días no está verificado y no se compensa con ingresos ocultos.
 
 ## Registro de sesiones
 
@@ -55,4 +55,4 @@ Anotar niveles, bolas emitidas/capturadas, valor generado/recogido/perdido, comp
 
 Comparar base, cada rama y máximos, usando una misma semilla cuando ayude. Cambiar pocos parámetros por prueba. No exigir récord cada día ni convertir duración en compra obligatoria. Los precios permanecen provisionales hasta observar sesiones.
 
-El valor perdido incluye pilas y monedas en aterrizaje que no se cobraron al cierre. Bolas y monedas desaparecen de noche; ahorro y compras permanecen. Las jornadas antiguas guardadas terminan con su balance anterior; el siguiente día adopta estos valores. Ver [compatibilidad](persistencia.md#compatibilidad-entre-versiones).
+El valor perdido incluye pilas y monedas en aterrizaje que no se cobraron al cierre. Las bolas y monedas dejan de existir en la sesión activa al cerrar; el fondo conserva solo una imagen inmóvil del tablero mientras se consulta el pop-up. No se pueden recoger ni se guardan como jornada activa. Ahorro y compras permanecen. Las jornadas antiguas guardadas terminan con su balance anterior; el siguiente día adopta estos valores. Ver [compatibilidad](persistencia.md#compatibilidad-entre-versiones).

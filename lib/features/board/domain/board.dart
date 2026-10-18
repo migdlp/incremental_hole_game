@@ -229,8 +229,8 @@ class Board {
     }
     if (producing) {
       spawnClock += dt;
-      if (spawnClock >= settings['spawn_interval']) {
-        spawnClock %= settings['spawn_interval'];
+      if (spawnClock + 1e-9 >= settings['spawn_interval']) {
+        spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
         final spawn = generator + Vec((random() - .5) * 42, 30);
         if (balls.length < settings['ball_limit'] &&
             balls.every((b) => (b.position - spawn).length > radius * 2.2)) {

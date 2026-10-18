@@ -618,8 +618,9 @@ String _description(SkillNode node) => switch (node.definition.id) {
 };
 
 String _value(SkillNode node, double value) {
-  String number(double n) =>
-      n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(1);
+  String number(double n) => n == n.roundToDouble()
+      ? '${n.toInt()}'
+      : n.toStringAsFixed(n.abs() < 1 ? 2 : 1);
   return switch (node.definition.unit) {
     'seconds' => '${number(value)} s',
     'coins' => '${number(value)} monedas/bola',

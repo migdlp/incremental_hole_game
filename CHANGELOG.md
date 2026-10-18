@@ -24,6 +24,15 @@ Se registran entregas y cambios observables. `0.2.1+3` es la versión actual dec
 - Guardado v2 con elección de herramienta y migración v1; once tipos de mejora con costes provisionales.
 - 36 pruebas y [pipeline Android correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858); prueba de navegador, sin aceptación en móvil físico.
 
+## Árbol de mejoras progresivo — 2026-10-18
+
+- El taller abre un tablero de nodos y conexiones con arrastre, zoom con dos dedos y controles para acercar, alejar y centrar la selección.
+- Una partida nueva muestra solo la primera mejora del generador; comprar revela los siguientes niveles y caminos de control/producción. Las compras anteriores se conservan y muestran sus conexiones.
+- Ficha sin nombres de fantasía: descripción del efecto, cambio porcentual respecto al nivel anterior, valores y coste en monedas.
+- Nodos asequibles iluminados, sin saldo oscurecidos y adquiridos con marca verde. Mantener pulsado tres segundos en un nodo seleccionado o en su ficha completa la compra; soltar, arrastrar, usar otro dedo o pasar a segundo plano la cancela.
+- Precios, efectos, IDs y formato del guardado sin cambios. El mapa añade requisitos de descubrimiento en la interfaz; la sesión conserva los requisitos históricos del CSV para cargar partidas previas.
+- Pruebas de descubrimiento, alcance de todos los niveles, compatibilidad, compra/cancelación, saldo y pantalla móvil. La comprobación física en Android sigue pendiente.
+
 ## Diseño de herramientas y recogida — 2026-10-17
 
 - Lluvia de ideas de herramientas para agrupar, transportar y lanzar bolas; son candidatas, sin implementación ni precios aprobados.

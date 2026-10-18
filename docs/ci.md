@@ -24,11 +24,11 @@ gh workflow run flutter-manual.yml --repo migdlp/incremental_hole_game --ref mai
 gh run list --repo migdlp/incremental_hole_game --workflow flutter-manual.yml --event workflow_dispatch
 ```
 
-Última entrega de código comprobada: **0.2.1+3**, commit `1d71843dd96fa32b745bc770bfc154c42720ab7a`, [ejecución 39138119402](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402). Terminó correctamente el 18 de octubre: formato, análisis, **41 pruebas**, APK y firma.
+Última entrega de código comprobada: **0.2.1+3 con árbol progresivo**, commit `1720fba6a14f6ca17bcb2a745f994b7803c5810d`, [ejecución 39141075339](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339). Terminó correctamente el 18 de octubre: formato, análisis, **48 pruebas**, APK y firma.
 
-**[Descargar APK y SHA-256 actuales](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218)**. GitHub descarga un ZIP: extraer e instalar `jardin-mecanico-debug.apk`. Caduca el 1 de noviembre de 2026. Este es el build con día inicial de 15 segundos y generación base cada 3 s; el APK anterior `0.2.0+2` conserva el balance previo.
+**[Descargar APK y SHA-256 actuales](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297)**. GitHub descarga un ZIP: extraer e instalar `jardin-mecanico-debug.apk`. Caduca el 1 de noviembre de 2026. Incluye mano/escobas, día de 15 s, emisión base cada 3 s y árbol con compra de tres segundos.
 
-Antecedentes: [0.2.0+2 / 36 pruebas](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858) y [0.1.0+1 / 17 pruebas](https://github.com/migdlp/incremental_hole_game/actions/runs/39020361800). Consultar siempre commit y resultado de la ejecución descargada. La documentación puede tener commits posteriores sin cambiar el código del APK; una descarga caducada tampoco indica fallo de compilación.
+El build anterior [39138119402](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402), commit `1d71843`, también declara `0.2.1+3`, pero no incluye el árbol. Identificar APK por **commit y ejecución**, no solo por número de versión. Otros antecedentes: [0.2.0+2 / 36 pruebas](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858) y [0.1.0+1 / 17 pruebas](https://github.com/migdlp/incremental_hole_game/actions/runs/39020361800). La documentación puede tener commits posteriores sin cambiar el código del APK; una descarga caducada tampoco indica fallo de compilación.
 
 El job usa Ubuntu 24.04 y tiene un límite de 40 minutos. Bash propaga errores de tuberías con `pipefail`; los registros se guardan con `tee`. Una nueva ejecución sobre la misma referencia cancela otra que siga en curso, según el grupo de concurrencia del workflow. La comparación de lockfile es estricta mediante `flutter pub get --enforce-lockfile`.
 

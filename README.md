@@ -36,7 +36,7 @@ python3 -m http.server 8123 --directory build/web
 
 La tabla `docs/balance.csv` se empaqueta como recurso y se valida al cargar: es la fuente editable del balance actual. Las jornadas antiguas conservan su configuración hasta terminar; el siguiente día usa el balance nuevo. La noche descarta también cualquier bola agarrada.
 
-**[Descargar APK 0.2.1+3 y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218)**. Descomprime el ZIP e instala el APK; requiere sesión en GitHub. Artefacto disponible hasta el 1 de noviembre de 2026; después puede regenerarse con la [pipeline manual](docs/ci.md).
+**[Descargar APK 0.2.1+3 y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297)**. Descomprime el ZIP e instala el APK; requiere sesión en GitHub. Artefacto disponible hasta el 1 de noviembre de 2026; después puede regenerarse con la [pipeline manual](docs/ci.md).
 
 ## Validar
 
@@ -50,7 +50,7 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 
-La entrega de balance tiene 41 pruebas superadas; el árbol posterior incorpora siete pruebas más. Consultar el commit y la [evidencia de cada entrega](docs/validacion-prototipo.md), porque ambas conservan el número de paquete `0.2.1+3`.
+La entrega actual con árbol tiene **48 pruebas superadas** y una pipeline Android correcta sobre `1720fba`; la entrega anterior de balance tenía 41. Consultar el commit y la [evidencia de cada entrega](docs/validacion-prototipo.md), porque ambas conservan el número de paquete `0.2.1+3`.
 
 La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisis y pruebas, compila el APK de depuración y lo guarda como artefacto descargable junto con su SHA-256. Se activa en **Actions → Flutter - APK manual → Run workflow**; no se dispara con cada push.
 

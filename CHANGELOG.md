@@ -7,14 +7,14 @@ Se registran entregas y cambios observables. `0.2.1+3` es la versión actual dec
 - Inicio rápido, diseño y arquitectura real alineados con mano y escobas recta/V, pulsación inicial y barrido comprado.
 - Economía de 15 s totales, intervalos cuatro veces mayores, once mejoras y límites del ritmo de compras provisional.
 - Guardado v3, compatibilidad v1/v2, herramienta y versión de balance por jornada.
-- APK más reciente, 41 pruebas y límites de validación identificados; historia original conservada. No modifica código ni balance.
+- APK más reciente con árbol, 48 pruebas y límites de validación identificados; historia original conservada. No modifica código ni balance.
 
 ## 0.2.1+3 — 2026-10-18
 
 - [PR #10](https://github.com/migdlp/incremental_hole_game/pull/10), `1d71843`: día base de 10 s de producción + 5 s de cierre; intervalo base 3 s y mejoras cuatro veces más lentas que antes.
 - Duración mejorable a 20/25/30 s totales; precios conservados y todavía provisionales.
 - Guardado v3 mantiene la jornada anterior hasta terminar y aplica el balance nuevo al día siguiente.
-- 41 pruebas y [pipeline Android correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402); [APK actual](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218).
+- 41 pruebas y [pipeline Android correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402); [APK del balance anterior al árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218).
 
 ## 0.2.0+2 — 2026-10-18
 
@@ -25,6 +25,8 @@ Se registran entregas y cambios observables. `0.2.1+3` es la versión actual dec
 - 36 pruebas y [pipeline Android correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858); prueba de navegador, sin aceptación en móvil físico.
 
 ## Árbol de mejoras progresivo — 2026-10-18
+
+- [PR #12](https://github.com/migdlp/incremental_hole_game/pull/12), `1720fba`; misma versión `0.2.1+3`, [CI correcta con 48 pruebas](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339) y [APK con árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297).
 
 - El taller abre un tablero de nodos y conexiones con arrastre, zoom con dos dedos y controles para acercar, alejar y centrar la selección.
 - Una partida nueva muestra solo la primera mejora del generador; comprar revela los siguientes niveles y caminos de control/producción. Las compras anteriores se conservan y muestran sus conexiones.

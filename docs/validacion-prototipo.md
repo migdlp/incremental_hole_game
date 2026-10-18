@@ -9,7 +9,10 @@
 | [PR #10](https://github.com/migdlp/incremental_hole_game/pull/10), `1d71843`, versión 0.2.1+3 | Día de 10 + 5 s, intervalos cuatro veces mayores, guardado v3 y balance por jornada |
 | Validación local de 0.2.1+3 | Formato y análisis correctos, **41 pruebas**: 37 de dominio/sesión y 4 de widgets |
 | [CI 39138119402](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402) | Correcta sobre `1d71843`: dependencias, formato, análisis, 41 pruebas, compilación Android, firma y subida |
-| [APK actual](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218) | `0.2.1+3`; ZIP con APK/SHA-256, disponible hasta el 1 de noviembre de 2026 |
+| [APK del balance, antes del árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218) | `0.2.1+3`; ZIP con APK/SHA-256, disponible hasta el 1 de noviembre de 2026 |
+| [PR #12](https://github.com/migdlp/incremental_hole_game/pull/12), `1720fba` | Árbol progresivo, siete pruebas adicionales, sin cambiar versión de paquete ni guardado |
+| [CI 39141075339](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339) | Correcta: formato, análisis, **48 pruebas** (39 de dominio/sesión y 9 de widgets), APK y firma |
+| [APK actual con árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297) | `0.2.1+3` sobre `1720fba`, ZIP con APK/SHA-256; retención hasta el 1 de noviembre |
 
 Las pruebas nuevas comprueban 15 segundos totales, producción detenida durante cierre, primera emisión a los 3 s, intervalos por nivel y conservación de una jornada antigua en varias reaperturas antes de adoptar el balance nuevo. Las de controles comprueban lanzamiento con eventos de 30/60/120 Hz, colocación y parada, geometría, V hasta capturar ambos lados y entrada de puntero a través de widgets.
 

@@ -53,3 +53,5 @@ Con el día base de 15 s, tres bolas y valor 2, el máximo inicial es 6 monedas.
 - [skill_tree_test.dart](../test/features/skill_tree_test.dart): dos pruebas de dominio y cinco de widgets, con descubrimiento, alcance, compras previas, compra única persistente, cancelaciones, saldo y pantalla pequeña.
 
 El árbol necesita revisión en Android físico y aceptación de interacción. Una prueba de widgets a tamaño móvil no certifica experiencia táctil, contraste en dispositivo o rendimiento. La ejecución de CI y el APK exactos están en [CI](ci.md); el número de versión por sí solo no identifica esta entrega.
+
+Evidencia de entrega: [CI 39141075339](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339) correcta sobre `1720fba`, con 48 pruebas, compilación y firma; [APK con árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297). No se ha repetido esta ejecución por el cambio documental.

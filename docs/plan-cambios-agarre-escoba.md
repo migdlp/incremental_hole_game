@@ -225,3 +225,5 @@ El usuario pidió actualizar la documentación general después de las entregas 
 ## Entrega posterior incluida en documentación
 
 Al actualizar se incorporó `1720fba` (PR #12), que implementa el árbol progresivo con zoom, descubrimiento y compra cancelable de tres segundos. Se conserva el código de esa entrega y sus notas; ver [árbol](arbol-de-mejoras.md). El número de paquete sigue siendo 0.2.1+3: identificar cada APK por commit y ejecución, no solo por versión. Las decisiones iniciales de este plan se conservan como historia; ya no describen el árbol como una tarea sin iniciar.
+
+La entrega del árbol quedó comprobada en [CI 39141075339](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339), sobre `1720fba`: 48 pruebas, APK y firma correctos. [Descargar APK con árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297); este build conserva la versión `0.2.1+3`, por lo que hay que distinguirlo del build anterior por commit.

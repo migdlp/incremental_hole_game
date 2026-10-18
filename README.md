@@ -27,7 +27,7 @@ python3 -m http.server 8123 --directory build/web
 - Tablero lógico 360 × 560, escalado uniforme, generador, fricción, colisiones con rejilla espacial, pala y captura por el hoyo.
 - Monedas con valor entero, aterrizaje, recogida por toque o barrido, fusión y límite de pilas sin perder valor.
 - Días de 60 segundos de producción y 5 de recogida; pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
-- Ocho mejoras, con niveles, costes y requisitos del [balance original](docs/balance.csv), robot que empuja e imán ligado a la pala.
+- Árbol de mejoras con un nodo por nivel, conexiones, descubrimiento progresivo, zoom y compra por pulsación de tres segundos. Conserva los costes y efectos de [balance.csv](docs/balance.csv), el robot y el imán.
 - Resultados, récord, comparación entre días, ahorro y compras persistentes.
 - Guardado JSON versionado, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano, instrucciones breves y opción de silenciar los sonidos del sistema.
@@ -50,7 +50,7 @@ La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisi
 
 ## Límites de esta entrega
 
-Es una primera implementación jugable, no una validación final del MVP. Falta probar en un móvil físico el gesto, el balance, el acceso al robot en 3–5 días y los 60 FPS bajo carga. No hay dispositivo de referencia acordado. Los sonidos son clics del sistema con opción de silencio; no hay efectos de audio propios ni control independiente de volumen. El taller presenta las ramas y requisitos en una lista, sin el grafo visual definitivo.
+Es una primera implementación jugable, no una validación final del MVP. Falta probar en un móvil físico el gesto, el balance, el acceso al robot en 3–5 días y los 60 FPS bajo carga. No hay dispositivo de referencia acordado. Los sonidos son clics del sistema con opción de silencio; no hay efectos de audio propios ni control independiente de volumen. El taller abre un árbol de mejoras con descubrimiento progresivo, zoom y compra al mantener pulsado durante tres segundos. Falta validar su comodidad en un teléfono físico.
 
 El juego mantiene su progreso localmente y no genera ingresos mientras está cerrado. Se solicitan puntos de control cada cinco segundos de avance activo. Un cierre forzado puede perder progreso desde la última escritura correcta, y la recuperación de una copia puede retroceder más; al restaurar no se simula el tiempo cerrado. Si falla el guardado se avisa y se permite reintentarlo. Si el archivo y su copia están dañados, se pide una acción explícita antes de comenzar una partida nueva. La copia de seguridad puede recuperar un estado anterior.
 

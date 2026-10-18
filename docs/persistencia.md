@@ -1,6 +1,6 @@
 # Referencia de guardado y recuperación
 
-Formato actual: JSON, `version = 1`. Implementación: [GameSession](../lib/app/game_session.dart), [Board](../lib/features/board/domain/board.dart) y adaptadores de [persistencia](../lib/persistence/). Este documento describe el contrato actual, no un servicio de sincronización.
+Formato actual: JSON, `version = 3`; se aceptan también versiones `1` y `2` mediante compatibilidad explícita. Implementación: [GameSession](../lib/app/game_session.dart), [Board](../lib/features/board/domain/board.dart) y adaptadores de [persistencia](../lib/persistence/). Este documento describe el contrato actual, no un servicio de sincronización.
 
 ## Dónde se guarda
 
@@ -17,7 +17,8 @@ En web, el plugin gestiona la representación de las preferencias en el almacena
 
 | Campo | Tipo | Significado |
 | --- | --- | --- |
-| `version` | entero | Solo se admite `1`; no hay migraciones implementadas |
+| `version` | entero | Se escribe `3`; se admiten `1`, `2` y `3` |
+| `tool` | cadena | Herramienta seleccionada: `hand`, `broom` o `vee`; debe estar desbloqueada |
 | `day` | entero | Jornada actual si hay `run`, o siguiente jornada disponible de noche |
 | `balance` | entero | Ahorro bancado, separado del ingreso del día en curso |
 | `record` | entero | Mayor ingreso de una jornada finalizada |
@@ -30,7 +31,8 @@ Ejemplo completo y válido de partida nueva, antes de comenzar el primer día:
 
 ```json
 {
-  "version": 1,
+  "version": 3,
+  "tool": "hand",
   "day": 1,
   "balance": 0,
   "record": 0,
@@ -45,20 +47,33 @@ No hay un campo de historial completo ni se guarda una fecha para generar progre
 
 ## Jornada activa
 
-`run` contiene `remaining` (segundos), `collected`, `generated`, `settings` y `board`.
+`run` contiene `remaining` (segundos), `collected`, `generated`, `settings`, `balanceVersion` y `board`.
 
-- `settings` es el mapa completo producido por `UpgradeCatalog.settings(levels)` al iniciar el día, incluidas bases y efectos comprados. La carga exige que coincida con el catálogo actual para esos niveles.
+- `settings` contiene las bases y efectos comprados al iniciar el día. La carga exige igualdad con el catálogo de esos niveles y de la versión de balance correspondiente.
+- `balanceVersion = 2` identifica el balance actual: 10 + 5 s y emisión base cada 3 s. `1` identifica el anterior: 60 + 5 s y emisión base cada 0,75 s. No es la versión del esquema JSON.
 - `board.random` conserva el estado entero del generador congruencial; la semilla inicial es `day * 7919`.
 - `board.nextId`, `captured` y `spawnClock` conservan identificadores, capturas y progreso del intervalo de emisión.
 - `board.balls` contiene objetos `{id, p: [x, y], v: [vx, vy]}`.
 - `board.coins` contiene objetos `{id, p: [x, y], value, landing}`. `landing` es el tiempo restante de aterrizaje entre `0` y `0.2`.
 - `board.robot` es `[x, y]`; `robotTarget` es ID de bola o `null`.
 
-La posición del robot y su objetivo se conservan; sus temporizadores internos de decisión/atasco se reinician. Pala y puntero no se serializan. Las animaciones cosméticas no constituyen una fuente de ingreso.
+La posición del robot y su objetivo se conservan; sus temporizadores internos de decisión/atasco se reinician. El puntero, orientación de escoba y agarre activo no se serializan. Una bola agarrada se guarda en su posición como bola normal con velocidad cero; no se restaura un lanzamiento ficticio. Las animaciones cosméticas no constituyen una fuente de ingreso.
+
+## Compatibilidad entre versiones
+
+| Esquema leído | Tratamiento |
+| --- | --- |
+| v1 | No incluye herramienta. Quien tenía `paddle` comprado recibe `broom: 1` y selecciona escoba; el resto selecciona mano. No se concede barrido. Se valida la configuración original sin los desbloqueos nuevos |
+| v2 | Conserva herramienta y compras. La jornada activa pertenece al balance anterior |
+| v3 | Exige herramienta válida y `run.balanceVersion` entero, `1` o `2`; valida los valores exactos contra esa versión |
+
+Saldo, resultados, niveles y objetos de la misma jornada se conservan. Una jornada v1/v2 restaurada mantiene sus tiempos e intervalo originales hasta terminar, y se abre pausada. Al volver a guardar se escribe v3 con `balanceVersion: 1`, para poder reabrirla de nuevo. El siguiente `startDay` usa el balance actual (`2`). Un guardado nocturno antiguo comienza directamente con el balance nuevo.
+
+Los valores históricos de duración e intervalo están conservados en `UpgradeCatalog.settings(..., balanceVersion: 1)` para validar partidas antiguas; no son una segunda tabla de balance para ajustar partidas nuevas. La validación completa precede a la aplicación del estado. `load` conserva como copia la instantánea leída; la escritura v3 ocurre al siguiente guardado normal.
 
 ## Cuándo y cómo se escribe
 
-Se solicita una instantánea al comenzar o terminar el día, comprar, cambiar sonido, entrar en pausa y aproximadamente cada cinco segundos de avance activo. `snapshot()` captura los valores del momento de la solicitud. Una cadena de futuros `_writes` ejecuta las escrituras en orden, evitando que una solicitud antigua termine sobrescribiendo una más reciente.
+Se solicita una instantánea al comenzar o terminar el día, comprar, seleccionar herramienta, cambiar sonido, entrar en pausa y aproximadamente cada cinco segundos de avance activo. `snapshot()` captura los valores del momento de la solicitud. Una cadena de futuros `_writes` ejecuta las escrituras en orden, evitando que una solicitud antigua termine sobrescribiendo una más reciente.
 
 En una escritura de archivo:
 
@@ -98,7 +113,7 @@ Una segunda llamada a `finishDay()` se ignora al no haber jornada. Tras cargar u
 - No hay avance por tiempo real mientras está cerrada la aplicación; al volver hay que continuar explícitamente.
 - Un fallo de escritura no revierte las acciones en memoria. Se muestra un aviso y se permite reintentar; salir antes de un guardado correcto puede perderlas.
 - Modificar IDs, valores de balance, reglas o esquema puede invalidar una jornada guardada. La igualdad de `settings` es deliberadamente estricta; probar compatibilidad antes de distribuir un cambio de balance.
-- No hay migrador de versiones. Antes de cambiar `version`, implementar y probar la migración o definir explícitamente la incompatibilidad; no incrementar el número esperando que la carga migre sola.
+- Hay compatibilidad explícita v1/v2 → v3 y conservación del balance anterior por jornada. Para cambios futuros hay que ampliar y probar esa política; incrementar el esquema no migra automáticamente configuraciones desconocidas.
 - Firma de APK y formato del guardado son asuntos distintos. Una APK con certificado diferente puede exigir desinstalar la anterior y borrar sus datos; consultar [desarrollo](guia-desarrollo.md) antes de hacerlo.
 
 La evidencia de archivo disponible procede de pruebas Linux y la de web de recargas en Chromium. La aceptación de recuperación y cierre forzado en Android físico sigue pendiente en [estado actual](estado-actual.md).

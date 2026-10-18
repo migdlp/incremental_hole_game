@@ -36,7 +36,7 @@ Registrado el 17 de octubre de 2026 a partir del PRD, la propuesta de arquitectu
 
 **Contexto:** una bola genera monedas que aún deben recogerse. Reabrir una partida no puede combinar un saldo nuevo con un día antiguo y volver a cobrarlo.
 
-**Decisión observada:** `generated`, `collected` y `balance` tienen funciones separadas. El cierre actualiza resultado/saldo/día, retira la jornada y encola una instantánea JSON v1 completa. Las escrituras se serializan y mantienen una copia anterior válida. Web usa preferencias; Android usa archivos y temporales.
+**Decisión observada:** `generated`, `collected` y `balance` tienen funciones separadas. El cierre actualiza resultado/saldo/día, retira la jornada y encola una instantánea JSON completa (v3 actual; v1 en la decisión inicial). Las escrituras se serializan y mantienen una copia anterior válida. Web usa preferencias; Android usa archivos y temporales.
 
 **Consecuencias:** el flujo normal y la recuperación de copias mantienen consistente el cobro. No hay transacción entre dos claves web ni garantía de durabilidad universal. Fallos de escritura o recuperación de una copia pueden retroceder más que el intervalo nominal de cinco segundos. No hay sincronización ni recompensas por tiempo cerrado.
 
@@ -57,3 +57,41 @@ Registrado el 17 de octubre de 2026 a partir del PRD, la propuesta de arquitectu
 **Revisar cuando:** se prepare distribución de producción, cambie el SDK, se necesiten otros destinos o el usuario cambie el criterio de activación. Actualizar versión, hash, lockfile, documentación y evidencia conjuntamente.
 
 **Evidencia:** [CSV](balance.csv), [workflow](../.github/workflows/flutter-manual.yml), [PR #3](https://github.com/migdlp/incremental_hole_game/pull/3), [ejecución manual correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39020361800).
+
+
+## ADR-005 — Agarre individual y geometría de escobas compartida
+
+**Estado:** implementado; sensación en teléfono pendiente.
+
+**Contexto:** el círculo inicial dispersaba grupos radialmente y no ofrecía una progresión de transporte individual a barrido cómodo.
+
+**Decisión:** mano inicial para una bola y lanzamiento por velocidad final del gesto; después escoba recta ampliable y V. El frente se orienta perpendicularmente al movimiento, con giro limitado y orientación retenida al parar. `broomSegments` sirve tanto para colisión como para dibujo. Se distinguen pulsación de moneda y arrastre, con barrido como compra independiente.
+
+**Consecuencias:** forma visible y física coinciden; la inercia se prueba a distintas frecuencias de entrada. La simulación propia debe resolver extremos, giros y atascos; el navegador no sustituye la prueba táctil real. El selector permite volver a herramientas compradas sin rediseñar aún el árbol.
+
+**Evidencia:** [tool.dart](../lib/features/board/domain/tool.dart), [Board](../lib/features/board/domain/board.dart), [pruebas de controles](../test/features/ball_controls_test.dart), [PR #8](https://github.com/migdlp/incremental_hole_game/pull/8).
+
+## ADR-006 — Esquema v3 y balance identificado por jornada
+
+**Estado:** aplicado; compatibilidad v1/v2 y reapertura comprobadas automáticamente.
+
+**Contexto:** al cambiar de 60 + 5 s a 10 + 5 s y reducir frecuencia cuatro veces, comparar solo con el catálogo nuevo invalidaría una partida activa anterior.
+
+**Decisión:** conservar valores históricos de duración/intervalo para validar y terminar esa jornada. Escribir v3 con herramienta y `run.balanceVersion`; restaurar v1/v2 con el balance anterior y abrir pausado. El siguiente día usa el balance actual. Las antiguas compras de anchura conservan escoba y no conceden barrido gratuito.
+
+**Consecuencias:** no se pierde progreso ni se recorta una jornada guardada. Hay dos versiones de balance conocidas, no soporte de configuraciones arbitrarias; futuras modificaciones requieren extender la política y sus pruebas. La tabla editable de partidas nuevas sigue siendo el CSV.
+
+**Evidencia:** [guardado](persistencia.md#compatibilidad-entre-versiones), [catálogo](../lib/features/upgrades/domain/catalog.dart), [pruebas de balance](../test/features/balance_test.dart), [PR #10](https://github.com/migdlp/incremental_hole_game/pull/10).
+
+
+## ADR-007 — Descubrimiento del árbol separado del catálogo histórico
+
+**Estado:** implementado en `1720fba`; aceptación táctil pendiente.
+
+**Contexto:** se quiere revelar caminos progresivamente sin invalidar compras o guardados anteriores ni cambiar precios durante el rediseño.
+
+**Decisión:** `SkillTree` crea un nodo por nivel y añade padres de descubrimiento a los requisitos existentes. La UI comprueba ambos antes de iniciar/completar la compra de tres segundos; la sesión conserva las condiciones históricas del CSV. Visibilidad derivada de niveles, sin nueva versión de guardado.
+
+**Consecuencias:** una partida nueva ve solo generador 1 y la primera compra visible cuesta treinta, aunque otras mejoras del catálogo cuesten veinte. Las compras antiguas siguen activas y muestran sus antecesores sin concederlos. Futuros cambios deben distinguir requisito de compra del dominio y descubrimiento de UI; deben probarse alcance y ausencia de ciclos.
+
+**Evidencia:** [árbol y recorrido](arbol-de-mejoras.md), [modelo](../lib/features/upgrades/domain/skill_tree.dart), [pruebas](../test/features/skill_tree_test.dart).

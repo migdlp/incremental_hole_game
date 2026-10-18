@@ -1,6 +1,6 @@
 # PRD — Game Incremental
 
-Versión: 0.1 · Fecha: 15 de octubre de 2026 · Estado: propuesta para revisión
+Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y objetivos pendientes del MVP
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
 
@@ -13,7 +13,7 @@ La experiencia debe combinar un gesto agradable de recoger y ordenar, decisiones
 ## 2. Reglas acordadas
 
 - El generador produce bolas durante el día.
-- El jugador arrastra el dedo para empujarlas con una pala circular hacia el hoyo.
+- El jugador empieza agarrando y arrastrando una bola. Después desbloquea escoba recta, anchura y escoba en V para reunir y empujar grupos. Al soltar una bola, su velocidad final determina el lanzamiento.
 - Introducir una bola en el hoyo produce monedas físicas en el tablero. El ingreso no se añade automáticamente al saldo.
 - Al inicio las monedas se recogen pulsándolas. Recogerlas pasando el dedo por encima requiere comprar la mejora de recogida por barrido.
 - El día tiene tiempo limitado y su duración puede mejorarse.
@@ -30,21 +30,21 @@ Preparación → comenzar día → generar y empujar bolas → recoger monedas �
 
 ### Día
 
-El tablero muestra el hoyo, el generador, la pala, las bolas, las monedas y el robot cuando esté desbloqueado. La interfaz muestra tiempo restante, dinero recogido en ese día y acceso a pausa.
+El tablero muestra el hoyo, el generador, la herramienta, las bolas, las monedas y el robot cuando esté desbloqueado. La interfaz muestra tiempo restante, dinero recogido en ese día y acceso a pausa.
 
-Propuesta inicial: 60 segundos de producción y 5 segundos finales de recogida. En esos 5 segundos el generador se detiene, pero el jugador y el robot pueden seguir moviendo bolas y recogiendo monedas. Ambos tiempos son provisionales; los 5 segundos forman parte del día y se comunican claramente en pantalla.
+Balance actual para probar: 15 segundos totales, 10 de producción y 5 finales de recogida; emisión inicial cada 3 segundos. En esos 5 segundos el generador se detiene, pero el jugador y el robot pueden seguir moviendo bolas y recogiendo monedas. Ambos tiempos son provisionales; los 5 segundos forman parte del día y se comunican claramente en pantalla.
 
-El dedo desplaza una pala que empuja grupos de bolas. El hoyo tiene una pequeña zona de captura para evitar que acertar resulte frustrante. Al inicio hay que pulsar las monedas para cobrarlas: arrastrar para empujar bolas no las recoge. Tras comprar recogida por barrido, pasar el dedo sobre una moneda también la cobra; entonces recogida y empuje pueden compartir gesto, sin cambiar de herramienta.
+La mano transporta una sola bola; las escobas barren grupos con un frente perpendicular al arrastre y giro suavizado. La V reúne por contacto, sin aspirar. El hoyo tiene una pequeña zona de captura para evitar que acertar resulte frustrante. Al inicio hay que pulsar las monedas para cobrarlas: arrastrar para empujar bolas no las recoge. Tras comprar recogida por barrido, pasar el dedo sobre una moneda también la cobra; entonces recogida y empuje pueden compartir gesto, sin cambiar de herramienta.
 
 ### Final del día
 
 Al llegar el tiempo a cero se bloquea la interacción, se detienen los robots y se calcula el resultado una sola vez. Las monedas sin recoger desaparecen sin sumarse al saldo.
 
-Regla acordada: al pasar a la noche se retiran todas las bolas y monedas restantes, incluidas las monedas en aterrizaje. El día siguiente comienza sin bolas ni monedas; después funciona el generador con la configuración correspondiente a las mejoras. Se conservan el dinero ya recogido y no gastado y el progreso. Ver [plan de la siguiente iteración](plan-siguiente-iteracion.md).
+Regla acordada: al pasar a la noche se retiran todas las bolas y monedas restantes, incluidas las monedas en aterrizaje. El día siguiente comienza sin bolas ni monedas; después funciona el generador con la configuración correspondiente a las mejoras. Se conservan el dinero ya recogido y no gastado y el progreso. Ver [seguimiento de cambios](plan-cambios-agarre-escoba.md).
 
 ### Noche
 
-Una pantalla reúne el resumen y el árbol de mejoras. El resumen muestra monedas recogidas, bolas introducidas, valor de monedas perdidas y récord diario. Si existe un día anterior, muestra la diferencia respecto a él.
+Una pantalla reúne el resumen y el taller por ramas; el árbol progresivo se abre desde el taller y su aceptación táctil sigue pendiente. El resumen muestra monedas recogidas, bolas introducidas, valor de monedas perdidas y récord diario. Si existe un día anterior, muestra la diferencia respecto a él.
 
 La puntuación principal es el dinero recogido ese día, independientemente del saldo ahorrado. El saldo disponible para comprar es el ahorro anterior más el ingreso del día. Cada compra lo descuenta inmediatamente y sus efectos comienzan el siguiente día.
 
@@ -57,37 +57,39 @@ Objetivo: demostrar que el ciclo manual resulta agradable y que comprar mejoras 
 | Incluido | Alcance |
 | --- | --- |
 | Tablero | Una arena, un hoyo y un generador |
-| Movimiento | Pala circular controlada con un dedo; empuje de grupos y captura por el hoyo |
+| Movimiento | Mano individual, escoba recta ampliable y escoba en V; un dedo, transporte y lanzamiento |
 | Recompensa | Monedas visibles al introducir bolas; recogida por toque y arrastre desbloqueable |
 | Ciclo | Día limitado, aviso de cierre, fin del día y noche sin temporizador |
 | Resultados | Ingreso diario, bolas introducidas, monedas perdidas, récord y comparación anterior |
-| Progresión | Árbol pequeño con los ocho tipos actuales y un desbloqueo de recogida por barrido pendiente |
+| Progresión | Once tipos y 23 nodos con descubrimiento progresivo, conexiones, zoom y compra de 3 s |
 | Automatización | Un robot básico que empuja bolas y una mejora de imán para dinero |
 | Persistencia | Guardado local del saldo, mejoras, número de día y resultados |
-| Controles básicos | Pausa, volumen de efectos y explicación breve durante el primer día |
-| Presentación | Gráficos sencillos, efectos de entrada al hoyo y recogida; límites de objetos y partículas |
+| Controles básicos | Pausa, silencio y explicación breve entregados; volumen independiente pendiente |
+| Presentación | Primitivas y animación de monedas; arte/audio final y partículas pendientes |
 
-### Árbol de mejoras propuesto
+### Catálogo y descubrimiento actuales
 
-Tres ramas visibles desde la primera noche. Las dependencias deben entenderse antes de comprar; cada nodo muestra efecto actual, siguiente efecto, precio y requisito.
+Una partida nueva muestra generador 1; comprar revela sucesores. Los nodos numéricos representan niveles individuales. Las dependencias deben entenderse antes de comprar; cada nodo muestra efecto actual, siguiente efecto, precio y requisito.
 
-| Rama | Nodo | Efecto | Dependencia propuesta |
+| Rama | Nodo | Efecto | Requisito actual |
 | --- | --- | --- | --- |
-| Control | Pala más ancha | Permite empujar grupos mayores | Nodo inicial |
-| Control | Recogida por barrido | Permite cobrar monedas al arrastrar por encima; antes solo por pulsación | Por definir; cambio confirmado, pendiente |
+| Control | Escoba recta | Desbloquea barrido de grupos | Nodo inicial |
+| Control | Escoba más ancha | Abarca más bolas, también en V | Escoba recta |
+| Control | Escoba en V | Reúne bolas hacia el centro | Anchura nivel 1 |
+| Control | Recogida por barrido | Permite cobrar monedas al arrastrar por encima; antes solo por pulsación | Nodo inicial |
 | Control | Radio de recogida | Recoge monedas desde más distancia | Nodo inicial |
-| Control | Imán | Atrae y recoge automáticamente monedas dentro de un radio corto alrededor de la pala | Radio de recogida, nivel 1 |
+| Control | Imán | Atrae y recoge automáticamente monedas dentro de un radio corto alrededor del dedo activo | Radio de recogida, nivel 1 |
 | Producción | Generador más rápido | Reduce el intervalo entre bolas | Nodo inicial |
 | Producción | Mayor recompensa | Aumenta el valor recibido por bola | Nodo inicial |
 | Producción | Día más largo | Aumenta el tiempo de producción, con límite | Generador, nivel 1 |
-| Automatización | Robot básico | Empuja bolas hacia el hoyo durante el día | Pala, nivel 1 |
+| Automatización | Robot básico | Empuja bolas hacia el hoyo durante el día | Anchura, nivel 1 |
 | Automatización | Velocidad del robot | Mejora su desplazamiento | Robot desbloqueado |
 
-El catálogo implementado aún contiene ocho tipos y permite barrido desde el inicio. El nuevo desbloqueo exige cambios de entrada, catálogo y guardado; su precio y relación con radio e imán están por definir en el [plan de cambios](plan-siguiente-iteracion.md). Las [ideas de herramientas para bolas](ideas-herramientas-bolas.md) siguen en exploración y no amplían automáticamente este alcance.
+El catálogo contiene once tipos. El [árbol](arbol-de-mejoras.md) añade requisitos de descubrimiento a los de la tabla y conserva compras antiguas; la primera compra visible es generador 1, por 30 monedas. Mano inicial gratuita; escoba, V, barrido, imán y robot son desbloqueos únicos, las mejoras numéricas tienen tres niveles. Costes y efectos actuales están en [economía](economia.md) y [CSV](balance.csv). La aspiradora y otros métodos del [brainstorming](ideas-herramientas-bolas.md) no amplían automáticamente el alcance.
 
-El robot básico no recoge monedas. El imán está ligado a la pala, de modo que recoger dinero sigue requiriendo posicionarse. Un robot independiente de dinero se reserva para una ampliación.
+El robot no recoge monedas. El imán funciona alrededor del dedo apoyado y es independiente del barrido de monedas. Este último requiere compra desde el inicio, sin otros requisitos.
 
-Propuesta de balance inicial: tres niveles por mejora numérica; imán y robot como desbloqueos únicos. El primer día debe permitir al menos una compra incluso con un rendimiento modesto. El primer robot debería poder conseguirse en aproximadamente 3–5 días jugados sin optimizar, sujeto a pruebas. La duración del día tendrá incrementos pequeños y un máximo explícito.
+Los precios siguen provisionales. Con el día corto se producen tres bolas base y hasta seis monedas; no se alcanza una compra de veinte en el primer día. Queda redefinir el ritmo de primera compra y robot, en vez de mantener las hipótesis anteriores de compra inmediata y robot en 3–5 días. La duración total mejora a 20/25/30 s y el intervalo a 2,6/2,2/1,8 s.
 
 Las mejoras de recompensa aumentan el valor representado por las monedas, sin multiplicar necesariamente su número físico.
 
@@ -119,7 +121,7 @@ Antes de ajustar costes debe existir una tabla editable con intervalos de genera
 
 ## 6. Propuesta técnica
 
-Flutter para menús, resultados y árbol; Flame para el tablero, movimiento, colisiones y efectos. Esta es la opción recomendada, pendiente de validación mediante el primer prototipo. No se incorporará un motor de física adicional hasta comprobar si el movimiento sencillo resulta insuficiente.
+Flutter para menús, resultados y árbol; Flame para el tablero, movimiento, colisiones y efectos. Esta opción está implementada; la aceptación de sensación y rendimiento en móvil sigue pendiente. No se incorporará un motor de física adicional hasta comprobar si el movimiento sencillo resulta insuficiente.
 
 Organizar una única aplicación y paquete Dart en módulos funcionales: tablero, ciclo diario, economía, mejoras, automatización y progreso. Cada módulo controla su estado y expone contratos explícitos; las reglas usan Dart puro y no dependen de Flutter, Flame ni almacenamiento. La composición de la aplicación conecta los módulos y coordina compras y cierre sin duplicar recompensas. La estructura y sus límites se detallan en [Arquitectura y stack](arquitectura.md).
 
@@ -147,7 +149,7 @@ El cierre del día y su ingreso deben registrarse de forma consistente para impe
 
 | Parte | Resultado revisable | Condición para continuar |
 | --- | --- | --- |
-| 1. Prototipo de interacción | Tablero, pala, bolas, hoyo y monedas | Empujar grupos y recoger resulta cómodo con un dedo; prueba inicial de carga |
+| 1. Prototipo de interacción | Tablero, mano, escobas, bolas, hoyo y monedas | Empujar grupos y recoger resulta cómodo con un dedo; prueba inicial de carga |
 | 2. Ciclo completo | Temporizador, cierre, noche, saldo y resultados | Ninguna moneda pendiente pasa al día siguiente y el ingreso se calcula una sola vez |
 | 3. Progresión | Árbol, mejoras existentes y desbloqueo de barrido, robot e imán | Comprar cambia el siguiente día y las dependencias se entienden |
 | 4. MVP verificable | Guardado, pausa, primera experiencia y ajuste de rendimiento/economía | Varias jornadas consecutivas funcionan sin bloquear la progresión ni perder el estado |
@@ -162,7 +164,7 @@ La primera entrega técnica es la parte 1; el primer MVP comprende las cuatro pa
 4. Al terminar el día, todas las bolas y monedas pendientes desaparecen al pasar a la noche. Las monedas no recogidas no se suman al saldo, las bolas retiradas no producen recompensa y cada día nuevo empieza sin bolas ni monedas.
 5. El saldo sin gastar se conserva entre días y al reiniciar la aplicación.
 6. Las mejoras existentes y el nuevo desbloqueo de barrido respetan los precios, dependencias y efectos que se definan; robot e imán funcionan durante el día.
-7. El primer día permite una compra con un rendimiento modesto, y el ritmo de acceso al robot se valida jugando.
+7. Se valida jugando el ritmo de ahorro, primera compra y acceso al robot con el día corto; los precios se ajustarán tras esa revisión.
 8. Pausar o salir a segundo plano detiene el temporizador y la simulación; reanudar no duplica ingresos.
 9. La agrupación de monedas conserva su valor incluso al alcanzar el límite de objetos.
 10. El tablero mantiene el objetivo de rendimiento en el dispositivo y carga acordados, incluidos los últimos segundos del día.
@@ -182,8 +184,6 @@ Prioridad orientativa después de validar el MVP:
 
 ## 10. Decisiones abiertas y recomendación
 
-Antes de comenzar la implementación se debe concretar la plataforma de la primera entrega: se propone Android en vertical para validar en un dispositivo real; iOS y web quedan pendientes de decisión. También falta fijar el dispositivo de referencia.
+Android vertical y web de apoyo ya están configurados. iOS queda fuera de esta entrega; falta fijar un teléfono Android de referencia.
 
-Durante el prototipo se revisarán el tamaño de pala, fricción, rebote, captura del hoyo y posible interferencia entre empujar y recoger con el mismo gesto. Durante la prueba del ciclo se revisarán los 60 + 5 segundos, la limpieza de bolas entre días y cuánto informa el aviso de cierre.
-
-Recomendación: no añadir más sistemas al MVP. Sí incluir desde el principio respuesta audiovisual sencilla, aviso claro de fin del día y un primer desbloqueo visible. El experimento principal es comprobar si el jugador quiere empezar otro día porque disfruta el gesto y quiere probar su siguiente mejora.
+Validar agarre suave/fuerte, orientación y anchura de escobas, V, interferencia con monedas y el día inicial de 15 segundos. La limpieza nocturna y las migraciones cuentan con pruebas automáticas; falta aceptación física. El árbol progresivo ya está implementado; su aceptación táctil y el ajuste de precios siguen pendientes. Ver [estado actual](estado-actual.md) y [plan de cambios](plan-cambios-agarre-escoba.md).

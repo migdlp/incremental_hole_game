@@ -50,7 +50,7 @@ lib/
   app/                  # arranque, GameSession, navegación y composición
   core/                 # utilidades técnicas realmente compartidas
   features/
-    board/              # bolas, hoyo, pala, generación y simulación
+    board/              # bolas, hoyo, mano/escobas, generación y simulación
     day_cycle/          # fases, temporizador, cierre y pausa
     economy/            # recompensa, saldo y transacciones
     upgrades/           # catálogo, requisitos, niveles y compras
@@ -109,7 +109,7 @@ Extraer un módulo a un paquete Dart solo si necesita reutilizarse, versionarse 
 
 - `Progress`: vista compuesta del saldo de economy, niveles de upgrades, número de día y resultados de progression, y ajustes.
 - `RunState`: vista compuesta del ID de jornada, fase y tiempo de day_cycle, contabilidad diaria de economy, estadísticas del tablero, configuración efectiva y estado aleatorio.
-- `BoardSnapshot`: posiciones, velocidades, IDs y valores de bolas y monedas. El comportamiento del robot se guarda en una instantánea de automation asociada. La pala no se restaura como pulsación activa.
+- `BoardSnapshot`: posiciones, velocidades, IDs y valores de bolas y monedas. El comportamiento del robot se guarda en una instantánea de automation asociada. La herramienta elegida se conserva; puntero y agarre no se restauran activos. El formato real v3 y la versión de balance se describen en [persistencia](persistencia.md).
 - `DayResult`: ID, ingreso, recompensa generada, valor perdido y bolas capturadas.
 - `UpgradeDefinition`: ID estable, niveles, costes, efectos y requisitos.
 - `SaveEnvelope`: versión del formato, progreso y jornada opcional.

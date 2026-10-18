@@ -29,7 +29,7 @@ Installed global Flutter was verified as 3.32.0 / Dart 3.8.0. Official stable 3.
 - [x] PG-02: At the existing closing boundary cancel active object gestures safely, freeze balls/broom and non-coin simulation, allow only coin collection, dim everything except coins, and show the existing result popup only after the five seconds. Verify exact boundary/timeout, no captures or duplicate income, and closing restore.
 - [x] PG-03: Run applicable focused/full tests, analyzer and formatting; inspect visual contrast if a runnable target is available. Update the roadmap and this file with observed outcomes, limitations and verification evidence.
 
-- [ ] PG-04: Publish the verified code and final documentation, run the existing manual Android pipeline, and record the exact build commit/run/artifact. Blocked: GitHub browser access was denied; no dispatch or APK exists for these changes.
+- [x] PG-04: Publish the verified code and final documentation and generate a test APK, recording the exact source commit and artifact. The user renewed publication authorization and requested a test APK. The local debug build satisfies the current APK request; GitHub Actions was not run because GitHub CLI has no authenticated session.
 
 ## Acceptance criteria
 
@@ -47,6 +47,8 @@ Both important behaviors work without granting other pending roadmap features. N
 - Engram mirror `odd/priority-gameplay/tasks` remains pending: project-context writes/reviews fail with `unknown_project` / backing-context errors. Preserve this local document as recovery truth.
 
 ## Rollback boundaries
+
+Current delivery follow-up, 2026-10-18: `f7bcdef7b80b917102e78545b9729513e927a1e7` was successfully pushed to `origin/main` using the Git authentication explicitly authorized by the user. GitHub CLI has no authenticated session, so workflow dispatch did not run. Flutter 3.35.7 `build apk --debug --no-pub` completed successfully in 235.1 seconds using the local Android SDK. Artifact: `build/app/outputs/flutter-apk/app-debug.apk` (140 MiB); SHA-256: `cd006dc4316a21c77d0d6deb6a4bf07812b79d54b6a9a0f97930cfa71ccb2b88`. Android build-tools 35.0.0 `apksigner verify --verbose` passed with one signer and APK Signature Scheme v2. Required NDK 27.0.12077973, build-tools 35 and platform 36 were installed by the build; no repository source or dependency versions changed. Android device installation, manual gameplay and performance checks remain pending. Engram tools remain unavailable; the mirror is pending. Earlier blocked-publication notes below are historical. Delivery policy: RDD disabled/unmanaged.
 
 Publication follow-up, 2026-10-18: user requested committing and pushing all pending changes on `main`. Rechecked with Flutter 3.35.7: all 63 tests pass, analyzer reports no issues, check-only formatting reports 26 files unchanged, and `git diff --check` passes. The initial sandboxed test attempt could not open local sockets; the authorized elevated run passed. Browser origin access to github.com was again denied by automatic approval review for missing explicit session authorization. No push or pipeline was attempted through another channel. PG-04 remains incomplete; Engram tools are unavailable and the mirror remains pending. Next step: explicit authorization for the GitHub session/channel, then push the prepared local commit.
 

@@ -6,6 +6,8 @@ Estado actual: `0.2.1+3` entregado con APK; pendiente validación en Android fí
 
 ## Hoja de ruta vigente — cambios pendientes del 18 de octubre de 2026
 
+**Actualización de entrega — 18 de octubre de 2026:** implementación publicada en `main`, commit `f7bcdef7b80b917102e78545b9729513e927a1e7`. APK de prueba generado localmente con Flutter 3.35.7 y firma verificada: `build/app/outputs/flutter-apk/app-debug.apk` (140 MiB), SHA-256 `cd006dc4316a21c77d0d6deb6a4bf07812b79d54b6a9a0f97930cfa71ccb2b88`. Las 63 pruebas, el análisis y el formato pasan. GitHub Actions no se ejecutó porque GitHub CLI no tiene sesión iniciada. Siguen pendientes la instalación en Android físico y el OK de jugabilidad. Esta actualización sustituye el estado de publicación pendiente de las notas locales que siguen, conservadas como registro de implementación.
+
 **Esta sección distingue requisitos pendientes de implementación local verificada.** Los dos cambios muy importantes ya están implementados localmente; no se declara nueva entrega Android ni publicación del código. Cuando contradiga objetivos anteriores, prevalece como dirección vigente; los registros históricos se conservan sin atribuirles cambios posteriores.
 
 Este documento será el seguimiento vivo de los cambios futuros y se actualizará conforme se acuerden prioridades y se observe cada resultado. El usuario ha autorizado publicar y mantener este seguimiento en GitHub; cada publicación se confirmará con su commit, sin dar por entregadas las funciones pendientes.

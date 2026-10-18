@@ -220,7 +220,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 2,
+    'version': 3,
     'tool': selectedTool.name,
     'day': progress.day,
     'balance': economy.balance,
@@ -235,6 +235,7 @@ class GameSession extends ChangeNotifier {
             'collected': economy.collected,
             'generated': economy.generated,
             'settings': board!.settings.toJson(),
+            'balanceVersion': board!.settings.balanceVersion,
             'board': board!.toJson(),
           },
   });
@@ -242,7 +243,7 @@ class GameSession extends ChangeNotifier {
   void restore(String raw) {
     final json = jsonDecode(raw) as Map<String, dynamic>;
     final legacy = json['version'] == 1;
-    if (!legacy && json['version'] != 2) {
+    if (!legacy && json['version'] != 2 && json['version'] != 3) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -288,7 +289,16 @@ class GameSession extends ChangeNotifier {
       final savedSettings = DaySettings.fromJson(
         run['settings'] as Map<String, dynamic>,
       );
-      final expected = Map.of(expectedSettings.values);
+      final balanceVersion = json['version'] == 3 ? run['balanceVersion'] : 1;
+      if (balanceVersion is! int ||
+          (balanceVersion != 1 && balanceVersion != 2)) {
+        throw const FormatException('Versión de balance inválida');
+      }
+      final settings = catalog.settings(
+        savedLevels,
+        balanceVersion: balanceVersion,
+      );
+      final expected = Map.of(settings.values);
       if (legacy) {
         expected.remove('broom_unlocked');
         expected.remove('v_unlocked');
@@ -297,7 +307,6 @@ class GameSession extends ChangeNotifier {
       if (!mapEquals(savedSettings.values, expected)) {
         throw const FormatException('Configuración de jornada inválida');
       }
-      final settings = expectedSettings;
       final remaining = (run['remaining'] as num).toDouble();
       if (!remaining.isFinite ||
           remaining <= 0 ||

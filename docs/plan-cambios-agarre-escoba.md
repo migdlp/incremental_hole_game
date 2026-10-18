@@ -201,3 +201,15 @@ Se conservan el resto de precios y efectos. `paddle_radius` se mantiene como cla
 - Pipeline manual [39136783858](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858): completada correctamente sobre `main`, commit `1a8fed78ced1e92b2d16b46bb3d7b1a78b8493d5` ([PR #8 integrada](https://github.com/migdlp/incremental_hole_game/pull/8)). Formato, análisis, 36 pruebas, compilación Android y verificación de firma correctos.
 - [Descargar APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858/artifacts/12140570505): artefacto `jardin-mecanico-debug-apk`, ZIP con `jardin-mecanico-debug.apk` y su suma. Versión `0.2.0+2`, APK de depuración para pruebas. Caduca el 1 de noviembre de 2026; puede regenerarse con la pipeline manual.
 - Se registra el resultado en un cambio posterior de este archivo; el APK corresponde al commit de código indicado, no a ese registro documental posterior.
+
+
+## Ajuste de balance solicitado — día inicial de 15 segundos
+
+Estado: implementado para probar en `0.2.1+3`; balance definitivo y OK pendientes.
+
+- El contador inicial dura **15 segundos en total**: 10 de producción y 5 de recogida final. Las mejoras de duración pasan a 15/20/25 segundos de producción, es decir, 20/25/30 totales. Conservan incrementos de 5 segundos y sus precios anteriores.
+- El intervalo inicial entre bolas pasa de 0,75 a **3 segundos**. Los niveles de generador pasan de 0,65/0,55/0,45 a **2,6/2,2/1,8 segundos**. La frecuencia baja cuatro veces en todos los niveles.
+- Con ambos cambios, una jornada base sin bloqueos produce 3 bolas, frente al máximo teórico anterior de 80. Su valor sigue siendo 2 monedas: 6 monedas generadas si se capturan las tres. El ingreso real exige recogerlas. No se reajustan precios de compras en esta tanda.
+- Guardado versión 3 con versión de balance por jornada. Una jornada ya guardada con v1/v2 termina con duración, objetos e intervalo anteriores; puede pausarse y reabrirse otra vez sin perderlos. El nuevo balance se aplica al siguiente día. No se reinician ahorro, niveles ni herramientas.
+- Validación local: análisis y 41 pruebas correctos. Cinco pruebas específicas comprueban contador total, cierre sin producción, primera emisión, reducción a todos los niveles y compatibilidad de una jornada antigua a través de varias reaperturas. Las pruebas anteriores de controles y monedas siguen pasando.
+- Se mantiene el acuerdo de actualizar la documentación general después del OK; esta sección registra únicamente esta implementación y sus evidencias.

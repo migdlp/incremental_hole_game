@@ -312,6 +312,9 @@ void main() {
       session.startDay();
       final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
       data['version'] = 1;
+      data['run']['settings']['production_duration'] = 60.0;
+      data['run']['settings']['spawn_interval'] = .75;
+      data['run'].remove('balanceVersion');
       data.remove('tool');
       data['levels'].remove('broom');
       data['run']['settings'].remove('broom_unlocked');
@@ -325,11 +328,11 @@ void main() {
       expect(restored.board!.settings['robot_count'], 1);
       expect(restored.board!.sweepEnabled, isFalse);
       expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 2);
+      expect(jsonDecode(restored.snapshot())['version'], 3);
     },
   );
 
-  test('v2 rejects forged tool unlocks and settings atomically', () {
+  test('current save rejects forged tool unlocks and settings atomically', () {
     final session = GameSession(catalog, MemoryStore())..startDay();
     final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
     data['tool'] = 'vee';

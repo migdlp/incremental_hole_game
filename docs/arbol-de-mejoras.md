@@ -1,5 +1,7 @@
 # Árbol de mejoras progresivo
 
+**Referencia del árbol implementado.** El diseño que iremos editando juntos vive en [Cambios futuros del árbol](cambios-futuros-arbol-mejoras.md). Sus propuestas no describen funciones ya entregadas.
+
 Implementado en `main` como `1720fba` ([PR #12](https://github.com/migdlp/incremental_hole_game/pull/12)), sin cambiar la versión de paquete `0.2.1+3`, los precios ni el esquema v3. El commit distingue este árbol del APK anterior con el mismo número de versión.
 
 ## Recorrido del jugador
@@ -55,3 +57,48 @@ Con el día base de 15 s, diez de producción a 1,5 bolas/s y valor 2, el máxim
 El árbol necesita revisión en Android físico y aceptación de interacción. Una prueba de widgets a tamaño móvil no certifica experiencia táctil, contraste en dispositivo o rendimiento. La ejecución de CI y el APK exactos están en [CI](ci.md); el número de versión por sí solo no identifica esta entrega.
 
 Evidencia de entrega: [CI 39141075339](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339) correcta sobre `1720fba`, con 48 pruebas, compilación y firma; [APK con árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297). No se ha repetido esta ejecución por el cambio documental.
+
+## Mapa completo para móvil — referencia actual
+
+Contrastado por lectura de `skill_tree.dart` y `balance.csv` el 18 de octubre de 2026. Son 23 nodos comprables. Este mapa expande el resumen anterior; las conexiones redundantes con antecesores ya requeridos no se repiten.
+
+```text
+GENERADOR I
+│
+├─ Generador II
+│  ├─ Generador III
+│  └─ Recompensa I
+│     └─ Recompensa II
+│        └─ Recompensa III
+│
+├─ Escoba recta
+│  └─ Anchura I
+│     ├─ Anchura II
+│     │  └─ Anchura III
+│     ├─ Escoba en V
+│     └─ Robot ayudante
+│        └─ Velocidad I
+│           └─ Velocidad II
+│              └─ Velocidad III
+│
+├─ Barrido de monedas
+│
+├─ Radio de recogida I
+│  ├─ Radio II
+│  │  └─ Radio III
+│  └─ Imán
+│
+└─ Día más largo I
+   └─ Día más largo II
+      └─ Día más largo III
+```
+
+Los precios, niveles y efectos actuales se consultan en [balance.csv](balance.csv), su única fuente editable. Cada nivel requiere el anterior; se pueden desarrollar todas las ramas. No existe una mejora actual de capacidad de mano para llevar varias bolas.
+
+### Catálogo y comportamiento de la escoba
+
+El árbol conserva el nodo histórico de compra «Escoba recta» y sus requisitos, pero el control actual ya ofrece la escoba física desde el inicio: [Board.canUse y Board.touch](../lib/features/board/domain/board.dart). Comprar ese nodo sigue siendo un paso del árbol hacia anchura, no una descripción fiel del primer acceso físico a la escoba. La propuesta futura elimina esa puerta de acceso y deja pendiente la migración de las compras existentes.
+
+### Estado de esta referencia
+
+Esta revisión es documental y procede del código, no de una nueva prueba en Android. Los colores por tipo, la capacidad de mano, Doble emisión, los cinco niveles y las fórmulas futuras todavía son propuestas: consultar [la referencia de cambios futuros](cambios-futuros-arbol-mejoras.md).

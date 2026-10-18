@@ -2,7 +2,7 @@
 
 Fecha: 18 de octubre de 2026. Base revisada: `main`, commit `1bf1efa`, prototipo `0.1.0+1`.
 
-Estado: planificación registrada; los cambios de este archivo no están implementados ni aprobados como entrega final. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. El resto de la documentación describe la entrega anterior o propuestas previas hasta el cierre acordado.
+Estado: implementación `0.2.0+2` en validación para entregar un APK de prueba; pendiente el OK del usuario. Los resultados y límites se registran al final de este archivo. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. El resto de la documentación describe la entrega anterior o propuestas previas hasta el cierre acordado.
 
 ## Forma de trabajar
 
@@ -12,7 +12,7 @@ Estado: planificación registrada; los cambios de este archivo no están impleme
 4. Distinguir implementación, verificación y OK del usuario. Ningún resultado automático equivale al OK de jugabilidad.
 5. Cuando estén terminados los cambios acordados y tengamos el OK del usuario, actualizar conjuntamente README, PRD, diseño, implementación, estado actual y demás documentación afectada. Hasta entonces, mantener el seguimiento en este archivo.
 
-Esta entrega crea únicamente el plan: no modifica juego, precios, árbol ni documentación general.
+La creación inicial de este archivo fue solo planificación. Esta tanda implementa los bloques 1–5; mantiene el árbol visual y el balance definitivo para más adelante. La documentación general se actualizará tras el OK acordado.
 
 ## Decisiones acordadas
 
@@ -42,12 +42,12 @@ Esta entrega crea únicamente el plan: no modifica juego, precios, árbol ni doc
 
 | Bloque | Trabajo | Dependencia | Implementado | Verificado | OK usuario |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Agarre de una bola y física de soltar/lanzar | Ninguna | Pendiente | Pendiente | Pendiente |
-| 2 | Escoba recta y ampliación de anchura | Física del bloque 1 validada | Pendiente | Pendiente | Pendiente |
-| 3 | Escoba en V | Barrido recto estable | Pendiente | Pendiente | Pendiente |
-| 4 | Monedas: pulsación y desbloqueo de barrido | Gestos de herramientas definidos | Pendiente | Pendiente | Pendiente |
-| 5 | Limpieza nocturna y persistencia completas | Revisión desde bloque 1; cierre tras 4 | Refuerzo pendiente | Pendiente | Pendiente |
-| 6 | Revisión integrada y APK manual | Bloques 1–5 | Pendiente | Pendiente | Pendiente |
+| 1 | Agarre de una bola y física de soltar/lanzar | Ninguna | Sí | Pruebas y navegador; Android físico pendiente | Pendiente |
+| 2 | Escoba recta y ampliación de anchura | Física del bloque 1 validada | Sí | Pruebas; sensación en Android pendiente | Pendiente |
+| 3 | Escoba en V | Barrido recto estable | Sí | Pruebas; sensación en Android pendiente | Pendiente |
+| 4 | Monedas: pulsación y desbloqueo de barrido | Gestos de herramientas definidos | Sí | Pruebas y recogida por toque en navegador | Pendiente |
+| 5 | Limpieza nocturna y persistencia completas | Revisión desde bloque 1; cierre tras 4 | Sí | Diez ciclos, noche, pausa, carga y migración en pruebas | Pendiente |
+| 6 | Revisión integrada y APK manual | Bloques 1–5 | En curso | Pipeline pendiente; ver registro de entrega | Pendiente |
 | Posterior | Rediseño del árbol de habilidades | Indicaciones del usuario | No iniciado | Pendiente | Pendiente |
 | Posterior | Balance de precios y ritmo de progreso | Controles validados; coordinar con árbol | No iniciado | Pendiente | Pendiente |
 | Cierre | Actualizar documentación general | Todo el alcance acordado terminado y OK explícito | Pendiente | Pendiente | Pendiente |
@@ -156,3 +156,44 @@ La aspiradora permanece como idea aparcada, sin prioridad para esta tanda.
 | 2026-10-18 | Planificación | Orden acordado: agarre individual → escoba ampliable → V; monedas y noche conservadas; árbol y balance posteriores | Solo planificación; sin cambios de juego ni OK final |
 
 Para cada implementación añadir commit, pruebas ejecutadas y resultado, revisión manual y pendientes. Registrar el OK del usuario únicamente cuando lo haya dado. Actualizar este plan durante el trabajo; actualizar la documentación general al cierre acordado.
+
+## Implementación para probar — 18 de octubre de 2026
+
+### Controles y decisiones de integración
+
+- Mano inicial: selección de una bola dentro de su radio más 12 unidades de tolerancia, conservando el desplazamiento respecto al dedo. Un gesto iniciado en vacío no agarra bolas que cruza después. Pulsar una moneda tiene prioridad sobre agarrar una bola próxima.
+- Lanzamiento: velocidad media del tramo final de 80 ms, limitada a 380 unidades/s; por debajo de 18 unidades/s se deja quieta. Parar antes de soltar elimina la inercia del movimiento anterior. La frecuencia de eventos no se usa como fuerza.
+- Arrastre de mano limitado a 700 unidades/s y movimiento de escoba a 900. Física con pasos de hasta 1/240 s, fricción existente y sin impulso extra por mantener una escoba parada. Estas cifras son valores iniciales de implementación, sujetos a prueba de sensación.
+- Escoba perpendicular al desplazamiento: ignorar cambios de dirección inferiores a 3 unidades, giro máximo de 3 radianes/s y orientación conservada al parar. Al tocar, se orienta hacia el hoyo. En la recta, invertir el movimiento no obliga a girar 180 grados una línea equivalente.
+- Colisiones y dibujo comparten segmentos con grosor de 7 unidades. La V abre hacia el movimiento y reúne hacia su vértice posterior; no atrae a distancia. La rotación aporta velocidad de contacto limitada para evitar golpes exagerados.
+- Selector Mano / Escoba / Escoba en V: muestra bloqueos, permite volver a herramientas compradas y conserva la elección. Comprar una herramienta la selecciona. Cambiarla cancela el gesto anterior con seguridad.
+- Monedas: sin barrido, cobrar al levantar tras una pulsación con desplazamiento máximo de 8 unidades. Un arrastre que empieza encima tampoco cobra; cancelar o pausar no confirma la pulsación. Con barrido se comprueba todo el segmento. El imán sigue siendo una capacidad independiente y conserva sus requisitos actuales.
+
+### Progresión provisional para poder probar
+
+| Compra | Coste provisional | Requisito | Efecto |
+| --- | --- | --- | --- |
+| Escoba recta (`broom`) | 20 | Ninguno | Desbloquea frente de anchura 80 |
+| Anchura (`paddle`) | 20 / 70 / 160 | Escoba recta | Anchuras 96 / 112 / 128; también afectan a la V |
+| Escoba en V (`broom_v`) | 80 | Anchura nivel 1 | Desbloquea dos brazos que reúnen bolas |
+| Barrido de monedas (`sweep`) | 20 | Ninguno | Permite recoger arrastrando; pulsar sigue disponible |
+
+Se conservan el resto de precios y efectos. `paddle_radius` se mantiene como clave interna por compatibilidad; el frente completo mide cuatro veces ese valor y la tienda muestra la anchura resultante. Estos importes permiten probar la progresión; no equivalen al balance definitivo ni al rediseño del árbol.
+
+### Guardado y cierre
+
+- Instantánea versión 2 con herramienta seleccionada; compras y ahorro persistentes.
+- Migración de versión 1: conserva progreso, resultados, objetos de la misma jornada y compras anteriores. Quien compró anchura recibe el acceso a escoba necesario para conservar esa compra. Sin anchura previa empieza con mano. El barrido nuevo no se concede gratis.
+- Durante una jornada antigua se validan los valores originales antes de migrar; la restauración queda pausada. La migración se comunica en pantalla nocturna.
+- Una bola agarrada se guarda como bola normal en su posición y sin velocidad de lanzamiento; no se restaura un dedo inexistente. Pausa, cancelación y cierre cancelan el agarre sin lanzar ni cobrar pulsaciones pendientes.
+- Noche sin tablero activo; al empezar otro día, listas de bolas/monedas vacías y ningún gesto heredado. Las monedas no cobradas se pierden y las bolas retiradas no generan recompensa.
+
+### Evidencia y límites de esta entrega
+
+- `flutter doctor -v`: SDK Flutter/Dart, Android y Chrome correctos. Faltan herramientas de escritorio Linux y Android Studio; no impiden el destino Android configurado.
+- `flutter pub get --enforce-lockfile`: correcto, sin actualizar dependencias.
+- Formato y `flutter analyze --no-pub`: correctos.
+- `flutter test --no-pub`: 36 pruebas superadas (32 de dominio/sesión y 4 de widgets). Cubren colocación suave, pausa antes de soltar, lanzamiento a 30/60/120 Hz de eventos, orientación, grupos, anchura, V, entrada real de puntero en widgets, monedas, guardado v1/v2 y diez ciclos limpios.
+- Compilación web correcta. Navegador Chromium a 390×844, con generación normal y puntero: 2 bolas capturadas, 4 monedas recogidas por pulsación y recarga pausada conservando ingreso, sin errores JavaScript. Cambio entre herramientas compradas y persistencia del barrido también comprobados, sin errores JavaScript; esta parte usa un guardado aislado de prueba, no se presenta como progreso obtenido jugando.
+- Pendientes: sensación con dedo en Android físico, medición de rendimiento en dispositivo, OK del usuario, diseño definitivo del árbol y balance. Las casillas de aceptación anteriores no se cierran en bloque con las pruebas automáticas.
+- Pipeline manual y enlace de APK: se añadirán al registro cuando termine la ejecución.

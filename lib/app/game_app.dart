@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../features/board/presentation/garden_game.dart';
+import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/upgrades/domain/catalog.dart';
 import 'game_session.dart';
@@ -219,8 +220,12 @@ class _DayScreenState extends State<DayScreen> {
             closing
                 ? 'ÚLTIMOS SEGUNDOS · Recoge las monedas'
                 : session.economy.generated > 0
-                ? 'Toca o desliza para recoger las monedas'
-                : 'Arrastra para empujar las bolas al hoyo',
+                ? (session.board!.sweepEnabled
+                      ? 'Toca o desliza para recoger las monedas'
+                      : 'Pulsa las monedas para recogerlas')
+                : session.selectedTool == BallTool.hand
+                ? 'Agarra una bola · Arrastra y suelta para lanzar'
+                : 'Barre hacia donde arrastras el dedo',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
@@ -230,6 +235,7 @@ class _DayScreenState extends State<DayScreen> {
             ),
           ),
         ),
+        ToolSelector(session: session),
         Expanded(
           child: Stack(
             children: [
@@ -240,23 +246,44 @@ class _DayScreenState extends State<DayScreen> {
                     final point = game.boardPoint(event.localPosition);
                     if (point == null) return;
                     pointer = event.pointer;
-                    session.touch(point);
+                    session.touch(
+                      point,
+                      time: event.timeStamp.inMicroseconds / 1e6,
+                    );
                   },
                   onPointerMove: (event) {
                     if (event.pointer != pointer || session.paused) return;
                     final point = game.boardPoint(event.localPosition);
-                    if (point != null) session.drag(point);
+                    if (point != null) {
+                      session.drag(
+                        point,
+                        time: event.timeStamp.inMicroseconds / 1e6,
+                      );
+                    } else {
+                      pointer = null;
+                      session.release(cancel: true);
+                    }
                   },
                   onPointerUp: (event) {
                     if (event.pointer == pointer) {
                       pointer = null;
-                      session.release();
+                      final point = game.boardPoint(event.localPosition);
+                      if (point != null) {
+                        session.drag(
+                          point,
+                          time: event.timeStamp.inMicroseconds / 1e6,
+                        );
+                      }
+                      session.release(
+                        cancel: point == null,
+                        time: event.timeStamp.inMicroseconds / 1e6,
+                      );
                     }
                   },
                   onPointerCancel: (event) {
                     if (event.pointer == pointer) {
                       pointer = null;
-                      session.release();
+                      session.release(cancel: true);
                     }
                   },
                   child: GameWidget(game: game),
@@ -377,7 +404,7 @@ class NightScreen extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 last == null
-                    ? 'Empuja las piedras al hoyo, recoge sus monedas y transforma tu próximo día.'
+                    ? 'Agarra una bola, llévala al hoyo y pulsa sus monedas. Desbloquea escobas para mover grupos.'
                     : 'Día ${last.day} completado. Invierte lo recogido o ahorra para más adelante.',
                 style: const TextStyle(
                   fontSize: 15,
@@ -393,7 +420,9 @@ class NightScreen extends StatelessWidget {
                     style: const TextStyle(color: gold),
                   ),
                 ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 16),
+              ToolSelector(session: session),
+              const SizedBox(height: 16),
               Card(
                 margin: EdgeInsets.zero,
                 child: Padding(
@@ -541,7 +570,10 @@ class UpgradeCard extends StatelessWidget {
   final GameSession session;
   final UpgradeDefinition definition;
   static const icons = {
-    'paddle': Icons.pan_tool_outlined,
+    'broom': Icons.cleaning_services_outlined,
+    'paddle': Icons.swap_horiz,
+    'broom_v': Icons.call_merge,
+    'sweep': Icons.swipe_outlined,
     'collection': Icons.touch_app_outlined,
     'magnet': Icons.sensors,
     'generator': Icons.speed,
@@ -562,6 +594,8 @@ class UpgradeCard extends StatelessWidget {
           ? value.toInt().toString()
           : value.toStringAsFixed(2);
       return switch (definition.unit) {
+        'unlock' => value > 0 ? 'Desbloqueado' : 'Bloqueado',
+        'broom_width' => '${(value * 4).round()} u de anchura',
         'seconds' => '$number s',
         'coins' => '$number monedas / bola',
         'robots' => value == 0 ? 'Sin robot' : '1 robot',
@@ -605,9 +639,24 @@ class UpgradeCard extends StatelessWidget {
               '${effect(current)}${next == null ? '' : '  →  ${effect(next.value)}'}',
               style: const TextStyle(color: Color(0xffd2d9e2)),
             ),
+            if (definition.id == 'broom')
+              const Text(
+                'Barre grupos. Se orienta según tu movimiento.',
+                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
+              ),
+            if (definition.id == 'broom_v')
+              const Text(
+                'Los dos brazos reúnen las bolas hacia el centro.',
+                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
+              ),
+            if (definition.id == 'sweep')
+              const Text(
+                'Recoge monedas arrastrando. Antes, solo pulsando.',
+                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
+              ),
             if (definition.id == 'magnet')
               const Text(
-                'Actúa alrededor de la pala mientras tocas.',
+                'Atrae y recoge monedas cerca del dedo mientras tocas.',
                 style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
               ),
             if (definition.id == 'robot')
@@ -651,4 +700,31 @@ class UpgradeCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class ToolSelector extends StatelessWidget {
+  const ToolSelector({super.key, required this.session});
+  final GameSession session;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+    child: Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      children: [
+        for (final tool in BallTool.values)
+          ChoiceChip(
+            label: Text(tool.label),
+            avatar: session.toolAvailable(tool)
+                ? null
+                : const Icon(Icons.lock_outline, size: 15),
+            selected: session.selectedTool == tool,
+            onSelected: session.toolAvailable(tool) && !session.paused
+                ? (_) => session.selectTool(tool)
+                : null,
+          ),
+      ],
+    ),
+  );
 }

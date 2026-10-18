@@ -31,7 +31,7 @@ Las flechas representan uso de datos o llamadas; la fábrica de persistencia eli
 | Ruta | Responsabilidad y entrada útil |
 | --- | --- |
 | [main.dart](../lib/main.dart) | Inicializa Flutter, pide orientación vertical, carga `docs/balance.csv`, crea almacenamiento y sesión; muestra errores y recuperación explícita |
-| [app/game_app.dart](../lib/app/game_app.dart) | `GardenApp`, `SessionScreen`, `DayScreen`, `NightScreen`, `UpgradeCard`; ciclo de vida y entrada del puntero |
+| [app/game_app.dart](../lib/app/game_app.dart) | `GardenApp`, `SessionScreen`, `DayScreen`, `NightScreen`, acceso al árbol; ciclo de vida y entrada del puntero |
 | [app/game_session.dart](../lib/app/game_session.dart) | `startDay`, `tick`, `touch`, `drag`, `pause`, `purchase`, `finishDay`, `snapshot`, `restore`, `save` |
 | [board/domain/board.dart](../lib/features/board/domain/board.dart) | `Board`, `Ball`, `Coin`, `BoardEvents`; generación, movimiento, colisiones, captura y recogida |
 | [board/presentation/garden_game.dart](../lib/features/board/presentation/garden_game.dart) | `GardenGame.update` avanza sesión; `render` lee tablero y dibuja primitivas; `boardPoint` transforma entrada |
@@ -115,6 +115,14 @@ sequenceDiagram
 Las monedas usan enteros. Durante la jornada, `generated = collected + board.pending`. El resultado calcula `lost = generated - collected`. `finishDay` retorna sin efectos si ya no hay jornada; esa guarda de sesión evita el segundo cobro. `Economy.bank()` por sí mismo no es idempotente: los llamadores deben pasar por la sesión.
 
 El cierre descarta tablero y pendientes, conserva ahorro y niveles, actualiza récord y día, y guarda el resultado. `Progress` conserva solo `last`, no una lista histórica; `previousIncome` permite comparar dos jornadas consecutivas.
+
+## Árbol visual de mejoras
+
+El taller abre `SkillTreeScreen` como una ruta independiente, con el saldo siempre visible y una ficha fija debajo del tablero. `SkillTree` construye un nodo por nivel y deriva el descubrimiento desde `GameSession.levels`; no guarda otra copia del progreso. El generador de nivel 1 es la raíz. Cada nodo posterior exige su nivel anterior y los requisitos del CSV; los inicios sin requisito dependen de la raíz, salvo la recompensa, que se descubre con el segundo nivel del generador. Las compras históricas y sus antecesores permanecen visibles aunque procedan del taller antiguo.
+
+`InteractiveViewer` transforma el lienzo y permite arrastrar/pellizcar; sus controles también permiten zoom y centrado. Un toque selecciona. En un nodo seleccionado o en la ficha, `AnimationController` muestra tres segundos de progreso antes de llamar a `GameSession.purchase`, comprobando otra vez saldo, nivel y desbloqueo. Movimiento superior a diez píxeles de pantalla, otro puntero, cancelación del sistema, zoom o pérdida de actividad reinician la compra. Espacio/Intro permiten mantener desde el foco de teclado. El catálogo, las compras persistidas y las jornadas guardadas no cambian de formato.
+
+Los porcentajes comparan cada nodo con su nivel anterior; la velocidad del generador usa la inversa del intervalo. Las mejoras de desbloqueo muestran una descripción directa. Los precios y efectos se leen del CSV y se pagan con monedas.
 
 ## Balance y mejoras
 

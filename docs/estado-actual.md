@@ -1,6 +1,8 @@
 # Estado actual del prototipo
 
-Corte: 17 de octubre de 2026, aplicación `0.1.0+1`, `main` hasta `44d0aeb`. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está pendiente.
+Actualización del 18 de octubre de 2026: el taller abre el [árbol progresivo](../lib/features/upgrades/presentation/skill_tree_screen.dart). Una partida nueva empieza en el generador y descubre los sucesores al comprar. Incluye arrastre, zoom, ficha de efecto/coste y compra de tres segundos, con cancelación por movimiento, multitáctil e interrupción. Mantiene las compras existentes y el balance del CSV. La interacción física en Android sigue pendiente.
+
+El siguiente inventario conserva el corte histórico del 17 de octubre de 2026, aplicación `0.1.0+1`, `main` hasta `44d0aeb`. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está pendiente.
 
 ## Qué está implementado
 
@@ -34,7 +36,7 @@ Las pruebas de simulación usan objetos controlados. La revisión del navegador 
 
 | Propuesta del diseño | Situación real |
 | --- | --- |
-| Árbol con conexiones visuales | Lista por ramas con requisitos y estados; falta el grafo final |
+| Árbol con conexiones visuales | Implementado el 18 de octubre: descubrimiento progresivo, estados, zoom y pulsación de compra |
 | Audio con recursos propios, concurrencia y volumen | Solo clic del sistema y silencio; `flame_audio` no está instalado |
 | Sistema de partículas y carga de 150 partículas | `particle_limit` está en el CSV, pero no existe sistema de partículas ni pools |
 | Modelos separados `RunState`, `BoardSnapshot`, `SaveEnvelope` | Se componen mapas JSON desde `GameSession` y `Board`; esas clases no existen |
@@ -59,7 +61,7 @@ También está confirmado cambiar las monedas: pulsación al inicio y barrido al
 | Alta | Validar economía y progresión | Diez jornadas manuales; revisar primera compra y robot en aproximadamente 3–5 días sin garantizar ese ritmo |
 | Alta | Medir rendimiento | Modo profile, 200 bolas y 100 pilas, tres jornadas y revisión tras diez ciclos; objetivo de 60 FPS aún sin verificar |
 | Media | Completar audio y volumen | Recursos propios con licencia, silencio y control independiente; prueba real por destino |
-| Media | Completar presentación | Grafo del árbol, respuesta visual final e iconos de instalación propios |
+| Media | Completar presentación | Validación física del árbol, ajuste visual e iconos de instalación propios |
 | Según necesidad | Ampliar pruebas de integración y robustez | Añadir regresiones de errores observados, recuperación y evolución de esquema antes de declarar garantías más amplias |
 
 La carga de partículas de la especificación solo podrá medirse cuando exista ese sistema. No se registra como prueba realizada.

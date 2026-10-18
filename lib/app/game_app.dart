@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import '../features/board/presentation/garden_game.dart';
 import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
-import '../features/upgrades/domain/catalog.dart';
+import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
 
 const ink = Color(0xff111c2e);
@@ -492,37 +492,45 @@ class NightScreen extends StatelessWidget {
                 'Cada mejora empieza a funcionar el próximo día.',
                 style: TextStyle(color: Color(0xffb5bdc9)),
               ),
-              for (final branch in [
-                'Control',
-                'Producción',
-                'Automatización',
-              ]) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 24, bottom: 10),
-                  child: Text(
-                    branch.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 2,
-                      color: Color(0xff8fc7ba),
-                    ),
+              const SizedBox(height: 18),
+              Card(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.account_tree_outlined,
+                        color: gold,
+                        size: 38,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Descubre nuevos caminos',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Compra una mejora para revelar las siguientes. Explora el árbol y mantén pulsado para comprar.',
+                      ),
+                      const SizedBox(height: 18),
+                      FilledButton.icon(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => SkillTreeScreen(session: session),
+                          ),
+                        ),
+                        icon: const Icon(Icons.account_tree_outlined),
+                        label: const Text('Abrir árbol de mejoras'),
+                      ),
+                    ],
                   ),
                 ),
-                for (final definition in session.catalog.definitions.where(
-                  (d) => d.branch == branch,
-                ))
-                  UpgradeCard(session: session, definition: definition),
-              ],
-              if (session.catalog.definitions.every(
-                (d) => (session.levels[d.id] ?? 0) == d.levels.length,
-              ))
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    'Mejoras del prototipo completadas. ¡A por un nuevo récord!',
-                    style: TextStyle(color: gold),
-                  ),
-                ),
+              ),
               const SizedBox(height: 12),
             ],
           ),
@@ -559,147 +567,6 @@ class NightScreen extends StatelessWidget {
       ),
     ],
   );
-}
-
-class UpgradeCard extends StatelessWidget {
-  const UpgradeCard({
-    super.key,
-    required this.session,
-    required this.definition,
-  });
-  final GameSession session;
-  final UpgradeDefinition definition;
-  static const icons = {
-    'broom': Icons.cleaning_services_outlined,
-    'paddle': Icons.swap_horiz,
-    'broom_v': Icons.call_merge,
-    'sweep': Icons.swipe_outlined,
-    'collection': Icons.touch_app_outlined,
-    'magnet': Icons.sensors,
-    'generator': Icons.speed,
-    'reward': Icons.monetization_on_outlined,
-    'duration': Icons.more_time,
-    'robot': Icons.smart_toy_outlined,
-    'robot_speed': Icons.bolt,
-  };
-  @override
-  Widget build(BuildContext context) {
-    final level = session.levels[definition.id] ?? 0;
-    final complete = level == definition.levels.length;
-    final next = complete ? null : definition.levels[level];
-    final block = session.purchaseBlock(definition);
-    final current = session.catalog.settings(session.levels)[definition.effect];
-    String effect(double value) {
-      final number = value == value.roundToDouble()
-          ? value.toInt().toString()
-          : value.toStringAsFixed(2);
-      return switch (definition.unit) {
-        'unlock' => value > 0 ? 'Desbloqueado' : 'Bloqueado',
-        'broom_width' => '${(value * 4).round()} u de anchura',
-        'seconds' => '$number s',
-        'coins' => '$number monedas / bola',
-        'robots' => value == 0 ? 'Sin robot' : '1 robot',
-        'logical_units_per_second' => '$number u/s',
-        _ => '$number u',
-      };
-    }
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  icons[definition.id],
-                  color: complete ? const Color(0xff8fc7ba) : gold,
-                  size: 25,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    definition.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                Text(
-                  '$level/${definition.levels.length}',
-                  style: const TextStyle(color: Color(0xffb5bdc9)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '${effect(current)}${next == null ? '' : '  →  ${effect(next.value)}'}',
-              style: const TextStyle(color: Color(0xffd2d9e2)),
-            ),
-            if (definition.id == 'broom')
-              const Text(
-                'Barre grupos. Se orienta según tu movimiento.',
-                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
-              ),
-            if (definition.id == 'broom_v')
-              const Text(
-                'Los dos brazos reúnen las bolas hacia el centro.',
-                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
-              ),
-            if (definition.id == 'sweep')
-              const Text(
-                'Recoge monedas arrastrando. Antes, solo pulsando.',
-                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
-              ),
-            if (definition.id == 'magnet')
-              const Text(
-                'Atrae y recoge monedas cerca del dedo mientras tocas.',
-                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
-              ),
-            if (definition.id == 'robot')
-              const Text(
-                'Empuja bolas. Las monedas las recoges tú.',
-                style: TextStyle(fontSize: 12, color: Color(0xffb5bdc9)),
-              ),
-            const SizedBox(height: 10),
-            if (block != null)
-              Text(
-                block,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: complete
-                      ? const Color(0xff8fc7ba)
-                      : const Color(0xffb5bdc9),
-                ),
-              ),
-            if (next != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: block == null
-                      ? () {
-                          if (session.purchase(definition) && session.sound) {
-                            unawaited(SystemSound.play(SystemSoundType.click));
-                          }
-                        }
-                      : null,
-                  icon: Icon(
-                    block == null
-                        ? Icons.add_circle_outline
-                        : Icons.lock_outline,
-                    size: 19,
-                  ),
-                  label: Text('Mejorar · ${next.cost} monedas'),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class ToolSelector extends StatelessWidget {

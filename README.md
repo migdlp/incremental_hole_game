@@ -2,6 +2,9 @@
 
 Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.3+8**.
 
+**[Descargar APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149)** · [CI correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) sobre `91b10cb`: 101 pruebas y firma verificadas. Incluye el árbol compacto y la compra de 1 s. Descomprime e instala `jardin-mecanico-debug.apk`.
+
+
 **[Descargar APK 0.3.1+6 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676)** · [CI correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) sobre `27b3950`: 88 pruebas y firma verificadas. Descomprime e instala `jardin-mecanico-debug.apk`; disponible hasta el 2 de noviembre de 2026.
 
 

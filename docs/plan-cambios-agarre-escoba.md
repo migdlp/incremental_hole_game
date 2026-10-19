@@ -1,5 +1,8 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+> **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
+
+
 ## Revisión CF-05 — árbol compacto, en rama
 
 Implementada por petición del usuario: [CF-05](cambios-futuros-arbol-mejoras.md#cf-05--árbol-compacto-y-ficha-bajo-demanda--19-de-octubre-de-2026). Se conserva la información, el balance y los nodos. Pantalla sin título, atrás ni controles de zoom; ficha tras seleccionar, cantidades en verde, compra desde botón en 1 s y conexiones rectas con nodos más cercanos. Pendiente de integración; no modifica los APK históricos enlazados debajo.

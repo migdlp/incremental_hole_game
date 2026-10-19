@@ -2,6 +2,13 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Entrega del árbol compacto — 2026-10-19 · 0.3.3+8
+
+- [PR #16](https://github.com/migdlp/incremental_hole_game/pull/16) integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. El APK incluye también los cambios ya presentes en `main`.
+- [Pipeline manual 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta: formato, análisis, 101 pruebas, compilación del APK y firma v2 verificada.
+- [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`.
+- El artefacto corresponde al commit de código indicado, anterior a este registro documental. Prueba física en Android y ajuste final de sensación pendientes.
+
 ## Cabecera visible y bolas doradas — 2026-10-19 · 0.3.3+8
 
 - El tiempo y toda la cabecera permanecen sin oscurecer durante la recogida final. El tablero conserva su capa oscura, las monedas su brillo y la pausa sigue accesible.

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../app/game_session.dart';
+import '../../board/presentation/coin_icon.dart';
 import '../domain/skill_tree.dart';
 
 const _background = Color(0xff101a2b);
@@ -146,12 +147,12 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         automaticallyImplyLeading: false,
         toolbarHeight: 48,
         actions: [
-          const Icon(Icons.monetization_on_outlined, color: _gold, size: 20),
+          const CoinIcon(),
           Padding(
             padding: const EdgeInsets.fromLTRB(7, 0, 20, 0),
             child: Center(
               child: Text(
-                '\$${session.economy.balance}',
+                '${session.economy.balance}',
                 style: const TextStyle(
                   color: _gold,
                   fontWeight: FontWeight.bold,
@@ -302,7 +303,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
       button: true,
       selected: isSelected,
       label:
-          '${_description(node)}. ${owned ? 'Adquirida' : '\$${node.upgrade.cost}'}.',
+          '${_description(node)}. ${owned ? 'Adquirida' : '${node.upgrade.cost} monedas'}.',
       onTap: () {
         _cancel();
         setState(() => selected = node);
@@ -425,13 +426,20 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
           Row(
             children: [
               Expanded(
-                child: Text(
-                  owned ? 'Adquirida' : '\$${node.upgrade.cost}',
-                  style: TextStyle(
-                    color: owned ? _mint : _gold,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                  ),
+                child: Row(
+                  children: [
+                    if (!owned) ...[const CoinIcon(), const SizedBox(width: 6)],
+                    Flexible(
+                      child: Text(
+                        owned ? 'Adquirida' : '${node.upgrade.cost}',
+                        style: TextStyle(
+                          color: owned ? _mint : _gold,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               if (!owned && !affordable)
@@ -556,7 +564,7 @@ const _icons = {
   'attraction': Icons.radar,
   'double_spawn': Icons.filter_2_outlined,
   'generator': Icons.speed,
-  'reward': Icons.monetization_on_outlined,
+  'reward': Icons.toll_outlined,
   'duration': Icons.more_time,
   'robot': Icons.smart_toy_outlined,
   'robot_speed': Icons.bolt,
@@ -571,8 +579,8 @@ String _description(SkillNode node) => switch (node.definition.id) {
   'paddle' => 'Aumenta la anchura de la escoba',
   'broom_v' => 'Reúne las bolas con una escoba en V',
   'sweep' => 'Recoge monedas al deslizar el dedo',
-  'collection' => 'Aumenta el radio de recogida de monedas',
-  'magnet' => 'Atrae monedas cerca del dedo mientras tocas',
+  'collection' => 'Recoge varias monedas cercanas en cada pulsación, sin imán',
+  'magnet' => 'Atrae monedas cerca del dedo solo con la mano vacía',
   'attraction' => 'Amplía el alcance del imán de monedas',
   'double_spawn' => 'Emite dos bolas a la vez sin cambiar la cadencia',
   'generator' => 'El generador lanza bolas más rápido',
@@ -594,7 +602,7 @@ TextSpan _summary(SkillNode node) {
     'collection' => ('Recoge monedas a ', number(value), ' u de distancia.'),
     'magnet' || 'attraction' => ('El imán alcanza ', number(value), ' u.'),
     'generator' => ('Genera ', number(1 / value), ' bolas/s.'),
-    'reward' => ('Cada bola da ', '\$${number(value)}', '.'),
+    'reward' => ('Cada bola da ', number(value), '.'),
     'duration' => ('Produce durante ', number(value), ' s.'),
     'robot_speed' => ('El robot avanza a ', number(value), ' u/s.'),
     'double_spawn' => (
@@ -611,6 +619,11 @@ TextSpan _summary(SkillNode node) {
   return TextSpan(
     children: [
       TextSpan(text: before),
+      if (node.definition.id == 'reward')
+        const WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: CoinIcon(),
+        ),
       TextSpan(
         text: amount,
         style: const TextStyle(
@@ -631,7 +644,7 @@ String _value(SkillNode node, double value) {
     'multiplier' => '×${number(value == 0 ? 1 : value)}',
     'unlock' => value > 0 ? 'Desbloqueada' : 'Sin desbloquear',
     'seconds' => '${number(value)} s',
-    'coins' => '\$${number(value)}/bola',
+    'coins' => '${number(value)} monedas/bola',
     'balls_per_spawn' => '${number(value)} bolas/emisión',
     'balls' => '${number(value)} bolas',
     'robots' => '${number(value)} robot',

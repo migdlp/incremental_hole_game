@@ -114,7 +114,7 @@ void main() {
         ..restore(session.snapshot());
       expect(restored.board!.gripStrength, 1.25);
       expect(restored.levels['hand_grip'], 1);
-      expect(restored.economy.balance, 955);
+      expect(restored.economy.balance, 962);
       expect(restored.board!.heldBalls, isEmpty);
       final old = GameSession(catalog, MemoryStore())..startDay();
       final reopened = GameSession(catalog, MemoryStore())

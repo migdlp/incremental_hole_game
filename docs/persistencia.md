@@ -1,10 +1,22 @@
 # Referencia de guardado y recuperación
 
+## Actualización vigente — 0.5.0+10 · JSON v5 y balance 6
+
+Se escribe `version: 5` y se aceptan versiones 1–5. `grandfathered` mantiene las compras del catálogo antiguo; `previousTree` conserva los niveles que ya estaban comprados en v4 antes del nuevo requisito de Imán. Ambos mapas se validan contra sus requisitos históricos y no conceden niveles nuevos. Las compras posteriores cumplen el CSV actual.
+
+Las jornadas nuevas usan balance 6: Mano I cuesta 13, Valor da 2/3/5/8/13 y el imán requiere Área III y cuesta 300. Una jornada activa mantiene su balance 1–5 hasta terminar. El balance 5 queda congelado en [balance_v5.dart](../lib/features/upgrades/domain/balance_v5.dart), además de las copias históricas existentes.
+
+`board.coins` contiene monedas individuales de valor 1/10/50/100/500. Al restaurar una pila histórica de otro importe se descompone sin perder dinero. `board.queuedCoins` es un mapa denominación → cantidad que conserva las monedas pendientes de emitir si se llena el límite de objetos visibles. Se valida que solo tenga claves de las cinco denominaciones y cantidades enteras no negativas; forma parte del valor pendiente. El nuevo límite visible es 1000; las jornadas históricas conservan su límite original.
+
+`board.collectedCoins` registra denominación → cantidad recogida durante la jornada y se copia a `last.collectedCoins` al cerrarla. Se exige que su valor sumado coincida con el ingreso cobrado. `null` significa que ese desglose no se guardaba en la jornada histórica; se conserva el ingreso y se indica que falta el detalle, sin deducir un recuento ficticio de un total. Las claves se serializan como cadenas canónicas, por ejemplo `"50"`.
+
+La restauración valida configuración, recuentos, IDs y contabilidad antes de modificar la sesión. Al cargar no se restaura un agarre ni se cobra el día dos veces. A partir de aquí se conserva la documentación histórica de los esquemas anteriores; esta sección prevalece para el contrato actual.
+
 ## Bolas doradas — 0.3.3+8
 
 El esquema v4 añade `golden` a cada bola y `goldenCaptured` al tablero. En datos anteriores ausentes significan bola normal y cero capturas doradas. El contador dorado debe estar entre cero y el total capturado. La contabilidad valida `generated = ball_value × (captured + 9 × goldenCaptured)` además de `generated = collected + pending`. El estado aleatorio sigue guardado, así que cargar no vuelve a sortear una bola existente ni reinicia la secuencia de emisiones.
 
-## Actualización vigente — esquema v4 y balance 5
+## Historial — esquema v4 y balance 5
 
 La revisión 0.3.1+6 conserva el esquema JSON v4 y admite balances 1–5. Las jornadas nuevas usan **balance 5**: $1 por bola base y 3 segundos de recogida final. Las jornadas activas de balance 4 conservan sus tiempos y valores completos desde [balance_v4.dart](../lib/features/upgrades/domain/balance_v4.dart); los balances 1–3 siguen usando [legacy_balance.dart](../lib/features/upgrades/domain/legacy_balance.dart). No se modifica el ahorro ni se convierten los importes existentes.
 

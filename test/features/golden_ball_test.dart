@@ -93,15 +93,15 @@ void main() {
       session.tick(1 / 60);
       expect(board.captured, 4);
       expect(board.goldenCaptured, 2);
-      expect(session.economy.generated, (2 + 20) * 4);
-      expect(board.pending, 88);
+      expect(session.economy.generated, (2 + 20) * 3);
+      expect(board.pending, 66);
       final restored = GameSession(catalog, MemoryStore())
         ..restore(session.snapshot());
-      expect(restored.economy.generated, 88);
+      expect(restored.economy.generated, 66);
       expect(restored.board!.goldenCaptured, 2);
       restored.resume();
       restored.tick(1 / 60);
-      expect(restored.economy.generated, 88);
+      expect(restored.economy.generated, 66);
     },
   );
 

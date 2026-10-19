@@ -61,7 +61,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(of: popup, matching: find.text('\$4')),
+        find.descendant(of: popup, matching: find.text('4')),
         findsOneWidget,
       );
       expect(
@@ -96,9 +96,9 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(session.levels['hand'], 1);
-      expect(session.economy.balance, 84);
+      expect(session.economy.balance, 91);
       expect(game.paused, isTrue);
-      expect(find.text('\$84'), findsOneWidget);
+      expect(find.text('91'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('tree-start-day')));
       await tester.pump();
       expect(popup, findsNothing);
@@ -107,7 +107,7 @@ void main() {
       expect(game.paused, isFalse);
       expect(session.board!.balls, isEmpty);
       expect(session.board!.coins, isEmpty);
-      expect(session.economy.balance, 84);
+      expect(session.economy.balance, 91);
       expect(session.board!.handCapacity, 2);
       await close(tester, session);
     },

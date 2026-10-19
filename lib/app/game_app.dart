@@ -3,6 +3,8 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../features/board/presentation/garden_game.dart';
+import '../features/board/presentation/coin_icon.dart';
+import '../features/board/domain/coin_denomination.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
@@ -196,7 +198,7 @@ class _DayScreenState extends State<DayScreen> {
                               ),
                             ),
                             Text(
-                              '${session.cycle?.remaining.ceil() ?? 0} s',
+                              '${session.cycle == null ? 0 : (closing ? session.cycle!.remaining : session.cycle!.remaining - session.cycle!.closing).ceil()} s',
                               style: TextStyle(
                                 fontSize: 30,
                                 fontWeight: FontWeight.w800,
@@ -208,14 +210,10 @@ class _DayScreenState extends State<DayScreen> {
                           ],
                         ),
                       ),
-                      const Icon(
-                        Icons.monetization_on_rounded,
-                        color: gold,
-                        size: 27,
-                      ),
+                      const CoinIcon(),
                       const SizedBox(width: 7),
                       Text(
-                        '\$${session.economy.collected}',
+                        '${session.economy.collected}',
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
@@ -232,21 +230,30 @@ class _DayScreenState extends State<DayScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: LinearProgressIndicator(
-                      value: session.cycle == null
-                          ? 0
-                          : (session.cycle!.remaining /
-                                    (session.cycle!.production +
-                                        session.cycle!.closing))
-                                .clamp(0, 1),
-                      minHeight: 5,
-                      backgroundColor: surface,
-                      color: closing
-                          ? const Color(0xffd1764c)
-                          : const Color(0xff69b4a5),
-                    ),
+                  child: Column(
+                    children: [
+                      _phaseBar(
+                        'day-timer',
+                        'Día',
+                        session.cycle == null
+                            ? 0
+                            : ((session.cycle!.remaining -
+                                          session.cycle!.closing) /
+                                      session.cycle!.production)
+                                  .clamp(0.0, 1.0),
+                        const Color(0xff69b4a5),
+                      ),
+                      if (closing) ...[
+                        const SizedBox(height: 6),
+                        _phaseBar(
+                          'collection-timer',
+                          'Recogida',
+                          (session.cycle!.remaining / session.cycle!.closing)
+                              .clamp(0.0, 1.0),
+                          const Color(0xffd1764c),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 Padding(
@@ -389,6 +396,32 @@ class _DayScreenState extends State<DayScreen> {
   }
 }
 
+Widget _phaseBar(String id, String label, double remaining, Color color) =>
+    Semantics(
+      label: label,
+      value: '${(remaining * 100).round()} % de tiempo restante',
+      child: Row(
+        children: [
+          SizedBox(
+            width: 64,
+            child: Text(label, style: TextStyle(fontSize: 11, color: color)),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: LinearProgressIndicator(
+                key: ValueKey(id),
+                value: remaining,
+                minHeight: 5,
+                backgroundColor: surface,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
 class _DayResultsOverlay extends StatelessWidget {
   const _DayResultsOverlay({required this.session});
   final GameSession session;
@@ -456,10 +489,10 @@ class NightScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(Icons.monetization_on_outlined, color: gold, size: 21),
+              const CoinIcon(),
               const SizedBox(width: 6),
               Text(
-                '\$${session.economy.balance}',
+                '${session.economy.balance}',
                 style: const TextStyle(
                   color: gold,
                   fontSize: 21,
@@ -548,9 +581,6 @@ class NightScreen extends StatelessWidget {
 
   Widget _results() {
     final result = session.progress.last!;
-    final collected = result.generated == 0
-        ? 0.0
-        : result.income / result.generated;
     return Container(
       key: const ValueKey('visual-day-results'),
       padding: const EdgeInsets.all(24),
@@ -561,7 +591,7 @@ class NightScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.savings_outlined, color: gold, size: 36),
+          const CoinIcon(),
           const SizedBox(height: 8),
           const Text(
             'Dinero ganado',
@@ -571,25 +601,11 @@ class NightScreen extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              '\$${result.income}',
+              '${result.income}',
               style: const TextStyle(
                 color: gold,
                 fontSize: 58,
                 fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Semantics(
-            label: 'Dinero recogido',
-            value: '\$${result.income} de \$${result.generated}',
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: collected.clamp(0, 1),
-                minHeight: 8,
-                color: const Color(0xff22c55e),
-                backgroundColor: const Color(0xff152136),
               ),
             ),
           ),
@@ -598,7 +614,7 @@ class NightScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _metric(
-                  Icons.adjust_rounded,
+                  const Icon(Icons.adjust_rounded, size: 22, color: cream),
                   '${result.captured}',
                   'Bolas al hoyo',
                   cream,
@@ -607,8 +623,8 @@ class NightScreen extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _metric(
-                  Icons.monetization_on_outlined,
-                  '\$${result.lost}',
+                  const CoinIcon(),
+                  '${result.lost}',
                   'Sin recoger',
                   result.lost == 0
                       ? const Color(0xff8fc7ba)
@@ -617,15 +633,58 @@ class NightScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 24),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Monedas recogidas',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (result.collectedCoins == null)
+            const Text(
+              'Detalle no disponible para esta jornada anterior.',
+              style: TextStyle(color: Color(0xffb5bdc9), fontSize: 12),
+            )
+          else if (result.collectedCoins!.values.every((count) => count == 0))
+            const Text(
+              'Sin monedas recogidas',
+              style: TextStyle(color: Color(0xffb5bdc9), fontSize: 12),
+            )
+          else
+            for (final denomination in CoinDenomination.values.reversed)
+              if ((result.collectedCoins![denomination.amount] ?? 0) > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Semantics(
+                    key: ValueKey('collected-coin-${denomination.amount}'),
+                    label:
+                        '${result.collectedCoins![denomination.amount]} monedas de ${denomination.amount}',
+                    excludeSemantics: true,
+                    child: Row(
+                      children: [
+                        CoinIcon(denomination: denomination),
+                        const SizedBox(width: 8),
+                        Text('${denomination.amount}'),
+                        const Spacer(),
+                        Text(
+                          '× ${result.collectedCoins![denomination.amount]}',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         ],
       ),
     );
   }
 
-  Widget _metric(IconData icon, String value, String label, Color color) =>
+  Widget _metric(Widget icon, String value, String label, Color color) =>
       Column(
         children: [
-          Icon(icon, size: 22, color: color),
+          icon,
           const SizedBox(height: 6),
           FittedBox(
             child: Text(

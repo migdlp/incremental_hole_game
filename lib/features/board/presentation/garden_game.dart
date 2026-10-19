@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
+import '../domain/coin_denomination.dart';
 import 'coin_painter.dart';
 
 class GardenGame extends FlameGame {
@@ -276,7 +277,7 @@ class GardenGame extends FlameGame {
     }
     if (board.paddle case final Vec point) {
       final p = offset(point);
-      if (board.settings['magnet_radius'] > 0) {
+      if (board.canCollectCoins && board.settings['magnet_radius'] > 0) {
         canvas.drawCircle(
           p,
           board.settings['magnet_radius'],
@@ -362,7 +363,14 @@ class GardenGame extends FlameGame {
       final p =
           offset(Board.hole + (coin.position - Board.hole) * t) -
           Offset(0, math.sin(t * math.pi) * 25);
-      paintCoinPile(canvas, p, coin.value);
+      paintCoin(
+        canvas,
+        p,
+        CoinDenomination.values.firstWhere(
+          (d) => d.amount == coin.value,
+          orElse: () => CoinDenomination.one,
+        ),
+      );
     }
     canvas.restore();
   }

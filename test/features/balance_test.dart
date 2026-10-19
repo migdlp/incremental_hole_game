@@ -104,7 +104,7 @@ void main() {
       reopened.board!.settings['spawn_interval'],
       closeTo(1 / 1.875, 1e-9),
     );
-    expect(reopened.board!.settings.balanceVersion, 5);
+    expect(reopened.board!.settings.balanceVersion, 6);
     expect(reopened.economy.balance, 123);
     expect(reopened.levels, session.levels);
   });
@@ -124,7 +124,7 @@ void main() {
     reloaded.finishDay();
     reloaded.startDay();
     expect(1 / reloaded.board!.settings['spawn_interval'], closeTo(1.5, 1e-9));
-    expect(reloaded.board!.settings.balanceVersion, 5);
+    expect(reloaded.board!.settings.balanceVersion, 6);
   });
 
   test(

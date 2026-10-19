@@ -1,5 +1,6 @@
 import 'legacy_balance.dart';
 import 'balance_v4.dart';
+import 'balance_v5.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -24,7 +25,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 5});
+  DaySettings(this.values, {this.balanceVersion = 6});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -45,7 +46,7 @@ class UpgradeCatalog {
     'paddle': ['Escoba más ancha', 'Control'],
     'broom_v': ['Escoba en V', 'Control'],
     'sweep': ['Recogida por barrido', 'Recolección'],
-    'collection': ['Radio de recogida', 'Recolección'],
+    'collection': ['Área de recogida', 'Recolección'],
     'magnet': ['Imán', 'Recolección'],
     'attraction': ['Alcance del imán', 'Recolección'],
     'double_spawn': ['Doble emisión', 'Producción'],
@@ -138,10 +139,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 5}) {
-    final values = balanceVersion <= 4 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 4) {
-      final historicalCsv = balanceVersion == 4
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 6}) {
+    final values = balanceVersion <= 5 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 5) {
+      final historicalCsv = balanceVersion == 5
+          ? balanceV5Csv
+          : balanceVersion == 4
           ? balanceV4Csv
           : legacyBalanceCsv;
       for (final line in historicalCsv.trim().split('\n').skip(1)) {
@@ -190,7 +193,21 @@ class UpgradeCatalog {
     Map<String, int> levels, {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
+    Map<String, int> previousTree = const {},
+    int balanceVersion = 6,
   }) {
+    if (previousTree.isNotEmpty) {
+      validateLevels(
+        previousTree,
+        grandfathered: grandfathered,
+        balanceVersion: 5,
+      );
+      for (final entry in previousTree.entries) {
+        if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
+          throw const FormatException('Compras del árbol anterior inválidas');
+        }
+      }
+    }
     if (!legacy && grandfathered.isNotEmpty) {
       validateLevels(grandfathered, legacy: true);
     }
@@ -228,8 +245,25 @@ class UpgradeCatalog {
           throw const FormatException('Compra anterior inválida');
         }
       } else if (entry.value > (grandfathered[entry.key] ?? 0) &&
-          !requirementsMet(definition.levels[entry.value - 1], levels)) {
-        throw const FormatException('Requisito guardado incumplido');
+          entry.value > (previousTree[entry.key] ?? 0)) {
+        var next = definition.levels[entry.value - 1];
+        if (balanceVersion == 5) {
+          final row = balanceV5Csv
+              .trim()
+              .split('\n')
+              .skip(1)
+              .map((line) => line.split(','))
+              .firstWhere(
+                (r) =>
+                    r[0] == 'upgrade' &&
+                    r[1] == entry.key &&
+                    int.parse(r[2]) == entry.value,
+              );
+          next = UpgradeLevel(0, 1, row[7]);
+        }
+        if (!requirementsMet(next, levels)) {
+          throw const FormatException('Requisito guardado incumplido');
+        }
       }
     }
   }

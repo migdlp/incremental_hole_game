@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import '../../../core/vec.dart';
 import '../../automation/domain/robot.dart';
 import 'tool.dart';
+import 'coin_denomination.dart';
 import '../../upgrades/domain/catalog.dart';
 
 class Ball {
@@ -21,7 +22,7 @@ class Coin {
   Coin(this.id, this.position, this.value, {this.landing = .2});
   final int id;
   Vec position;
-  int value;
+  final int value;
   double landing;
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -46,6 +47,10 @@ class Board {
   final DaySettings settings;
   final balls = <Ball>[];
   final coins = <Coin>[];
+  // Only five denomination counters are queued if the visible-object cap fills.
+  final _queuedCoins = <int, int>{};
+  Map<int, int>? collectedCoins = <int, int>{};
+  bool get canCollectCoins => _heldBalls.isEmpty;
   final robot = Robot();
   Vec? paddle, target;
   late Vec broomPosition;
@@ -106,7 +111,12 @@ class Board {
   int goldenCaptured = 0;
   double spawnClock = 0;
   double get radius => settings['ball_radius'];
-  int get pending => coins.fold(0, (sum, coin) => sum + coin.value);
+  int get pending =>
+      coins.fold(0, (sum, coin) => sum + coin.value) +
+      _queuedCoins.entries.fold(
+        0,
+        (sum, entry) => sum + entry.key * entry.value,
+      );
   double random() {
     randomState = (1664525 * randomState + 1013904223) & 0xffffffff;
     return randomState / 4294967296;
@@ -184,9 +194,7 @@ class Board {
     _sample(paddle!, time ?? _clock);
     _desiredAngle = toolAngle;
     final onCoin = coins.any(
-      (c) =>
-          c.landing <= 0 &&
-          (c.position - paddle!).length <= settings['collection_radius'],
+      (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
     );
     final handle =
         broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
@@ -242,6 +250,7 @@ class Board {
   }
 
   int _collect(Vec a, Vec b) {
+    if (!canCollectCoins) return 0;
     var amount = 0;
     coins.removeWhere((coin) {
       if (coin.landing > 0 ||
@@ -250,35 +259,63 @@ class Board {
         return false;
       }
       amount += coin.value;
+      final counts = collectedCoins;
+      if (counts != null) {
+        for (final stack in CoinDenomination.split(coin.value)) {
+          counts.update(
+            stack.denomination.amount,
+            (n) => n + stack.count,
+            ifAbsent: () => stack.count,
+          );
+        }
+      }
       return true;
     });
     return amount;
   }
 
   void releaseCoin(int value) {
-    final angle = random() * math.pi * 2;
-    final distance = 40 + random() * 36;
-    final point = (hole + Vec(math.cos(angle), math.sin(angle)) * distance)
-        .inside(14);
-    Coin? closest;
-    for (final coin in coins) {
-      if (closest == null ||
-          (coin.position - point).length < (closest.position - point).length) {
-        closest = coin;
-      }
+    if (value <= 0) throw ArgumentError.value(value, 'value');
+    for (final stack in CoinDenomination.split(value)) {
+      _queuedCoins.update(
+        stack.denomination.amount,
+        (n) => n + stack.count,
+        ifAbsent: () => stack.count,
+      );
     }
-    if (closest != null &&
-        ((closest.position - point).length < 17 ||
-            coins.length >= settings['coin_pile_limit'])) {
-      closest.value += value;
-      closest.landing = math.max(closest.landing, .2);
-    } else {
-      coins.add(Coin(nextId++, point, value));
+    _flushCoins();
+  }
+
+  void _flushCoins() {
+    for (final denomination in CoinDenomination.values.reversed) {
+      final value = denomination.amount;
+      var count = _queuedCoins[value] ?? 0;
+      while (count > 0 && coins.length < settings['coin_pile_limit']) {
+        // Coins never merge: each visible coin pays exactly its color's value.
+        var point = hole;
+        for (var attempt = 0; attempt < 6; attempt++) {
+          final angle = random() * math.pi * 2;
+          final distance = 40 + random() * (36 + attempt * 20);
+          point = (hole + Vec(math.cos(angle), math.sin(angle)) * distance)
+              .inside(14);
+          if (coins.every((coin) => (coin.position - point).length >= 22)) {
+            break;
+          }
+        }
+        coins.add(Coin(nextId++, point, value));
+        count--;
+      }
+      if (count == 0) {
+        _queuedCoins.remove(value);
+      } else {
+        _queuedCoins[value] = count;
+      }
     }
   }
 
   BoardEvents update(double dt, {required bool producing}) {
     var collected = 0;
+    _flushCoins();
     for (final coin in coins) {
       coin.landing = math.max(0, coin.landing - dt);
     }
@@ -307,7 +344,7 @@ class Board {
     }
     if (paddle != null && target != null) {
       final start = paddle!;
-      if (settings['magnet_radius'] > 0) {
+      if (canCollectCoins && settings['magnet_radius'] > 0) {
         for (final coin in coins) {
           if (coin.landing <= 0 &&
               (coin.position - start).length <= settings['magnet_radius']) {
@@ -582,6 +619,10 @@ class Board {
         )
         .toList(),
     'coins': coins.map((c) => c.toJson()).toList(),
+    'queuedCoins': _queuedCoins.map((key, value) => MapEntry('$key', value)),
+    'collectedCoins': collectedCoins?.map(
+      (key, value) => MapEntry('$key', value),
+    ),
     'robot': robot.position.toJson(),
     'robotTarget': robot.targetId,
   };
@@ -633,6 +674,13 @@ class Board {
         ),
       );
     }
+    final queued = json['queuedCoins'];
+    if (queued != null) {
+      board._queuedCoins.addAll(CoinDenomination.readCounts(queued));
+    }
+    board.collectedCoins = json['collectedCoins'] == null
+        ? null
+        : CoinDenomination.readCounts(json['collectedCoins']);
     board.robot.position = Vec.fromJson(json['robot']);
     board.robot.targetId = json['robotTarget'] as int?;
     if (board.balls.length > settings['ball_limit'] ||
@@ -659,6 +707,24 @@ class Board {
         ids.any((id) => id <= 0 || id >= board.nextId)) {
       throw const FormatException('IDs de tablero inválidos');
     }
+    // Old saves used arbitrary-value piles. Split them once without changing
+    // pending money; overflow is emitted as individual coins when space frees.
+    final oldPiles = board.coins
+        .where(
+          (coin) => !CoinDenomination.values.any((d) => d.amount == coin.value),
+        )
+        .toList();
+    board.coins.removeWhere(oldPiles.contains);
+    for (final pile in oldPiles) {
+      for (final stack in CoinDenomination.split(pile.value)) {
+        board._queuedCoins.update(
+          stack.denomination.amount,
+          (n) => n + stack.count,
+          ifAbsent: () => stack.count,
+        );
+      }
+    }
+    board._flushCoins();
     return board;
   }
 }

@@ -16,7 +16,7 @@ void main() {
       session.purchase(catalog.definitions.firstWhere((d) => d.id == id));
 
   test(
-    'map has five initial paths, five-level lines and the agreed crossings',
+    'map has six initial paths, five-level lines and the agreed crossings',
     () {
       expect(tree.nodes, hasLength(49));
       expect(tree.root.id, 'hand:1');
@@ -26,14 +26,21 @@ void main() {
             .where((n) => !n.owned({'hand': 1}))
             .map((n) => n.id)
             .toSet(),
-        {'generator:1', 'reward:1', 'sweep:1', 'hand:2', 'hand_grip:1'},
+        {
+          'generator:1',
+          'reward:1',
+          'sweep:1',
+          'collection:1',
+          'hand:2',
+          'hand_grip:1',
+        },
       );
       expect(tree.byId('broom:1').parents, ['hand:2']);
       expect(tree.byId('paddle:1').parents, ['broom:1']);
       expect(tree.byId('broom_v:1').parents, ['paddle:1']);
       expect(tree.byId('duration:1').parents, ['generator:2']);
-      expect(tree.byId('collection:1').parents, ['sweep:1']);
-      expect(tree.byId('magnet:1').parents, ['collection:1']);
+      expect(tree.byId('collection:1').parents, ['hand:1']);
+      expect(tree.byId('magnet:1').parents, ['collection:3']);
       expect(tree.byId('attraction:1').parents, ['magnet:1']);
       expect(tree.byId('robot:1').parents.toSet(), {'paddle:2', 'sweep:1'});
       expect(tree.byId('double_spawn:1').parents.toSet(), {
@@ -88,7 +95,9 @@ void main() {
     expect(buy(session, 'double_spawn'), isFalse);
     expect(buy(session, 'paddle'), isTrue);
     expect(buy(session, 'double_spawn'), isTrue);
-    expect(buy(session, 'collection'), isTrue);
+    for (var i = 0; i < 3; i++) {
+      expect(buy(session, 'collection'), isTrue);
+    }
     expect(buy(session, 'magnet'), isTrue);
     for (var i = 0; i < 3; i++) {
       expect(buy(session, 'attraction'), isTrue);
@@ -157,7 +166,7 @@ void main() {
           isFalse,
         ); // next purchase follows the new map
         reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 5);
+        expect(reopened.board!.settings.balanceVersion, 6);
         expect(reopened.board!.settings['production_duration'], 16);
         expect(reopened.levels.containsKey('hand'), isFalse);
         expect(reopened.levels.containsKey('sweep'), isFalse);
@@ -266,7 +275,7 @@ void main() {
         expect(b.velocity.length, lessThanOrEqualTo(380));
         expect(b.velocity.length.isFinite, isTrue);
       }
-      expect(settings['ball_value'], 11);
+      expect(settings['ball_value'], 13);
       expect(
         settings['spawn_interval'],
         closeTo(1 / (1.5 * math.pow(1.25, 5)), 1e-9),

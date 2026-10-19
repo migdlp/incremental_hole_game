@@ -18,6 +18,7 @@ class GameSession extends ChangeNotifier {
   final progress = Progress();
   final levels = <String, int>{};
   final _grandfathered = <String, int>{};
+  final _previousTree = <String, int>{};
   BallTool selectedTool = BallTool.hand;
   Board? board;
   DayCycle? cycle;
@@ -127,6 +128,9 @@ class GameSession extends ChangeNotifier {
       generated: economy.generated,
       captured: board!.captured,
       previousIncome: progress.last?.income,
+      collectedCoins: board!.collectedCoins == null
+          ? null
+          : Map.unmodifiable(board!.collectedCoins!),
     );
     release(cancel: true);
     economy.bank();
@@ -213,7 +217,7 @@ class GameSession extends ChangeNotifier {
       return 'Requiere $name · nivel ${parts[1]}';
     }
     if (economy.balance < next.cost) {
-      return 'Faltan \$${next.cost - economy.balance}';
+      return 'Faltan ${next.cost - economy.balance} monedas';
     }
     return null;
   }
@@ -231,8 +235,9 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 4,
+    'version': 5,
     'grandfathered': _grandfathered,
+    'previousTree': _previousTree,
     'tool': selectedTool.name,
     'day': progress.day,
     'balance': economy.balance,
@@ -258,7 +263,8 @@ class GameSession extends ChangeNotifier {
     if (!legacy &&
         json['version'] != 2 &&
         json['version'] != 3 &&
-        json['version'] != 4) {
+        json['version'] != 4 &&
+        json['version'] != 5) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -272,15 +278,21 @@ class GameSession extends ChangeNotifier {
     );
     // Old paddle purchases become width upgrades and retain access to the broom.
     if (legacy && (savedLevels['paddle'] ?? 0) > 0) savedLevels['broom'] = 1;
-    final oldProgress = json['version'] != 4;
+    final oldProgress = (json['version'] as int) < 4;
     final grandfathered = oldProgress
         ? Map<String, int>.of(savedLevels)
         : (json['grandfathered'] as Map<String, dynamic>).map(
             (key, value) => MapEntry(key, value as int),
           );
+    final previousTree = json['version'] == 4
+        ? Map<String, int>.of(savedLevels)
+        : (json['previousTree'] as Map<String, dynamic>? ?? {}).map(
+            (key, value) => MapEntry(key, value as int),
+          );
     catalog.validateLevels(
       savedLevels,
       grandfathered: grandfathered,
+      previousTree: previousTree,
       legacy: oldProgress,
     );
     var restoredTool = legacy
@@ -305,7 +317,13 @@ class GameSession extends ChangeNotifier {
             last.income < 0 ||
             last.generated < last.income ||
             last.captured < 0 ||
-            record < last.income)) {
+            record < last.income ||
+            (last.collectedCoins != null &&
+                last.collectedCoins!.entries.fold<int>(
+                      0,
+                      (sum, e) => sum + e.key * e.value,
+                    ) !=
+                    last.income))) {
       throw const FormatException('Resultado inválido');
     }
     final run = json['run'] as Map<String, dynamic>?;
@@ -320,7 +338,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 5)) {
+          (balanceVersion < 1 || balanceVersion > 6)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -363,6 +381,12 @@ class GameSession extends ChangeNotifier {
       collected = run['collected'] as int;
       generated = run['generated'] as int;
       if (collected < 0 ||
+          (restoredBoard.collectedCoins != null &&
+              restoredBoard.collectedCoins!.entries.fold<int>(
+                    0,
+                    (sum, e) => sum + e.key * e.value,
+                  ) !=
+                  collected) ||
           generated != collected + restoredBoard.pending ||
           generated !=
               (restoredBoard.captured + 9 * restoredBoard.goldenCaptured) *
@@ -384,6 +408,9 @@ class GameSession extends ChangeNotifier {
     _grandfathered
       ..clear()
       ..addAll(grandfathered);
+    _previousTree
+      ..clear()
+      ..addAll(previousTree);
     selectedTool = restoredTool;
     if (legacy) {
       recoveryMessage =

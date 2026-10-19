@@ -40,7 +40,7 @@ void main() {
         containsAll(['generator:1', 'reward:1', 'sweep:1', 'hand:2']),
       );
       expect(first, isNot(contains('broom:1')));
-      expect(first, isNot(contains('collection:1')));
+      expect(first, contains('collection:1'));
       expect(first, isNot(contains('duration:1')));
       expect(tree.visible({'hand': 2}).map((n) => n.id), contains('broom:1'));
       expect(
@@ -129,17 +129,17 @@ void main() {
     expect(session.levels, isEmpty);
     await tester.pump(const Duration(milliseconds: 101));
     expect(session.levels['hand'], 1);
-    expect(session.economy.balance, 480);
+    expect(session.economy.balance, 487);
     expect(find.byKey(const ValueKey('node-hand:2')), findsOneWidget);
     expect(find.byKey(const ValueKey('node-generator:3')), findsNothing);
     await tester.pump(const Duration(seconds: 4));
-    expect(session.economy.balance, 480);
+    expect(session.economy.balance, 487);
     await gesture.up();
     await session.pendingWrites;
     final restored = GameSession(testCatalog(), MemoryStore())
       ..restore(session.snapshot());
     expect(restored.levels['hand'], 1);
-    expect(restored.economy.balance, 480);
+    expect(restored.economy.balance, 487);
     restored.dispose();
     await close(tester, session);
   });
@@ -230,7 +230,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1100));
       await gesture.up();
       expect(session.levels['hand'], 1);
-      expect(session.economy.balance, 480);
+      expect(session.economy.balance, 487);
       await close(tester, session);
     },
   );
@@ -239,7 +239,7 @@ void main() {
     tester,
   ) async {
     final session = await open(tester, balance: 0);
-    expect(find.text('Faltan \$20'), findsOneWidget);
+    expect(find.text('Faltan 13 monedas'), findsOneWidget);
     final gesture = await tester.startGesture(
       tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
     );
@@ -267,7 +267,7 @@ void main() {
       expect(find.byType(IconButton), findsNothing);
       expect(find.byKey(const ValueKey('upgrade-summary')), findsNothing);
       expect(find.byKey(const ValueKey('hold-purchase')), findsNothing);
-      expect(find.text('\$500'), findsOneWidget);
+      expect(find.text('500'), findsOneWidget);
       final viewerFinder = find.byKey(const ValueKey('skill-tree-viewer'));
       final viewer = tester.widget<InteractiveViewer>(viewerFinder);
       final before = viewer.transformationController!.value.getMaxScaleOnAxis();

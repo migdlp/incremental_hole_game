@@ -1,5 +1,9 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+## Tanda vigente — CF-09 a CF-15 · 0.5.0+10
+
+Implementados UI sin `$`, monedas individuales y tamaño uniforme, resumen por denominaciones, tiempos separados, recogida con mano vacía, área antes del imán y balance inicial/Valor revisados. 116 pruebas correctas; ver requisitos y decisiones en la [referencia viva](cambios-futuros-arbol-mejoras.md). Las bolas duplicadoras y bomba se conservan como ideas sin implementar. La integración y entrega Android se registrarán tras sus comprobaciones.
+
 > **Entrega CF-06 a CF-08 — 19 de octubre de 2026:** [PR #17](https://github.com/migdlp/incremental_hole_game/pull/17) integrada en `main`, código `1cd7b8761a9e1e4eea19761385086e92ec470438`. **APK 0.4.0+9:** [descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776/artifacts/12173036451), disponible hasta el 2 de noviembre de 2026. [Pipeline 39223285776](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776) correcta: formato, análisis, **107 pruebas**, compilación Android y firma v2 verificada. Incluye estadísticas visuales, árbol compacto de ocho direcciones y cinco niveles de fuerza de agarre. Descomprimir e instalar `jardin-mecanico-debug.apk`. Validación en Android físico y ajuste definitivo de precios pendientes.
 
 ## Próximas mejoras registradas — 19 de octubre de 2026

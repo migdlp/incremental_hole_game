@@ -28,7 +28,7 @@ void main() {
     final levels = {for (final d in catalog.definitions) d.id: d.levels.length};
     final max = catalog.settings(levels);
     expect(max['production_duration'], 25);
-    expect(max['ball_value'], 11);
+    expect(max['ball_value'], 13);
     expect(max['spawn_interval'], closeTo(1 / (1.5 * 3.0517578125), 1e-9));
     expect(
       () => UpgradeCatalog.fromCsv('invalid\nbase,x'),
@@ -60,7 +60,7 @@ void main() {
     expect(session.economy.collected, 1);
     expect(session.board!.pending, 0);
   });
-  test('coin pile cap and merging preserve every unit of value', () {
+  test('coin cap and queued denominations preserve every unit of value', () {
     final settings = catalog.settings({});
     settings.values['coin_pile_limit'] = 2;
     final board = Board(settings);
@@ -127,12 +127,12 @@ void main() {
         );
       }
       expect(session.purchase(robot), isTrue);
-      expect(session.economy.balance, 495);
+      expect(session.economy.balance, 502);
       expect(session.purchase(robot), isFalse);
       session.startDay();
       expect(session.board!.settings['robot_count'], 1);
       expect(session.purchase(paddle), isFalse);
-      expect(session.economy.balance, 495);
+      expect(session.economy.balance, 502);
       session.finishDay();
       session.economy.balance = 0;
       expect(session.purchase(paddle), isFalse);

@@ -1,5 +1,14 @@
 # Registro de validación
 
+## CF-09 a CF-15 — 19 de octubre de 2026 · 0.5.0+10
+
+- 116 pruebas correctas; formato y análisis sin incidencias con Flutter 3.35.7 / Dart 3.9.2.
+- Nuevas comprobaciones: monedas individuales de denominaciones válidas, área sin barrido/imán, bloqueo de cobro y atracción con bolas agarradas, precio inicial 13 y curva entera ×1,65.
+- Compatibilidad: compras v4 de imán con Área I conservadas sin regalar nuevos niveles; jornada de balance 5 conserva recompensa 11 y la siguiente adopta balance 6 con recompensa 13. Pilas antiguas descompuestas con importe conservado y reserva bajo el límite técnico; recuentos alterados se rechazan sin modificar la sesión.
+- Recuento exacto de 55 recogidos como una moneda de 50 y cinco de 1, persistido al terminar. Resumen ordenado, sin barra y sin símbolos `$`, comprobado a 320 × 568 y texto al 150 %. Siluetas de las cinco monedas con la misma anchura y altura.
+- Temporizadores: día inicial muestra 10 s; al llegar a cero aparece una barra independiente de recogida de 3 s. Revisión visual con Roboto/MaterialIcons del resumen, la ficha y el cambio de fase.
+- No se implementan bolas duplicadoras ni bomba. La aceptación en Android físico y el ajuste de precios jugando permanecen pendientes. La entrega Android se registra tras su pipeline.
+
 > **Entrega CF-06 a CF-08 — 19 de octubre de 2026:** [PR #17](https://github.com/migdlp/incremental_hole_game/pull/17) integrada en `main`, código `1cd7b8761a9e1e4eea19761385086e92ec470438`. **APK 0.4.0+9:** [descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776/artifacts/12173036451), disponible hasta el 2 de noviembre de 2026. [Pipeline 39223285776](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776) correcta: formato, análisis, **107 pruebas**, compilación Android y firma v2 verificada. Incluye estadísticas visuales, árbol compacto de ocho direcciones y cinco niveles de fuerza de agarre. Descomprimir e instalar `jardin-mecanico-debug.apk`. Validación en Android físico y ajuste definitivo de precios pendientes.
 
 ## Próximas mejoras CF-06 a CF-08 — 19 de octubre de 2026 · 0.4.0+9

@@ -109,12 +109,14 @@ void main() {
       for (var i = 0; i < 16; i++) {
         reopened.tick(1 / 60);
       }
-      reopened.touch(reopened.board!.coins.single.position);
-      reopened.release();
+      while (reopened.board!.coins.isNotEmpty) {
+        reopened.touch(reopened.board!.coins.first.position);
+        reopened.release();
+      }
       reopened.finishDay();
       reopened.startDay();
       expect(reopened.economy.balance, 125);
-      expect(reopened.board!.settings.balanceVersion, 5);
+      expect(reopened.board!.settings.balanceVersion, 6);
       expect(reopened.board!.settings['ball_value'], 1);
       expect(reopened.cycle!.closing, 3);
       expect(reopened.cycle!.remaining, 13);
@@ -126,11 +128,7 @@ void main() {
     () async {
       for (final denomination in CoinDenomination.values) {
         final recorder = ui.PictureRecorder();
-        paintCoinPile(
-          Canvas(recorder),
-          const Offset(20, 20),
-          denomination.amount,
-        );
+        paintCoin(Canvas(recorder), const Offset(20, 20), denomination);
         final picture = recorder.endRecording();
         final image = await picture.toImage(40, 40);
         final pixels = await image.toByteData(

@@ -2,6 +2,15 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## UI, monedas y economía CF-09 a CF-15 — 2026-10-19 · 0.5.0+10
+
+- Todos los importes de la UI se muestran con icono de moneda y sin `$`. Las cinco denominaciones tienen la misma geometría, sin cifras sobre su cara.
+- Las recompensas se dividen en monedas individuales de 1/10/50/100/500, sin fusionar sus valores por proximidad. Reserva acotada por denominación al llenarse el límite visible; sin pérdida de dinero.
+- Resumen sin barra verde, con recuentos reales de monedas recogidas por denominación de mayor a menor. Barras independientes de día y recogida, contador separado por fase.
+- Ningún cobro ni atracción con bolas agarradas. Área manual disponible tras Mano I; Imán exige Área III y cuesta 300. Las compras antiguas se conservan.
+- Mano I cuesta 13 y Valor progresa 2/3/5/8/13 mediante ×1,65 redondeado por nivel. JSON v5 y balance 6, con balance 5 congelado y migración de las pilas antiguas sin alterar importes.
+- 116 pruebas correctas y análisis sin incidencias. Las ideas de bolas duplicadoras y bomba continúan pendientes de planificación.
+
 ## Próximas mejoras CF-06 a CF-08 — 2026-10-19 · 0.4.0+9
 
 - Estadísticas visuales y minimalistas: dinero ganado destacado, bolas al hoyo y dinero sin recoger, barra del importe cobrado y una sola acción para ir al árbol.

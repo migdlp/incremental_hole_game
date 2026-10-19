@@ -215,7 +215,7 @@ class _DayScreenState extends State<DayScreen> {
                       ),
                       const SizedBox(width: 7),
                       Text(
-                        '${session.economy.collected}',
+                        '\$${session.economy.collected}',
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
@@ -468,7 +468,7 @@ class NightScreen extends StatelessWidget {
               const Icon(Icons.monetization_on_outlined, color: gold, size: 21),
               const SizedBox(width: 6),
               Text(
-                '${session.economy.balance}',
+                '\$${session.economy.balance}',
                 style: const TextStyle(
                   color: gold,
                   fontSize: 21,
@@ -516,7 +516,7 @@ class NightScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${session.economy.balance} monedas',
+                        '\$${session.economy.balance}',
                         style: const TextStyle(
                           fontSize: 26,
                           color: gold,
@@ -529,18 +529,18 @@ class NightScreen extends StatelessWidget {
                           spacing: 24,
                           runSpacing: 16,
                           children: [
-                            _stat('Monedas ganadas', '${last.income}'),
-                            _stat('Generadas', '${last.generated}'),
-                            _stat('Sin recoger', '${last.lost}'),
+                            _stat('Dinero ganado', '\$${last.income}'),
+                            _stat('Generado', '\$${last.generated}'),
+                            _stat('Sin recoger', '\$${last.lost}'),
                             _stat('Bolas al hoyo', '${last.captured}'),
                             _stat(
                               'Récord diario',
-                              '${session.progress.record}',
+                              '\$${session.progress.record}',
                             ),
                             if (last.previousIncome != null)
                               _stat(
                                 'Respecto al anterior',
-                                '${last.income - last.previousIncome! >= 0 ? '+' : ''}${last.income - last.previousIncome!}',
+                                '${last.income - last.previousIncome! >= 0 ? '+' : '-'}\$${(last.income - last.previousIncome!).abs()}',
                               ),
                           ],
                         ),
@@ -587,14 +587,16 @@ class NightScreen extends StatelessWidget {
                     ),
                   ),
                   icon: const Icon(Icons.account_tree_outlined),
-                  label: const Text('Abrir árbol de mejoras'),
+                  label: const Text('Ir al árbol de mejoras'),
                 ),
-                const SizedBox(height: 8),
-                FilledButton.icon(
-                  onPressed: session.startDay,
-                  icon: const Icon(Icons.wb_sunny_outlined),
-                  label: Text('Comenzar día ${session.progress.day}'),
-                ),
+                if (last == null) ...[
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: session.startDay,
+                    icon: const Icon(Icons.wb_sunny_outlined),
+                    label: Text('Comenzar día ${session.progress.day}'),
+                  ),
+                ],
               ],
             ),
           ),

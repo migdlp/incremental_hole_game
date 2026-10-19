@@ -1,5 +1,12 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+## Implementación CF-01 a CF-04 — 19 de octubre de 2026
+
+El usuario autoriza implementar estos cambios y aclara que ninguna moneda debe mostrar cifras, cantidades ni símbolos sobre su cara. La revisión 0.3.1+6 prepara monedas por color con base de $1, recogida final de 3 s, estadísticas con una sola salida al árbol y el botón «Comenzar día» en esa pantalla, además de estados apagado/blanco/color en los nodos. Conserva el mapa, las compras, el agarre múltiple y el desbloqueo de escoba ya implementados.
+
+La referencia detallada sigue en [CF-01 a CF-04](cambios-futuros-arbol-mejoras.md). Los precios y los efectos de Valor comprados se mantienen; su balance sigue provisional. Esquema JSON v4, balance nuevo 5 y jornadas históricas 1–4 conservadas. Preparado en rama para revisión; no se declara APK ni prueba física en Android.
+
+
 > Actualización vigente — 19 de octubre: se implementa el [mapa futuro v0.6](cambios-futuros-arbol-mejoras.md) en 0.3.0+5: 44 nodos, cuatro ramas, cinco niveles, seis colores, Doble emisión y alcance del imán. Mano inicial de una bola, mejoras a 2/3/4/5/6 y escoba solo tras comprarla. Guardado/balance v4 conserva las compras y jornadas antiguas. Esta nota sustituye estados anteriores que la contradigan; ver [árbol actual](arbol-de-mejoras.md) y [historial](../CHANGELOG.md).
 
 Fecha: 18 de octubre de 2026. Base revisada: `main`, commit `1bf1efa`, prototipo `0.1.0+1`.

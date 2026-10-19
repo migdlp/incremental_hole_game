@@ -1,8 +1,8 @@
 kind,id,level,cost,effect,effect_value,unit,requires,cap
 base,production_duration,0,0,production_duration,10,seconds,,25
-base,closing_duration,0,0,closing_duration,5,seconds,,5
+base,closing_duration,0,0,closing_duration,3,seconds,,3
 base,spawn_interval,0,0,spawn_interval,0.6666666666666666,seconds,,
-base,ball_value,0,0,ball_value,2,coins,,11
+base,ball_value,0,0,ball_value,1,coins,,11
 base,paddle_radius,0,0,paddle_radius,20,logical_units,,40
 base,collection_radius,0,0,collection_radius,18,logical_units,,48
 base,ball_radius,0,0,ball_radius,6,logical_units,,

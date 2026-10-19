@@ -1,58 +1,43 @@
-# Economía inicial y balance
+# Economía y monedas
 
-Estado de `0.2.2+4`: valores implementados para probar; precios y ritmo de compras todavía provisionales. Fuente editable del balance actual: [balance.csv](balance.csv).
+Referencia de la implementación 0.3.1+6 preparada para revisión. La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
 
-## Lectura de la tabla
+## Valor y denominaciones
 
-`level=0` indica base. En una mejora, `level` es el nivel comprado y `cost` su precio incremental. `effect_value` es el valor absoluto resultante; `requires` usa `id:nivel`. `cap` es descriptivo, no un validador adicional del cargador. El parser admite nueve columnas simples, sin comas entrecomilladas. Ver [catálogo](implementacion.md#balance-y-mejoras).
+Una bola capturada genera **$1 de base**. El dinero se ingresa al recoger la moneda, no al capturar la bola. Saldo, precios y estadísticas muestran importes en dólares del juego; las monedas físicas no llevan cifras, cantidades, símbolos ni texto en la cara.
 
-Duración de producción y cierre se suman para obtener el contador visible. `paddle_radius` conserva su clave histórica, pero el frente completo de escoba mide cuatro veces su valor; no es el radio de recogida de monedas.
+| Denominación | Color |
+| --- | --- |
+| $1 | Amarillo/dorado `#EAB308` |
+| $10 | Verde esmeralda `#10B981` |
+| $50 | Azul `#3B82F6` |
+| $100 | Violeta `#A855F7` |
+| $500 | Coral `#F43F5E` |
 
-## Jornada y generación actuales
+No existe moneda de $25. Las pilas conservan un importe entero y se representan descompuestas en estas denominaciones, de mayor a menor. Una pila de $61 muestra monedas de $50, $10 y $1; una de $25 contiene dos de $10 y cinco de $1. Se dibujan hasta tres capas por denominación para acotar el coste visual, sin truncar el importe. El dibujo no muestra contadores.
 
-| Nivel | Producción | Cierre | Contador total | Intervalo del generador |
-| --- | --- | --- | --- | --- |
-| Base | 10 s | 5 s | **15 s** | **⅔ s (1,5 bolas/s)** |
-| Mejora 1 | 15 s | 5 s | 20 s | ≈ 0,578 s |
-| Mejora 2 | 20 s | 5 s | 25 s | ≈ 0,489 s |
-| Mejora 3 | 25 s | 5 s | 30 s | 0,4 s |
+Las pilas cercanas se agrupan y, si se alcanza el límite técnico, se acumulan sin perder valor. Se conserva el área lógica de recogida alrededor de su posición; tocar o barrer una pila recoge su importe completo una sola vez. Guardar y restaurar conserva el valor exacto. La paleta está en [coin_painter.dart](../lib/features/board/presentation/coin_painter.dart) y la descomposición en [coin_denomination.dart](../lib/features/board/domain/coin_denomination.dart).
 
-Duración y generador son mejoras independientes; cada columna muestra sus propios niveles. Duración requiere generador nivel 1. La base emite 1,5 bolas por segundo. Los intervalos de los niveles se reducen en la misma proporción (2/9 del balance anterior de 3/2,6/2,2/1,8 s), conservando sus aumentos relativos de velocidad.
+Las denominaciones superiores representan valor acumulado; no se añaden premios aleatorios ni probabilidades nuevas. La mejora de recompensa existente mantiene sus efectos del CSV: aumenta el importe por captura, que se representa mediante denominaciones válidas. La progresión definitiva de Valor y posibles desbloqueos especiales siguen abiertos en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 
-La primera bola llega tras acumular el intervalo, no inmediatamente. Una salida bloqueada o el límite de población pierde ese intento, sin cola. En cierre no hay producción. El día base sin bloqueos intenta emitir cada dos tercios de segundo: **quince bolas** durante los diez segundos de producción. Cada bola vale 2 monedas, hasta 30 si entran las quince; solo se ingresan al recogerlas. La comparación del reloj usa tolerancia numérica para no perder la emisión del límite por redondeo.
+## Duración, producción y cobro
 
-## Mejoras
+La jornada base tiene **10 segundos de producción + 3 de recogida final = 13 segundos**. Estadísticas y árbol no tienen temporizador. La recogida final congela bolas, escoba y robot; solo permite cobrar monedas y conserva el oscurecimiento de fondo.
 
-| ID | Compra | Costes por nivel | Efecto y requisito del CSV |
-| --- | --- | --- | --- |
-| `broom` | Escoba recta | 20 | Frente 80; sin requisito |
-| `paddle` | Anchura | 20 / 70 / 160 | Frentes 96 / 112 / 128; requiere escoba; afecta también a la V |
-| `broom_v` | Escoba en V | 80 | Reúne por contacto; requiere anchura 1 |
-| `sweep` | Barrido de monedas | 20 | Desbloquea recogida por recorrido; sin requisito |
-| `collection` | Radio de recogida | 25 / 80 / 180 | Radios 24 / 30 / 36; base 18; no desbloquea barrido |
-| `magnet` | Imán | 120 | Radio 65 mientras se toca; requiere recogida 1, independiente de barrido |
-| `generator` | Generación | 30 / 100 / 220 | Intervalos ≈ 0,578 / 0,489 / 0,4 s |
-| `reward` | Recompensa | 40 / 140 / 300 | Valores 3 / 4 / 5 por bola; base 2 |
-| `duration` | Duración | 60 / 160 / 320 | Producción 15 / 20 / 25 s; requiere generador 1 |
-| `robot` | Robot | 160 | Un robot; requiere anchura 1; no recoge monedas |
-| `robot_speed` | Velocidad del robot | 80 / 200 / 400 | 55 / 70 / 85 u/s; requiere robot; base 45 |
+La producción base sigue siendo 1,5 bolas/s. Sin bloqueos, intenta emitir quince bolas en diez segundos: máximo teórico de **$15 generados** si se capturan todas y se cobran. Bloqueos del generador, bolas sin capturar y monedas sin recoger reducen el ingreso. Este máximo no mide la experiencia real del jugador.
 
-Escoba, V, barrido, imán y robot son desbloqueos únicos; las otras mejoras tienen tres niveles. La mano inicial no cuesta dinero. Comprar una herramienta la selecciona; se puede volver a otras ya compradas. Los efectos de compra comienzan el día siguiente. La recompensa aumenta valor, no necesariamente número de objetos físicos.
+Generador, duración y recompensa son mejoras independientes. Los precios y efectos por nivel se consultan en el CSV; sus conexiones se explican en el [árbol actual](arbol-de-mejoras.md). Las compras se aplican al siguiente día. No se modifican automáticamente los precios ni los valores de recompensa comprados al reducir la base a $1.
 
-Los requisitos de la tabla son los de sesión/CSV. El [árbol progresivo](arbol-de-mejoras.md) añade padres de descubrimiento: inicialmente solo se ve generador 1; escoba, barrido y radio se revelan tras comprarlo, y recompensa tras generador 2. Esto no modifica compras históricas ni concede padres gratis.
+## Balance y contabilidad
 
-## Ritmo pendiente de ajuste
+- El valor generado es igual al recogido más el pendiente en el tablero.
+- El valor generado es igual a las capturas multiplicadas por el valor por bola de esa jornada.
+- El cierre banca una sola vez lo recogido; el resto se pierde y se vacía el tablero para la jornada siguiente.
+- La representación por denominaciones no cambia estos cálculos ni crea dinero.
+- No hay ingresos mientras el juego está cerrado.
 
-Con treinta monedas teóricas por día base y la primera compra visible de treinta (generador 1), la compra inicial puede llegar al terminar la primera jornada si se capturan y cobran todas las bolas sin bloqueos ni pérdidas. Esto es un límite aritmético, no una prueba de comodidad o accesibilidad.
+Las nuevas jornadas usan balance 5. Las jornadas guardadas con balance 1–4 mantienen su configuración original y su valor hasta terminar, aunque la presentación use ya los nuevos colores. El siguiente día adopta el CSV actual. Ver [persistencia](persistencia.md).
 
-Los precios no cambian en esta iteración y siguen pendientes de balance. El ritmo del robot en 3–5 días no está verificado y no se compensa con ingresos ocultos.
+## Ajuste pendiente
 
-## Registro de sesiones
-
-Anotar niveles, bolas emitidas/capturadas, valor generado/recogido/perdido, compras, duración y comodidad. Métricas: captura/producción, recogida/valor generado, ingreso/segundo, días hasta primera compra y robot, bloqueos y saturación. Si un denominador es cero, indicar «sin datos». No hace falta telemetría externa.
-
-## Ajuste del MVP
-
-Comparar base, cada rama y máximos, usando una misma semilla cuando ayude. Cambiar pocos parámetros por prueba. No exigir récord cada día ni convertir duración en compra obligatoria. Los precios permanecen provisionales hasta observar sesiones.
-
-El valor perdido incluye pilas y monedas en aterrizaje que no se cobraron al cierre. Las bolas y monedas dejan de existir en la sesión activa al cerrar; el fondo conserva solo una imagen inmóvil del tablero mientras se consulta el pop-up. No se pueden recoger ni se guardan como jornada activa. Ahorro y compras permanecen. Las jornadas antiguas guardadas terminan con su balance anterior; el siguiente día adopta estos valores. Ver [compatibilidad](persistencia.md#compatibilidad-entre-versiones).
+El cambio a $1 reduce el ingreso inicial respecto al balance 4, que daba dos monedas por captura. Los precios se mantienen por ahora y siguen pendientes de revisión jugando. Registrar capturas, valor generado/cobrado/perdido, duración y días entre compras antes de recalibrar. No se promete una compra en el primer día ni un plazo fijo para llegar al robot.

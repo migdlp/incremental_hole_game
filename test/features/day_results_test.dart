@@ -41,14 +41,27 @@ void main() {
       await tester.pumpAndSettle();
       final popup = find.byKey(const ValueKey('day-results-popup'));
       expect(popup, findsOneWidget);
-      expect((tester.widget(gameFinder) as GameWidget).game, same(game));
-      expect(game.paused, isTrue);
       expect(
-        find.descendant(of: popup, matching: find.text('Monedas ganadas')),
+        find.descendant(
+          of: popup,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is ButtonStyleButton,
+          ),
+        ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: popup, matching: find.text('4')),
+        find.descendant(of: popup, matching: find.byType(FilledButton)),
+        findsNothing,
+      );
+      expect((tester.widget(gameFinder) as GameWidget).game, same(game));
+      expect(game.paused, isTrue);
+      expect(
+        find.descendant(of: popup, matching: find.text('Dinero ganado')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: popup, matching: find.text('\$4')),
         findsNWidgets(2),
       );
       expect(
@@ -69,7 +82,7 @@ void main() {
       expect(session.selectedTool, BallTool.hand);
       expect(session.economy.balance, 104);
       expect(session.progress.day, 2);
-      await tester.tap(find.text('Abrir árbol de mejoras'));
+      await tester.tap(find.text('Ir al árbol de mejoras'));
       await tester.pumpAndSettle();
       expect(popup, findsNothing);
       expect(find.byKey(const ValueKey('node-hand:1')), findsOneWidget);
@@ -83,10 +96,8 @@ void main() {
       expect(session.levels['hand'], 1);
       expect(session.economy.balance, 84);
       expect(game.paused, isTrue);
-      await tester.pageBack();
-      await tester.pumpAndSettle();
-      expect(find.text('84 monedas'), findsOneWidget);
-      await tester.tap(find.text('Comenzar día 2'));
+      expect(find.text('\$84'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('tree-start-day')));
       await tester.pump();
       expect(popup, findsNothing);
       expect((tester.widget(gameFinder) as GameWidget).game, same(game));
@@ -96,6 +107,41 @@ void main() {
       expect(session.board!.coins, isEmpty);
       expect(session.economy.balance, 84);
       expect(session.board!.handCapacity, 2);
+      await close(tester, session);
+    },
+  );
+
+  testWidgets(
+    'starting the next day cancels an unfinished purchase on mobile',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final session = GameSession(testCatalog(), MemoryStore())
+        ..economy.balance = 100;
+      session.startDay();
+      session.finishDay();
+      await tester.pumpWidget(GardenApp(session: session));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ir al árbol de mejoras'));
+      await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('node-hand:1'))),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byKey(const ValueKey('tree-start-day')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 4));
+      expect(session.running, isTrue);
+      expect(session.levels, isEmpty);
+      expect(session.economy.balance, 100);
+      expect(find.byKey(const ValueKey('day-results-popup')), findsNothing);
+      expect(find.byKey(const ValueKey('tree-start-day')), findsNothing);
+      expect(tester.takeException(), isNull);
       await close(tester, session);
     },
   );
@@ -116,7 +162,7 @@ void main() {
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('day-results-popup')), findsOneWidget);
-      await tester.tap(find.text('Abrir árbol de mejoras'));
+      await tester.tap(find.text('Ir al árbol de mejoras'));
       await tester.pumpAndSettle();
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),

@@ -166,7 +166,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
             padding: const EdgeInsets.fromLTRB(7, 0, 20, 0),
             child: Center(
               child: Text(
-                '${session.economy.balance}',
+                '\$${session.economy.balance}',
                 style: const TextStyle(
                   color: _gold,
                   fontWeight: FontWeight.bold,
@@ -196,13 +196,6 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
           top: false,
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Text(
-                  'Arrastra para explorar · Pellizca para acercarte',
-                  style: TextStyle(color: Color(0xffa5b2c5), fontSize: 12),
-                ),
-              ),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -288,35 +281,39 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             ),
                           ),
                         ),
-                        Positioned(
-                          left: 16,
-                          bottom: 12,
-                          child: IgnorePointer(
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_outline,
-                                  size: 15,
-                                  color: _mint,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '${tree.nodes.where((n) => n.owned(session.levels)).length} adquiridas',
-                                  style: const TextStyle(
-                                    color: _mint,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ],
                     );
                   },
                 ),
               ),
-              _details(),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(context).height * .46,
+                ),
+                child: SingleChildScrollView(child: _details()),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const ValueKey('tree-start-day'),
+                    onPressed: session.running
+                        ? null
+                        : () {
+                            _cancel();
+                            activePointer = null;
+                            pointers.clear();
+                            session.startDay();
+                            if (Navigator.of(context).canPop()) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                    icon: const Icon(Icons.wb_sunny_outlined),
+                    label: const Text('Comenzar día'),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -329,13 +326,17 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     final affordable = _canBuy(node);
     final isSelected = selected.id == node.id;
     final typeColor = _typeColor(node);
-    final color = typeColor.withValues(alpha: owned || affordable ? 1 : .55);
+    final color = owned
+        ? typeColor
+        : affordable
+        ? const Color(0xffe2e8f0)
+        : const Color(0xff64738a);
     final locked = !tree.unlocked(node, widget.session.levels);
     return Semantics(
       button: true,
       selected: isSelected,
       label:
-          '${_description(node)}. ${owned ? 'Adquirida' : '${node.upgrade.cost} monedas'}.',
+          '${_description(node)}. ${owned ? 'Adquirida' : '\$${node.upgrade.cost}'}.',
       onTap: () {
         _cancel();
         setState(() => selected = node);
@@ -358,7 +359,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                   width: 76,
                   height: 76,
                   decoration: BoxDecoration(
-                    color: typeColor.withValues(
+                    color: color.withValues(
                       alpha: owned
                           ? .18
                           : affordable
@@ -367,13 +368,13 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     ),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: isSelected ? Colors.white : color,
+                      color: color,
                       width: isSelected ? 2.5 : 1.5,
                     ),
                     boxShadow: affordable
                         ? [
                             BoxShadow(
-                              color: typeColor.withValues(alpha: .22),
+                              color: Colors.white.withValues(alpha: .16),
                               blurRadius: 24,
                               spreadRadius: 2,
                             ),
@@ -391,7 +392,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                           child: Icon(
                             owned ? Icons.check_circle : Icons.lock_outline,
                             size: 16,
-                            color: typeColor,
+                            color: color,
                           ),
                         ),
                       if (holding?.id == node.id)
@@ -481,7 +482,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
             children: [
               Expanded(
                 child: Text(
-                  owned ? 'Adquirida' : '${node.upgrade.cost} monedas',
+                  owned ? 'Adquirida' : '\$${node.upgrade.cost}',
                   style: TextStyle(
                     color: owned ? _mint : _gold,
                     fontWeight: FontWeight.w700,
@@ -583,11 +584,6 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                 style: const TextStyle(color: _mint, fontSize: 12),
               ),
             ),
-          const SizedBox(height: 6),
-          const Text(
-            'Las mejoras se aplican al próximo día.',
-            style: TextStyle(color: Color(0xffa5b2c5), fontSize: 11),
-          ),
         ],
       ),
     );
@@ -648,7 +644,7 @@ String _value(SkillNode node, double value) {
       : n.toStringAsFixed(n.abs() < 1 ? 2 : 1);
   return switch (node.definition.unit) {
     'seconds' => '${number(value)} s',
-    'coins' => '${number(value)} monedas/bola',
+    'coins' => '\$${number(value)}/bola',
     'balls_per_spawn' => '${number(value)} bolas/emisión',
     'balls' => '${number(value)} bolas',
     'robots' => '${number(value)} robot',
@@ -675,9 +671,9 @@ class _TreePainter extends CustomPainter {
         final parent = nodes.where((n) => n.id == id).firstOrNull;
         if (parent == null) continue;
         final paint = Paint()
-          ..color = _typeColor(
-            node,
-          ).withValues(alpha: node.owned(levels) ? .8 : .35)
+          ..color = node.owned(levels)
+              ? _typeColor(node).withValues(alpha: .8)
+              : const Color(0xff475269)
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke;
         final start = Offset(parent.x, parent.y);

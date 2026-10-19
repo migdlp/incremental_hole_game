@@ -73,9 +73,9 @@ void main() {
     final session = GameSession(testCatalog(), MemoryStore())
       ..economy.balance = balance;
     await tester.pumpWidget(GardenApp(session: session));
-    await tester.scrollUntilVisible(find.text('Abrir árbol de mejoras'), 200);
+    await tester.scrollUntilVisible(find.text('Ir al árbol de mejoras'), 200);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Abrir árbol de mejoras'));
+    await tester.tap(find.text('Ir al árbol de mejoras'));
     await tester.pumpAndSettle();
     expect(find.byType(SkillTreeScreen), findsOneWidget);
     return session;
@@ -210,7 +210,7 @@ void main() {
     tester,
   ) async {
     final session = await open(tester, balance: 0);
-    expect(find.text('Faltan 20 monedas'), findsOneWidget);
+    expect(find.text('Faltan \$20'), findsOneWidget);
     final gesture = await tester.startGesture(
       tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
     );

@@ -1,5 +1,20 @@
 # Registro de validación
 
+## CF-01 a CF-04 y monedas sin cifras — 19 de octubre de 2026
+
+Revisión preparada en la rama `feat/coin-colors-and-day-flow`, versión 0.3.1+6, antes de integrar. Ver [cambios futuros](cambios-futuros-arbol-mejoras.md) y [referencia actual](arbol-de-mejoras.md).
+
+- Flutter 3.35.7 estable / Dart 3.9.2; archivo de dependencias conservado y resuelto con `flutter pub get --enforce-lockfile`.
+- `dart format --output=none --set-exit-if-changed lib test`: correcto.
+- `flutter analyze --no-pub`: sin incidencias.
+- `flutter test --no-pub`: **88 pruebas correctas**. Nuevas comprobaciones de captura/cobro único de $1, denominaciones mixtas y grandes sin perder valor, restauraciones sucesivas de una jornada de balance 4, cara de monedas sin numerales y colores por denominación.
+- Widgets: estadísticas con una única acción, compra y comienzo directo del siguiente día desde el árbol, cancelación de una compra incompleta al comenzarlo y estados gris/blanco/color de tipo. Incluye vista de 320 × 568; las pruebas anteriores de 360 × 640 siguen pasando.
+- `flutter build web --no-pub --no-web-resources-cdn`: correcto, incluidos compilación JavaScript y ensayo de compatibilidad Wasm.
+- `git diff --check` y revisión de enlaces relativos de Markdown: correctos.
+
+No se ha desplegado la web ni generado un nuevo APK. Tampoco se acredita aceptación táctil, legibilidad por color ni rendimiento en Android físico. El cambio a $1 conserva los precios existentes para esta revisión; no se declara validado el ritmo de progreso.
+
+
 ## Entrega actual — 0.2.1+3, 18 de octubre de 2026
 
 | Evidencia | Resultado y alcance |

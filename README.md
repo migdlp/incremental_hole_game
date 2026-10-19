@@ -1,8 +1,8 @@
 # Jardín mecánico
 
-Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.0+5**.
+Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.1+6**.
 
-El mapa de [cambios futuros](docs/cambios-futuros-arbol-mejoras.md) se incorpora al árbol: cuatro ramas iniciales, cinco niveles, seis colores, Doble emisión y alcance del imán. Se conservan las compras anteriores y el balance de las jornadas interrumpidas; las nuevas jornadas usan balance 4.
+El mapa de [cambios futuros](docs/cambios-futuros-arbol-mejoras.md) se incorpora al árbol: cuatro ramas iniciales, cinco niveles, seis colores, Doble emisión y alcance del imán. Se conservan las compras anteriores y el balance de las jornadas interrumpidas; las nuevas jornadas usan balance 5.
 
 La aplicación y su pipeline manual de APK están fusionadas en `main`. La aceptación del MVP en un Android físico sigue pendiente. Empieza por el [índice de documentación](docs/README.md), el [estado actual](docs/estado-actual.md) o la [guía de desarrollo](docs/guia-desarrollo.md).
 
@@ -28,11 +28,11 @@ python3 -m http.server 8123 --directory build/web
 
 - Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual inicial, capacidad mejorable a 2/3/4/5/6 bolas y lanzamiento del grupo según la velocidad final del gesto. Solo una mano que ya lleva una bola atrae las cercanas.
 - Escoba física disponible solo tras comprarla, perpendicular al arrastre, giro suavizado, anchura mejorable y escoba en V; selector de herramientas compradas.
-- Monedas con valor entero, aterrizaje, recogida por pulsación al inicio y por barrido tras comprar la mejora, fusión y límite de pilas sin perder valor.
-- Día inicial de **15 segundos en total: 10 de producción y 5 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
+- Monedas de $1/$10/$50/$100/$500 con colores propios, sin cifras ni símbolos sobre sus caras; una bola genera $1 de base. Pilas con valor entero, aterrizaje, recogida por pulsación al inicio y por barrido tras comprar la mejora, fusión y límite de pilas sin perder valor.
+- Día inicial de **13 segundos en total: 10 de producción y 3 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 3 segundos; las compras revelan nuevos caminos.
 - Catorce tipos y 44 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
-- Resultados y estadísticas en un pop-up sobre el juego detenido, con un botón para abrir el árbol en su pantalla independiente. Solo se interactúa con el pop-up hasta comenzar el siguiente día; ahorro y compras persistentes.
+- Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
 - Guardado JSON v4 con compatibilidad v1/v2/v3, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano, instrucciones breves y opción de silenciar los sonidos del sistema.
 
@@ -58,7 +58,7 @@ La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisi
 
 ## Límites de esta entrega
 
-Es una primera implementación jugable, no una validación final del MVP. Falta probar en un móvil físico el agarre, los lanzamientos, el giro de ambas escobas, el balance y los 60 FPS bajo carga. Los precios siguen provisionales; el generador intenta emitir quince bolas durante los diez segundos iniciales de producción, con un valor máximo de treinta monedas si se capturan y cobran todas sin bloqueos. No hay dispositivo de referencia acordado. Los sonidos son clics del sistema con opción de silencio; no hay efectos de audio propios ni control independiente de volumen. El taller abre un árbol progresivo; su revisión táctil y el ajuste final de precios siguen pendientes. Ver [cómo se explora y compra](docs/arbol-de-mejoras.md).
+Es una primera implementación jugable, no una validación final del MVP. Falta probar en un móvil físico el agarre, los lanzamientos, el giro de ambas escobas, el balance y los 60 FPS bajo carga. Los precios siguen provisionales; el generador intenta emitir quince bolas durante los diez segundos iniciales de producción, con un valor máximo base de $15 si se capturan y cobran todas sin bloqueos. No hay dispositivo de referencia acordado. Los sonidos son clics del sistema con opción de silencio; no hay efectos de audio propios ni control independiente de volumen. El taller abre un árbol progresivo; su revisión táctil y el ajuste final de precios siguen pendientes. Ver [cómo se explora y compra](docs/arbol-de-mejoras.md).
 
 El juego mantiene su progreso localmente y no genera ingresos mientras está cerrado. Se solicitan puntos de control cada cinco segundos de avance activo. Un cierre forzado puede perder progreso desde la última escritura correcta, y la recuperación de una copia puede retroceder más; al restaurar no se simula el tiempo cerrado. Si falla el guardado se avisa y se permite reintentarlo. Si el archivo y su copia están dañados, se pide una acción explícita antes de comenzar una partida nueva. La copia de seguridad puede recuperar un estado anterior.
 

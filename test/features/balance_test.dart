@@ -13,14 +13,14 @@ void advance(GameSession session, int frames) {
 
 void main() {
   final catalog = testCatalog();
-  test('initial day lasts 15 seconds including five for collection', () {
+  test('initial day lasts 13 seconds including three for collection', () {
     final session = GameSession(catalog, MemoryStore())..startDay();
-    expect(session.cycle!.remaining, 15);
+    expect(session.cycle!.remaining, 13);
     advance(session, 600);
     expect(session.phase, DayPhase.closing);
-    expect(session.cycle!.remaining, closeTo(5, .001));
+    expect(session.cycle!.remaining, closeTo(3, .001));
     expect(session.board!.balls.length, 15);
-    advance(session, 299);
+    advance(session, 179);
     expect(session.running, isTrue);
     expect(session.board!.balls.length, 15); // no production during closing
     advance(session, 1);
@@ -99,12 +99,12 @@ void main() {
     expect(reopened.board!.settings['production_duration'], 70);
     reopened.finishDay();
     reopened.startDay();
-    expect(reopened.cycle!.remaining, 21);
+    expect(reopened.cycle!.remaining, 19);
     expect(
       reopened.board!.settings['spawn_interval'],
       closeTo(1 / 1.875, 1e-9),
     );
-    expect(reopened.board!.settings.balanceVersion, 4);
+    expect(reopened.board!.settings.balanceVersion, 5);
     expect(reopened.economy.balance, 123);
     expect(reopened.levels, session.levels);
   });
@@ -124,7 +124,7 @@ void main() {
     reloaded.finishDay();
     reloaded.startDay();
     expect(1 / reloaded.board!.settings['spawn_interval'], closeTo(1.5, 1e-9));
-    expect(reloaded.board!.settings.balanceVersion, 4);
+    expect(reloaded.board!.settings.balanceVersion, 5);
   });
 
   test(
@@ -137,7 +137,7 @@ void main() {
       data['run']['balanceVersion'] = 2;
       data['run']['settings']['production_duration'] = 75;
       expect(() => session.restore(jsonEncode(data)), throwsFormatException);
-      expect(session.cycle!.remaining, 15);
+      expect(session.cycle!.remaining, 13);
     },
   );
 }

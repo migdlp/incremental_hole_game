@@ -2,11 +2,87 @@
 
 > Actualización vigente: la petición más reciente sustituye la escoba inicial y el salto inicial a tres bolas. Se implementa localmente una mano de una bola, primera mejora a **dos** y rama a **tres, cuatro y cinco**; la atracción solo funciona llevando alguna bola. La escoba física solo aparece tras comprar su desbloqueo. Ver [árbol actual](arbol-de-mejoras.md) y [cambios sin publicar](../CHANGELOG.md). Las propuestas y entregas anteriores que contradigan esta nota quedan como registro histórico.
 
-**Referencia viva v0.4 · Cambios futuros · Diseño en revisión, no implementado.**
+**Referencia viva v0.5 · Cambios futuros · Requisitos nuevos registrados; implementación pendiente.**
 
 Este documento es la referencia de trabajo para diseñar juntos el árbol futuro de Incremental Hole Game. El [árbol actual](arbol-de-mejoras.md) documenta lo implementado; este archivo reúne únicamente lo que queremos explorar o cambiar. Registrar una propuesta aquí no autoriza implementarla ni significa que su balance esté aprobado.
 
 El [seguimiento general](plan-cambios-agarre-escoba.md) conserva las prioridades. Los precios actuales siguen teniendo como única fuente editable [balance.csv](balance.csv); las cifras de este documento son hipótesis de diseño futuro.
+
+## Cambios añadidos — 19 de octubre de 2026
+
+**Requisitos de diseño confirmados por el usuario; todos pendientes de implementación en esta actualización.** La numeración identifica cambios, no un orden de prioridad. Estas reglas sustituyen cualquier cifra o presentación contradictoria de propuestas anteriores. Se conservan las decisiones vigentes sobre mano y escoba de la nota inicial.
+
+### CF-01 · Valor base y denominaciones de monedas
+
+- [ ] Una bola capturada en el hoyo genera **$1 de valor base**, representado por una moneda normal de un dólar.
+- [ ] Mostrar el dinero en dólares del juego, distinguiendo el importe de la cantidad de monedas físicas.
+- [ ] Usar únicamente denominaciones de **$1, $10, $50, $100 y $500**. No habrá moneda de $25.
+- [ ] Cada denominación tendrá un color propio y su valor visible, para reconocerla también sin depender del color.
+
+| Denominación | Apariencia | Color HEX | Decisión |
+| --- | --- | --- | --- |
+| **$1** | 🟡 Dorada; moneda normal | `#EAB308` | Dorado indicado por el usuario. |
+| **$10** | 🟢 Verde esmeralda | `#10B981` | Paleta propuesta. |
+| **$50** | 🔵 Azul | `#3B82F6` | Paleta propuesta. |
+| **$100** | 🟣 Violeta | `#A855F7` | Paleta propuesta. |
+| **$500** | 🔴 Rojo coral | `#F43F5E` | Paleta propuesta. |
+
+El color de una moneda representa su denominación; el color de un nodo del árbol representa el tipo de mejora. Son dos leyendas independientes.
+
+**Pendiente de diseñar juntos:** cómo se desbloquean o aparecen las denominaciones superiores, cómo interactúan con las mejoras de valor y cómo se representan las pilas o agrupaciones sin cambiar el importe total. No se presupone que cada bola vaya a generar una moneda de $500 ni se fijan probabilidades. El cambio a $1 obliga a recalcular el ritmo de ingresos y los precios futuros; no se mantienen como balance aprobado las cifras basadas en dos monedas por bola.
+
+### CF-02 · Recogida final inicial de tres segundos
+
+- [ ] La fase nocturna de recogida de monedas empieza con **3 segundos de duración base**.
+- [ ] Tres segundos sustituye a la cifra de dos segundos mencionada y corregida en la petición, y a los cinco segundos de propuestas anteriores.
+- [ ] Esta duración corresponde solo a la fase de recogida final, no al tiempo de producción ni al tiempo para consultar estadísticas o comprar mejoras.
+
+Se conserva el comportamiento previsto de recogida final con el resto del tablero detenido. Con una base de 10 segundos de producción, el ciclo activo inicial pasaría a **13 segundos en total**. No se define todavía una mejora para ampliar la recogida; si se añade, partirá de esos tres segundos.
+
+### CF-03 · Estadísticas → árbol independiente → siguiente día
+
+- [ ] El pop-up de estadísticas tendrá **un único botón: «Ir al árbol de mejoras»**.
+- [ ] El árbol de mejoras será una **pantalla independiente**.
+- [ ] Esa pantalla tendrá el botón **«Comenzar día»**, que inicia directamente el siguiente día.
+- [ ] El pop-up de estadísticas dejará de ofrecer «Comenzar día»; el recorrido ya no obliga a regresar al resumen para iniciarlo.
+
+```text
+DÍA EN JUEGO
+     ↓
+RECOGIDA FINAL · 3 s de base
+     ↓
+POP-UP DE ESTADÍSTICAS
+[Ir al árbol de mejoras]
+     ↓
+PANTALLA DEL ÁRBOL
+[Comenzar día]
+     ↓
+SIGUIENTE DÍA
+```
+
+### CF-04 · Estilo visual del árbol según estado
+
+- [ ] Rediseñar el estilo del árbol para distinguir los tipos de mejora y el estado de cada nodo.
+- [ ] **Comprada:** mostrar el icono y el color de su tipo o grupo.
+- [ ] **Sin comprar y no disponible para compra:** mostrar el nodo apagado, con icono y contorno atenuados.
+- [ ] **Sin comprar y comprable:** iluminar el nodo con una luz blanca suave, como una activación parcial. Exige requisitos cumplidos y dinero suficiente.
+- [ ] Mantener visibles las conexiones necesarias para entender las ramificaciones, respetando el descubrimiento progresivo.
+
+| Estado | Icono y presentación |
+| --- | --- |
+| Comprada | Icono visible con el color de su tipo; marca de compra complementaria. |
+| Sin comprar, bloqueada o sin dinero | Apagada, gris y con poco brillo; el motivo se indica al consultar. |
+| Comprable | Icono y borde en blanco suave, con resplandor moderado; aún no usa la presentación de comprada. |
+
+Los tipos mantienen la paleta del apartado «Tipos y colores». El brillo blanco indica que puedes comprar; el color de categoría identifica lo que ya has adquirido.
+
+### Comprobaciones para cuando se implemente
+
+- Una captura sin mejoras genera exactamente $1; recogerla aumenta el saldo una sola vez en $1.
+- Solo aparecen denominaciones permitidas y cada una conserva su importe al agrupar o cobrar.
+- Una partida nueva dispone de tres segundos de recogida final, sin cambiar por error la duración de producción.
+- El pop-up tiene una única acción y el recorrido estadísticas → árbol → comenzar día funciona sin regresar al pop-up.
+- Los estados comprado, apagado y comprable se distinguen; al comprar se pasa de blanco suave al icono con el color del tipo.
 
 ## Objetivo
 
@@ -25,7 +101,7 @@ Tomamos «llevar 2 bolas más» como primera mejora propuesta: capacidad inicial
 | TIE · Tiempo de producción | 🟠 Naranja · `#F97316` | Días con más tiempo para producir. |
 | AUT · Automatización | 🔴 Coral · `#F43F5E` | Robot y velocidad. |
 
-Cada subrama hereda el color de su tipo, aunque nazca de otro tipo. El color identifica el efecto. Un candado indica bloqueo, una marca indica compra y el brillo indica disponibilidad, para no sustituir el color de categoría por el estado.
+Cada subrama hereda el color de su tipo, aunque nazca de otro tipo. Al estar comprada muestra icono y color de categoría. Antes de comprar está apagada o, si se puede comprar, iluminada en blanco suave, según CF-04. Marcas y candados complementan el estado.
 
 ## Mapa para móvil
 
@@ -45,7 +121,7 @@ Puedes llevar 3 bolas (+2)
 │        └─ II → III → IV → V
 │
 ├─ 🟡 VALOR I
-│  3 monedas por bola
+│  Mejora de valor (por definir)
 │  └─ Valor II → III → IV → V
 │
 ├─ 🔵 BARRIDO DE MONEDAS
@@ -74,7 +150,7 @@ Estas dos conexiones adicionales forman parte del mapa aunque no se repitan como
 
 ## Primeros pasos del jugador
 
-1. Sin mejoras: mano de una bola, 1,5 bolas/s, 2 monedas por captura, 10 s de producción y 5 s de recogida.
+1. Sin mejoras: mano de una bola, 1,5 bolas/s, $1 por captura, 10 s de producción y 3 s de recogida final.
 2. Primera compra: Mano I por 20 monedas. Poder transportar tres bolas cambia el control antes de aumentar la carga del tablero.
 3. Se abren cuatro decisiones: producir más, ganar más por captura, recoger deslizando o ampliar la mano.
 4. Mano II abre las mejoras de anchura de la escoba, que ya está disponible desde el inicio; Generador II abre el tiempo de producción. Valor I está disponible pronto y no obliga a invertir primero en varios niveles de producción.
@@ -124,10 +200,10 @@ Atracción usa la misma fórmula, con precio inicial 80. Los precios son por nod
 | --- | --- |
 | Mano | Capacidad = 1 + 2n: 3, 5, 7, 9, 11 bolas. |
 | Generador | Frecuencia = 1,5 × 1,25^n bolas/s antes de Doble emisión: 1,88; 2,34; 2,93; 3,66; 4,58. |
-| Valor | Monedas por bola = redondear(2 × 1,4^n): 3, 4, 5, 8, 11. |
+| Valor | Base de $1 por bola (CF-01). Fórmula y relación con denominaciones superiores pendientes de redefinir. La propuesta anterior basada en dos monedas queda sustituida. |
 | Radio | 18 + 6n: 24, 30, 36, 42, 48 unidades lógicas. |
 | Anchura | 80 + 16n: 96, 112, 128, 144, 160 unidades lógicas. |
-| Día más largo | Producción = 10 + 3n: 13, 16, 19, 22, 25 s. Mantiene 5 s de recogida. |
+| Día más largo | Producción = 10 + 3n: 13, 16, 19, 22, 25 s. Mantiene 3 s de recogida final base (CF-02). |
 | Velocidad del robot | 45 × 1,15^n: aproximadamente 52, 60, 68, 79, 91 unidades/s. |
 | Imán | Desbloquea atracción alrededor del dedo activo, con radio 65 unidades. |
 | Atracción | Radio del imán = 65 + 10n: 75, 85, 95 unidades. |
@@ -144,16 +220,9 @@ Ingreso teórico por día:
 
 En la tabla de Generador, «bolas/s» equivale a emisiones/s antes de Doble emisión. Esta mejora duplica las bolas por emisión sin cambiar el intervalo. Los dos últimos factores de la fórmula están entre 0 y 1: producir más no equivale automáticamente a cobrar más.
 
-Referencias máximas aproximadas, sin bloqueos ni pérdidas:
+Referencia máxima inicial con CF-01: **1,5 bolas/s × 10 s × $1 = $15 por día**, antes de pérdidas por bolas no capturadas y monedas no cobradas. Es una tasa media teórica, no una predicción de ingreso real.
 
-| Situación | Monedas por día |
-| --- | --- |
-| Inicio | 1,5 × 10 × 2 = 30 |
-| Generador I + Valor I | 1,875 × 10 × 3 ≈ 56 |
-| Generador III + Valor III + Día III | 2,93 × 19 × 5 ≈ 278 |
-| Mismo caso + Doble emisión | ≈ 557 |
-
-Son tasas medias teóricas; los días discretos y los límites del tablero pueden variar el total. No son predicciones de lo que cobrará un jugador.
+Las estimaciones antiguas de $30, $56, $278 y $557 por jornada se retiran porque partían de una base y una progresión de valor que ya no son vigentes. Las nuevas estimaciones se calcularán cuando definamos el efecto de Valor y el acceso a las denominaciones superiores.
 
 Objetivos para el primer ensayo:
 - Mano I alcanzable en aproximadamente 1–2 jornadas de aprendizaje.
@@ -204,3 +273,5 @@ No se implementará un límite duro sobre producción o valor sin mostrarlo al j
 - **v0.2:** referencia del árbol real del código, conservada en documento separado.
 - **v0.3:** propuesta con capacidad de mano, seis tipos con color, especializaciones, cinco niveles y crecimiento multiplicativo.
 - **v0.4:** se establece como referencia viva de cambios futuros; respeta escoba inicial y transformación en V, distingue mejora de dos monedas de capacidad de bolas y conserva el árbol actual por separado. Balance y detalles pendientes de revisión.
+
+- **v0.5 · 2026-10-19:** CF-01 valor base de $1 y denominaciones con colores; CF-02 recogida final base de 3 s; CF-03 estadísticas → árbol → comenzar día; CF-04 iconos y colores de mejoras compradas, apagadas o iluminadas en blanco al poder comprarlas. Requisitos registrados, sin implementación en esta actualización.

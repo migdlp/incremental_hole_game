@@ -1,5 +1,10 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+## Revisión CF-05 — árbol compacto, en rama
+
+Implementada por petición del usuario: [CF-05](cambios-futuros-arbol-mejoras.md#cf-05--árbol-compacto-y-ficha-bajo-demanda--19-de-octubre-de-2026). Se conserva la información, el balance y los nodos. Pantalla sin título, atrás ni controles de zoom; ficha tras seleccionar, cantidades en verde, compra desde botón en 1 s y conexiones rectas con nodos más cercanos. Pendiente de integración; no modifica los APK históricos enlazados debajo.
+
+
 > **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
 
 

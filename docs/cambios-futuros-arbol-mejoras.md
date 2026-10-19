@@ -15,6 +15,21 @@ Petición posterior del usuario: ninguna moneda muestra su valor sobre la cara, 
 
 Se autoriza implementar CF-01 a CF-04, conservando el mapa y las compras existentes. El resultado se registra con sus comprobaciones antes de darlo por entregado.
 
+## CF-05 · Árbol compacto y ficha bajo demanda — 19 de octubre de 2026
+
+**Implementado en la rama `feat/compact-upgrade-tree`, pendiente de integrar.** Esta petición sustituye el tiempo anterior de tres segundos y los controles visibles del árbol; conserva el mapa de mejoras, efectos, precios, requisitos y compras existentes.
+
+- [x] Cabecera sin botón de atrás ni título «Árbol de mejoras»; solo monedas y saldo arriba a la derecha.
+- [x] Eliminar los botones de acercar, alejar y centrar. Mantener arrastre y zoom por pellizco; el botón inferior «Comenzar día» se conserva.
+- [x] No seleccionar ninguna mejora al abrir: la ficha y la compra aparecen únicamente tras tocar un nodo.
+- [x] Mostrar el efecto en una frase breve: «La mano agarra **2** bolas». La cantidad o capacidad mejorada se destaca en verde `#22C55E`.
+- [x] Conservar precio, estado y requisitos. El desglose de nivel, efecto, valor anterior → nuevo y porcentaje sigue en la información contextual del resumen al mantenerlo pulsado, además de las descripciones accesibles.
+- [x] Comprar únicamente desde su botón, manteniéndolo **1 segundo**. Tocar o mantener un nodo consulta, sin comprar. Soltar antes, mover el dedo, añadir otro o interrumpir la aplicación cancela el progreso.
+- [x] Acercar nodos: salto vertical de 96 unidades en lugar de 180; lienzo de 880 × 1120 en lugar de 3150 × 2150, sin cambiar las conexiones de desbloqueo.
+- [x] Dibujar conexiones mediante tramos rectos horizontales, verticales o diagonales, sin curvas. Los requisitos cruzados recorren pasillos libres para no atravesar otros nodos.
+
+Comprobaciones: 95 pruebas correctas, incluida ausencia de ficha inicial, compra única tras un segundo, cancelación, colores, separación de objetivos táctiles y pantalla de 320 × 568 con texto ampliado al 150 %. No se acredita experiencia física en Android ni se genera APK en esta revisión.
+
 ## Cambios añadidos — 19 de octubre de 2026
 
 **Requisitos implementados en esta revisión; pendientes de revisión táctil en Android y de integración de la rama.** La numeración identifica cambios, no un orden de prioridad. Estas reglas sustituyen cualquier cifra o presentación contradictoria de propuestas anteriores. Se conservan las decisiones vigentes sobre mano y escoba de la nota inicial.
@@ -277,3 +292,5 @@ Los guardados antiguos conservan las compras sin añadir mejoras gratis. Las jor
 - **v0.6:** mapa implementado por petición del usuario, con Mano I de dos bolas, capacidad +1 por nivel y escoba comprada. Doble emisión, alcance, cinco niveles, colores por tipo y migración forman parte de 0.3.0+5. CF-01 a CF-04 se conservan pendientes.
 
 - **v0.7 · 2026-10-19:** monedas sin cifras ni símbolos, CF-01 a CF-04 implementados para revisión; esquema JSON v4 conservado y balance 5 para jornadas nuevas. Balance 4 congelado para recuperar jornadas interrumpidas. No se genera APK ni se acredita prueba en Android físico en esta revisión.
+
+- **CF-05 · 2026-10-19:** interfaz compacta, ficha bajo demanda y compra de un segundo, implementadas en rama para revisión. Las notas históricas de compra de tres segundos quedan sustituidas por CF-05.

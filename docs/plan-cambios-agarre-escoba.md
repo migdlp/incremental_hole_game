@@ -1,5 +1,7 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+> Actualización vigente: la petición más reciente sustituye la escoba inicial y el salto inicial a tres bolas. Se implementa localmente una mano de una bola, primera mejora a **dos** y rama a **tres, cuatro y cinco**; la atracción solo funciona llevando alguna bola. La escoba física solo aparece tras comprar su desbloqueo. Ver [árbol actual](arbol-de-mejoras.md) y [cambios sin publicar](../CHANGELOG.md). Las propuestas y entregas anteriores que contradigan esta nota quedan como registro histórico.
+
 Fecha: 18 de octubre de 2026. Base revisada: `main`, commit `1bf1efa`, prototipo `0.1.0+1`.
 
 Estado actual: `0.2.1+3` entregado con APK; pendiente validación en Android físico y OK de jugabilidad. Los resultados y límites se registran al final de este archivo. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. La documentación general se ha actualizado por petición del usuario el 18 de octubre; esto no sustituye la aceptación de jugabilidad ni el balance final.

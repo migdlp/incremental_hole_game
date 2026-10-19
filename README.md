@@ -24,12 +24,12 @@ python3 -m http.server 8123 --directory build/web
 
 ## Lo que ya funciona
 
-- Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual y lanzamiento según la velocidad final del gesto.
-- Escoba recta perpendicular al arrastre, giro suavizado, anchura mejorable y escoba en V; selector de herramientas compradas.
+- Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual inicial, capacidad mejorable a 2/3/4/5 bolas y lanzamiento del grupo según la velocidad final del gesto. Solo una mano que ya lleva una bola atrae las cercanas.
+- Escoba física disponible solo tras comprarla, perpendicular al arrastre, giro suavizado, anchura mejorable y escoba en V; selector de herramientas compradas.
 - Monedas con valor entero, aterrizaje, recogida por pulsación al inicio y por barrido tras comprar la mejora, fusión y límite de pilas sin perder valor.
 - Día inicial de **15 segundos en total: 10 de producción y 5 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 3 segundos; las compras revelan nuevos caminos.
-- Once tipos de mejora, con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
+- Doce tipos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un botón para abrir el árbol en su pantalla independiente. Solo se interactúa con el pop-up hasta comenzar el siguiente día; ahorro y compras persistentes.
 - Guardado JSON v3 con compatibilidad v1/v2, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano, instrucciones breves y opción de silenciar los sonidos del sistema.

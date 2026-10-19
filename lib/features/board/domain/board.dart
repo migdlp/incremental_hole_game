@@ -59,7 +59,12 @@ class Board {
   }
 
   BallTool tool;
-  Ball? heldBall;
+  final _heldBalls = <Ball, Vec>{};
+  Ball? get heldBall => _heldBalls.keys.firstOrNull;
+  List<Ball> get heldBalls => List.unmodifiable(_heldBalls.keys);
+  int get handCapacity => math.max(1, settings['hand_capacity'].toInt());
+  double get ballMagnetRadius => radius * 2 + 24;
+  bool get broomUnlocked => settings['broom_unlocked'] > 0;
   Vec _grabOffset = Vec.zero;
   Vec? _downPoint, _directionAnchor;
   bool _dragged = false, _heldDuringGesture = false;
@@ -69,12 +74,13 @@ class Board {
   static const broomThickness = 3.5;
   double get broomHalfWidth => settings['paddle_radius'] * 2;
   bool get sweepEnabled => settings['coin_sweep'] > 0;
-  List<ToolSegment> get segments =>
-      broomSegments(broomTool, broomPosition, toolAngle, broomHalfWidth);
+  List<ToolSegment> get segments => broomUnlocked
+      ? broomSegments(broomTool, broomPosition, toolAngle, broomHalfWidth)
+      : const [];
 
   bool canUse(BallTool value) => switch (value) {
     BallTool.hand => true,
-    BallTool.broom => true,
+    BallTool.broom => broomUnlocked,
     BallTool.vee => settings['v_unlocked'] > 0,
   };
 
@@ -97,13 +103,14 @@ class Board {
 
   int releasePointer({bool cancel = false, double? time}) {
     var collected = 0;
-    if (heldBall case final Ball ball) {
-      ball.velocity = cancel ? Vec.zero : _releaseVelocity(time ?? _clock);
+    final velocity = cancel ? Vec.zero : _releaseVelocity(time ?? _clock);
+    for (final ball in _heldBalls.keys) {
+      ball.velocity = velocity;
     }
     if (!cancel && !_dragged && !_heldDuringGesture && _downPoint != null) {
       collected = _collect(_downPoint!, _downPoint!);
     }
-    heldBall = null;
+    _heldBalls.clear();
     holdingBroom = false;
     paddle = null;
     target = null;
@@ -168,6 +175,7 @@ class Board {
         broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
     holdingBroom =
         !coinOnly &&
+        broomUnlocked &&
         !onCoin &&
         (segments.any(
               (segment) => (segment.closest(paddle!) - paddle!).length <= 12,
@@ -188,9 +196,9 @@ class Board {
           distance = d;
         }
       }
-      heldBall = nearest;
       if (nearest != null) {
         _grabOffset = nearest.position - paddle!;
+        _heldBalls[nearest] = _grabOffset;
         nearest.velocity = Vec.zero;
         _heldDuringGesture = true;
       }
@@ -300,7 +308,7 @@ class Board {
       _moveTool(step);
       final friction = math.exp(-1.6 * step);
       for (final ball in balls) {
-        if (ball == heldBall) continue;
+        if (_heldBalls.containsKey(ball)) continue;
         final toHole = hole - ball.position;
         if (toHole.length < settings['hole_capture_radius'] + 15) {
           ball.velocity = ball.velocity + toHole.unit * (220 * step);
@@ -326,7 +334,7 @@ class Board {
       if ((ball.position - hole).length > settings['hole_capture_radius']) {
         return false;
       }
-      if (heldBall == ball) heldBall = null;
+      _heldBalls.remove(ball);
       captures++;
       return true;
     });
@@ -338,12 +346,33 @@ class Board {
     if (paddle == null || target == null) return;
     final start = paddle!;
     paddle = start + (target! - start).limit(900 * dt);
-    if (heldBall case final Ball ball) {
-      final goal = (target! + _grabOffset).inside(radius);
-      final previous = ball.position;
-      ball.position = previous + (goal - previous).limit(700 * dt);
-      // Used only for contact response; snapshots never restore an active grip.
-      ball.velocity = (ball.position - previous) * (1 / dt);
+    if (_heldBalls.isNotEmpty && !holdingBroom) {
+      // The first grip is manual. Only an existing grip can attract neighbours.
+      while (_heldBalls.length < handCapacity) {
+        Ball? nearest;
+        var distance = ballMagnetRadius;
+        for (final ball in balls) {
+          if (_heldBalls.containsKey(ball)) continue;
+          final d = (ball.position - heldBall!.position).length;
+          if (d < distance) {
+            nearest = ball;
+            distance = d;
+          }
+        }
+        if (nearest == null) break;
+        final angle = (_heldBalls.length - 1) * math.pi / 2;
+        _heldBalls[nearest] =
+            _grabOffset +
+            Vec(math.cos(angle), math.sin(angle)) * (radius * 2 + 2);
+      }
+      for (final entry in _heldBalls.entries) {
+        final ball = entry.key;
+        final goal = (target! + entry.value).inside(radius);
+        final previous = ball.position;
+        ball.position = previous + (goal - previous).limit(700 * dt);
+        // Snapshots never restore an active grip or its contact velocity.
+        ball.velocity = (ball.position - previous) * (1 / dt);
+      }
     }
     if (!holdingBroom) return;
     final previousBroom = broomPosition;
@@ -364,6 +393,7 @@ class Board {
   void _contactBroom(Vec velocity, double rotation) {
     for (final segment in segments) {
       for (final ball in balls) {
+        if (_heldBalls.containsKey(ball)) continue;
         final contact = segment.closest(ball.position);
         final difference = ball.position - contact;
         final overlap = radius + broomThickness - difference.length;
@@ -386,7 +416,7 @@ class Board {
 
   void _push(Vec point, double size, Vec velocity, double correction) {
     for (final ball in balls) {
-      if (ball == heldBall) continue;
+      if (_heldBalls.containsKey(ball)) continue;
       final difference = ball.position - point;
       final overlap = size + radius - difference.length;
       if (overlap <= 0) continue;
@@ -424,7 +454,9 @@ class Board {
             final overlap = radius * 2 - difference.length;
             if (overlap <= 0) continue;
             final n = difference.unit;
-            final heldA = ball == heldBall, heldB = other == heldBall;
+            final heldA = _heldBalls.containsKey(ball),
+                heldB = _heldBalls.containsKey(other);
+            if (heldA && heldB) continue;
             final distance = overlap + .01;
             if (!heldA) {
               ball.position =
@@ -462,7 +494,7 @@ class Board {
     'broomAngle': toolAngle,
     'balls': balls
         .map(
-          (b) => b == heldBall
+          (b) => _heldBalls.containsKey(b)
               ? (b.toJson()..['v'] = Vec.zero.toJson())
               : b.toJson(),
         )

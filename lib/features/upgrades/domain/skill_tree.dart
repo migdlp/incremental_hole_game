@@ -16,6 +16,12 @@ class SkillNode {
 class SkillTree {
   SkillTree(UpgradeCatalog catalog) {
     const routes = {
+      'hand': [
+        (700.0, 1400.0),
+        (510.0, 1250.0),
+        (400.0, 1430.0),
+        (210.0, 1600.0),
+      ],
       'generator': [(700.0, 1150.0), (950.0, 950.0), (1110.0, 740.0)],
       'broom': [(470.0, 980.0)],
       'paddle': [(300.0, 800.0), (160.0, 640.0), (160.0, 440.0)],
@@ -34,8 +40,12 @@ class SkillTree {
         final parents = <String>{
           if (i > 0) '${definition.id}:$i',
           if (requirement.isNotEmpty) requirement,
-          if (i == 0 && requirement.isEmpty && definition.id != 'generator')
-            definition.id == 'reward' ? 'generator:2' : 'generator:1',
+          if (i == 0 && requirement.isEmpty && definition.id != 'hand')
+            definition.id == 'generator'
+                ? 'hand:1'
+                : definition.id == 'reward'
+                ? 'generator:2'
+                : 'generator:1',
         };
         final position = routes[definition.id]![i];
         nodes.add(
@@ -51,7 +61,7 @@ class SkillTree {
     }
   }
   final List<SkillNode> nodes = [];
-  SkillNode get root => nodes.firstWhere((n) => n.id == 'generator:1');
+  SkillNode get root => nodes.firstWhere((n) => n.id == 'hand:1');
 
   bool unlocked(SkillNode node, Map<String, int> levels) =>
       node.parents.every((id) => byId(id).owned(levels));

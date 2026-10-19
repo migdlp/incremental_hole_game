@@ -1,5 +1,7 @@
 # Cambios futuros: árbol de mejoras
 
+> Actualización vigente: la petición más reciente sustituye la escoba inicial y el salto inicial a tres bolas. Se implementa localmente una mano de una bola, primera mejora a **dos** y rama a **tres, cuatro y cinco**; la atracción solo funciona llevando alguna bola. La escoba física solo aparece tras comprar su desbloqueo. Ver [árbol actual](arbol-de-mejoras.md) y [cambios sin publicar](../CHANGELOG.md). Las propuestas y entregas anteriores que contradigan esta nota quedan como registro histórico.
+
 **Referencia viva v0.4 · Cambios futuros · Diseño en revisión, no implementado.**
 
 Este documento es la referencia de trabajo para diseñar juntos el árbol futuro de Incremental Hole Game. El [árbol actual](arbol-de-mejoras.md) documenta lo implementado; este archivo reúne únicamente lo que queremos explorar o cambiar. Registrar una propuesta aquí no autoriza implementarla ni significa que su balance esté aprobado.

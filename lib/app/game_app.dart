@@ -260,7 +260,11 @@ class _DayScreenState extends State<DayScreen> {
                         ? (session.board!.sweepEnabled
                               ? 'Toca o desliza para recoger las monedas'
                               : 'Pulsa las monedas para recogerlas')
-                        : 'Agarra una bola o recoge la escoba para barrer',
+                        : session.board!.broomUnlocked
+                        ? 'Agarra una bola o recoge la escoba para barrer'
+                        : session.board!.handCapacity > 1
+                        ? 'Agarra una bola y acércala a otras para recogerlas'
+                        : 'Agarra una bola y llévala al hoyo',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,

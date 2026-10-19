@@ -294,11 +294,25 @@ class GardenGame extends FlameGame {
           paint(const Color(0xff247d73), stroke: 2),
         );
         if (ball != null) {
-          canvas.drawLine(p, center, paint(const Color(0xff247d73), stroke: 2));
+          for (final held in board.heldBalls) {
+            final position = offset(held.position);
+            canvas.drawLine(
+              p,
+              position,
+              paint(const Color(0xff247d73), stroke: 2),
+            );
+            if (held != ball) {
+              canvas.drawCircle(
+                position,
+                board.radius + 4,
+                paint(const Color(0xff247d73), stroke: 1.5),
+              );
+            }
+          }
         }
       }
     }
-    {
+    if (board.broomUnlocked) {
       final point = board.broomPosition;
       final p = offset(point);
       for (final segment in board.segments) {

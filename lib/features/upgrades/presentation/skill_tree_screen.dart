@@ -224,7 +224,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             maxScale: 1.8,
                             child: SizedBox(
                               width: 1500,
-                              height: 1600,
+                              height: 1800,
                               child: CustomPaint(
                                 painter: _TreePainter(visible, session.levels),
                                 child: Stack(
@@ -589,6 +589,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 }
 
 const _icons = {
+  'hand': Icons.back_hand_outlined,
   'broom': Icons.cleaning_services_outlined,
   'paddle': Icons.swap_horiz,
   'broom_v': Icons.call_merge,
@@ -603,6 +604,8 @@ const _icons = {
 };
 
 String _description(SkillNode node) => switch (node.definition.id) {
+  'hand' =>
+    'Lleva hasta ${node.upgrade.value.toInt()} bolas: agarra una y acerca la mano a otras para atraerlas',
   'broom' => 'Desbloquea la escoba para empujar grupos de bolas',
   'paddle' => 'Aumenta la anchura de la escoba',
   'broom_v' => 'Reúne las bolas con una escoba en V',
@@ -624,6 +627,7 @@ String _value(SkillNode node, double value) {
   return switch (node.definition.unit) {
     'seconds' => '${number(value)} s',
     'coins' => '${number(value)} monedas/bola',
+    'balls' => '${number(value)} bolas',
     'robots' => '${number(value)} robot',
     'broom_width' => '${number(value * 4)} u',
     'logical_units_per_second' => '${number(value)} u/s',

@@ -72,7 +72,7 @@ void main() {
       await tester.tap(find.text('Abrir árbol de mejoras'));
       await tester.pumpAndSettle();
       expect(popup, findsNothing);
-      expect(find.byKey(const ValueKey('node-generator:1')), findsOneWidget);
+      expect(find.byKey(const ValueKey('node-hand:1')), findsOneWidget);
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
       );
@@ -80,12 +80,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 3100));
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(session.levels['generator'], 1);
-      expect(session.economy.balance, 74);
+      expect(session.levels['hand'], 1);
+      expect(session.economy.balance, 94);
       expect(game.paused, isTrue);
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('74 monedas'), findsOneWidget);
+      expect(find.text('94 monedas'), findsOneWidget);
       await tester.tap(find.text('Comenzar día 2'));
       await tester.pump();
       expect(popup, findsNothing);
@@ -94,8 +94,8 @@ void main() {
       expect(game.paused, isFalse);
       expect(session.board!.balls, isEmpty);
       expect(session.board!.coins, isEmpty);
-      expect(session.economy.balance, 74);
-      expect(session.board!.settings['spawn_interval'], lessThan(2 / 3));
+      expect(session.economy.balance, 94);
+      expect(session.board!.handCapacity, 2);
       await close(tester, session);
     },
   );

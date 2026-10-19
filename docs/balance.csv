@@ -11,6 +11,11 @@ base,robot_speed,0,0,robot_speed,45,logical_units_per_second,,85
 base,ball_limit,0,0,ball_limit,200,objects,,200
 base,coin_pile_limit,0,0,coin_pile_limit,100,objects,,100
 base,particle_limit,0,0,particle_limit,150,objects,,150
+base,hand_capacity,0,0,hand_capacity,1,balls,,5
+upgrade,hand,1,10,hand_capacity,2,balls,,5
+upgrade,hand,2,40,hand_capacity,3,balls,,5
+upgrade,hand,3,100,hand_capacity,4,balls,,5
+upgrade,hand,4,220,hand_capacity,5,balls,,5
 upgrade,broom,1,20,broom_unlocked,1,unlock,,1
 upgrade,paddle,1,20,paddle_radius,24,broom_width,broom:1,32
 upgrade,paddle,2,70,paddle_radius,28,broom_width,broom:1,32

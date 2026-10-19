@@ -34,6 +34,7 @@ class UpgradeCatalog {
   final Map<String, double> base;
   final List<UpgradeDefinition> definitions;
   static const labels = {
+    'hand': ['Capacidad de la mano', 'Control'],
     'broom': ['Escoba recta', 'Control'],
     'paddle': ['Escoba más ancha', 'Control'],
     'broom_v': ['Escoba en V', 'Control'],

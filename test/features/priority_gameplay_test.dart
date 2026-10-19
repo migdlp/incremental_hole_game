@@ -17,8 +17,8 @@ void frames(GameSession session, int count) {
 
 void main() {
   final catalog = testCatalog();
-  test('first-day broom is a persistent item and hand remains available', () {
-    final board = Board(catalog.settings({}));
+  test('purchased broom is a persistent item and hand remains available', () {
+    final board = Board(catalog.settings({'broom': 1}));
     expect(board.segments, hasLength(1));
     final segment = board.segments.single;
     final center = (segment.a + segment.b) * .5;
@@ -119,13 +119,13 @@ void main() {
   });
 
   test(
-    'old board saves get a broom and invalid physical item data is rejected',
+    'old board saves keep broom locked and invalid physical item data is rejected',
     () {
       final board = Board(catalog.settings({}));
       final old = board.toJson()
         ..remove('broomPosition')
         ..remove('broomAngle');
-      expect(Board.fromJson(board.settings, old).segments, hasLength(1));
+      expect(Board.fromJson(board.settings, old).segments, isEmpty);
       final bad =
           jsonDecode(jsonEncode(board.toJson())) as Map<String, dynamic>;
       bad['broomPosition'] = [-100, 40];
@@ -148,7 +148,9 @@ void main() {
   test(
     'broom pose survives reload without a held gesture and can be picked up again',
     () {
-      final session = GameSession(catalog, MemoryStore())..startDay();
+      final session = GameSession(catalog, MemoryStore())
+        ..levels['broom'] = 1
+        ..startDay();
       final board = session.board!;
       board.touch(board.broomPosition, time: 0);
       board.drag(const Vec(220, 230), time: .1);
@@ -172,7 +174,7 @@ void main() {
   );
 
   test('parked broom keeps its collision geometry after release', () {
-    final board = Board(catalog.settings({}));
+    final board = Board(catalog.settings({'broom': 1}));
     board.broomPosition = const Vec(180, 200);
     final ball = Ball(board.nextId++, const Vec(180, 190), const Vec(0, 120));
     board.balls.add(ball);
@@ -194,7 +196,7 @@ void main() {
     () {
       for (final sweep in [false, true]) {
         final session = GameSession(catalog, MemoryStore())
-          ..levels.addAll(sweep ? {'sweep': 1} : {})
+          ..levels.addAll({'broom': 1, if (sweep) 'sweep': 1})
           ..startDay();
         final board = session.board!;
         session.cycle!.remaining = 5 + 1 / 60;
@@ -226,7 +228,9 @@ void main() {
   test(
     'closing overlay dims scenery, balls and broom but leaves coins bright',
     () async {
-      final session = GameSession(catalog, MemoryStore())..startDay();
+      final session = GameSession(catalog, MemoryStore())
+        ..levels['broom'] = 1
+        ..startDay();
       final board = session.board!;
       board.balls.add(Ball(board.nextId++, const Vec(100, 200), Vec.zero));
       board.coins.add(Coin(board.nextId++, const Vec(100, 300), 2, landing: 0));

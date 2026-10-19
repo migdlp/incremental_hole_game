@@ -7,7 +7,7 @@ Implementado en `main` como `1720fba` ([PR #12](https://github.com/migdlp/increm
 ## Recorrido del jugador
 
 1. De noche, el pop-up muestra el resumen de la jornada y **Abrir árbol de mejoras**. Ese botón abre una pantalla independiente; el juego sigue detenido.
-2. En una partida nueva aparece solo el primer nivel de generador. Pulsar un nodo consulta efecto, valores, porcentaje y coste.
+2. En una partida nueva aparece solo Mano I: capacidad de dos bolas. Al comprarla se revelan Mano II y Generador I. Pulsar un nodo consulta efecto, valores, porcentaje y coste.
 3. Mantener pulsado **3 segundos** en el nodo ya seleccionado o en su ficha para comprar. La compra ocurre al completar el progreso, una sola vez; pulsar brevemente no compra.
 4. Soltar antes, mover más de 10 píxeles lógicos, añadir otro dedo, interrumpir/cancelar o pasar a segundo plano cancela el progreso sin gastar.
 5. Arrastrar para explorar; pellizcar para zoom o usar Acercar/Alejar. **Centrar selección** devuelve el nodo al centro. Volver desde el árbol al mismo pop-up y pulsar **Comenzar día** para cerrar el resumen e iniciar la siguiente jornada.
@@ -16,11 +16,15 @@ Nodos asequibles iluminados, sin saldo oscurecidos y adquiridos con marca verde.
 
 ## Descubrimiento y requisitos
 
-Hay once tipos y 23 nodos, uno por nivel comprable. La visibilidad se deriva de niveles guardados: se muestran compras, sus antecesores y sucesores cuyos padres ya estén comprados. No se guarda un segundo estado de descubrimiento.
+Hay doce tipos y 27 nodos, uno por nivel comprable. La visibilidad se deriva de niveles guardados: se muestran compras, sus antecesores y sucesores cuyos padres ya estén comprados. No se guarda un segundo estado de descubrimiento.
 
 ```mermaid
 flowchart TD
-    G1[Generador 1] --> G2[Generador 2]
+    H1[Mano I: 2 bolas] --> H2[Mano II: 3 bolas]
+    H2 --> H3[Mano III: 4 bolas]
+    H3 --> H4[Mano IV: 5 bolas]
+    H1 --> G1[Generador 1]
+    G1 --> G2[Generador 2]
     G2 --> G3[Generador 3]
     G1 --> E[Escoba]
     E --> A[Anchura 1]
@@ -39,13 +43,13 @@ flowchart TD
 El dibujo resume cadenas: cada nivel numérico requiere el anterior. Hay dos capas distintas:
 
 - **CSV/sesión:** requisitos económicos y de compatibilidad originales, comprobados por `purchaseBlock` y `purchase`.
-- **Árbol/UI:** además impone descubrimiento. Escoba, barrido y radio inicial requieren generador 1 en la interfaz; recompensa inicial requiere generador 2. El resto conserva dependencias del CSV y cadenas de nivel.
+- **Árbol/UI:** además impone descubrimiento. Generador 1 requiere Mano I. Escoba, barrido y radio inicial requieren generador 1 en la interfaz; recompensa inicial requiere generador 2. El resto conserva dependencias del CSV y cadenas de nivel.
 
 Una compra válida por API de sesión no implica que el nodo esté disponible todavía en la interfaz. No cambiar requisitos históricos solo para dibujar conexiones: se conservan compras antiguas aunque no tengan los nuevos padres comprados. Se muestran sus antecesores sin regalarlos ni descontar saldo.
 
 ## Relación con el balance
 
-Con el día base de 15 s, diez de producción a 1,5 bolas/s y valor 2, el máximo inicial es 30 monedas. La primera compra visible cuesta **30** (generador 1): se puede alcanzar tras una jornada perfecta, sin bloqueos ni pérdidas. El desbloqueo de escoba de 20 monedas necesita además ese avance previo en la UI. Los precios siguen provisionales; no garantizar una compra en el primer día ni que el robot llegue en 3–5 días.
+Con el día base de 15 s, diez de producción a 1,5 bolas/s y valor 2, el máximo inicial es 30 monedas. La primera compra visible cuesta **10** (Mano I: dos bolas): se puede alcanzar tras una jornada perfecta, sin bloqueos ni pérdidas. El desbloqueo de escoba de 20 monedas necesita además ese avance previo en la UI. Los precios siguen provisionales; no garantizar una compra en el primer día ni que el robot llegue en 3–5 días.
 
 ## Código y comprobaciones
 
@@ -60,7 +64,7 @@ Evidencia de entrega: [CI 39141075339](https://github.com/migdlp/incremental_hol
 
 ## Mapa completo para móvil — referencia actual
 
-Contrastado por lectura de `skill_tree.dart` y `balance.csv` el 18 de octubre de 2026. Son 23 nodos comprables. Este mapa expande el resumen anterior; las conexiones redundantes con antecesores ya requeridos no se repiten.
+Contrastado por lectura de `skill_tree.dart` y `balance.csv` el 18 de octubre de 2026. Son 27 nodos comprables; Mano I es la raíz y abre la rama Mano II → III → IV y el subárbol de Generador I mostrado debajo. Este mapa expande el resumen anterior; las conexiones redundantes con antecesores ya requeridos no se repiten.
 
 ```text
 GENERADOR I
@@ -93,12 +97,12 @@ GENERADOR I
       └─ Día más largo III
 ```
 
-Los precios, niveles y efectos actuales se consultan en [balance.csv](balance.csv), su única fuente editable. Cada nivel requiere el anterior; se pueden desarrollar todas las ramas. No existe una mejora actual de capacidad de mano para llevar varias bolas.
+Los precios, niveles y efectos actuales se consultan en [balance.csv](balance.csv), su única fuente editable. Cada nivel requiere el anterior; se pueden desarrollar todas las ramas. La capacidad inicial es una bola; Mano I/II/III/IV permiten llevar 2/3/4/5 bolas. La primera se agarra manualmente y las siguientes se atraen al acercarlas a menos de 36 unidades de la primera bola sostenida, hasta llenar la capacidad. Sin bola agarrada no hay atracción. Esta mejora no recoge monedas.
 
 ### Catálogo y comportamiento de la escoba
 
-El árbol conserva el nodo histórico de compra «Escoba recta» y sus requisitos, pero el control actual ya ofrece la escoba física desde el inicio: [Board.canUse y Board.touch](../lib/features/board/domain/board.dart). Comprar ese nodo sigue siendo un paso del árbol hacia anchura, no una descripción fiel del primer acceso físico a la escoba. La propuesta futura elimina esa puerta de acceso y deja pendiente la migración de las compras existentes.
+Comprar «Escoba recta» desbloquea el objeto físico en el siguiente día: antes de comprarlo no se dibuja, no se puede agarrar y no colisiona con bolas. Las mejoras de anchura y V siguen afectando a esa misma escoba. El barrido de monedas es una compra independiente.
 
 ### Estado de esta referencia
 
-Esta revisión es documental y procede del código, no de una nueva prueba en Android. Los colores por tipo, la capacidad de mano, Doble emisión, los cinco niveles y las fórmulas futuras todavía son propuestas: consultar [la referencia de cambios futuros](cambios-futuros-arbol-mejoras.md).
+La capacidad de mano y el bloqueo inicial de escoba se han implementado en esta revisión local; el registro de CI anterior corresponde a la entrega histórica. Los colores por tipo, Doble emisión y otras fórmulas futuras todavía son propuestas: consultar [la referencia de cambios futuros](cambios-futuros-arbol-mejoras.md).

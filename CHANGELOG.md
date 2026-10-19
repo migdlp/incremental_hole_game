@@ -2,6 +2,14 @@
 
 Se registran entregas y cambios observables. `0.2.1+3` es la versión actual declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Sin publicar — capacidad de mano y desbloqueo de escoba
+
+- Primera mejora visible del árbol: llevar dos bolas. Rama de capacidad de 2, 3, 4 y 5 bolas, con costes provisionales de 10, 40, 100 y 220 monedas en el CSV.
+- La primera bola se agarra manualmente; solo mientras se lleva alguna se atraen bolas cercanas hasta el límite comprado. El grupo acompaña al dedo y se lanza o se suelta junto; pausa y cierre cancelan todos los agarres.
+- Escoba invisible, no agarrable y sin colisiones hasta comprar «Escoba recta». Conserva su pose y las mejoras de anchura/V tras desbloquearla.
+- Guardados v1/v2/v3 anteriores sin capacidad se restauran con una bola; una selección gratuita de escoba vuelve a mano sin perder progreso. Las compras existentes conservan su visibilidad en el árbol.
+- Validación local con Flutter 3.35.7 / Dart 3.9.2: suite de 72 pruebas correcta y dos regresiones adicionales de pausa/renderizado correctas; análisis sin incidencias, formato y compilación web correctos. Sin nueva publicación ni validación en Android físico.
+
 ## Resultados modales y generador inicial — 2026-10-18 · 0.2.2+4
 
 - Generación inicial de 1,5 bolas/s (intervalo ⅔ s); los niveles del generador conservan sus aumentos relativos de velocidad y sus precios.

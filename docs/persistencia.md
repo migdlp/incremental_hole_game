@@ -1,5 +1,7 @@
 # Referencia de guardado y recuperación
 
+La capacidad de mano se guarda como nivel `hand` y efecto de jornada `hand_capacity`. Los guardados previos sin ese efecto se normalizan a capacidad 1 solo si no hay compras de mano. No se restauran agarres; todas las bolas sostenidas se serializan con velocidad cero. Una escoba seleccionada durante el bug de acceso gratuito vuelve a mano si no está comprada; su pose guardada no concede acceso físico.
+
 Formato actual: JSON, `version = 3`; se aceptan también versiones `1` y `2` mediante compatibilidad explícita. Implementación: [GameSession](../lib/app/game_session.dart), [Board](../lib/features/board/domain/board.dart) y adaptadores de [persistencia](../lib/persistence/). Este documento describe el contrato actual, no un servicio de sincronización.
 
 ## Dónde se guarda

@@ -117,6 +117,40 @@ void main() {
     },
   );
 
+  testWidgets(
+    'real gesture attracts a second ball only with the hand upgrade',
+    (tester) async {
+      final session = GameSession(testCatalog(), MemoryStore())
+        ..levels['hand'] = 1
+        ..startDay();
+      await tester.pumpWidget(GardenApp(session: session));
+      await tester.pump(const Duration(milliseconds: 100));
+      final finder = find.byWidgetPredicate((widget) => widget is GameWidget);
+      final game = (tester.widget(finder) as GameWidget).game as GardenGame;
+      Offset screen(Vec point) =>
+          tester.getTopLeft(finder) +
+          game.origin +
+          Offset(point.x, point.y) * game.scale;
+      final board = session.board!;
+      final first = Ball(board.nextId++, const Vec(100, 250), Vec.zero);
+      final second = Ball(board.nextId++, const Vec(170, 250), Vec.zero);
+      board.balls.addAll([first, second]);
+      final gesture = await tester.startGesture(screen(first.position));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(board.heldBalls, [first]);
+      await gesture.moveTo(screen(const Vec(150, 250)));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(board.heldBalls, containsAll([first, second]));
+      await gesture.up();
+      expect(board.heldBalls, isEmpty);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await session.pendingWrites;
+      session.dispose();
+    },
+  );
+
   testWidgets('hand picks up the owned physical V broom without a selector', (
     tester,
   ) async {

@@ -160,7 +160,7 @@ class GameSession extends ChangeNotifier {
     final settings = catalog.settings(levels);
     return switch (tool) {
       BallTool.hand => true,
-      BallTool.broom => true,
+      BallTool.broom => settings['broom_unlocked'] > 0,
       BallTool.vee => settings['v_unlocked'] > 0,
     };
   }
@@ -261,13 +261,17 @@ class GameSession extends ChangeNotifier {
     // Old paddle purchases become width upgrades and retain access to the broom.
     if (legacy && (savedLevels['paddle'] ?? 0) > 0) savedLevels['broom'] = 1;
     catalog.validateLevels(savedLevels);
-    final restoredTool = legacy
+    var restoredTool = legacy
         ? ((savedLevels['broom'] ?? 0) > 0 ? BallTool.broom : BallTool.hand)
         : BallTool.values.firstWhere(
             (tool) => tool.name == json['tool'],
             orElse: () => throw const FormatException('Herramienta inválida'),
           );
     final expectedSettings = catalog.settings(savedLevels);
+    if (restoredTool == BallTool.broom &&
+        expectedSettings['broom_unlocked'] == 0) {
+      restoredTool = BallTool.hand;
+    }
     if (restoredTool == BallTool.vee && expectedSettings['v_unlocked'] == 0) {
       throw const FormatException('Herramienta sin desbloquear');
     }
@@ -299,6 +303,10 @@ class GameSession extends ChangeNotifier {
         savedLevels,
         balanceVersion: balanceVersion,
       );
+      if (!savedSettings.values.containsKey('hand_capacity') &&
+          (savedLevels['hand'] ?? 0) == 0) {
+        savedSettings.values['hand_capacity'] = 1;
+      }
       final expected = Map.of(settings.values);
       if (legacy) {
         expected.remove('broom_unlocked');

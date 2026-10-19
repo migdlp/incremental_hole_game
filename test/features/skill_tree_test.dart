@@ -11,8 +11,12 @@ void main() {
     'discovery exposes only the root and purchased immediate successors',
     () {
       final tree = SkillTree(testCatalog());
-      expect(tree.visible({}).map((n) => n.id), ['generator:1']);
-      final first = tree.visible({'generator': 1}).map((n) => n.id);
+      expect(tree.visible({}).map((n) => n.id), ['hand:1']);
+      expect(
+        tree.visible({'hand': 1}).map((n) => n.id),
+        containsAll(['hand:2', 'generator:1']),
+      );
+      final first = tree.visible({'hand': 1, 'generator': 1}).map((n) => n.id);
       expect(
         first,
         containsAll([
@@ -92,7 +96,7 @@ void main() {
     tester,
   ) async {
     final session = await open(tester);
-    final root = find.byKey(const ValueKey('node-generator:1'));
+    final root = find.byKey(const ValueKey('node-hand:1'));
     await tester.tap(root);
     await tester.pump();
     expect(session.levels, isEmpty);
@@ -101,18 +105,18 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2900));
     expect(session.levels, isEmpty);
     await tester.pump(const Duration(milliseconds: 101));
-    expect(session.levels['generator'], 1);
-    expect(session.economy.balance, 470);
-    expect(find.byKey(const ValueKey('node-generator:2')), findsOneWidget);
+    expect(session.levels['hand'], 1);
+    expect(session.economy.balance, 490);
+    expect(find.byKey(const ValueKey('node-hand:2')), findsOneWidget);
     expect(find.byKey(const ValueKey('node-generator:3')), findsNothing);
     await tester.pump(const Duration(seconds: 4));
-    expect(session.economy.balance, 470);
+    expect(session.economy.balance, 490);
     await gesture.up();
     await session.pendingWrites;
     final restored = GameSession(testCatalog(), MemoryStore())
       ..restore(session.snapshot());
-    expect(restored.levels['generator'], 1);
-    expect(restored.economy.balance, 470);
+    expect(restored.levels['hand'], 1);
+    expect(restored.economy.balance, 490);
     restored.dispose();
     await close(tester, session);
   });
@@ -121,7 +125,7 @@ void main() {
     'early release, dragging, pinch and backgrounding cancel purchase',
     (tester) async {
       final session = await open(tester);
-      final root = find.byKey(const ValueKey('node-generator:1'));
+      final root = find.byKey(const ValueKey('node-hand:1'));
       var center = tester.getCenter(root);
       var gesture = await tester.startGesture(center);
       await tester.pump();
@@ -175,7 +179,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 3100));
       await gesture.up();
-      expect(session.levels['generator'], 1);
+      expect(session.levels['hand'], 1);
       await close(tester, session);
     },
   );
@@ -201,8 +205,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 3100));
       await gesture.up();
-      expect(session.levels['generator'], 1);
-      expect(session.economy.balance, 470);
+      expect(session.levels['hand'], 1);
+      expect(session.economy.balance, 490);
       await close(tester, session);
     },
   );
@@ -211,7 +215,7 @@ void main() {
     tester,
   ) async {
     final session = await open(tester, balance: 0);
-    expect(find.text('Faltan 30 monedas'), findsOneWidget);
+    expect(find.text('Faltan 10 monedas'), findsOneWidget);
     final gesture = await tester.startGesture(
       tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
     );

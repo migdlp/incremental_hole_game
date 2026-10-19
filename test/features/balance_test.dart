@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/features/day_cycle/domain/day_cycle.dart';
@@ -29,13 +30,12 @@ void main() {
   test(
     'generation starts at 1.5 balls per second and every upgrade is faster',
     () {
-      for (var level = 0; level <= 3; level++) {
+      for (var level = 0; level <= 5; level++) {
         final levels = {'generator': level};
-        final old = catalog.settings(levels, balanceVersion: 2);
         final current = catalog.settings(levels);
         expect(
           current['spawn_interval'],
-          closeTo(old['spawn_interval'] * 2 / 9, 1e-9),
+          closeTo(1 / (1.5 * pow(1.25, level)), 1e-9),
         );
         expect(current['production_duration'], 10);
         if (level == 0) {
@@ -56,7 +56,7 @@ void main() {
             'generator': 1,
             'duration': level,
           })['production_duration'],
-          10 + level * 5,
+          10 + level * 3,
         );
       }
     },
@@ -99,12 +99,12 @@ void main() {
     expect(reopened.board!.settings['production_duration'], 70);
     reopened.finishDay();
     reopened.startDay();
-    expect(reopened.cycle!.remaining, 25);
+    expect(reopened.cycle!.remaining, 21);
     expect(
       reopened.board!.settings['spawn_interval'],
-      closeTo(2.6 * 2 / 9, 1e-9),
+      closeTo(1 / 1.875, 1e-9),
     );
-    expect(reopened.board!.settings.balanceVersion, 3);
+    expect(reopened.board!.settings.balanceVersion, 4);
     expect(reopened.economy.balance, 123);
     expect(reopened.levels, session.levels);
   });
@@ -124,7 +124,7 @@ void main() {
     reloaded.finishDay();
     reloaded.startDay();
     expect(1 / reloaded.board!.settings['spawn_interval'], closeTo(1.5, 1e-9));
-    expect(reloaded.board!.settings.balanceVersion, 3);
+    expect(reloaded.board!.settings.balanceVersion, 4);
   });
 
   test(

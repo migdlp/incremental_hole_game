@@ -156,7 +156,7 @@ void main() {
   ) async {
     final session = GameSession(testCatalog(), MemoryStore());
     session.economy.balance = 500;
-    for (final id in ['broom', 'paddle', 'broom_v']) {
+    for (final id in ['hand', 'hand', 'broom', 'paddle', 'broom_v']) {
       session.purchase(
         session.catalog.definitions.firstWhere((d) => d.id == id),
       );

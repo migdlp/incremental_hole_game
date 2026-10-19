@@ -16,23 +16,18 @@ void main() {
         tree.visible({'hand': 1}).map((n) => n.id),
         containsAll(['hand:2', 'generator:1']),
       );
-      final first = tree.visible({'hand': 1, 'generator': 1}).map((n) => n.id);
+      final first = tree.visible({'hand': 1}).map((n) => n.id);
       expect(
         first,
-        containsAll([
-          'generator:2',
-          'broom:1',
-          'collection:1',
-          'sweep:1',
-          'duration:1',
-        ]),
+        containsAll(['generator:1', 'reward:1', 'sweep:1', 'hand:2']),
       );
-      expect(first, isNot(contains('generator:3')));
-      expect(first, isNot(contains('paddle:1')));
-      expect(first, isNot(contains('reward:1')));
+      expect(first, isNot(contains('broom:1')));
+      expect(first, isNot(contains('collection:1')));
+      expect(first, isNot(contains('duration:1')));
+      expect(tree.visible({'hand': 2}).map((n) => n.id), contains('broom:1'));
       expect(
         tree.visible({'generator': 2}).map((n) => n.id),
-        containsAll(['generator:3', 'reward:1']),
+        contains('duration:1'),
       );
     },
   );
@@ -67,7 +62,7 @@ void main() {
           'broom:1',
           'magnet:1',
           'collection:1',
-          'generator:1',
+          'hand:1',
         ]),
       );
       expect(legacy.containsKey('generator'), isFalse);
@@ -106,17 +101,17 @@ void main() {
     expect(session.levels, isEmpty);
     await tester.pump(const Duration(milliseconds: 101));
     expect(session.levels['hand'], 1);
-    expect(session.economy.balance, 490);
+    expect(session.economy.balance, 480);
     expect(find.byKey(const ValueKey('node-hand:2')), findsOneWidget);
     expect(find.byKey(const ValueKey('node-generator:3')), findsNothing);
     await tester.pump(const Duration(seconds: 4));
-    expect(session.economy.balance, 490);
+    expect(session.economy.balance, 480);
     await gesture.up();
     await session.pendingWrites;
     final restored = GameSession(testCatalog(), MemoryStore())
       ..restore(session.snapshot());
     expect(restored.levels['hand'], 1);
-    expect(restored.economy.balance, 490);
+    expect(restored.economy.balance, 480);
     restored.dispose();
     await close(tester, session);
   });
@@ -206,7 +201,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 3100));
       await gesture.up();
       expect(session.levels['hand'], 1);
-      expect(session.economy.balance, 490);
+      expect(session.economy.balance, 480);
       await close(tester, session);
     },
   );
@@ -215,7 +210,7 @@ void main() {
     tester,
   ) async {
     final session = await open(tester, balance: 0);
-    expect(find.text('Faltan 10 monedas'), findsOneWidget);
+    expect(find.text('Faltan 20 monedas'), findsOneWidget);
     final gesture = await tester.startGesture(
       tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
     );

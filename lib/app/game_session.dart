@@ -17,6 +17,7 @@ class GameSession extends ChangeNotifier {
   final economy = Economy();
   final progress = Progress();
   final levels = <String, int>{};
+  final _grandfathered = <String, int>{};
   BallTool selectedTool = BallTool.hand;
   Board? board;
   DayCycle? cycle;
@@ -200,7 +201,12 @@ class GameSession extends ChangeNotifier {
     if (level >= definition.levels.length) return 'Completado';
     final next = definition.levels[level];
     if (!catalog.requirementsMet(next, levels)) {
-      final parts = next.requirement.split(':');
+      final parts = next.requirements
+          .firstWhere((item) {
+            final parts = item.split(':');
+            return (levels[parts[0]] ?? 0) < int.parse(parts[1]);
+          })
+          .split(':');
       final name = catalog.definitions.firstWhere((d) => d.id == parts[0]).name;
       return 'Requiere $name · nivel ${parts[1]}';
     }
@@ -223,7 +229,8 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 3,
+    'version': 4,
+    'grandfathered': _grandfathered,
     'tool': selectedTool.name,
     'day': progress.day,
     'balance': economy.balance,
@@ -246,7 +253,10 @@ class GameSession extends ChangeNotifier {
   void restore(String raw) {
     final json = jsonDecode(raw) as Map<String, dynamic>;
     final legacy = json['version'] == 1;
-    if (!legacy && json['version'] != 2 && json['version'] != 3) {
+    if (!legacy &&
+        json['version'] != 2 &&
+        json['version'] != 3 &&
+        json['version'] != 4) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -260,7 +270,17 @@ class GameSession extends ChangeNotifier {
     );
     // Old paddle purchases become width upgrades and retain access to the broom.
     if (legacy && (savedLevels['paddle'] ?? 0) > 0) savedLevels['broom'] = 1;
-    catalog.validateLevels(savedLevels);
+    final oldProgress = json['version'] != 4;
+    final grandfathered = oldProgress
+        ? Map<String, int>.of(savedLevels)
+        : (json['grandfathered'] as Map<String, dynamic>).map(
+            (key, value) => MapEntry(key, value as int),
+          );
+    catalog.validateLevels(
+      savedLevels,
+      grandfathered: grandfathered,
+      legacy: oldProgress,
+    );
     var restoredTool = legacy
         ? ((savedLevels['broom'] ?? 0) > 0 ? BallTool.broom : BallTool.hand)
         : BallTool.values.firstWhere(
@@ -294,9 +314,11 @@ class GameSession extends ChangeNotifier {
       final savedSettings = DaySettings.fromJson(
         run['settings'] as Map<String, dynamic>,
       );
-      final balanceVersion = json['version'] == 3 ? run['balanceVersion'] : 1;
+      final balanceVersion = !legacy && json['version'] != 2
+          ? run['balanceVersion']
+          : 1;
       if (balanceVersion is! int ||
-          (balanceVersion != 1 && balanceVersion != 2 && balanceVersion != 3)) {
+          (balanceVersion < 1 || balanceVersion > 4)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -356,6 +378,9 @@ class GameSession extends ChangeNotifier {
     levels
       ..clear()
       ..addAll(savedLevels);
+    _grandfathered
+      ..clear()
+      ..addAll(grandfathered);
     selectedTool = restoredTool;
     if (legacy) {
       recoveryMessage =

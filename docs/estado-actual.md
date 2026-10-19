@@ -1,6 +1,6 @@
 # Estado actual del prototipo
 
-> Actualización vigente: la petición más reciente sustituye la escoba inicial y el salto inicial a tres bolas. Se implementa localmente una mano de una bola, primera mejora a **dos** y rama a **tres, cuatro y cinco**; la atracción solo funciona llevando alguna bola. La escoba física solo aparece tras comprar su desbloqueo. Ver [árbol actual](arbol-de-mejoras.md) y [cambios sin publicar](../CHANGELOG.md). Las propuestas y entregas anteriores que contradigan esta nota quedan como registro histórico.
+> Actualización vigente — 19 de octubre: se implementa el [mapa futuro v0.6](cambios-futuros-arbol-mejoras.md) en 0.3.0+5: 44 nodos, cuatro ramas, cinco niveles, seis colores, Doble emisión y alcance del imán. Mano inicial de una bola, mejoras a 2/3/4/5/6 y escoba solo tras comprarla. Guardado/balance v4 conserva las compras y jornadas antiguas. Esta nota sustituye estados anteriores que la contradigan; ver [árbol actual](arbol-de-mejoras.md) y [historial](../CHANGELOG.md).
 
 Corte: 18 de octubre de 2026, aplicación `0.2.2+4`, con resultados modales y generación inicial de 1,5 bolas/s. La evidencia histórica de APK se identifica debajo por commit. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está pendiente.
 

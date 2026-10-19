@@ -1,5 +1,11 @@
 # Referencia de guardado y recuperación
 
+## Actualización del árbol — v4
+
+El formato actual escribe `version: 4` y `grandfathered`, un mapa de niveles heredados. Al leer v1/v2/v3 se validan sus requisitos históricos y se conservan sus compras sin conceder requisitos nuevos; al volver a guardar, esta procedencia queda persistida. Los niveles heredados deben ser compras válidas del catálogo anterior. Cualquier compra posterior sigue el CSV actual, incluidos requisitos cruzados separados por `&`.
+
+Las jornadas activas mantienen `balanceVersion` 1/2/3 y los valores congelados en `legacy_balance.dart` hasta terminar, también tras sucesivas restauraciones en v4. Las jornadas nuevas usan balance 4. Se conserva la validación de configuración, contabilidad y objetos antes de modificar la sesión. Las referencias a v3 que siguen documentan el formato anterior.
+
 La capacidad de mano se guarda como nivel `hand` y efecto de jornada `hand_capacity`. Los guardados previos sin ese efecto se normalizan a capacidad 1 solo si no hay compras de mano. No se restauran agarres; todas las bolas sostenidas se serializan con velocidad cero. Una escoba seleccionada durante el bug de acceso gratuito vuelve a mano si no está comprada; su pose guardada no concede acceso físico.
 
 Formato actual: JSON, `version = 3`; se aceptan también versiones `1` y `2` mediante compatibilidad explícita. Implementación: [GameSession](../lib/app/game_session.dart), [Board](../lib/features/board/domain/board.dart) y adaptadores de [persistencia](../lib/persistence/). Este documento describe el contrato actual, no un servicio de sincronización.

@@ -1,8 +1,12 @@
+import 'legacy_balance.dart';
+
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
   final int cost;
   final double value;
   final String requirement;
+  List<String> get requirements =>
+      requirement.isEmpty ? const [] : requirement.split('&');
 }
 
 class UpgradeDefinition {
@@ -19,7 +23,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 3});
+  DaySettings(this.values, {this.balanceVersion = 4});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -38,12 +42,14 @@ class UpgradeCatalog {
     'broom': ['Escoba recta', 'Control'],
     'paddle': ['Escoba más ancha', 'Control'],
     'broom_v': ['Escoba en V', 'Control'],
-    'sweep': ['Recogida por barrido', 'Control'],
-    'collection': ['Radio de recogida', 'Control'],
-    'magnet': ['Imán', 'Control'],
+    'sweep': ['Recogida por barrido', 'Recolección'],
+    'collection': ['Radio de recogida', 'Recolección'],
+    'magnet': ['Imán', 'Recolección'],
+    'attraction': ['Alcance del imán', 'Recolección'],
+    'double_spawn': ['Doble emisión', 'Producción'],
     'generator': ['Generador rápido', 'Producción'],
-    'reward': ['Mayor recompensa', 'Producción'],
-    'duration': ['Día más largo', 'Producción'],
+    'reward': ['Mayor recompensa', 'Valor'],
+    'duration': ['Día más largo', 'Tiempo'],
     'robot': ['Robot ayudante', 'Automatización'],
     'robot_speed': ['Velocidad del robot', 'Automatización'],
   };
@@ -79,9 +85,10 @@ class UpgradeCatalog {
         if (int.parse(levels[i][2]) != i + 1 || int.parse(levels[i][3]) < 0) {
           throw const FormatException('Niveles de mejora inválidos');
         }
-        if (levels[i][7].isNotEmpty) {
-          final requirement = levels[i][7].split(':');
-          if (!labels.containsKey(requirement[0]) ||
+        for (final item in UpgradeLevel(0, 1, levels[i][7]).requirements) {
+          final requirement = item.split(':');
+          if (requirement.length != 2 ||
+              !labels.containsKey(requirement[0]) ||
               int.parse(requirement[1]) < 1) {
             throw const FormatException('Requisito inválido');
           }
@@ -114,6 +121,8 @@ class UpgradeCatalog {
       'ball_limit',
       'coin_pile_limit',
       'particle_limit',
+      'hand_capacity',
+      'balls_per_spawn',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }
@@ -121,17 +130,29 @@ class UpgradeCatalog {
   }
 
   bool requirementsMet(UpgradeLevel level, Map<String, int> owned) {
-    if (level.requirement.isEmpty) return true;
-    final parts = level.requirement.split(':');
-    return (owned[parts[0]] ?? 0) >= int.parse(parts[1]);
+    return level.requirements.every((item) {
+      final parts = item.split(':');
+      return (owned[parts[0]] ?? 0) >= int.parse(parts[1]);
+    });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 3}) {
-    final values = Map.of(base);
-    for (final definition in definitions) {
-      final level = owned[definition.id] ?? 0;
-      if (level > 0) {
-        values[definition.effect] = definition.levels[level - 1].value;
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 4}) {
+    final values = balanceVersion <= 3 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 3) {
+      for (final line in legacyBalanceCsv.trim().split('\n').skip(1)) {
+        final cells = line.split(',');
+        if (cells[0] == 'base' ||
+            (cells[0] == 'upgrade' &&
+                (owned[cells[1]] ?? 0) == int.parse(cells[2]))) {
+          values[cells[4]] = double.parse(cells[5]);
+        }
+      }
+    } else {
+      for (final definition in definitions) {
+        final level = owned[definition.id] ?? 0;
+        if (level > 0) {
+          values[definition.effect] = definition.levels[level - 1].value;
+        }
       }
     }
     // Historical values keep in-progress v1/v2 saves playable until that day ends.
@@ -160,7 +181,19 @@ class UpgradeCatalog {
     return DaySettings(values, balanceVersion: balanceVersion);
   }
 
-  void validateLevels(Map<String, int> levels) {
+  void validateLevels(
+    Map<String, int> levels, {
+    Map<String, int> grandfathered = const {},
+    bool legacy = false,
+  }) {
+    if (!legacy && grandfathered.isNotEmpty) {
+      validateLevels(grandfathered, legacy: true);
+    }
+    for (final entry in grandfathered.entries) {
+      if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
+        throw const FormatException('Compras anteriores inválidas');
+      }
+    }
     for (final entry in levels.entries) {
       final definition = definitions
           .where((d) => d.id == entry.key)
@@ -170,7 +203,26 @@ class UpgradeCatalog {
           entry.value > definition.levels.length) {
         throw const FormatException('Mejoras guardadas inválidas');
       }
-      if (entry.value > 0 &&
+      if (legacy) {
+        final oldRows = legacyBalanceCsv
+            .trim()
+            .split('\n')
+            .skip(1)
+            .map((line) => line.split(','));
+        final row = oldRows
+            .where(
+              (r) =>
+                  r[0] == 'upgrade' &&
+                  r[1] == entry.key &&
+                  int.parse(r[2]) == entry.value,
+            )
+            .firstOrNull;
+        if (entry.value > 0 &&
+            (row == null ||
+                !requirementsMet(UpgradeLevel(0, 1, row[7]), levels))) {
+          throw const FormatException('Compra anterior inválida');
+        }
+      } else if (entry.value > (grandfathered[entry.key] ?? 0) &&
           !requirementsMet(definition.levels[entry.value - 1], levels)) {
         throw const FormatException('Requisito guardado incumplido');
       }

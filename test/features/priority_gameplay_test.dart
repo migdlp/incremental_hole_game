@@ -149,7 +149,7 @@ void main() {
     'broom pose survives reload without a held gesture and can be picked up again',
     () {
       final session = GameSession(catalog, MemoryStore())
-        ..levels['broom'] = 1
+        ..levels.addAll({'hand': 2, 'broom': 1})
         ..startDay();
       final board = session.board!;
       board.touch(board.broomPosition, time: 0);
@@ -229,7 +229,7 @@ void main() {
     'closing overlay dims scenery, balls and broom but leaves coins bright',
     () async {
       final session = GameSession(catalog, MemoryStore())
-        ..levels['broom'] = 1
+        ..levels.addAll({'hand': 2, 'broom': 1})
         ..startDay();
       final board = session.board!;
       board.balls.add(Ball(board.nextId++, const Vec(100, 200), Vec.zero));

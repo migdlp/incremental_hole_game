@@ -268,10 +268,15 @@ class Board {
       spawnClock += dt;
       if (spawnClock + 1e-9 >= settings['spawn_interval']) {
         spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
-        final spawn = generator + Vec((random() - .5) * 42, 30);
-        if (balls.length < settings['ball_limit'] &&
-            balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
-          balls.add(Ball(nextId++, spawn, Vec((random() - .5) * 36, 85)));
+        final count = math.max(1, settings['balls_per_spawn'].toInt());
+        final center = generator + Vec((random() - .5) * 42, 30);
+        for (var index = 0; index < count; index++) {
+          final spawn =
+              center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
+          if (balls.length < settings['ball_limit'] &&
+              balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
+            balls.add(Ball(nextId++, spawn, Vec((random() - .5) * 36, 85)));
+          }
         }
       }
     }
@@ -360,10 +365,14 @@ class Board {
           }
         }
         if (nearest == null) break;
-        final angle = (_heldBalls.length - 1) * math.pi / 2;
+        final satellites = handCapacity - 1;
+        final angle = (_heldBalls.length - 1) * math.pi * 2 / satellites;
+        final spacing = math.max(
+          radius * 2 + 2,
+          (radius + 1) / math.sin(math.pi / math.max(2, satellites)),
+        );
         _heldBalls[nearest] =
-            _grabOffset +
-            Vec(math.cos(angle), math.sin(angle)) * (radius * 2 + 2);
+            _grabOffset + Vec(math.cos(angle), math.sin(angle)) * spacing;
       }
       for (final entry in _heldBalls.entries) {
         final ball = entry.key;

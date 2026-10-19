@@ -243,7 +243,14 @@ void main() {
       session.selectTool(BallTool.vee);
       expect(session.selectedTool, BallTool.hand);
       session.economy.balance = 500;
-      for (final id in ['broom', 'paddle', 'broom_v', 'sweep']) {
+      for (final id in [
+        'hand',
+        'hand',
+        'broom',
+        'paddle',
+        'broom_v',
+        'sweep',
+      ]) {
         expect(
           session.purchase(catalog.definitions.firstWhere((d) => d.id == id)),
           isTrue,
@@ -316,8 +323,9 @@ void main() {
       session.startDay();
       final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
       data['version'] = 1;
-      data['run']['settings']['production_duration'] = 60.0;
-      data['run']['settings']['spawn_interval'] = .75;
+      data['run']['settings'] = catalog
+          .settings(session.levels, balanceVersion: 1)
+          .toJson();
       data['run'].remove('balanceVersion');
       data.remove('tool');
       data['levels'].remove('broom');
@@ -332,7 +340,7 @@ void main() {
       expect(restored.board!.settings['robot_count'], 1);
       expect(restored.board!.sweepEnabled, isFalse);
       expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 3);
+      expect(jsonDecode(restored.snapshot())['version'], 4);
     },
   );
 

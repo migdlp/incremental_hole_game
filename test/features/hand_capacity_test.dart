@@ -38,7 +38,7 @@ void main() {
   test(
     'base hand stays single; purchased capacities attract only up to limit',
     () {
-      for (var level = 0; level <= 4; level++) {
+      for (var level = 0; level <= 5; level++) {
         final board = Board(catalog.settings({'hand': level}));
         final first = ball(board, const Vec(100, 200));
         for (final offset in [
@@ -202,6 +202,9 @@ void main() {
   test('bug-era saves load with single hand and no free broom', () {
     final session = GameSession(catalog, MemoryStore())..startDay();
     final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
+    json['version'] = 3;
+    json['run']['balanceVersion'] = 3;
+    json['run']['settings'] = catalog.settings({}, balanceVersion: 3).toJson();
     json['tool'] = 'broom';
     json['run']['settings'].remove('hand_capacity');
     final restored = GameSession(catalog, MemoryStore())
@@ -226,6 +229,7 @@ void main() {
       step(board);
       expect((free.position - board.broomPosition).length, 0);
       session.finishDay();
+      session.levels['hand'] = 2;
       session.economy.balance = 20;
       expect(
         session.purchase(

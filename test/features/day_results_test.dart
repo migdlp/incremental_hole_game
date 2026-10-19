@@ -81,11 +81,11 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(session.levels['hand'], 1);
-      expect(session.economy.balance, 94);
+      expect(session.economy.balance, 84);
       expect(game.paused, isTrue);
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('94 monedas'), findsOneWidget);
+      expect(find.text('84 monedas'), findsOneWidget);
       await tester.tap(find.text('Comenzar día 2'));
       await tester.pump();
       expect(popup, findsNothing);
@@ -94,7 +94,7 @@ void main() {
       expect(game.paused, isFalse);
       expect(session.board!.balls, isEmpty);
       expect(session.board!.coins, isEmpty);
-      expect(session.economy.balance, 94);
+      expect(session.economy.balance, 84);
       expect(session.board!.handCapacity, 2);
       await close(tester, session);
     },

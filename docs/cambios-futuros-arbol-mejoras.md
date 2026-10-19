@@ -1,12 +1,10 @@
 # Cambios futuros: árbol de mejoras
 
-> Actualización vigente: la petición más reciente sustituye la escoba inicial y el salto inicial a tres bolas. Se implementa localmente una mano de una bola, primera mejora a **dos** y rama a **tres, cuatro y cinco**; la atracción solo funciona llevando alguna bola. La escoba física solo aparece tras comprar su desbloqueo. Ver [árbol actual](arbol-de-mejoras.md) y [cambios sin publicar](../CHANGELOG.md). Las propuestas y entregas anteriores que contradigan esta nota quedan como registro histórico.
+**Referencia viva v0.6 · Mapa implementado en 0.3.0+5; CF-01 a CF-04 pendientes.**
 
-**Referencia viva v0.5 · Cambios futuros · Requisitos nuevos registrados; implementación pendiente.**
+El usuario autorizó implementar este mapa el 19 de octubre de 2026. El [árbol actual](arbol-de-mejoras.md) documenta su ejecución y [balance.csv](balance.csv) contiene los costes y efectos. Las dos instrucciones más recientes prevalecen sobre el boceto original: Mano I permite llevar **dos** bolas (no tres), cada nivel añade una y la escoba solo aparece tras comprar su desbloqueo. El resto del mapa se implementa con sus cinco niveles, colores y requisitos cruzados.
 
-Este documento es la referencia de trabajo para diseñar juntos el árbol futuro de Incremental Hole Game. El [árbol actual](arbol-de-mejoras.md) documenta lo implementado; este archivo reúne únicamente lo que queremos explorar o cambiar. Registrar una propuesta aquí no autoriza implementarla ni significa que su balance esté aprobado.
-
-El [seguimiento general](plan-cambios-agarre-escoba.md) conserva las prioridades. Los precios actuales siguen teniendo como única fuente editable [balance.csv](balance.csv); las cifras de este documento son hipótesis de diseño futuro.
+La entrega implementa el mapa de ramificaciones. Las nuevas notas CF-01 a CF-04 añadidas en paralelo se conservan debajo como trabajo pendiente: todavía no cambian el valor base de dos monedas, el cierre de cinco segundos, el recorrido de resultados ni los estados visuales de esta versión. El balance y los precios del mapa siguen siendo provisionales y CF-01 exigirá recalcularlos. Las ideas nuevas que se añadan después de esta revisión no se consideran implementadas por aparecer en este archivo.
 
 ## Cambios añadidos — 19 de octubre de 2026
 
@@ -88,7 +86,7 @@ Los tipos mantienen la paleta del apartado «Tipos y colores». El brillo blanco
 
 Empezar manipulando pocas bolas y recogiendo monedas a mano. Las mejoras aumentan la producción, el valor y la capacidad de manejar y cobrar lo producido. Escobas, imán y robot cambian la manera de jugar y abren especializaciones.
 
-Tomamos «llevar 2 bolas más» como primera mejora propuesta: capacidad inicial de una bola, primera compra de tres bolas. Es una mecánica nueva que habrá que implementar; no existe en el código actual.
+La primera compra permite llevar dos bolas. La primera se agarra manualmente y, mientras se lleva alguna, las siguientes se atraen al acercarse hasta llenar la capacidad comprada.
 
 ## Tipos y colores
 
@@ -101,7 +99,7 @@ Tomamos «llevar 2 bolas más» como primera mejora propuesta: capacidad inicial
 | TIE · Tiempo de producción | 🟠 Naranja · `#F97316` | Días con más tiempo para producir. |
 | AUT · Automatización | 🔴 Coral · `#F43F5E` | Robot y velocidad. |
 
-Cada subrama hereda el color de su tipo, aunque nazca de otro tipo. Al estar comprada muestra icono y color de categoría. Antes de comprar está apagada o, si se puede comprar, iluminada en blanco suave, según CF-04. Marcas y candados complementan el estado.
+Cada subrama hereda el color de su tipo, aunque nazca de otro tipo. El color identifica el efecto. Un candado indica bloqueo, una marca indica compra y el brillo indica disponibilidad, para no sustituir el color de categoría por el estado.
 
 ## Mapa para móvil
 
@@ -109,7 +107,7 @@ Cada flecha exige comprar el nivel anterior. Las bifurcaciones permiten avanzar 
 
 ```text
 🟣 MANO I · 20 monedas
-Puedes llevar 3 bolas (+2)
+Puedes llevar 2 bolas (+1)
 │
 ├─ 🟢 GENERADOR I
 │  Produce un 25 % más rápido
@@ -121,7 +119,7 @@ Puedes llevar 3 bolas (+2)
 │        └─ II → III → IV → V
 │
 ├─ 🟡 VALOR I
-│  Mejora de valor (por definir)
+│  3 monedas por bola
 │  └─ Valor II → III → IV → V
 │
 ├─ 🔵 BARRIDO DE MONEDAS
@@ -132,16 +130,17 @@ Puedes llevar 3 bolas (+2)
 │        └─ ATRACCIÓN I → II → III
 │
 └─ 🟣 MANO II · 30 monedas
-   Puedes llevar 5 bolas
+   Puedes llevar 3 bolas
    ├─ Mano III → IV → V
-   │  7 → 9 → 11 bolas
-   └─ 🟣 ANCHURA I
-      ├─ Anchura II
-      │  ├─ Anchura III → IV → V
-      │  └─ 🔴 ROBOT AYUDANTE
-      │     └─ VELOCIDAD I
-      │        └─ II → III → IV → V
-      └─ 🟣 TRANSFORMAR ESCOBA EN V
+   │  4 → 5 → 6 bolas
+   └─ 🟣 DESBLOQUEAR ESCOBA · 20 monedas
+      └─ 🟣 ANCHURA I
+         ├─ Anchura II
+         │  ├─ Anchura III → IV → V
+         │  └─ 🔴 ROBOT AYUDANTE
+         │     └─ VELOCIDAD I
+         │        └─ II → III → IV → V
+         └─ 🟣 TRANSFORMAR ESCOBA EN V
 ```
 
 **Requisitos adicionales:** Doble emisión requiere también Anchura III, para que la mejora de producción tenga una herramienta de control disponible. Robot requiere también Barrido de monedas, para haber introducido la recogida por deslizamiento antes de automatizar el empuje. Comprar el robot no automatiza la recogida de monedas.
@@ -150,20 +149,20 @@ Estas dos conexiones adicionales forman parte del mapa aunque no se repitan como
 
 ## Primeros pasos del jugador
 
-1. Sin mejoras: mano de una bola, 1,5 bolas/s, $1 por captura, 10 s de producción y 3 s de recogida final.
-2. Primera compra: Mano I por 20 monedas. Poder transportar tres bolas cambia el control antes de aumentar la carga del tablero.
+1. Sin mejoras: mano de una bola, 1,5 bolas/s, 2 monedas por captura, 10 s de producción y 5 s de recogida.
+2. Primera compra: Mano I por 20 monedas. Poder transportar dos bolas cambia el control antes de aumentar la carga del tablero.
 3. Se abren cuatro decisiones: producir más, ganar más por captura, recoger deslizando o ampliar la mano.
-4. Mano II abre las mejoras de anchura de la escoba, que ya está disponible desde el inicio; Generador II abre el tiempo de producción. Valor I está disponible pronto y no obliga a invertir primero en varios niveles de producción.
+4. Mano II abre la compra de la escoba; esta compra abre las mejoras de anchura; Generador II abre el tiempo de producción. Valor I está disponible pronto y no obliga a invertir primero en varios niveles de producción.
 5. Anchura I abre la escoba en V; Anchura II y Barrido permiten llegar al robot.
 6. Generador III y Anchura III abren Doble emisión: salto de producción tras invertir en control.
 
 La mano recoge hasta su capacidad cerca del punto de agarre y mantiene el grupo durante el arrastre. El lanzamiento libera las bolas con la velocidad del gesto. La escoba empuja grupos sin usar la capacidad de mano. Radio de recogida se refiere siempre a monedas, no a bolas.
 
-La escoba está disponible desde el inicio como objeto físico y la mano siempre puede agarrarla. La V transforma esa misma escoba; no añade otra herramienta ni un selector separado. Esto respeta la dirección ya registrada en el seguimiento general.
+La escoba aparece como objeto físico únicamente después de comprar su desbloqueo. Una vez comprada, la mano siempre puede agarrarla. La V transforma esa misma escoba; no añade otra herramienta ni un selector separado. Esto aplica la corrección más reciente del usuario.
 
 La mejora pendiente de mano para recoger dos monedas cercanas es una mecánica de recolección distinta de transportar más bolas. Sigue pendiente en el seguimiento y aún debe decidirse dónde conectarla en este mapa; no se considera sustituida por Mano I.
 
-## Costes y crecimiento propuestos
+## Costes del mapa implementado — pendientes de revisión con CF-01
 
 Los precios son una primera hipótesis de balance, no cifras ya probadas jugando.
 
@@ -185,6 +184,7 @@ Se redondea al final, no a partir del precio ya redondeado del nivel anterior. L
 
 | Desbloqueo | Coste | Requisitos |
 | --- | --- | --- |
+| Desbloquear escoba | 20 | Mano II |
 | Barrido | 25 | Mano I |
 | Escoba en V | 160 | Anchura I |
 | Imán | 180 | Radio I |
@@ -194,16 +194,16 @@ Se redondea al final, no a partir del precio ya redondeado del nivel anterior. L
 
 Atracción usa la misma fórmula, con precio inicial 80. Los precios son por nodo, no acumulados.
 
-## Efectos por nivel
+## Efectos actuales del mapa — anteriores a CF-01 y CF-02
 
 | Línea | Progresión propuesta |
 | --- | --- |
-| Mano | Capacidad = 1 + 2n: 3, 5, 7, 9, 11 bolas. |
+| Mano | Capacidad = 1 + n: 2, 3, 4, 5, 6 bolas. |
 | Generador | Frecuencia = 1,5 × 1,25^n bolas/s antes de Doble emisión: 1,88; 2,34; 2,93; 3,66; 4,58. |
-| Valor | Base de $1 por bola (CF-01). Fórmula y relación con denominaciones superiores pendientes de redefinir. La propuesta anterior basada en dos monedas queda sustituida. |
+| Valor | Monedas por bola = redondear(2 × 1,4^n): 3, 4, 5, 8, 11. |
 | Radio | 18 + 6n: 24, 30, 36, 42, 48 unidades lógicas. |
 | Anchura | 80 + 16n: 96, 112, 128, 144, 160 unidades lógicas. |
-| Día más largo | Producción = 10 + 3n: 13, 16, 19, 22, 25 s. Mantiene 3 s de recogida final base (CF-02). |
+| Día más largo | Producción = 10 + 3n: 13, 16, 19, 22, 25 s. Mantiene 5 s de recogida. |
 | Velocidad del robot | 45 × 1,15^n: aproximadamente 52, 60, 68, 79, 91 unidades/s. |
 | Imán | Desbloquea atracción alrededor del dedo activo, con radio 65 unidades. |
 | Atracción | Radio del imán = 65 + 10n: 75, 85, 95 unidades. |
@@ -220,9 +220,9 @@ Ingreso teórico por día:
 
 En la tabla de Generador, «bolas/s» equivale a emisiones/s antes de Doble emisión. Esta mejora duplica las bolas por emisión sin cambiar el intervalo. Los dos últimos factores de la fórmula están entre 0 y 1: producir más no equivale automáticamente a cobrar más.
 
-Referencia máxima inicial con CF-01: **1,5 bolas/s × 10 s × $1 = $15 por día**, antes de pérdidas por bolas no capturadas y monedas no cobradas. Es una tasa media teórica, no una predicción de ingreso real.
+Con CF-01, la referencia inicial futura será **1,5 bolas/s × 10 s × $1 = $15 por día**, antes de pérdidas. La entrega actual mantiene dos monedas por bola y cinco segundos de cierre hasta implementar CF-01 y CF-02; no se presenta este ingreso futuro como comportamiento ya publicado.
 
-Las estimaciones antiguas de $30, $56, $278 y $557 por jornada se retiran porque partían de una base y una progresión de valor que ya no son vigentes. Las nuevas estimaciones se calcularán cuando definamos el efecto de Valor y el acceso a las denominaciones superiores.
+Las estimaciones antiguas de 30, 56, 278 y 557 monedas por jornada no fijan el nuevo balance. Se recalcularán cuando se defina la mejora de Valor y el acceso a las denominaciones superiores.
 
 Objetivos para el primer ensayo:
 - Mano I alcanzable en aproximadamente 1–2 jornadas de aprendizaje.
@@ -233,26 +233,14 @@ Objetivos para el primer ensayo:
 
 Se ajustarán costes, multiplicadores y requisitos después de medir ingresos reales y tiempo entre compras. La fórmula de precios por sí sola no garantiza estos ritmos.
 
-## Decisiones abiertas
+## Pendiente de validar o ampliar
 
-- Confirmar si Mano I será la primera compra y si dará exactamente dos bolas adicionales; procede del ejemplo conversado, no de una mecánica aprobada.
-- Confirmar conexiones, cinco niveles iniciales y los dos requisitos cruzados.
-- Situar la mejora de recoger dos monedas, sin confundirla con el agarre de bolas.
-- Validar costes y multiplicadores con sesiones reales antes de fijarlos.
-- Resolver la migración del nodo histórico de desbloqueo de escoba, ahora que la escoba física es inicial. Conservar compras y progreso.
+- Medir costes, ingresos reales y tiempo entre compras jugando en móvil.
+- Situar la mejora de recoger dos monedas: es una mecánica distinta de llevar varias bolas y sigue pendiente.
+- Ensayar sensación de control y rendimiento en Android físico. La prueba de saturación con 200 bolas comprueba límites y estabilidad numérica, no certifica FPS.
+- Añadir futuras ramas o niveles solo con una nueva decisión de diseño.
 
-## Cambios necesarios en el juego cuando aprobemos el diseño
-
-- Añadir agarre múltiple, capacidad de mano y su lanzamiento.
-- Añadir Doble emisión y niveles de alcance del imán.
-- Ampliar de tres a cinco niveles las líneas indicadas.
-- Actualizar valores, costes, requisitos y conexiones.
-- Adaptar las posiciones del árbol: el código actual tiene coordenadas fijas para los niveles existentes.
-- Mostrar color por tipo y estado mediante marcas, candados y brillo.
-- Mantener coherencia entre requisitos de compra y árbol, preservando compras antiguas.
-- Probar saturación: el tablero actual limita el número de bolas y necesita soportar la producción nueva.
-
-No se implementará un límite duro sobre producción o valor sin mostrarlo al jugador. Si se alcanzan límites técnicos, habrá que revisar rendimiento o representar grupos de bolas antes de ampliar indefinidamente las ramas.
+Los guardados antiguos conservan las compras sin añadir mejoras gratis. Las jornadas activas usan sus valores históricos hasta terminar; las nuevas usan el CSV del mapa. Las compras posteriores sí exigen los requisitos nuevos.
 
 ## Ficha para añadir nodos juntos
 
@@ -274,4 +262,5 @@ No se implementará un límite duro sobre producción o valor sin mostrarlo al j
 - **v0.3:** propuesta con capacidad de mano, seis tipos con color, especializaciones, cinco niveles y crecimiento multiplicativo.
 - **v0.4:** se establece como referencia viva de cambios futuros; respeta escoba inicial y transformación en V, distingue mejora de dos monedas de capacidad de bolas y conserva el árbol actual por separado. Balance y detalles pendientes de revisión.
 
-- **v0.5 · 2026-10-19:** CF-01 valor base de $1 y denominaciones con colores; CF-02 recogida final base de 3 s; CF-03 estadísticas → árbol → comenzar día; CF-04 iconos y colores de mejoras compradas, apagadas o iluminadas en blanco al poder comprarlas. Requisitos registrados, sin implementación en esta actualización.
+- **v0.5 · 2026-10-19:** CF-01 valor base de $1 y denominaciones con colores; CF-02 recogida final base de 3 s; CF-03 estadísticas → árbol → comenzar día; CF-04 iconos y colores de mejoras compradas, apagadas o iluminadas en blanco al poder comprarlas. Requisitos registrados y pendientes.
+- **v0.6:** mapa implementado por petición del usuario, con Mano I de dos bolas, capacidad +1 por nivel y escoba comprada. Doble emisión, alcance, cinco niveles, colores por tipo y migración forman parte de 0.3.0+5. CF-01 a CF-04 se conservan pendientes.

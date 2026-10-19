@@ -223,8 +223,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             minScale: .35,
                             maxScale: 1.8,
                             child: SizedBox(
-                              width: 1500,
-                              height: 1800,
+                              width: 3150,
+                              height: 2150,
                               child: CustomPaint(
                                 painter: _TreePainter(visible, session.levels),
                                 child: Stack(
@@ -328,11 +328,9 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     final owned = node.owned(widget.session.levels);
     final affordable = _canBuy(node);
     final isSelected = selected.id == node.id;
-    final color = owned
-        ? _mint
-        : affordable
-        ? _gold
-        : const Color(0xff64738a);
+    final typeColor = _typeColor(node);
+    final color = typeColor.withValues(alpha: owned || affordable ? 1 : .55);
+    final locked = !tree.unlocked(node, widget.session.levels);
     return Semantics(
       button: true,
       selected: isSelected,
@@ -360,11 +358,13 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                   width: 76,
                   height: 76,
                   decoration: BoxDecoration(
-                    color: owned
-                        ? const Color(0xff233f40)
-                        : affordable
-                        ? const Color(0xff3b3325)
-                        : const Color(0xff172235),
+                    color: typeColor.withValues(
+                      alpha: owned
+                          ? .18
+                          : affordable
+                          ? .12
+                          : .05,
+                    ),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: isSelected ? Colors.white : color,
@@ -373,7 +373,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     boxShadow: affordable
                         ? [
                             BoxShadow(
-                              color: _gold.withValues(alpha: .16),
+                              color: typeColor.withValues(alpha: .22),
                               blurRadius: 24,
                               spreadRadius: 2,
                             ),
@@ -383,13 +383,17 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Icon(
-                        owned
-                            ? Icons.check_rounded
-                            : _icons[node.definition.id],
-                        size: 30,
-                        color: color,
-                      ),
+                      Icon(_icons[node.definition.id], size: 30, color: color),
+                      if (owned || locked)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Icon(
+                            owned ? Icons.check_circle : Icons.lock_outline,
+                            size: 16,
+                            color: typeColor,
+                          ),
+                        ),
                       if (holding?.id == node.id)
                         Positioned.fill(
                           child: Padding(
@@ -424,7 +428,9 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     final owned = node.owned(widget.session.levels);
     final affordable = _canBuy(node);
     final current = node.level == 1
-        ? (widget.session.catalog.base[node.definition.effect] ?? 0)
+        ? (node.definition.id == 'attraction'
+              ? 65.0
+              : widget.session.catalog.base[node.definition.effect] ?? 0)
         : node.definition.levels[node.level - 2].value;
     final next = node.upgrade.value;
     final isInterval = node.definition.effect == 'spawn_interval';
@@ -448,7 +454,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               Icon(
                 _icons[node.definition.id],
                 size: 22,
-                color: owned ? _mint : _gold,
+                color: _typeColor(node),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -588,6 +594,18 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   }
 }
 
+Color _typeColor(SkillNode node) => switch (node.definition.id) {
+  'generator' || 'double_spawn' => const Color(0xff22c55e),
+  'reward' => const Color(0xffeab308),
+  'sweep' ||
+  'collection' ||
+  'magnet' ||
+  'attraction' => const Color(0xff3b82f6),
+  'duration' => const Color(0xfff97316),
+  'robot' || 'robot_speed' => const Color(0xfff43f5e),
+  _ => const Color(0xffa855f7),
+};
+
 const _icons = {
   'hand': Icons.back_hand_outlined,
   'broom': Icons.cleaning_services_outlined,
@@ -596,6 +614,8 @@ const _icons = {
   'sweep': Icons.swipe_outlined,
   'collection': Icons.touch_app_outlined,
   'magnet': Icons.sensors,
+  'attraction': Icons.radar,
+  'double_spawn': Icons.filter_2_outlined,
   'generator': Icons.speed,
   'reward': Icons.monetization_on_outlined,
   'duration': Icons.more_time,
@@ -612,6 +632,8 @@ String _description(SkillNode node) => switch (node.definition.id) {
   'sweep' => 'Recoge monedas al deslizar el dedo',
   'collection' => 'Aumenta el radio de recogida de monedas',
   'magnet' => 'Atrae monedas cerca del dedo mientras tocas',
+  'attraction' => 'Amplía el alcance del imán de monedas',
+  'double_spawn' => 'Emite dos bolas a la vez sin cambiar la cadencia',
   'generator' => 'El generador lanza bolas más rápido',
   'reward' => 'Obtén más monedas por cada bola',
   'duration' => 'Aumenta el tiempo de producción del día',
@@ -627,6 +649,7 @@ String _value(SkillNode node, double value) {
   return switch (node.definition.unit) {
     'seconds' => '${number(value)} s',
     'coins' => '${number(value)} monedas/bola',
+    'balls_per_spawn' => '${number(value)} bolas/emisión',
     'balls' => '${number(value)} bolas',
     'robots' => '${number(value)} robot',
     'broom_width' => '${number(value * 4)} u',
@@ -652,9 +675,9 @@ class _TreePainter extends CustomPainter {
         final parent = nodes.where((n) => n.id == id).firstOrNull;
         if (parent == null) continue;
         final paint = Paint()
-          ..color = node.owned(levels)
-              ? _mint.withValues(alpha: .65)
-              : const Color(0xff475269)
+          ..color = _typeColor(
+            node,
+          ).withValues(alpha: node.owned(levels) ? .8 : .35)
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke;
         final start = Offset(parent.x, parent.y);

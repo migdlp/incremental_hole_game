@@ -15,37 +15,34 @@ class SkillNode {
 
 class SkillTree {
   SkillTree(UpgradeCatalog catalog) {
-    const routes = {
-      'hand': [
-        (700.0, 1400.0),
-        (510.0, 1250.0),
-        (400.0, 1430.0),
-        (210.0, 1600.0),
-      ],
-      'generator': [(700.0, 1150.0), (950.0, 950.0), (1110.0, 740.0)],
-      'broom': [(470.0, 980.0)],
-      'paddle': [(300.0, 800.0), (160.0, 640.0), (160.0, 440.0)],
-      'broom_v': [(430.0, 620.0)],
-      'sweep': [(920.0, 1140.0)],
-      'collection': [(700.0, 940.0), (640.0, 730.0), (620.0, 520.0)],
-      'magnet': [(820.0, 730.0)],
-      'reward': [(1120.0, 1100.0), (1280.0, 940.0), (1360.0, 740.0)],
-      'duration': [(940.0, 1330.0), (1110.0, 1460.0), (1320.0, 1460.0)],
-      'robot': [(240.0, 1000.0)],
-      'robot_speed': [(120.0, 1160.0), (120.0, 1340.0), (300.0, 1440.0)],
+    List<(double, double)> column(double x, double y, int count) => [
+      for (var i = 0; i < count; i++) (x, y + 180 * i),
+    ];
+    final routes = {
+      'hand': [(1400.0, 150.0), ...column(2250, 400, 4)],
+      'generator': column(200, 400, 5),
+      'duration': column(520, 760, 5),
+      'double_spawn': [(200.0, 1360.0)],
+      'reward': column(950, 400, 5),
+      'sweep': [(1400.0, 400.0)],
+      'collection': column(1400, 580, 5),
+      'magnet': [(1720.0, 760.0)],
+      'attraction': column(1720, 940, 3),
+      'broom': [(2600.0, 580.0)],
+      'paddle': column(2600, 760, 5),
+      'broom_v': [(2920.0, 940.0)],
+      'robot': [(2920.0, 1120.0)],
+      'robot_speed': column(2920, 1300, 5),
     };
     for (final definition in catalog.definitions) {
       for (var i = 0; i < definition.levels.length; i++) {
-        final requirement = definition.levels[i].requirement;
         final parents = <String>{
           if (i > 0) '${definition.id}:$i',
-          if (requirement.isNotEmpty) requirement,
-          if (i == 0 && requirement.isEmpty && definition.id != 'hand')
-            definition.id == 'generator'
-                ? 'hand:1'
-                : definition.id == 'reward'
-                ? 'generator:2'
-                : 'generator:1',
+          ...definition.levels[i].requirements.where(
+            (requirement) =>
+                i == 0 ||
+                !definition.levels[i - 1].requirements.contains(requirement),
+          ),
         };
         final position = routes[definition.id]![i];
         nodes.add(
@@ -63,8 +60,10 @@ class SkillTree {
   final List<SkillNode> nodes = [];
   SkillNode get root => nodes.firstWhere((n) => n.id == 'hand:1');
 
-  bool unlocked(SkillNode node, Map<String, int> levels) =>
-      node.parents.every((id) => byId(id).owned(levels));
+  bool unlocked(SkillNode node, Map<String, int> levels) => {
+    ...node.parents,
+    ...node.upgrade.requirements,
+  }.every((id) => byId(id).owned(levels));
   SkillNode byId(String id) => nodes.firstWhere((node) => node.id == id);
 
   List<SkillNode> visible(Map<String, int> levels) {

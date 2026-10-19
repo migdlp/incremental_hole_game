@@ -1,108 +1,77 @@
 # Árbol de mejoras progresivo
 
-**Referencia del árbol implementado.** El diseño que iremos editando juntos vive en [Cambios futuros del árbol](cambios-futuros-arbol-mejoras.md). Sus propuestas no describen funciones ya entregadas.
+Referencia implementada en **0.3.0+5**, a partir del [mapa de cambios futuros v0.6](cambios-futuros-arbol-mejoras.md), autorizado el 19 de octubre de 2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos de compra.
 
-Implementado en `main` como `1720fba` ([PR #12](https://github.com/migdlp/incremental_hole_game/pull/12)), sin cambiar la versión de paquete `0.2.1+3`, los precios ni el esquema v3. El commit distingue este árbol del APK anterior con el mismo número de versión.
+## Mapa actual
 
-## Recorrido del jugador
-
-1. De noche, el pop-up muestra el resumen de la jornada y **Abrir árbol de mejoras**. Ese botón abre una pantalla independiente; el juego sigue detenido.
-2. En una partida nueva aparece solo Mano I: capacidad de dos bolas. Al comprarla se revelan Mano II y Generador I. Pulsar un nodo consulta efecto, valores, porcentaje y coste.
-3. Mantener pulsado **3 segundos** en el nodo ya seleccionado o en su ficha para comprar. La compra ocurre al completar el progreso, una sola vez; pulsar brevemente no compra.
-4. Soltar antes, mover más de 10 píxeles lógicos, añadir otro dedo, interrumpir/cancelar o pasar a segundo plano cancela el progreso sin gastar.
-5. Arrastrar para explorar; pellizcar para zoom o usar Acercar/Alejar. **Centrar selección** devuelve el nodo al centro. Volver desde el árbol al mismo pop-up y pulsar **Comenzar día** para cerrar el resumen e iniciar la siguiente jornada.
-
-Nodos asequibles iluminados, sin saldo oscurecidos y adquiridos con marca verde. La ficha usa descripciones del efecto; los porcentajes se comparan con el nivel anterior. Para generación expresa aumento de frecuencia (`intervaloAnterior / intervaloNuevo - 1`), no reducción porcentual del intervalo. Un desbloqueo sin base no necesita porcentaje.
-
-## Descubrimiento y requisitos
-
-Hay doce tipos y 27 nodos, uno por nivel comprable. La visibilidad se deriva de niveles guardados: se muestran compras, sus antecesores y sucesores cuyos padres ya estén comprados. No se guarda un segundo estado de descubrimiento.
-
-```mermaid
-flowchart TD
-    H1[Mano I: 2 bolas] --> H2[Mano II: 3 bolas]
-    H2 --> H3[Mano III: 4 bolas]
-    H3 --> H4[Mano IV: 5 bolas]
-    H1 --> G1[Generador 1]
-    G1 --> G2[Generador 2]
-    G2 --> G3[Generador 3]
-    G1 --> E[Escoba]
-    E --> A[Anchura 1]
-    A --> A2[Anchura 2 y 3]
-    A --> V[Escoba en V]
-    A --> R[Robot]
-    R --> RV[Velocidad 1 a 3]
-    G1 --> B[Barrido de monedas]
-    G1 --> C[Radio de recogida 1]
-    C --> C2[Radio 2 y 3]
-    C --> I[Imán]
-    G1 --> D[Duración 1 a 3]
-    G2 --> M[Recompensa 1 a 3]
-```
-
-El dibujo resume cadenas: cada nivel numérico requiere el anterior. Hay dos capas distintas:
-
-- **CSV/sesión:** requisitos económicos y de compatibilidad originales, comprobados por `purchaseBlock` y `purchase`.
-- **Árbol/UI:** además impone descubrimiento. Generador 1 requiere Mano I. Escoba, barrido y radio inicial requieren generador 1 en la interfaz; recompensa inicial requiere generador 2. El resto conserva dependencias del CSV y cadenas de nivel.
-
-Una compra válida por API de sesión no implica que el nodo esté disponible todavía en la interfaz. No cambiar requisitos históricos solo para dibujar conexiones: se conservan compras antiguas aunque no tengan los nuevos padres comprados. Se muestran sus antecesores sin regalarlos ni descontar saldo.
-
-## Relación con el balance
-
-Con el día base de 15 s, diez de producción a 1,5 bolas/s y valor 2, el máximo inicial es 30 monedas. La primera compra visible cuesta **10** (Mano I: dos bolas): se puede alcanzar tras una jornada perfecta, sin bloqueos ni pérdidas. El desbloqueo de escoba de 20 monedas necesita además ese avance previo en la UI. Los precios siguen provisionales; no garantizar una compra en el primer día ni que el robot llegue en 3–5 días.
-
-## Código y comprobaciones
-
-- [skill_tree.dart](../lib/features/upgrades/domain/skill_tree.dart): `SkillNode`, padres, posiciones y visibilidad; dominio Dart puro.
-- [skill_tree_screen.dart](../lib/features/upgrades/presentation/skill_tree_screen.dart): visor, conexiones, ficha, progreso de tres segundos, cancelación, zoom y estados.
-- [game_app.dart](../lib/app/game_app.dart): acceso desde la noche; la sesión conserva la operación de compra y guardado.
-- [skill_tree_test.dart](../test/features/skill_tree_test.dart): dos pruebas de dominio y cinco de widgets, con descubrimiento, alcance, compras previas, compra única persistente, cancelaciones, saldo y pantalla pequeña.
-
-El árbol necesita revisión en Android físico y aceptación de interacción. Una prueba de widgets a tamaño móvil no certifica experiencia táctil, contraste en dispositivo o rendimiento. La ejecución de CI y el APK exactos están en [CI](ci.md); el número de versión por sí solo no identifica esta entrega.
-
-Evidencia de entrega: [CI 39141075339](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339) correcta sobre `1720fba`, con 48 pruebas, compilación y firma; [APK con árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297). No se ha repetido esta ejecución por el cambio documental.
-
-## Mapa completo para móvil — referencia actual
-
-Contrastado por lectura de `skill_tree.dart` y `balance.csv` el 18 de octubre de 2026. Son 27 nodos comprables; Mano I es la raíz y abre la rama Mano II → III → IV y el subárbol de Generador I mostrado debajo. Este mapa expande el resumen anterior; las conexiones redundantes con antecesores ya requeridos no se repiten.
+Catorce tipos y **44 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las cuatro ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
-GENERADOR I
+🟣 MANO I · 20 monedas · 2 bolas
 │
-├─ Generador II
-│  ├─ Generador III
-│  └─ Recompensa I
-│     └─ Recompensa II
-│        └─ Recompensa III
+├─ 🟢 GENERADOR I
+│  └─ Generador II
+│     ├─ Generador III → IV → V
+│     │  └─ 🟢 DOBLE EMISIÓN (+ Anchura III)
+│     └─ 🟠 DÍA MÁS LARGO I → II → III → IV → V
 │
-├─ Escoba recta
-│  └─ Anchura I
-│     ├─ Anchura II
-│     │  └─ Anchura III
-│     ├─ Escoba en V
-│     └─ Robot ayudante
-│        └─ Velocidad I
-│           └─ Velocidad II
-│              └─ Velocidad III
+├─ 🟡 VALOR I → II → III → IV → V
 │
-├─ Barrido de monedas
+├─ 🔵 BARRIDO DE MONEDAS
+│  └─ RADIO I
+│     ├─ Radio II → III → IV → V
+│     └─ IMÁN → ATRACCIÓN I → II → III
 │
-├─ Radio de recogida I
-│  ├─ Radio II
-│  │  └─ Radio III
-│  └─ Imán
-│
-└─ Día más largo I
-   └─ Día más largo II
-      └─ Día más largo III
+└─ 🟣 MANO II · 3 bolas
+   ├─ Mano III → IV → V · 4 → 5 → 6 bolas
+   └─ DESBLOQUEAR ESCOBA · 20 monedas
+      └─ ANCHURA I
+         ├─ Anchura II
+         │  ├─ Anchura III → IV → V
+         │  └─ 🔴 ROBOT (+ Barrido)
+         │     └─ VELOCIDAD I → II → III → IV → V
+         └─ ESCOBA EN V
 ```
 
-Los precios, niveles y efectos actuales se consultan en [balance.csv](balance.csv), su única fuente editable. Cada nivel requiere el anterior; se pueden desarrollar todas las ramas. La capacidad inicial es una bola; Mano I/II/III/IV permiten llevar 2/3/4/5 bolas. La primera se agarra manualmente y las siguientes se atraen al acercarlas a menos de 36 unidades de la primera bola sostenida, hasta llenar la capacidad. Sin bola agarrada no hay atracción. Esta mejora no recoge monedas.
+La mano inicial lleva una bola. Siempre se agarra la primera manualmente; solo una mano que ya sostiene alguna atrae otras a menos de 36 unidades de la primera sostenida, hasta llenar la capacidad. El grupo sigue al dedo y comparte el lanzamiento o la suelta. Pausa y cierre cancelan todos los agarres sin lanzarlos. Esta mecánica no recoge monedas.
 
-### Catálogo y comportamiento de la escoba
+La escoba no se dibuja, no se puede agarrar y no colisiona hasta comprar su desbloqueo. Después es un objeto físico que conserva posición y orientación. Anchura y V modifican esa misma escoba. La V no añade otro selector.
 
-Comprar «Escoba recta» desbloquea el objeto físico en el siguiente día: antes de comprarlo no se dibuja, no se puede agarrar y no colisiona con bolas. Las mejoras de anchura y V siguen afectando a esa misma escoba. El barrido de monedas es una compra independiente.
+Doble emisión intenta crear dos bolas separadas en cada emisión; mantiene el intervalo y respeta obstáculos de salida y el límite técnico de 200 bolas. El robot empuja bolas; no cobra monedas. Imán y Atracción actúan sobre monedas alrededor del dedo activo; no son el imán de bolas de la mano.
 
-### Estado de esta referencia
+## Colores y estados
 
-La capacidad de mano y el bloqueo inicial de escoba se han implementado en esta revisión local; el registro de CI anterior corresponde a la entrega histórica. Los colores por tipo, Doble emisión y otras fórmulas futuras todavía son propuestas: consultar [la referencia de cambios futuros](cambios-futuros-arbol-mejoras.md).
+| Tipo | Color |
+| --- | --- |
+| Generación | Verde `#22C55E` |
+| Valor | Amarillo `#EAB308` |
+| Recogida de monedas | Azul `#3B82F6` |
+| Control de bolas | Violeta `#A855F7` |
+| Tiempo | Naranja `#F97316` |
+| Automatización | Coral `#F43F5E` |
+
+Los nodos conservan el color de su tipo. Una marca indica compra, un candado indica requisito pendiente y el brillo indica disponibilidad económica. Las conexiones heredan el color de su destino.
+
+## Recorrido e interacción
+
+1. Desde el resumen nocturno se abre el árbol en una pantalla independiente.
+2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Barrido y Mano II.
+3. Pulsar un nodo consulta su efecto y coste; mantener pulsado tres segundos en el nodo seleccionado o en la ficha compra una sola vez.
+4. Soltar antes, arrastrar, añadir otro dedo o pasar a segundo plano cancela la compra sin gastar.
+5. Se conservan arrastre, zoom por pellizco, Acercar/Alejar y Centrar selección. Volver muestra el resumen; Comenzar día inicia la siguiente jornada y aplica las compras.
+
+El catálogo y la sesión comprueban los mismos requisitos que el árbol, incluidos los dos cruces. Las condiciones repetidas que ya se cumplen por un antecesor no se dibujan como conexiones duplicadas.
+
+## Balance y compatibilidad
+
+Base: 1,5 emisiones/s, dos monedas por bola, diez segundos de producción y cinco de recogida. Mano I cuesta 20 monedas; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
+
+El guardado v4 acepta v1/v2/v3. Conserva compras, saldo y jornadas activas: estas últimas usan el balance histórico hasta terminar; la siguiente jornada usa balance 4. Se registran los niveles heredados sin regalar sus nuevos requisitos. Las compras nuevas exigen el mapa actual. Los antecesores de compras antiguas siguen visibles aunque estén pendientes.
+
+## Verificación
+
+Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alcance, emisión doble, tablero de 200 bolas, colores, pantalla pequeña y cancelación de compra. La compilación web y el análisis se ejecutan antes de publicar. No hay aceptación táctil ni medición de FPS en Android físico en esta entrega.
+
+La evidencia histórica del árbol anterior sigue en [validación](validacion-prototipo.md) y [CI](ci.md); sus APK no contienen automáticamente este mapa nuevo.
+
+Las notas CF-01 a CF-04 añadidas en paralelo siguen pendientes y se conservan en cambios futuros. No forman parte de la entrega del mapa.

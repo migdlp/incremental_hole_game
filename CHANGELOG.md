@@ -2,13 +2,22 @@
 
 Se registran entregas y cambios observables. `0.2.1+3` es la versión actual declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
-## Sin publicar — capacidad de mano y desbloqueo de escoba
+## Árbol del mapa futuro — 2026-10-19 · 0.3.0+5
+
+- Mapa de cuatro ramas desde Mano I: Generador, Valor, Barrido y Mano II. Catorce tipos, 44 nodos, cinco niveles por línea y seis colores por efecto, con marcas de compra y candados.
+- Se mantienen las últimas reglas: mano inicial de una bola, mejoras a 2/3/4/5/6, atracción solo con una bola agarrada y escoba física bloqueada hasta comprarla. Mano II abre el nodo de escoba y este abre Anchura I.
+- Requisitos y costes del mapa en el CSV, tanto para la sesión como para la interfaz. Robot requiere Anchura II y Barrido; Doble emisión requiere Generador III y Anchura III.
+- Doble emisión crea dos bolas separadas por emisión, respetando bloqueo del generador y límite de bolas. Alcance del imán añade radios de 75/85/95 para monedas.
+- Balance y guardado v4. Las partidas v1/v2/v3 conservan sus compras sin regalar requisitos nuevos; sus jornadas activas conservan valores históricos hasta terminar. Las compras nuevas siguen los requisitos nuevos.
+- Validación local: 82 pruebas correctas con Flutter 3.35.7 / Dart 3.9.2, análisis sin incidencias y formato correcto. La comprobación de saturación no equivale a una medición de FPS en Android.
+
+## Capacidad de mano y desbloqueo de escoba — 2026-10-18 · `7b1c61e`
 
 - Primera mejora visible del árbol: llevar dos bolas. Rama de capacidad de 2, 3, 4 y 5 bolas, con costes provisionales de 10, 40, 100 y 220 monedas en el CSV.
 - La primera bola se agarra manualmente; solo mientras se lleva alguna se atraen bolas cercanas hasta el límite comprado. El grupo acompaña al dedo y se lanza o se suelta junto; pausa y cierre cancelan todos los agarres.
 - Escoba invisible, no agarrable y sin colisiones hasta comprar «Escoba recta». Conserva su pose y las mejoras de anchura/V tras desbloquearla.
 - Guardados v1/v2/v3 anteriores sin capacidad se restauran con una bola; una selección gratuita de escoba vuelve a mano sin perder progreso. Las compras existentes conservan su visibilidad en el árbol.
-- Validación local con Flutter 3.35.7 / Dart 3.9.2: suite de 72 pruebas correcta y dos regresiones adicionales de pausa/renderizado correctas; análisis sin incidencias, formato y compilación web correctos. Sin nueva publicación ni validación en Android físico.
+- Validación local con Flutter 3.35.7 / Dart 3.9.2: suite de 72 pruebas correcta y dos regresiones adicionales de pausa/renderizado correctas; análisis sin incidencias, formato y compilación web correctos. Publicada en `main` como `7b1c61e`; sin validación en Android físico.
 
 ## Resultados modales y generador inicial — 2026-10-18 · 0.2.2+4
 

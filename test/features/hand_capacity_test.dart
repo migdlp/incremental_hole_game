@@ -15,6 +15,15 @@ void step(Board board, [int frames = 30]) {
   }
 }
 
+void carryGently(Board board, Vec destination, {double seconds = 1}) {
+  final start = board.target!;
+  final frames = (seconds * 240).round();
+  for (var i = 1; i <= frames; i++) {
+    board.drag(start + (destination - start) * (i / frames));
+    step(board, 1);
+  }
+}
+
 Ball ball(Board board, Vec position) {
   final result = Ball(board.nextId++, position, Vec.zero);
   board.balls.add(result);
@@ -56,8 +65,8 @@ void main() {
         expect(board.heldBall, same(first));
         expect(board.heldBalls, hasLength(level + 1));
         expect(board.heldBalls, isNot(contains(distant)));
-        board.drag(const Vec(180, 250));
-        step(board, 60);
+        carryGently(board, const Vec(180, 250));
+        step(board, 240);
         for (final held in board.heldBalls) {
           expect((held.position - const Vec(180, 250)).length, lessThan(16));
         }
@@ -90,7 +99,10 @@ void main() {
       expect(board.heldBalls, hasLength(2));
       board.releasePointer(cancel: cancel, time: .1);
       expect(first.velocity.x, cancel ? 0 : closeTo(200, .001));
-      expect(second.velocity.x, first.velocity.x);
+      expect(
+        second.velocity.x,
+        cancel ? 0 : inExclusiveRange(0, first.velocity.x),
+      );
       expect(board.heldBalls, isEmpty);
       board.touch(first.position);
       step(board);
@@ -109,8 +121,8 @@ void main() {
       ball(board, const Vec(205, 330));
       board.touch(first.position);
       step(board);
-      board.drag(Board.hole);
-      step(board, 120);
+      carryGently(board, Board.hole);
+      step(board, 240);
       expect(board.captured, 2);
       expect(board.heldBalls, isEmpty);
       ball(board, const Vec(180, 350));
@@ -159,6 +171,103 @@ void main() {
     expect(board.heldBalls, isEmpty);
     expect(board.balls.every((b) => b.velocity.length == 0), isTrue);
   });
+
+  test('magnetic pickup eases in over time instead of snapping into place', () {
+    final board = Board(catalog.settings({'hand': 1}));
+    final first = ball(board, const Vec(100, 250));
+    final second = ball(board, const Vec(130, 250));
+    board.touch(first.position);
+    step(board, 1);
+    expect(second.position.x, closeTo(130, .1));
+    step(board, 23); // 100 ms: still approaching its slot at x=114.
+    expect(second.position.x, inExclusiveRange(120, 130));
+    step(board, 216); // Settles after a short, visible delay.
+    expect(second.position.x, closeTo(114, 1));
+    expect(second.velocity.length, lessThan(2));
+  });
+
+  test('gentle movement keeps the group with visible lag', () {
+    final board = Board(catalog.settings({'hand': 1}));
+    final first = ball(board, const Vec(80, 250));
+    final second = ball(board, const Vec(110, 250));
+    board.touch(first.position);
+    step(board, 240);
+    carryGently(board, const Vec(180, 250));
+    expect(board.heldBalls, containsAll([first, second]));
+    expect(second.position.x, lessThan(first.position.x + 10));
+    step(board, 240);
+    expect(second.position.x, closeTo(194, 1));
+  });
+
+  test(
+    'a sharp pull breaks the extra grip, keeps momentum and cannot reattach immediately',
+    () {
+      final board = Board(catalog.settings({'hand': 1}));
+      final first = ball(board, const Vec(80, 250));
+      final second = ball(board, const Vec(110, 250));
+      board.touch(first.position);
+      step(board, 240);
+      board.drag(const Vec(320, 250));
+      step(board, 72);
+      expect(board.heldBalls, [first]);
+      expect(second.velocity.length, greaterThan(0));
+      final position = second.position;
+      step(board, 12);
+      expect((second.position - position).length, greaterThan(0));
+      // Bring the manually held ball close again while keeping the gesture active.
+      board.drag(second.position - const Vec(20, 0));
+      step(board, 240);
+      expect(board.heldBalls, [first]);
+      board.releasePointer(cancel: true);
+      board.touch(second.position);
+      expect(board.heldBall, same(second));
+    },
+  );
+
+  test('spring motion and breakage are consistent at 30, 60 and 120 fps', () {
+    Vec run(int hz) {
+      final board = Board(catalog.settings({'hand': 1}));
+      final first = ball(board, const Vec(80, 250));
+      final second = ball(board, const Vec(110, 250));
+      board.touch(first.position);
+      step(board, 240);
+      for (var i = 1; i <= hz; i++) {
+        board.drag(Vec(80 + 100 * i / hz, 250));
+        board.update(1 / hz, producing: false);
+      }
+      expect(board.heldBalls, hasLength(2));
+      board.drag(const Vec(350, 250));
+      for (var i = 0; i < hz ~/ 2; i++) {
+        board.update(1 / hz, producing: false);
+      }
+      expect(board.heldBalls, [first]);
+      return second.position;
+    }
+
+    final baseline = run(60);
+    expect((run(30) - baseline).length, lessThan(5));
+    expect((run(120) - baseline).length, lessThan(5));
+  });
+
+  test(
+    'capturing the manual ball frees its slot without promoting a spring to a rigid grip',
+    () {
+      final board = Board(catalog.settings({'hand': 1}));
+      final first = ball(board, const Vec(180, 360));
+      final second = ball(board, const Vec(206, 360));
+      board.touch(first.position);
+      step(board, 240);
+      first.position = Board.hole;
+      board.drag(Board.hole);
+      step(board, 1);
+      expect(board.captured, 1);
+      expect(board.heldBalls, [second]);
+      final third = ball(board, const Vec(220, 370));
+      step(board, 1);
+      expect(board.heldBalls, containsAll([second, third]));
+      expect(second.position.y, lessThan(370));
+    },
+  );
 
   test('locked broom renders neither its head nor its handle', () async {
     Future<List<int>> pixel({

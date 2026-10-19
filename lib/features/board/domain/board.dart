@@ -60,6 +60,13 @@ class Board {
 
   BallTool tool;
   final _heldBalls = <Ball, Vec>{};
+  Ball? _manualBall;
+  final _slippedBalls = <Ball>{};
+  // Logical units and seconds: a soft, damped tether for extra balls.
+  static const _gripStiffness = 80.0;
+  static const _gripDamping = 14.0;
+  static const _gripAcceleration = 900.0;
+  static const _gripBreakDistance = 72.0;
   Ball? get heldBall => _heldBalls.keys.firstOrNull;
   List<Ball> get heldBalls => List.unmodifiable(_heldBalls.keys);
   int get handCapacity => math.max(1, settings['hand_capacity'].toInt());
@@ -105,12 +112,18 @@ class Board {
     var collected = 0;
     final velocity = cancel ? Vec.zero : _releaseVelocity(time ?? _clock);
     for (final ball in _heldBalls.keys) {
-      ball.velocity = velocity;
+      ball.velocity = cancel
+          ? Vec.zero
+          : ball == _manualBall
+          ? velocity
+          : ball.velocity.limit(380);
     }
     if (!cancel && !_dragged && !_heldDuringGesture && _downPoint != null) {
       collected = _collect(_downPoint!, _downPoint!);
     }
     _heldBalls.clear();
+    _manualBall = null;
+    _slippedBalls.clear();
     holdingBroom = false;
     paddle = null;
     target = null;
@@ -198,6 +211,7 @@ class Board {
       }
       if (nearest != null) {
         _grabOffset = nearest.position - paddle!;
+        _manualBall = nearest;
         _heldBalls[nearest] = _grabOffset;
         nearest.velocity = Vec.zero;
         _heldDuringGesture = true;
@@ -340,6 +354,8 @@ class Board {
         return false;
       }
       _heldBalls.remove(ball);
+      if (ball == _manualBall) _manualBall = null;
+      _slippedBalls.remove(ball);
       captures++;
       return true;
     });
@@ -357,7 +373,9 @@ class Board {
         Ball? nearest;
         var distance = ballMagnetRadius;
         for (final ball in balls) {
-          if (_heldBalls.containsKey(ball)) continue;
+          if (_heldBalls.containsKey(ball) || _slippedBalls.contains(ball)) {
+            continue;
+          }
           final d = (ball.position - heldBall!.position).length;
           if (d < distance) {
             nearest = ball;
@@ -365,22 +383,41 @@ class Board {
           }
         }
         if (nearest == null) break;
-        final satellites = handCapacity - 1;
-        final angle = (_heldBalls.length - 1) * math.pi * 2 / satellites;
-        final spacing = math.max(
-          radius * 2 + 2,
-          (radius + 1) / math.sin(math.pi / math.max(2, satellites)),
-        );
-        _heldBalls[nearest] =
-            _grabOffset + Vec(math.cos(angle), math.sin(angle)) * spacing;
+        _heldBalls[nearest] = _nextGripOffset();
       }
-      for (final entry in _heldBalls.entries) {
-        final ball = entry.key;
-        final goal = (target! + entry.value).inside(radius);
+      if (_manualBall case final Ball ball) {
+        final goal = (target! + _grabOffset).inside(radius);
         final previous = ball.position;
         ball.position = previous + (goal - previous).limit(700 * dt);
-        // Snapshots never restore an active grip or its contact velocity.
         ball.velocity = (ball.position - previous) * (1 / dt);
+      }
+      final anchor = _manualBall == null
+          ? paddle!
+          : _manualBall!.position - _grabOffset;
+      final slipped = <Ball>[];
+      for (final entry in _heldBalls.entries) {
+        final ball = entry.key;
+        if (ball == _manualBall) continue;
+        final goal = (anchor + entry.value).inside(radius);
+        final stretch = goal - ball.position;
+        if (stretch.length > _gripBreakDistance) {
+          slipped.add(ball);
+          continue;
+        }
+        final acceleration =
+            (stretch * _gripStiffness - ball.velocity * _gripDamping).limit(
+              _gripAcceleration,
+            );
+        ball.velocity = (ball.velocity + acceleration * dt).limit(380);
+        final next = ball.position + ball.velocity * dt;
+        ball.position = next.inside(radius);
+        if (ball.position.x != next.x) ball.velocity = Vec(0, ball.velocity.y);
+        if (ball.position.y != next.y) ball.velocity = Vec(ball.velocity.x, 0);
+      }
+      for (final ball in slipped) {
+        _heldBalls.remove(ball);
+        // A broken tether must not immediately reattach during this gesture.
+        _slippedBalls.add(ball);
       }
     }
     if (!holdingBroom) return;
@@ -397,6 +434,27 @@ class Board {
     final turn = angle.clamp(-3 * dt, 3 * dt);
     toolAngle = (toolAngle + turn) % (2 * math.pi);
     _contactBroom((broomPosition - previousBroom) * (1 / dt), turn / dt);
+  }
+
+  Vec _nextGripOffset() {
+    if (_manualBall == null &&
+        _heldBalls.values.every((used) => (used - _grabOffset).length > .1)) {
+      return _grabOffset;
+    }
+    final satellites = handCapacity - 1;
+    final spacing = math.max(
+      radius * 2 + 2,
+      (radius + 1) / math.sin(math.pi / math.max(2, satellites)),
+    );
+    for (var slot = 0; slot < satellites; slot++) {
+      final angle = slot * math.pi * 2 / satellites;
+      final offset =
+          _grabOffset + Vec(math.cos(angle), math.sin(angle)) * spacing;
+      if (_heldBalls.values.every((used) => (used - offset).length > .1)) {
+        return offset;
+      }
+    }
+    throw StateError('No free hand slot');
   }
 
   void _contactBroom(Vec velocity, double rotation) {

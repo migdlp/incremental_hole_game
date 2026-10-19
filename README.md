@@ -1,6 +1,6 @@
 # Jardín mecánico
 
-Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.1+6**.
+Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.2+7**.
 
 El mapa de [cambios futuros](docs/cambios-futuros-arbol-mejoras.md) se incorpora al árbol: cuatro ramas iniciales, cinco niveles, seis colores, Doble emisión y alcance del imán. Se conservan las compras anteriores y el balance de las jornadas interrumpidas; las nuevas jornadas usan balance 5.
 
@@ -26,7 +26,7 @@ python3 -m http.server 8123 --directory build/web
 
 ## Lo que ya funciona
 
-- Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual inicial, capacidad mejorable a 2/3/4/5/6 bolas y lanzamiento del grupo según la velocidad final del gesto. Solo una mano que ya lleva una bola atrae las cercanas.
+- Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual inicial, capacidad mejorable a 2/3/4/5/6 bolas y lanzamiento manual según la velocidad final del gesto e inercia propia para las bolas adicionales. Solo una mano que ya lleva una bola atrae las cercanas, con peso y retraso; un tirón fuerte puede soltarlas.
 - Escoba física disponible solo tras comprarla, perpendicular al arrastre, giro suavizado, anchura mejorable y escoba en V; selector de herramientas compradas.
 - Monedas de $1/$10/$50/$100/$500 con colores propios, sin cifras ni símbolos sobre sus caras; una bola genera $1 de base. Pilas con valor entero, aterrizaje, recogida por pulsación al inicio y por barrido tras comprar la mejora, fusión y límite de pilas sin perder valor.
 - Día inicial de **13 segundos en total: 10 de producción y 3 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.

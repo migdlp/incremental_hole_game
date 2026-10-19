@@ -2,6 +2,13 @@
 
 Se registran entregas y cambios observables. `0.2.1+3` es la versión actual declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Mano con peso e inercia — 2026-10-19 · 0.3.2+7
+
+- Las bolas adicionales atraídas por la mano usan una fuerza limitada y amortiguada: se acercan durante unas décimas y siguen el arrastre con retraso. La primera bola sigue siendo un agarre manual.
+- Un tirón que estira demasiado el agarre suelta la bola adicional con su velocidad física; no vuelve a engancharse durante ese mismo gesto. Al soltar normalmente, las bolas adicionales conservan su propia inercia en lugar de recibir instantáneamente la velocidad del dedo.
+- Pausa y cierre siguen cancelando los agarres sin lanzar; el guardado no restaura agarres ni velocidades artificiales. Se conserva la capacidad comprada y el alcance de detección; este cambio afecta a la fuerza del imán de bolas, no al imán de monedas.
+- Verificación local: 93 pruebas correctas, incluidas aproximación gradual, arrastre suave, pérdida por tirón, no reenganche, reutilización de plazas y estabilidad a 30/60/120 FPS simulados. Compilación web correcta. Ajuste inicial de sensación pendiente de probar en Android físico.
+
 ## CF-01 a CF-04 — 2026-10-19 · 0.3.1+6 · Preparado para revisión
 
 - Captura base de $1; denominaciones $1/$10/$50/$100/$500 con colores y sin cifras ni símbolos sobre las monedas. Las pilas representan denominaciones válidas conservando todo el importe; saldo y estadísticas muestran dólares.

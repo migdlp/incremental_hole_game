@@ -33,7 +33,7 @@ Catorce tipos y **44 nodos**, uno por nivel comprable. Cada nivel requiere el an
          └─ ESCOBA EN V
 ```
 
-La mano inicial lleva una bola. Siempre se agarra la primera manualmente; solo una mano que ya sostiene alguna atrae otras a menos de 36 unidades de la primera sostenida, hasta llenar la capacidad. El grupo sigue al dedo y comparte el lanzamiento o la suelta. Pausa y cierre cancelan todos los agarres sin lanzarlos. Esta mecánica no recoge monedas.
+La mano inicial lleva una bola. Siempre se agarra la primera manualmente; solo una mano que ya sostiene alguna atrae otras a menos de 36 unidades de la primera sostenida, hasta llenar la capacidad. La primera bola sigue el agarre manual. Las adicionales se acercan con fuerza limitada e inercia, tardan unas décimas en acomodarse y siguen al dedo con retraso. Un tirón fuerte puede romper ese agarre; las bolas sueltas conservan su velocidad y no se reenganchan hasta un gesto nuevo. Al levantar el dedo, cada bola adicional conserva su propia inercia. Pausa y cierre cancelan todos los agarres sin lanzarlos. Esta mecánica no recoge monedas.
 
 La escoba no se dibuja, no se puede agarrar y no colisiona hasta comprar su desbloqueo. Después es un objeto físico que conserva posición y orientación. Anchura y V modifican esa misma escoba. La V no añade otro selector.
 

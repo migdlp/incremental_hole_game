@@ -1,5 +1,7 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+> **Entrega CF-06 a CF-08 — 19 de octubre de 2026:** [PR #17](https://github.com/migdlp/incremental_hole_game/pull/17) integrada en `main`, código `1cd7b8761a9e1e4eea19761385086e92ec470438`. **APK 0.4.0+9:** [descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776/artifacts/12173036451), disponible hasta el 2 de noviembre de 2026. [Pipeline 39223285776](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776) correcta: formato, análisis, **107 pruebas**, compilación Android y firma v2 verificada. Incluye estadísticas visuales, árbol compacto de ocho direcciones y cinco niveles de fuerza de agarre. Descomprimir e instalar `jardin-mecanico-debug.apk`. Validación en Android físico y ajuste definitivo de precios pendientes.
+
 ## Próximas mejoras registradas — 19 de octubre de 2026
 
 - **CF-06, implementado en esta tanda:** estadísticas mucho más visuales y minimalistas, con menos texto y sin información irrelevante.
@@ -8,7 +10,7 @@
 
 Autorización más reciente: implementar toda la lista vigente CF-06 a CF-08 y entregar el APK. Se han completado los tres bloques; 107 pruebas locales correctas. La aceptación en Android físico y los ajustes de precios siguen sujetos a prueba real.
 
-La especificación se mantiene en una única referencia: [Próximas mejoras](cambios-futuros-arbol-mejoras.md#próximas-mejoras--19-de-octubre-de-2026). Se confirma que mano con peso (`9c79dd3`), cabecera visible y bolas doradas (`8f92527`) ya están en `main`, junto con CF-05. Esta actualización es documental; CF-06 y CF-07 todavía no cambian el juego ni el APK.
+La especificación se mantiene en una única referencia: [Próximas mejoras](cambios-futuros-arbol-mejoras.md#próximas-mejoras--19-de-octubre-de-2026). Se confirma que mano con peso (`9c79dd3`), cabecera visible y bolas doradas (`8f92527`) ya están en `main`, junto con CF-05. CF-06 a CF-08 están integrados y entregados en el APK 0.4.0+9 enlazado al principio de este documento.
 
 > **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
 

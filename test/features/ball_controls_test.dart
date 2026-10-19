@@ -323,6 +323,7 @@ void main() {
       session.startDay();
       final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
       data['version'] = 1;
+      data['run']['board'].remove('combo');
       data['run']['settings'] = catalog
           .settings(session.levels, balanceVersion: 1)
           .toJson();
@@ -340,7 +341,7 @@ void main() {
       expect(restored.board!.settings['robot_count'], 1);
       expect(restored.board!.sweepEnabled, isFalse);
       expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 5);
+      expect(jsonDecode(restored.snapshot())['version'], 6);
     },
   );
 

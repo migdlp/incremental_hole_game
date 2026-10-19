@@ -1,6 +1,6 @@
 # Economía y monedas
 
-Referencia de la implementación 0.5.0+10. La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
+Referencia de la implementación 0.6.0+11 (código; última entrega APK documentada: 0.5.0+10). La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
 
 ## Valor y denominaciones
 
@@ -39,7 +39,7 @@ Con una o más bolas agarradas se bloquean todos los cobros de monedas y su atra
 ## Balance y contabilidad
 
 - El valor generado es igual al recogido más el pendiente en el tablero y su reserva de monedas por emitir.
-- El valor generado es igual al valor normal por bola multiplicado por `(capturas normales + 10 × capturas doradas)`.
+- El valor generado es la suma de cada captura: `valor normal × (dorada ? 10 : 1) × multiplicador del combo`. Las jornadas anteriores a los combos mantienen el multiplicador ×1.
 - El cierre banca una sola vez lo recogido; el resto se pierde y se vacía el tablero para la jornada siguiente.
 - La representación por denominaciones no cambia estos cálculos ni crea dinero.
 - No hay ingresos mientras el juego está cerrado.
@@ -49,3 +49,11 @@ Las nuevas jornadas usan balance 6. Las jornadas guardadas con balance 1–5 man
 ## Ajuste pendiente
 
 El cambio a $1 reduce el ingreso inicial respecto al balance 4, que daba dos monedas por captura. Mano I se reduce a 13 y el Imán pasa a 300; los demás precios se conservan y siguen pendientes de revisión jugando. Registrar capturas, valor generado/cobrado/perdido, duración y días entre compras antes de recalibrar. No se promete una compra en el primer día ni un plazo fijo para llegar al robot.
+
+## Combos — revisión 0.6.0+11
+
+Las jornadas nuevas tienen combos desde el inicio: capturas 1–4 ×1, 5–9 ×2 y desde la décima ×3. La ventana de un segundo entre capturas es inclusiva; superarla reinicia la racha sin modificar recompensas pasadas. El reloj usa tiempo de simulación: la pausa no lo consume y guardar/restaurar no lo reinicia. Entrar en recogida final termina la racha. Los parámetros son provisionales para pruebas de balance.
+
+Cuentan todas las capturas, también las asistidas por robot, provisionalmente. Si varias ocurren en el mismo paso de simulación, se procesan en el orden estable de las bolas del tablero; cada una utiliza el multiplicador que le corresponde. No se agrupan primero las doradas, ya que eso cambiaría el premio de la quinta o décima captura.
+
+Los premios se generan como monedas físicas de las cinco denominaciones y necesitan recogerse. No se conceden ingresos directamente al saldo. La UI muestra el multiplicador activo al alcanzar ×2/×3 y lo retira al romperse la racha, sin publicar los umbrales. La regla del 1 % dorado, Valor I–V y el CSV no cambian; su sustitución por tiers depende del diseño pendiente.

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import '../../../app/game_session.dart';
 import '../../board/presentation/coin_icon.dart';
@@ -33,16 +35,38 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   Size? viewport;
   bool initialized = false;
   String? announcement;
+  late bool _wasDebugEnabled;
+  late bool _wasFullTree;
+  bool get _debugBuying => widget.session.debugFullTree;
+  List<SkillNode> get _visible =>
+      _debugBuying ? tree.nodes : tree.visible(widget.session.levels);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _wasDebugEnabled = widget.session.debugEnabled;
+    _wasFullTree = widget.session.debugFullTree;
     widget.session.addListener(_sessionChanged);
   }
 
   void _sessionChanged() {
-    if (holding != null && !_canBuy(holding!)) _cancel();
+    final session = widget.session;
+    final changedMode =
+        _wasDebugEnabled != session.debugEnabled ||
+        _wasFullTree != session.debugFullTree;
+    _wasDebugEnabled = session.debugEnabled;
+    _wasFullTree = session.debugFullTree;
+    if (changedMode || (holding != null && !_canBuy(holding!))) {
+      _cancel();
+      activePointer = null;
+      pointers.clear();
+    }
+    if (selected != null && !_visible.any((n) => n.id == selected!.id)) {
+      selected = null;
+      announcement = null;
+    }
+    if (changedMode && viewport != null) _center(viewport!, node: tree.root);
     if (mounted) setState(() {});
   }
 
@@ -56,11 +80,14 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     }
   }
 
-  bool _canBuy(SkillNode node) =>
-      !node.owned(widget.session.levels) &&
-      (widget.session.levels[node.definition.id] ?? 0) == node.level - 1 &&
-      tree.unlocked(node, widget.session.levels) &&
-      widget.session.purchaseBlock(node.definition) == null;
+  bool _canBuy(SkillNode node) {
+    final session = widget.session;
+    if (_debugBuying) return !session.running && !node.owned(session.levels);
+    return !node.owned(session.levels) &&
+        (session.levels[node.definition.id] ?? 0) == node.level - 1 &&
+        tree.unlocked(node, session.levels) &&
+        session.purchaseBlock(node.definition) == null;
+  }
 
   void _cancel() {
     hold.reset();
@@ -73,7 +100,10 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     holding = null;
     hold.reset();
     if (node == null || !_canBuy(node)) return;
-    if (widget.session.purchase(node.definition)) {
+    final purchased = _debugBuying
+        ? widget.session.debugPurchase(node.definition.id, node.level)
+        : widget.session.purchase(node.definition);
+    if (purchased) {
       if (widget.session.sound) {
         unawaited(SystemSound.play(SystemSoundType.click));
       }
@@ -117,6 +147,21 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   }
 
   void _center(Size size, {SkillNode? node}) {
+    if (_debugBuying) {
+      final scale = math
+          .min(
+            (size.width - 24) / SkillTree.canvasSize,
+            (size.height - 24) / SkillTree.canvasSize,
+          )
+          .clamp(.2, 1.0);
+      transform.value = Matrix4.diagonal3Values(scale, scale, scale)
+        ..setTranslationRaw(
+          (size.width - SkillTree.canvasSize * scale) / 2,
+          (size.height - SkillTree.canvasSize * scale) / 2,
+          0,
+        );
+      return;
+    }
     final target = node ?? selected ?? tree.root;
     const scale = .85;
     transform.value = Matrix4.diagonal3Values(scale, scale, scale)
@@ -139,25 +184,50 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   @override
   Widget build(BuildContext context) {
     final session = widget.session;
-    final visible = tree.visible(session.levels);
+    final visible = _visible;
     return Scaffold(
       backgroundColor: _background,
       appBar: AppBar(
         backgroundColor: _background,
         automaticallyImplyLeading: false,
         toolbarHeight: 48,
+        title: session.debugEnabled
+            ? TextButton.icon(
+                key: const ValueKey('tree-debug-tools'),
+                onPressed: _openDebug,
+                icon: const Icon(Icons.bug_report_outlined, size: 18),
+                label: const Text('DEBUG'),
+              )
+            : null,
         actions: [
-          const CoinIcon(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(7, 0, 20, 0),
-            child: Center(
-              child: Text(
-                '${session.economy.balance}',
-                style: const TextStyle(
-                  color: _gold,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 21,
-                ),
+          RawGestureDetector(
+            key: const ValueKey('tree-debug-entry'),
+            gestures: {
+              LongPressGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<
+                    LongPressGestureRecognizer
+                  >(
+                    () => LongPressGestureRecognizer(
+                      duration: const Duration(seconds: 3),
+                    ),
+                    (recognizer) => recognizer.onLongPress = _openDebug,
+                  ),
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+              child: Row(
+                children: [
+                  const CoinIcon(),
+                  const SizedBox(width: 7),
+                  Text(
+                    '${session.economy.balance}',
+                    style: const TextStyle(
+                      color: _gold,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 21,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -192,15 +262,20 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                       _center(viewport!, node: tree.root);
                     } else if (previousViewport != null &&
                         previousViewport != viewport) {
-                      final value = transform.value;
-                      transform.value = value.clone()
-                        ..setTranslationRaw(
-                          value.storage[12] +
-                              (viewport!.width - previousViewport.width) / 2,
-                          value.storage[13] +
-                              (viewport!.height - previousViewport.height) / 2,
-                          0,
-                        );
+                      if (_debugBuying) {
+                        _center(viewport!);
+                      } else {
+                        final value = transform.value;
+                        transform.value = value.clone()
+                          ..setTranslationRaw(
+                            value.storage[12] +
+                                (viewport!.width - previousViewport.width) / 2,
+                            value.storage[13] +
+                                (viewport!.height - previousViewport.height) /
+                                    2,
+                            0,
+                          );
+                      }
                     }
                     return Stack(
                       children: [
@@ -211,7 +286,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             constrained: false,
                             alignment: Alignment.topLeft,
                             boundaryMargin: const EdgeInsets.all(800),
-                            minScale: .35,
+                            minScale: _debugBuying ? .2 : .35,
                             maxScale: 1.8,
                             child: SizedBox(
                               width: SkillTree.canvasSize,
@@ -288,6 +363,92 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     );
   }
 
+  void _openDebug() {
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
+    final session = widget.session;
+    if (!session.debugEnabled && !session.enterDebug()) return;
+    _cancel();
+    activePointer = null;
+    pointers.clear();
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) => SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: AnimatedBuilder(
+              animation: session,
+              builder: (_, _) => Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Depuración',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Pruebas temporales: tu partida guardada se conserva. '
+                    'Puedes comenzar días con estas mejoras.',
+                  ),
+                  SwitchListTile(
+                    key: const ValueKey('debug-player-view'),
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Vista del jugador'),
+                    subtitle: Text(
+                      session.debugFullTree
+                          ? 'Árbol completo. Compras gratuitas con sus requisitos.'
+                          : 'Solo nodos comprados y siguientes; precios y estados normales.',
+                    ),
+                    value: !session.debugFullTree,
+                    onChanged: (value) => session.setDebugFullTree(!value),
+                  ),
+                  const Text(
+                    'La vista del jugador usa tus compras de prueba. '
+                    'Reinicia la prueba para ver cómo empieza una partida.',
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    key: const ValueKey('debug-buy-all'),
+                    onPressed: session.running
+                        ? null
+                        : () => session.debugBuyAll(),
+                    child: const Text('Comprar todo'),
+                  ),
+                  TextButton(
+                    key: const ValueKey('debug-add-coins'),
+                    onPressed: session.running ? null : session.debugAddCoins,
+                    child: const Text('Añadir 1000 monedas de prueba'),
+                  ),
+                  TextButton(
+                    key: const ValueKey('debug-reset'),
+                    onPressed: session.running ? null : session.debugReset,
+                    child: const Text('Reiniciar prueba desde cero'),
+                  ),
+                  TextButton(
+                    key: const ValueKey('debug-close-tools'),
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: const Text('Volver al árbol'),
+                  ),
+                  OutlinedButton(
+                    key: const ValueKey('debug-exit'),
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      session.exitDebug();
+                    },
+                    child: const Text('Salir de depuración'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _node(SkillNode node) {
     final owned = node.owned(widget.session.levels);
     final affordable = _canBuy(node);
@@ -298,7 +459,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         : affordable
         ? const Color(0xffe2e8f0)
         : const Color(0xff64738a);
-    final locked = !tree.unlocked(node, widget.session.levels);
+    final locked = !_debugBuying && !tree.unlocked(node, widget.session.levels);
     return Semantics(
       button: true,
       selected: isSelected,
@@ -431,7 +592,11 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     if (!owned) ...[const CoinIcon(), const SizedBox(width: 6)],
                     Flexible(
                       child: Text(
-                        owned ? 'Adquirida' : '${node.upgrade.cost}',
+                        owned
+                            ? 'Adquirida'
+                            : _debugBuying
+                            ? 'Gratis · DEBUG'
+                            : '${node.upgrade.cost}',
                         style: TextStyle(
                           color: owned ? _mint : _gold,
                           fontWeight: FontWeight.w700,
@@ -509,7 +674,11 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             height: 50,
                             child: Center(
                               child: Text(
-                                affordable ? 'Comprar · 1 s' : 'No disponible',
+                                affordable
+                                    ? (_debugBuying
+                                          ? 'Comprar gratis · 1 s'
+                                          : 'Comprar · 1 s')
+                                    : 'No disponible',
                                 style: TextStyle(
                                   color: affordable
                                       ? _gold

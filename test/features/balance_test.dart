@@ -82,6 +82,7 @@ void main() {
     session.startDay();
     final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
     data['version'] = 2;
+    data['run']['board'].remove('combo');
     data['run'].remove('balanceVersion');
     data['run']['settings'] = catalog
         .settings(session.levels, balanceVersion: 1)

@@ -2,6 +2,15 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Combos y planificación del brainstorm — 2026-10-19 · 0.6.0+11 (sin entrega APK registrada)
+
+- Combos desde el inicio: ventana inclusiva de 1 s; ×2 desde la quinta captura y ×3 desde la décima. Feedback visual sin publicar la fórmula en la UI. Cuentan provisionalmente todas las capturas, incluidas las asistidas.
+- Recompensas ordenadas por captura combinan Valor vigente, dorada y combo; se generan como monedas que hay que recoger. Las rachas no modifican premios pasados y terminan al cerrar producción.
+- JSON v6 persiste racha, ventana y bonificación acumulada. Pausa y recarga no consumen ni reinician tiempo; las jornadas v1–v5 mantienen sus reglas hasta terminar.
+- Tiers, potenciadora, cartas, mecanismos de fábrica, pinball, duplicadora, bomba/impulso y controles quedan descritos con decisiones abiertas en cambios futuros. El árbol y balance vigentes no cambian.
+- Modo de depuración temporal: acceso desde el saldo del árbol tras 3 s, mapa completo o vista del jugador, compra gratuita de cualquier nodo con sus requisitos, compra total, monedas de prueba y reinicio. Se pueden jugar jornadas de prueba; salir o reabrir recupera el progreso normal.
+- 134 pruebas correctas; aceptación táctil y balance jugando pendientes.
+
 ## UI, monedas y economía CF-09 a CF-15 — 2026-10-19 · 0.5.0+10
 
 - Todos los importes de la UI se muestran con icono de moneda y sin `$`. Las cinco denominaciones tienen la misma geometría, sin cifras sobre su cara.

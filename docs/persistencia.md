@@ -1,5 +1,18 @@
 # Referencia de guardado y recuperación
 
+## Sesión de depuración temporal
+
+El modo de depuración no cambia el esquema JSON. Al entrar entre jornadas, `GameSession.enterDebug()` captura el progreso normal y encola su guardado antes de activar el modo. Mientras está activo, `save()` no encola escrituras de las pruebas. La cola anterior continúa escribiendo únicamente instantáneas normales. Las compras, reinicios y jornadas de prueba se descartan al salir mediante restauración de la instantánea inicial. Una nueva instancia de la aplicación inicia el modo desactivado y carga el guardado normal. Ver [uso del modo de depuración](modo-debug.md).
+
+## Actualización de combos — esquema v6
+
+La revisión de código 0.6.0+11 escribe JSON v6 y acepta v1–v5. `board.combo` guarda `enabled`, `streak`, `remaining` y `bonusUnits`. La racha y su ventana restante usan tiempo de simulación; la carga conserva ambos valores y presenta la jornada pausada. `bonusUnits` conserva el incremento acumulado por combos incluso después de terminar una racha. Se exige `generated = ball_value × (captured + 9 × goldenCaptured + bonusUnits)` además de `generated = collected + pending`.
+
+Se rechazan tiempos no finitos/fuera de ventana, rachas mayores que las capturas, bonificaciones negativas o fuera del máximo posible y contabilidad incongruente antes de aplicar el estado. Un combo desactivado no puede tener racha, tiempo ni bonificación. El tablero de una jornada v6 debe incluir este bloque.
+
+Una jornada v1–v5 no contiene combo: se carga con `enabled = false` y mantiene sus premios ×1 hasta terminar. Al volver a guardarla en v6 se conserva ese estado; solo la siguiente jornada activa combos. No se cambian niveles, saldo ni configuración histórica. El balance sigue en versión 6; el esquema JSON v6 es independiente de la versión del balance. Las secciones siguientes documentan contratos anteriores.
+
+
 ## Actualización vigente — 0.5.0+10 · JSON v5 y balance 6
 
 Se escribe `version: 5` y se aceptan versiones 1–5. `grandfathered` mantiene las compras del catálogo antiguo; `previousTree` conserva los niveles que ya estaban comprados en v4 antes del nuevo requisito de Imán. Ambos mapas se validan contra sus requisitos históricos y no conceden niveles nuevos. Las compras posteriores cumplen el CSV actual.

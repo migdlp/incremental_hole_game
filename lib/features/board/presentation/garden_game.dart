@@ -139,6 +139,25 @@ class GardenGame extends FlameGame {
       color: const Color(0xff756347),
       fontSize: 10,
     );
+    if (session.running && !board.coinOnly && board.combo.multiplier > 1) {
+      final color = board.combo.multiplier == 3
+          ? const Color(0xffc084fc)
+          : const Color(0xff4ade80);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTWH(105, 133, 150, 38),
+          const Radius.circular(16),
+        ),
+        paint(const Color(0xee172333)),
+      );
+      label(
+        canvas,
+        'COMBO ×${board.combo.multiplier}',
+        const Offset(180, 152),
+        color: color,
+        fontSize: 20,
+      );
+    }
     final hole = offset(Board.hole);
     final radius = board.settings['hole_capture_radius'];
     canvas.drawOval(

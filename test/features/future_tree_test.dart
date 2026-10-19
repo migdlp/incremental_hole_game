@@ -143,7 +143,7 @@ void main() {
           'generated': 0,
           'settings': historical.toJson()..remove('hand_capacity'),
           'balanceVersion': 3,
-          'board': board.toJson(),
+          'board': board.toJson()..remove('combo'),
         };
         if (version == 1) {
           for (final key in ['broom_unlocked', 'v_unlocked', 'coin_sweep']) {

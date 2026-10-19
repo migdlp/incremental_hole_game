@@ -1,0 +1,36 @@
+# Modo de depuración
+
+Disponible en el código de la revisión 0.6.0+11. Es una sesión de pruebas temporal para inspeccionar el árbol y probar mejoras sin alterar el progreso guardado.
+
+## Acceso desde el móvil
+
+1. Abre el árbol de mejoras entre jornadas.
+2. Mantén pulsado el saldo de monedas de la esquina superior derecha durante **3 segundos**.
+3. Se activa la prueba y aparece el panel «Depuración». Mientras esté activa, el botón **DEBUG** del árbol vuelve a abrir este panel.
+
+El acceso está separado de las opciones normales. Un toque o una pulsación corta en el saldo no activa el modo.
+
+## Ver el árbol completo o la vista del jugador
+
+- **Vista del jugador desactivada:** muestra los 49 nodos y sus conexiones. Al entrar o volver a esta vista, el mapa se encuadra completo; puedes acercarte y arrastrarlo para inspeccionar las ramas. Cualquier nodo pendiente se puede comprar gratis desde su ficha, manteniendo el botón un segundo. Se adquieren también sus niveles anteriores y requisitos, incluidos los cruces entre ramas, para que la configuración sea válida al jugar.
+- **Vista del jugador activada:** usa exactamente el descubrimiento normal: nodos comprados y siguientes nodos accesibles. Conserva precios, requisitos y colores/estados de disponibilidad normales. Las compras realizadas en esta vista descuentan el saldo de prueba, como en una partida normal.
+
+Las dos vistas comparten las mismas compras de prueba. Si compras todo, la vista del jugador mostrará todo porque ya lo tienes adquirido. Para comprobar el inicio, pulsa «Reiniciar prueba desde cero» y activa «Vista del jugador».
+
+Cambiar de vista no compra ni elimina mejoras. Si una ficha seleccionada deja de ser visible se cierra; cualquier compra mantenida en curso se cancela.
+
+## Herramientas del panel
+
+- **Comprar todo:** adquiere gratuitamente todos los niveles de todas las ramas.
+- **Añadir 1000 monedas de prueba:** permite inspeccionar qué nodos estarían disponibles para un jugador con saldo suficiente.
+- **Reiniciar prueba desde cero:** vacía las mejoras y el saldo de prueba; vuelve al día 1. No borra la partida normal.
+- **Volver al árbol:** cierra el panel conservando la prueba.
+- **Salir de depuración:** descarta la prueba y recupera el punto de partida normal.
+
+Puedes pulsar «Comenzar día» y jugar con las mejoras de prueba. Durante la jornada aparece **DEBUG · prueba temporal**, con el botón «Salir de debug». Las modificaciones de mejoras se realizan entre jornadas para conservar la configuración activa del día.
+
+## Progreso y guardado
+
+Entrar toma una instantánea del progreso normal y solicita su guardado. Las compras, monedas y jornadas de depuración permanecen en memoria y no se escriben en el guardado ni en su copia. Al salir se restaura la instantánea; al cerrar y reabrir la aplicación se carga la partida normal, sin activar depuración.
+
+La prueba comienza con tu progreso actual. Reiniciar la prueba o comprar gratis no afecta a ese punto de partida. Este modo no añade campos al esquema JSON ni concede compras gratuitas fuera de la sesión de depuración.

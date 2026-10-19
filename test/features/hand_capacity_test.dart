@@ -312,6 +312,7 @@ void main() {
     final session = GameSession(catalog, MemoryStore())..startDay();
     final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
     json['version'] = 3;
+    json['run']['board'].remove('combo');
     json['run']['balanceVersion'] = 3;
     json['run']['settings'] = catalog.settings({}, balanceVersion: 3).toJson();
     json['tool'] = 'broom';

@@ -6,6 +6,8 @@ Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` 
 
 | Quiero… | Leer |
 | --- | --- |
+| Inspeccionar el árbol completo y probar mejoras gratis | [Modo de depuración](modo-debug.md) |
+| Dar contexto rápido y pedir ideas | [Resumen para compartir](contexto-proyecto-para-ideas.md) |
 | Saber qué está terminado y qué falta | [Estado actual](estado-actual.md) |
 | Preparar los cambios de la siguiente iteración | [Seguimiento de agarre, escobas y balance](plan-cambios-agarre-escoba.md) |
 | Explorar herramientas para recoger y lanzar bolas | [Ideas de herramientas](ideas-herramientas-bolas.md) |

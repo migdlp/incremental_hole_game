@@ -134,7 +134,8 @@ void main() {
       );
       final oldBoard = board.toJson()
         ..remove('collectedCoins')
-        ..remove('queuedCoins');
+        ..remove('queuedCoins')
+        ..remove('combo');
       final data =
           jsonDecode(GameSession(catalog, MemoryStore()).snapshot())
               as Map<String, dynamic>;

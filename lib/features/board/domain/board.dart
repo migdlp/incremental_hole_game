@@ -3,6 +3,7 @@ import '../../../core/vec.dart';
 import '../../automation/domain/robot.dart';
 import 'tool.dart';
 import 'coin_denomination.dart';
+import 'capture_combo.dart';
 import '../../upgrades/domain/catalog.dart';
 
 class Ball {
@@ -33,18 +34,30 @@ class Coin {
 }
 
 class BoardEvents {
-  const BoardEvents(this.captured, this.collected, {this.goldenCaptured = 0});
+  const BoardEvents(
+    this.captured,
+    this.collected, {
+    this.goldenCaptured = 0,
+    this.rewards = const [],
+  });
   final int captured, collected, goldenCaptured;
+  final List<int> rewards;
 }
 
 class Board {
-  Board(this.settings, {this.randomState = 42, this.tool = BallTool.hand}) {
+  Board(
+    this.settings, {
+    this.randomState = 42,
+    this.tool = BallTool.hand,
+    bool combosEnabled = true,
+  }) : combo = CaptureCombo(enabled: combosEnabled) {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
   }
   static const width = 360.0, height = 560.0;
   static const hole = Vec(180, 412);
   static const generator = Vec(180, 60);
   final DaySettings settings;
+  final CaptureCombo combo;
   final balls = <Ball>[];
   final coins = <Coin>[];
   // Only five denomination counters are queued if the visible-object cap fills.
@@ -63,6 +76,7 @@ class Board {
   void enterClosing() {
     releasePointer(cancel: true);
     coinOnly = true;
+    combo.end();
   }
 
   BallTool tool;
@@ -356,6 +370,7 @@ class Board {
       }
     }
     if (coinOnly) return BoardEvents(0, collected);
+    combo.advance(dt);
     if (settings['robot_count'] > 0) {
       final goal = robot.direction(dt, [
         for (final ball in balls) (id: ball.id, position: ball.position),
@@ -397,6 +412,7 @@ class Board {
     }
     _clock += dt;
     var captures = 0, goldenCaptures = 0;
+    final rewards = <int>[];
     balls.removeWhere((ball) {
       if ((ball.position - hole).length > settings['hole_capture_radius']) {
         return false;
@@ -406,11 +422,19 @@ class Board {
       _slippedBalls.remove(ball);
       captures++;
       if (ball.golden) goldenCaptures++;
+      rewards.add(
+        settings['ball_value'].toInt() * combo.capture(golden: ball.golden),
+      );
       return true;
     });
     captured += captures;
     goldenCaptured += goldenCaptures;
-    return BoardEvents(captures, collected, goldenCaptured: goldenCaptures);
+    return BoardEvents(
+      captures,
+      collected,
+      goldenCaptured: goldenCaptures,
+      rewards: rewards,
+    );
   }
 
   void _moveTool(double dt) {
@@ -608,6 +632,7 @@ class Board {
     'nextId': nextId,
     'captured': captured,
     'goldenCaptured': goldenCaptured,
+    'combo': combo.toJson(),
     'spawnClock': spawnClock,
     'broomPosition': broomPosition.toJson(),
     'broomAngle': toolAngle,
@@ -628,7 +653,26 @@ class Board {
   };
 
   factory Board.fromJson(DaySettings settings, Map<String, dynamic> json) {
-    final board = Board(settings, randomState: json['random'] as int);
+    final goldenCaptured = json['goldenCaptured'] ?? 0;
+    if (goldenCaptured is! int) {
+      throw const FormatException('Capturas doradas inválidas');
+    }
+    final combo = json['combo'] == null
+        ? CaptureCombo(enabled: false)
+        : CaptureCombo.fromJson(
+            json['combo'] as Map<String, dynamic>,
+            captured: json['captured'] as int,
+            goldenCaptured: goldenCaptured,
+          );
+    final board = Board(
+      settings,
+      randomState: json['random'] as int,
+      combosEnabled: combo.enabled,
+    );
+    board.combo
+      ..streak = combo.streak
+      ..remaining = combo.remaining
+      ..bonusUnits = combo.bonusUnits;
     if (json.containsKey('broomPosition')) {
       board.broomPosition = Vec.fromJson(json['broomPosition']);
     }
@@ -646,10 +690,6 @@ class Board {
     }
     board.nextId = json['nextId'] as int;
     board.captured = json['captured'] as int;
-    final goldenCaptured = json['goldenCaptured'] ?? 0;
-    if (goldenCaptured is! int) {
-      throw const FormatException('Capturas doradas inválidas');
-    }
     board.goldenCaptured = goldenCaptured;
     board.spawnClock = (json['spawnClock'] as num).toDouble();
     for (final row in json['balls'] as List) {

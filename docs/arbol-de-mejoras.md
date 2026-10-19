@@ -1,5 +1,9 @@
 # Árbol de mejoras progresivo
 
+> **Modo de depuración:** mantén el saldo pulsado 3 s para ver el árbol completo, comprar nodos gratis con sus requisitos y alternar la Vista del jugador. Las pruebas son temporales y no sustituyen el progreso guardado. [Instrucciones](modo-debug.md).
+
+> **Revisión de código 0.6.0+11:** combos disponibles desde el inicio en las nuevas jornadas. Esta revisión no cambia nodos, costes ni requisitos. La sustitución de Valor por tiers individuales y las posibles mejoras del combo siguen pendientes en [cambios futuros](cambios-futuros-arbol-mejoras.md). Última entrega APK documentada: 0.5.0+10.
+
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
 > **Referencia actualizada a 0.5.0+10:** CF-09 a CF-15 implementados: Mano I de 13, Área manual desde Mano I e Imán de 300 tras Área III. Guardado v5 y balance 6; los precios en la UI usan icono de moneda.
@@ -90,7 +94,7 @@ Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alc
 
 La evidencia histórica del árbol anterior sigue en [validación](validacion-prototipo.md) y [CI](ci.md); sus APK no contienen automáticamente este mapa nuevo.
 
-CF-01 a CF-04 y las monedas sin cifras se implementan en esta revisión. El historial de decisiones sigue en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, las denominaciones y el valor base se explican en [economía](economia.md).
+CF-01 a CF-04 y las monedas sin cifras se implementan en esta revisión. Los cambios pendientes se consultan en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, las denominaciones y el valor base se explican en [economía](economia.md).
 
 ## Fuerza de agarre de la mano
 

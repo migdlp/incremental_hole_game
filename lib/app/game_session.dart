@@ -30,6 +30,10 @@ class GameSession extends ChangeNotifier {
   String? _lastSaved;
   Future<void> _writes = Future.value();
   bool _disposed = false;
+  String? _debugBaseline;
+  bool _debugFullTree = true;
+  bool get debugEnabled => _debugBaseline != null;
+  bool get debugFullTree => debugEnabled && _debugFullTree;
   bool get running => cycle != null;
   DayPhase get phase => cycle?.phase ?? DayPhase.night;
 
@@ -106,10 +110,7 @@ class GameSession extends ChangeNotifier {
     if (dt <= 0) return;
     final events = board!.update(dt, producing: producing);
     economy.collect(events.collected);
-    for (var i = 0; i < events.captured; i++) {
-      final value =
-          board!.settings['ball_value'].toInt() *
-          (i < events.goldenCaptured ? 10 : 1);
+    for (final value in events.rewards) {
       economy.generated += value;
       board!.releaseCoin(value);
     }
@@ -201,6 +202,109 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Debug play is temporary: purchases and days never reach the real save.
+  bool enterDebug() {
+    if (debugEnabled || running) return false;
+    final baseline = snapshot();
+    save();
+    _debugBaseline = baseline;
+    _debugFullTree = true;
+    notifyListeners();
+    return true;
+  }
+
+  void exitDebug() {
+    final baseline = _debugBaseline;
+    if (baseline == null) return;
+    restore(baseline);
+    _debugBaseline = null;
+    _debugFullTree = true;
+    _checkpoint = _uiClock = 0;
+    notifyListeners();
+  }
+
+  void setDebugFullTree(bool value) {
+    if (!debugEnabled) return;
+    _debugFullTree = value;
+    notifyListeners();
+  }
+
+  bool debugPurchase(String id, int targetLevel) {
+    if (!debugEnabled || running) return false;
+    final definition = catalog.definitions.where((d) => d.id == id).firstOrNull;
+    if (definition == null ||
+        targetLevel < 1 ||
+        targetLevel > definition.levels.length ||
+        targetLevel <= (levels[id] ?? 0)) {
+      return false;
+    }
+    final next = Map<String, int>.of(levels);
+    void unlock(UpgradeDefinition definition, int level) {
+      if ((next[definition.id] ?? 0) >= level) return;
+      for (final upgrade in definition.levels.take(level)) {
+        for (final requirement in upgrade.requirements) {
+          final parts = requirement.split(':');
+          unlock(
+            catalog.definitions.firstWhere((d) => d.id == parts[0]),
+            int.parse(parts[1]),
+          );
+        }
+      }
+      next[definition.id] = level;
+    }
+
+    unlock(definition, targetLevel);
+    _applyDebugLevels(next);
+    return true;
+  }
+
+  bool debugBuyAll() {
+    if (!debugEnabled || running) return false;
+    _applyDebugLevels({
+      for (final definition in catalog.definitions)
+        definition.id: definition.levels.length,
+    });
+    return true;
+  }
+
+  void _applyDebugLevels(Map<String, int> next) {
+    catalog.validateLevels(
+      next,
+      grandfathered: _grandfathered,
+      previousTree: _previousTree,
+    );
+    if ((next['broom_v'] ?? 0) > (levels['broom_v'] ?? 0)) {
+      selectedTool = BallTool.vee;
+    } else if ((next['broom'] ?? 0) > (levels['broom'] ?? 0)) {
+      selectedTool = BallTool.broom;
+    }
+    levels
+      ..clear()
+      ..addAll(next);
+    notifyListeners();
+  }
+
+  void debugAddCoins() {
+    if (!debugEnabled || running) return;
+    economy.balance += 1000;
+    notifyListeners();
+  }
+
+  void debugReset() {
+    if (!debugEnabled || running) return;
+    levels.clear();
+    _grandfathered.clear();
+    _previousTree.clear();
+    selectedTool = BallTool.hand;
+    economy.balance = 0;
+    economy.begin();
+    progress
+      ..day = 1
+      ..record = 0
+      ..last = null;
+    notifyListeners();
+  }
+
   String? purchaseBlock(UpgradeDefinition definition) {
     if (running) return 'Disponible durante la noche';
     final level = levels[definition.id] ?? 0;
@@ -235,7 +339,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 5,
+    'version': 6,
     'grandfathered': _grandfathered,
     'previousTree': _previousTree,
     'tool': selectedTool.name,
@@ -264,7 +368,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 2 &&
         json['version'] != 3 &&
         json['version'] != 4 &&
-        json['version'] != 5) {
+        json['version'] != 5 &&
+        json['version'] != 6) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -370,10 +475,15 @@ class GameSession extends ChangeNotifier {
         closing: settings['closing_duration'],
         remaining: remaining,
       );
-      restoredBoard = Board.fromJson(
-        settings,
-        run['board'] as Map<String, dynamic>,
-      );
+      final savedBoard = run['board'] as Map<String, dynamic>;
+      if (json['version'] == 6 && savedBoard['combo'] == null) {
+        throw const FormatException('Falta el estado del combo');
+      }
+      // An active pre-combo day must keep its original rewards until it ends.
+      if ((json['version'] as int) < 6 && savedBoard['combo'] != null) {
+        throw const FormatException('Combo en guardado anterior');
+      }
+      restoredBoard = Board.fromJson(settings, savedBoard);
       restoredBoard.tool = restoredTool;
       if (restoredCycle.phase == DayPhase.closing) {
         restoredBoard.enterClosing();
@@ -389,7 +499,9 @@ class GameSession extends ChangeNotifier {
                   collected) ||
           generated != collected + restoredBoard.pending ||
           generated !=
-              (restoredBoard.captured + 9 * restoredBoard.goldenCaptured) *
+              (restoredBoard.captured +
+                      9 * restoredBoard.goldenCaptured +
+                      restoredBoard.combo.bonusUnits) *
                   settings['ball_value'].toInt()) {
         throw const FormatException('Contabilidad inválida');
       }
@@ -425,6 +537,7 @@ class GameSession extends ChangeNotifier {
   }
 
   Future<void> save() {
+    if (debugEnabled) return _writes;
     final data = snapshot();
     _writes = _writes.then((_) async {
       final previousError = saveError;

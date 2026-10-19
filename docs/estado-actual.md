@@ -1,5 +1,9 @@
 # Estado actual del prototipo
 
+> **Depuración en la revisión 0.6.0+11:** acceso oculto manteniendo el saldo del árbol 3 s, vista completa o del jugador, compras gratuitas con requisitos, compra total y jornadas temporales sin escribir sobre el progreso normal. [Instrucciones](modo-debug.md). La revisión pasa 134 pruebas.
+
+> **Revisión de código 0.6.0+11:** combos de capturas implementados con ventana de 1 s, multiplicadores ×1/×2/×3 y feedback visual bajo descubrimiento. Cuentan provisionalmente las capturas asistidas. Guardado JSON v6 conserva las jornadas antiguas sin combos hasta terminar. 125 pruebas correctas. Tiers, potenciadora y los demás conceptos del brainstorm se detallan en [cambios futuros](cambios-futuros-arbol-mejoras.md); aún no están implementados. Última entrega APK documentada: 0.5.0+10. Las notas inferiores son históricas.
+
 > Actualización 0.3.3+8: cabecera sin oscurecer durante la recogida final; 1 % de bolas doradas con recompensa ×10 (base $10), guardado y contabilidad por tipo. Conserva la mano con peso de 0.3.2+7. Los enlaces de APK inferiores corresponden a sus versiones históricas.
 
 > **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.

@@ -88,6 +88,20 @@ class _SessionScreenState extends State<SessionScreen>
             constraints: const BoxConstraints(maxWidth: 680),
             child: Column(
               children: [
+                if (widget.session.debugEnabled)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      children: [
+                        const Expanded(child: Text('DEBUG · prueba temporal')),
+                        TextButton(
+                          key: const ValueKey('session-debug-exit'),
+                          onPressed: widget.session.exitDebug,
+                          child: const Text('Salir de debug'),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (widget.session.saveError != null)
                   MaterialBanner(
                     content: Text(widget.session.saveError!),

@@ -1,5 +1,9 @@
 # Referencia de guardado y recuperación
 
+## Bolas doradas — 0.3.3+8
+
+El esquema v4 añade `golden` a cada bola y `goldenCaptured` al tablero. En datos anteriores ausentes significan bola normal y cero capturas doradas. El contador dorado debe estar entre cero y el total capturado. La contabilidad valida `generated = ball_value × (captured + 9 × goldenCaptured)` además de `generated = collected + pending`. El estado aleatorio sigue guardado, así que cargar no vuelve a sortear una bola existente ni reinicia la secuencia de emisiones.
+
 ## Actualización vigente — esquema v4 y balance 5
 
 La revisión 0.3.1+6 conserva el esquema JSON v4 y admite balances 1–5. Las jornadas nuevas usan **balance 5**: $1 por bola base y 3 segundos de recogida final. Las jornadas activas de balance 4 conservan sus tiempos y valores completos desde [balance_v4.dart](../lib/features/upgrades/domain/balance_v4.dart); los balances 1–3 siguen usando [legacy_balance.dart](../lib/features/upgrades/domain/legacy_balance.dart). No se modifica el ahorro ni se convierten los importes existentes.

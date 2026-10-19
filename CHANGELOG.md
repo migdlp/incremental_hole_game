@@ -1,6 +1,14 @@
 # Historial de cambios
 
-Se registran entregas y cambios observables. `0.2.1+3` es la versión actual declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
+Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
+
+## Cabecera visible y bolas doradas — 2026-10-19 · 0.3.3+8
+
+- El tiempo y toda la cabecera permanecen sin oscurecer durante la recogida final. El tablero conserva su capa oscura, las monedas su brillo y la pausa sigue accesible.
+- Cada bola emitida por el generador tiene una probabilidad independiente del 1 % de ser dorada, también con Doble emisión. Se distingue por cuerpo dorado, borde ámbar y reflejo claro.
+- Capturar una dorada produce diez veces el valor de una normal: con la base de $1 genera una moneda de $10. Las mejoras de valor también se multiplican por diez; las capturas mixtas se contabilizan por su tipo y no vuelven a pagarse.
+- El guardado conserva el tipo de las bolas, las capturas doradas y la secuencia aleatoria. Los campos nuevos son opcionales al leer partidas anteriores; se valida el dinero generado con el total normal y dorado.
+- Validación local: 99 pruebas correctas, análisis sin incidencias, formato y compilación web correctos. Prueba de sensación y presentación en Android físico pendiente.
 
 ## Mano con peso e inercia — 2026-10-19 · 0.3.2+7
 

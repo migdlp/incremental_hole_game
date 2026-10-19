@@ -5,13 +5,15 @@ import 'tool.dart';
 import '../../upgrades/domain/catalog.dart';
 
 class Ball {
-  Ball(this.id, this.position, this.velocity);
+  Ball(this.id, this.position, this.velocity, {this.golden = false});
   final int id;
+  final bool golden;
   Vec position, velocity;
   Map<String, dynamic> toJson() => {
     'id': id,
     'p': position.toJson(),
     'v': velocity.toJson(),
+    'golden': golden,
   };
 }
 
@@ -30,8 +32,8 @@ class Coin {
 }
 
 class BoardEvents {
-  const BoardEvents(this.captured, this.collected);
-  final int captured, collected;
+  const BoardEvents(this.captured, this.collected, {this.goldenCaptured = 0});
+  final int captured, collected, goldenCaptured;
 }
 
 class Board {
@@ -100,6 +102,7 @@ class Board {
   int nextId = 1;
   int randomState;
   int captured = 0;
+  int goldenCaptured = 0;
   double spawnClock = 0;
   double get radius => settings['ball_radius'];
   int get pending => coins.fold(0, (sum, coin) => sum + coin.value);
@@ -289,7 +292,14 @@ class Board {
               center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
           if (balls.length < settings['ball_limit'] &&
               balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
-            balls.add(Ball(nextId++, spawn, Vec((random() - .5) * 36, 85)));
+            balls.add(
+              Ball(
+                nextId++,
+                spawn,
+                Vec((random() - .5) * 36, 85),
+                golden: random() < .01,
+              ),
+            );
           }
         }
       }
@@ -348,7 +358,7 @@ class Board {
       _contactBroom(Vec.zero, 0);
     }
     _clock += dt;
-    var captures = 0;
+    var captures = 0, goldenCaptures = 0;
     balls.removeWhere((ball) {
       if ((ball.position - hole).length > settings['hole_capture_radius']) {
         return false;
@@ -357,10 +367,12 @@ class Board {
       if (ball == _manualBall) _manualBall = null;
       _slippedBalls.remove(ball);
       captures++;
+      if (ball.golden) goldenCaptures++;
       return true;
     });
     captured += captures;
-    return BoardEvents(captures, collected);
+    goldenCaptured += goldenCaptures;
+    return BoardEvents(captures, collected, goldenCaptured: goldenCaptures);
   }
 
   void _moveTool(double dt) {
@@ -556,6 +568,7 @@ class Board {
     'random': randomState,
     'nextId': nextId,
     'captured': captured,
+    'goldenCaptured': goldenCaptured,
     'spawnClock': spawnClock,
     'broomPosition': broomPosition.toJson(),
     'broomAngle': toolAngle,
@@ -590,10 +603,22 @@ class Board {
     }
     board.nextId = json['nextId'] as int;
     board.captured = json['captured'] as int;
+    final goldenCaptured = json['goldenCaptured'] ?? 0;
+    if (goldenCaptured is! int) {
+      throw const FormatException('Capturas doradas inválidas');
+    }
+    board.goldenCaptured = goldenCaptured;
     board.spawnClock = (json['spawnClock'] as num).toDouble();
     for (final row in json['balls'] as List) {
+      final golden = row['golden'] ?? false;
+      if (golden is! bool) throw const FormatException('Bola dorada inválida');
       board.balls.add(
-        Ball(row['id'] as int, Vec.fromJson(row['p']), Vec.fromJson(row['v'])),
+        Ball(
+          row['id'] as int,
+          Vec.fromJson(row['p']),
+          Vec.fromJson(row['v']),
+          golden: golden,
+        ),
       );
     }
     for (final row in json['coins'] as List) {
@@ -619,7 +644,9 @@ class Board {
         ) ||
         !board.spawnClock.isFinite ||
         board.spawnClock < 0 ||
-        board.captured < 0) {
+        board.captured < 0 ||
+        board.goldenCaptured < 0 ||
+        board.goldenCaptured > board.captured) {
       throw const FormatException('Tablero guardado inválido');
     }
     final ids = [

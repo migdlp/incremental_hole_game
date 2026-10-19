@@ -106,7 +106,9 @@ class GameSession extends ChangeNotifier {
     final events = board!.update(dt, producing: producing);
     economy.collect(events.collected);
     for (var i = 0; i < events.captured; i++) {
-      final value = board!.settings['ball_value'].toInt();
+      final value =
+          board!.settings['ball_value'].toInt() *
+          (i < events.goldenCaptured ? 10 : 1);
       economy.generated += value;
       board!.releaseCoin(value);
     }
@@ -363,7 +365,8 @@ class GameSession extends ChangeNotifier {
       if (collected < 0 ||
           generated != collected + restoredBoard.pending ||
           generated !=
-              restoredBoard.captured * settings['ball_value'].toInt()) {
+              (restoredBoard.captured + 9 * restoredBoard.goldenCaptured) *
+                  settings['ball_value'].toInt()) {
         throw const FormatException('Contabilidad inválida');
       }
     }

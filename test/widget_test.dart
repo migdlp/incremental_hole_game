@@ -193,7 +193,7 @@ void main() {
     await session.pendingWrites;
     session.dispose();
   });
-  testWidgets('closing dims the HUD while retaining pause controls', (
+  testWidgets('closing keeps the HUD undimmed while retaining pause controls', (
     tester,
   ) async {
     final session = GameSession(testCatalog(), MemoryStore())..startDay();
@@ -205,7 +205,10 @@ void main() {
       session.tick(1 / 60);
     }
     await tester.pump();
-    expect(find.byKey(const ValueKey('closing-hud-dim')), findsOneWidget);
+    expect(session.board!.coinOnly, isTrue);
+    expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
+    expect(find.text('3 s'), findsOneWidget);
+    expect(tester.widget<Text>(find.text('3 s')).style!.color!.a, 1);
     await tester.tap(find.byTooltip('Pausar'));
     await tester.pump();
     expect(session.paused, isTrue);

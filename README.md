@@ -1,6 +1,6 @@
 # Jardín mecánico
 
-Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.2+7**.
+Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.3+8**.
 
 **[Descargar APK 0.3.1+6 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676)** · [CI correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) sobre `27b3950`: 88 pruebas y firma verificadas. Descomprime e instala `jardin-mecanico-debug.apk`; disponible hasta el 2 de noviembre de 2026.
 
@@ -29,7 +29,7 @@ python3 -m http.server 8123 --directory build/web
 
 ## Lo que ya funciona
 
-- Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual inicial, capacidad mejorable a 2/3/4/5/6 bolas y lanzamiento manual según la velocidad final del gesto e inercia propia para las bolas adicionales. Solo una mano que ya lleva una bola atrae las cercanas, con peso y retraso; un tirón fuerte puede soltarlas.
+- Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual inicial, capacidad mejorable a 2/3/4/5/6 bolas y lanzamiento manual según la velocidad final del gesto e inercia propia para las bolas adicionales. Solo una mano que ya lleva una bola atrae las cercanas, con peso y retraso; un tirón fuerte puede soltarlas. Cada bola emitida tiene un 1 % de probabilidad de ser dorada y valer ×10; con el valor base genera $10.
 - Escoba física disponible solo tras comprarla, perpendicular al arrastre, giro suavizado, anchura mejorable y escoba en V; selector de herramientas compradas.
 - Monedas de $1/$10/$50/$100/$500 con colores propios, sin cifras ni símbolos sobre sus caras; una bola genera $1 de base. Pilas con valor entero, aterrizaje, recogida por pulsación al inicio y por barrido tras comprar la mejora, fusión y límite de pilas sin perder valor.
 - Día inicial de **13 segundos en total: 10 de producción y 3 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.

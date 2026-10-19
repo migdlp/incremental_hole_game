@@ -224,11 +224,18 @@ class GardenGame extends FlameGame {
         board.radius + 1,
         paint(const Color(0x40644c2d)),
       );
-      canvas.drawCircle(p, board.radius, paint(const Color(0xff697583)));
+      if (ball.golden) {
+        canvas.drawCircle(p, board.radius + 1, paint(const Color(0xffb7791f)));
+      }
+      canvas.drawCircle(
+        p,
+        board.radius,
+        paint(ball.golden ? const Color(0xffeab308) : const Color(0xff697583)),
+      );
       canvas.drawCircle(
         p + const Offset(-1.5, -2),
         board.radius * .48,
-        paint(const Color(0xff97a2ad)),
+        paint(ball.golden ? const Color(0xfffff4b0) : const Color(0xff97a2ad)),
       );
     }
     if (board.settings['robot_count'] > 0) {

@@ -1,6 +1,6 @@
 # Economía y monedas
 
-Referencia de la implementación 0.3.1+6 preparada para revisión. La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
+Referencia de la implementación 0.3.3+8. La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
 
 ## Valor y denominaciones
 
@@ -18,20 +18,20 @@ No existe moneda de $25. Las pilas conservan un importe entero y se representan 
 
 Las pilas cercanas se agrupan y, si se alcanza el límite técnico, se acumulan sin perder valor. Se conserva el área lógica de recogida alrededor de su posición; tocar o barrer una pila recoge su importe completo una sola vez. Guardar y restaurar conserva el valor exacto. La paleta está en [coin_painter.dart](../lib/features/board/presentation/coin_painter.dart) y la descomposición en [coin_denomination.dart](../lib/features/board/domain/coin_denomination.dart).
 
-Las denominaciones superiores representan valor acumulado; no se añaden premios aleatorios ni probabilidades nuevas. La mejora de recompensa existente mantiene sus efectos del CSV: aumenta el importe por captura, que se representa mediante denominaciones válidas. La progresión definitiva de Valor y posibles desbloqueos especiales siguen abiertos en [cambios futuros](cambios-futuros-arbol-mejoras.md).
+Cada bola que emite el generador tiene una probabilidad independiente del 1 % de ser dorada. Al capturarla genera diez veces el valor normal de esa jornada: con la base de $1 produce una moneda de $10. Las mejoras de recompensa también se multiplican por diez. Las denominaciones superiores siguen representando el importe exacto, incluido el premio dorado. La mejora de recompensa existente mantiene sus efectos del CSV: aumenta el importe por captura, que se representa mediante denominaciones válidas. La progresión definitiva de Valor y posibles desbloqueos especiales siguen abiertos en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 
 ## Duración, producción y cobro
 
-La jornada base tiene **10 segundos de producción + 3 de recogida final = 13 segundos**. Estadísticas y árbol no tienen temporizador. La recogida final congela bolas, escoba y robot; solo permite cobrar monedas y conserva el oscurecimiento de fondo.
+La jornada base tiene **10 segundos de producción + 3 de recogida final = 13 segundos**. Estadísticas y árbol no tienen temporizador. La recogida final congela bolas, escoba y robot; solo permite cobrar monedas y conserva el oscurecimiento del tablero, manteniendo la cabecera y el tiempo sin oscurecer.
 
-La producción base sigue siendo 1,5 bolas/s. Sin bloqueos, intenta emitir quince bolas en diez segundos: máximo teórico de **$15 generados** si se capturan todas y se cobran. Bloqueos del generador, bolas sin capturar y monedas sin recoger reducen el ingreso. Este máximo no mide la experiencia real del jugador.
+La producción base sigue siendo 1,5 bolas/s. Sin bloqueos, intenta emitir quince bolas en diez segundos: **$15 generados con quince bolas normales** si se capturan todas. Las doradas aumentan ese importe; $15 ya no es un máximo absoluto. El ingreso se banca únicamente al cobrar las monedas. Bloqueos del generador, bolas sin capturar y monedas sin recoger reducen el ingreso. Estas cifras no miden la experiencia real del jugador.
 
 Generador, duración y recompensa son mejoras independientes. Los precios y efectos por nivel se consultan en el CSV; sus conexiones se explican en el [árbol actual](arbol-de-mejoras.md). Las compras se aplican al siguiente día. No se modifican automáticamente los precios ni los valores de recompensa comprados al reducir la base a $1.
 
 ## Balance y contabilidad
 
 - El valor generado es igual al recogido más el pendiente en el tablero.
-- El valor generado es igual a las capturas multiplicadas por el valor por bola de esa jornada.
+- El valor generado es igual al valor normal por bola multiplicado por `(capturas normales + 10 × capturas doradas)`.
 - El cierre banca una sola vez lo recogido; el resto se pierde y se vacía el tablero para la jornada siguiente.
 - La representación por denominaciones no cambia estos cálculos ni crea dinero.
 - No hay ingresos mientras el juego está cerrado.

@@ -276,15 +276,6 @@ class _DayScreenState extends State<DayScreen> {
                 ),
               ],
             ),
-            if (closing)
-              const Positioned.fill(
-                child: IgnorePointer(
-                  child: ColoredBox(
-                    key: ValueKey('closing-hud-dim'),
-                    color: Color(0xa6000000),
-                  ),
-                ),
-              ),
           ],
         ),
         Expanded(

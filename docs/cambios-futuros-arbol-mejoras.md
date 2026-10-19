@@ -4,6 +4,70 @@
 
 ## Próximas mejoras — 19 de octubre de 2026
 
+**Pendiente de implementación: CF-09 a CF-15.** Estos requisitos detallan las nuevas peticiones para UI, economía y recogida. Deben poder implementarse leyendo esta sección junto al [árbol actual](arbol-de-mejoras.md) y el [balance](balance.csv). Los valores de balance aquí indicados son objetivos acordados; cualquier precio nuevo que no esté especificado queda por ajustar al implementar.
+
+### CF-09 · Mostrar dinero sin el símbolo «$»
+
+- [ ] Quitar el carácter `$` que precede a los importes en toda la interfaz: saldo, fichas y precios de mejoras, estadísticas, recompensas, tiendas y cualquier otra pantalla o aviso.
+- [ ] En cada sitio que muestre dinero, acompañar el importe con el icono de moneda que corresponda. Mantener el número para expresar la cantidad o el precio; quitar solamente el símbolo `$`.
+- [ ] No alterar los valores guardados, los cálculos ni el formato interno de la economía. El cambio es de presentación: por ejemplo, saldo «[icono de moneda] 120», precio «[icono de moneda] 13».
+- [ ] Comprobar que importes de distinta longitud siguen cabiendo en pantallas estrechas y que el icono conserva el color de su denominación.
+
+### CF-10 · Todas las monedas con las mismas dimensiones
+
+- [ ] Dar a todas las monedas físicas la misma anchura y altura, independientemente de su denominación.
+- [ ] Usar el color como diferencia visual entre denominaciones; el color indica su valor. No cambiar el tamaño para sugerir que una moneda vale más.
+- [ ] Mantener las monedas sin cifras ni texto sobre la cara. El valor se comunica mediante el color y, fuera de la moneda, por el icono y el importe cuando la interfaz necesite expresar una cantidad.
+- [ ] Revisar las monedas en el tablero y en el resumen, con sus tamaños aparentes consistentes en distintas escalas de pantalla.
+
+### CF-11 · Limitar estrictamente las denominaciones
+
+- [ ] Solo pueden existir monedas de **$1, $10, $50, $100 y $500**. No crear ni entregar denominaciones de $2, $4, $25 u otros valores.
+- [ ] Cada objeto de moneda siempre corresponde exactamente a una de esas cinco denominaciones. Si una recompensa tiene otro importe, representarla como combinación de monedas permitidas; por ejemplo, $3 son tres monedas de $1 y $12 son una de $10 y dos de $1. Nunca crear una moneda individual de $2, $3, $4 u otro valor fuera de la lista.
+- [ ] Dar un color distintivo y constante a cada denominación, conservando el dorado/amarillo para $1 y la paleta ya documentada en CF-01 para las demás.
+- [ ] Aplicar la restricción en todos los caminos que generan, guardan, muestran, atraen o recogen monedas, no solo en su dibujo. Revisar partidas guardadas para que ningún valor inválido se convierta silenciosamente en una denominación nueva.
+
+### CF-12 · Resumen diario: quitar la barra y desglosar monedas
+
+- [ ] Retirar la barra verde del resumen del día; no mostrarla como indicador de progreso.
+- [ ] Aclaración del indicador actual: representa la proporción del valor cobrado respecto del valor total generado durante el día (`dinero cobrado / dinero generado`). No representa el tiempo del día, el avance hacia una meta ni el número de monedas. Registrar esta explicación para identificar el indicador que se retira; no sustituirlo por otra barra.
+- [ ] Añadir al resumen un recuento diario por denominación: mostrar las monedas conseguidas con su icono y cantidad, ordenadas de mayor a menor valor ($500, $100, $50, $10, $1); omitir las denominaciones cuya cantidad sea cero.
+- [ ] El desglose debe permitir entender la cuenta del día. Mostrar cada cantidad de monedas por separado para que no se confunda con el valor total en dinero.
+- [ ] Verificar tanto un día sin monedas como uno con varias denominaciones, así como importes y recuentos en una pantalla de móvil estrecha.
+
+### CF-13 · Barras y fases independientes para el día y la recogida
+
+- [ ] Mostrar el tiempo del día y el tiempo de recogida final con barras independientes; no reutilizar la misma barra para ambas fases.
+- [ ] Mientras transcurre el día, avanzar únicamente la barra del día. Al completarse, cerrar esa barra y entonces empezar la fase nocturna/de recogida con su propia barra desde el inicio.
+- [ ] El tiempo inicial de recogida continúa siendo de 3 segundos, como se acordó en CF-02, salvo que un cambio futuro documentado lo modifique.
+- [ ] La transición entre fases debe ser visible e inequívoca: la barra de noche no debe avanzar mientras avanza la del día. Reflejar pausa, cierre y fin de fase correctamente.
+
+### CF-14 · Recogida manual por área antes del imán
+
+- [ ] Permitir mejorar primero el área de recogida manual de monedas. Al pulsar una moneda, el área mejorada permite recoger las monedas que queden dentro de su radio en esa acción, varias a la vez, sin poseer el imán.
+- [ ] Dar a esta progresión sus niveles y radio en el árbol/balance. Debe estar disponible antes del desbloqueo del imán de monedas; conservar el gesto de pulsar monedas y explicar en el árbol que el área permite recoger un grupo cercano.
+- [ ] Mover el imán de monedas más adelante en la rama y encarecer su desbloqueo respecto a la recogida manual por área, para que sea una automatización posterior. Ajustar los requisitos y la disposición del árbol sin crear conexiones imposibles ni perder compras guardadas.
+- [ ] Desactivar **toda** recogida de monedas mientras el jugador tenga una bola agarrada en la mano: ni el imán ni una pulsación/área manual deben cobrar monedas en ese estado. Cuando no tenga ninguna bola en la mano, vuelven a funcionar según sus mejoras.
+- [ ] La condición de mano ocupada debe aplicarse también durante la atracción y al completar la recogida para que una moneda no termine cobrada después de empezar a agarrar una bola.
+
+### CF-15 · Balance inicial y curva entera del valor de monedas
+
+- [ ] Bajar el precio de la primera mejora, **Mano I**, de $20 a **$13**. Este es el precio inicial de prueba solicitado. Actualizar la fuente de balance y la ficha del árbol; no confundirlo con el coste de los niveles Mano II–V.
+- [ ] Revisar la rama Valor completa para que cada nivel aumente el valor respecto al nivel anterior mediante una progresión aproximadamente exponencial, con factor objetivo de **1,6 a 1,7** por nivel.
+- [ ] Redondear cada valor de mejora a un número entero de dólares antes de ofrecerlo o guardarlo. Nunca mostrar ni otorgar valores fraccionarios como $3,3; aplicar una regla de redondeo única y documentada.
+- [ ] No arrancar con un salto de ×3 para después reducir los incrementos: cada nivel nuevo se calcula a partir del valor entero del nivel anterior aplicando el factor objetivo y redondeando. Debido a los enteros, el redondeo puede apartar puntualmente el factor efectivo; mantener la tendencia creciente y no compensarlo con una bajada posterior.
+- [ ] Actualizar efectos, topes, costes, resumen de cada nodo y guardados de forma compatible; no alterar el valor base de $1 por bola ni permitir denominaciones inválidas (CF-11). Los costes de esta rama no están fijados por esta petición y deben quedar como decisión de balance explícita al implementarla.
+
+### Ideas de nuevos tipos de bola — aún no listas para implementar
+
+Estas propuestas son conceptos, no requisitos completos: no incorporarlas al juego, al árbol ni al balance hasta concretar su comportamiento y aprobar una tarea implementable.
+
+- **Bola duplicadora:** al chocar con otra bola, la duplica. Quedan por decidir qué bola se duplica, si hay límite por choque/cadena, cómo interactúa con el límite de bolas y si hay efectos visuales o sonoros.
+- **Bola bomba:** empieza a ponerse roja y muestra una cuenta atrás de 3, 2, 1; después explota y destruye las bolas cercanas. Quedan por decidir el radio, el momento y las reglas de la cuenta atrás, el tratamiento de monedas u objetos cercanos, límites de destrucción y efectos visuales/sonoros.
+
+**Estado:** CF-06, CF-07 y CF-08 se entregaron en el APK 0.4.0+9; CF-09 a CF-15 quedan pendientes. Las dos ideas de bolas son exploratorias y no deben contabilizarse como tareas aprobadas para implementar.
+
+
 **CF-06, CF-07 y CF-08 implementados y entregados en el APK 0.4.0+9.** Estas tres tareas recogen las peticiones más recientes; el usuario ha autorizado implementarlas, integrarlas y entregar un APK. La numeración identifica requisitos y no fija un orden de prioridad.
 
 ### CF-06 · Estadísticas más visuales y minimalistas
@@ -61,7 +125,7 @@ La ejecución de esta tanda comprende CF-06, CF-07 y CF-08, la lista vigente de 
 > **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
 
 
-**Referencia viva v0.9 · CF-01 a CF-08 entregados; APK actual 0.4.0+9.**
+**Referencia viva v1.0 · CF-01 a CF-08 entregados; CF-09 a CF-15 pendientes; APK actual 0.4.0+9.**
 
 El usuario autorizó implementar este mapa el 19 de octubre de 2026. El [árbol actual](arbol-de-mejoras.md) documenta su ejecución y [balance.csv](balance.csv) contiene los costes y efectos. Las dos instrucciones más recientes prevalecen sobre el boceto original: Mano I permite llevar **dos** bolas (no tres), cada nivel añade una y la escoba solo aparece tras comprar su desbloqueo. El resto del mapa se implementa con sus cinco niveles, colores y requisitos cruzados.
 

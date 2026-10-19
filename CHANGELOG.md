@@ -9,6 +9,13 @@ Se registran entregas y cambios observables. `0.2.1+3` es la versión actual dec
 - Pausa y cierre siguen cancelando los agarres sin lanzar; el guardado no restaura agarres ni velocidades artificiales. Se conserva la capacidad comprada y el alcance de detección; este cambio afecta a la fuerza del imán de bolas, no al imán de monedas.
 - Verificación local: 93 pruebas correctas, incluidas aproximación gradual, arrastre suave, pérdida por tirón, no reenganche, reutilización de plazas y estabilidad a 30/60/120 FPS simulados. Compilación web correcta. Ajuste inicial de sensación pendiente de probar en Android físico.
 
+## Entrega Android — 2026-10-19 · 0.3.1+6
+
+- [PR #15](https://github.com/migdlp/incremental_hole_game/pull/15) integrada en `main`: `27b3950146389f2db3f63cf708ffb289ed908859`.
+- [Pipeline manual 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación del APK y verificación de firma v2.
+- [APK y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676); artefacto disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`.
+- El APK corresponde al commit de código indicado, anterior a este registro documental. Validación física de Android y balance final pendientes.
+
 ## CF-01 a CF-04 — 2026-10-19 · 0.3.1+6 · Preparado para revisión
 
 - Captura base de $1; denominaciones $1/$10/$50/$100/$500 con colores y sin cifras ni símbolos sobre las monedas. Las pilas representan denominaciones válidas conservando todo el importe; saldo y estadísticas muestran dólares.

@@ -1,5 +1,8 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+> **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
+
+
 ## Implementación CF-01 a CF-04 — 19 de octubre de 2026
 
 El usuario autoriza implementar estos cambios y aclara que ninguna moneda debe mostrar cifras, cantidades ni símbolos sobre su cara. La revisión 0.3.1+6 prepara monedas por color con base de $1, recogida final de 3 s, estadísticas con una sola salida al árbol y el botón «Comenzar día» en esa pantalla, además de estados apagado/blanco/color en los nodos. Conserva el mapa, las compras, el agarre múltiple y el desbloqueo de escoba ya implementados.

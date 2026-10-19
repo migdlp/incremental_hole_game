@@ -1,5 +1,8 @@
 # APK manual de Flutter
 
+> **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
+
+
 En GitHub, abrir **Actions → Flutter - APK manual → Run workflow**, seleccionar la rama y ejecutar. Solo se activa manualmente mediante `workflow_dispatch`; no se dispara con pushes ni pull requests.
 
 La pipeline prepara JDK Temurin 21 completo, Android SDK Platforms 35/36, Build Tools 35.0.0, NDK 27.0.12077973 y CMake 3.22.1. Instala Flutter 3.35.7 estable con Dart 3.9.2 y comprueba el SHA-256 oficial del SDK.

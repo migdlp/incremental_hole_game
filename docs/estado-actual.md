@@ -1,5 +1,8 @@
 # Estado actual del prototipo
 
+> **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
+
+
 > Revisión 0.3.1+6 preparada para integrar: CF-01 a CF-04, monedas sin cifras, $1 por captura base, 3 s de recogida final y recorrido estadísticas → árbol → comenzar día. La implementación se verifica con pruebas y compilación web; Android físico pendiente. Ver [economía](economia.md), [árbol](arbol-de-mejoras.md) y [compatibilidad](persistencia.md). Esta nota prevalece sobre las cifras históricas inferiores.
 
 > Actualización vigente — 19 de octubre: se implementa el [mapa futuro v0.6](cambios-futuros-arbol-mejoras.md) en 0.3.0+5: 44 nodos, cuatro ramas, cinco niveles, seis colores, Doble emisión y alcance del imán. Mano inicial de una bola, mejoras a 2/3/4/5/6 y escoba solo tras comprarla. Guardado/balance v4 conserva las compras y jornadas antiguas. Esta nota sustituye estados anteriores que la contradigan; ver [árbol actual](arbol-de-mejoras.md) y [historial](../CHANGELOG.md).

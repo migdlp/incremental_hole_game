@@ -2,8 +2,11 @@
 
 ## Próximas mejoras registradas — 19 de octubre de 2026
 
-- **CF-06, pendiente:** estadísticas mucho más visuales y minimalistas, con menos texto y sin información irrelevante.
-- **CF-07, pendiente:** árbol con nodos bastante más cerca que en CF-05 y colocación únicamente en las ocho direcciones cardinales y diagonales. El reparto de ramas hacia ciertos lados queda para más adelante.
+- **CF-06, implementado en esta tanda:** estadísticas mucho más visuales y minimalistas, con menos texto y sin información irrelevante.
+- **CF-07, implementado en esta tanda:** árbol con nodos bastante más cerca que en CF-05 y colocación únicamente en las ocho direcciones cardinales y diagonales. El reparto de ramas hacia ciertos lados queda para más adelante.
+- **CF-08, implementado en esta tanda:** fuerza de agarre de mano en cinco niveles, para atraer y sujetar antes las bolas adicionales, sin aumentar su capacidad ni alcance.
+
+Autorización más reciente: implementar toda la lista vigente CF-06 a CF-08 y entregar el APK. Se han completado los tres bloques; 107 pruebas locales correctas. La aceptación en Android físico y los ajustes de precios siguen sujetos a prueba real.
 
 La especificación se mantiene en una única referencia: [Próximas mejoras](cambios-futuros-arbol-mejoras.md#próximas-mejoras--19-de-octubre-de-2026). Se confirma que mano con peso (`9c79dd3`), cabecera visible y bolas doradas (`8f92527`) ya están en `main`, junto con CF-05. Esta actualización es documental; CF-06 y CF-07 todavía no cambian el juego ni el APK.
 

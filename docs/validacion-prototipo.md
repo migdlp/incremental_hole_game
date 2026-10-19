@@ -1,5 +1,19 @@
 # Registro de validación
 
+## Próximas mejoras CF-06 a CF-08 — 19 de octubre de 2026 · 0.4.0+9
+
+Implementadas estadísticas visuales, disposición más cercana en ocho direcciones y cinco niveles de fuerza de agarre de mano. La lista vigente queda completa; las propuestas históricas y la aceptación física conservan su estado independiente.
+
+- Flutter 3.35.7 / Dart 3.9.2, dependencias conservadas.
+- 107 pruebas locales correctas. Nuevas pruebas verifican mejora de rapidez en cada nivel, movimiento sin teletransporte, retención bajo tirones, ausencia de atracción desde una mano vacía y conservación de capacidad/alcance.
+- Simulación de agarre más fuerte consistente a 30/60/120 Hz; compra, requisitos y restauración preservan el progreso. Las jornadas sin la compra nueva conservan su configuración original.
+- Cada conexión entre nodos y cada segmento del trazado cumple una de las ocho direcciones. Las rutas conservan 30 unidades de distancia respecto a otros nodos; no cambian los requisitos de compra.
+- Estadísticas con cero y con ingresos, una sola acción y pantalla de 320 × 568 con texto al 150 % sin desbordamientos. Capturas con fuentes reales del resumen y de la ficha revisadas.
+- Formato, análisis, enlaces relativos y `git diff --check` correctos; compilación web correcta.
+
+No se declara aceptación táctil, rendimiento ni satisfacción subjetiva en Android físico. Los precios de la nueva fuerza son un balance inicial para jugar y ajustar; no una calibración final. La entrega Android se registra al terminar su pipeline.
+
+
 > **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
 
 

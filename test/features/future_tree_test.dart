@@ -16,9 +16,9 @@ void main() {
       session.purchase(catalog.definitions.firstWhere((d) => d.id == id));
 
   test(
-    'map has four initial paths, five-level lines and the agreed crossings',
+    'map has five initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(44));
+      expect(tree.nodes, hasLength(49));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -26,7 +26,7 @@ void main() {
             .where((n) => !n.owned({'hand': 1}))
             .map((n) => n.id)
             .toSet(),
-        {'generator:1', 'reward:1', 'sweep:1', 'hand:2'},
+        {'generator:1', 'reward:1', 'sweep:1', 'hand:2', 'hand_grip:1'},
       );
       expect(tree.byId('broom:1').parents, ['hand:2']);
       expect(tree.byId('paddle:1').parents, ['broom:1']);

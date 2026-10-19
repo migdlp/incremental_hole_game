@@ -73,6 +73,7 @@ class Board {
   List<Ball> get heldBalls => List.unmodifiable(_heldBalls.keys);
   int get handCapacity => math.max(1, settings['hand_capacity'].toInt());
   double get ballMagnetRadius => radius * 2 + 24;
+  double get gripStrength => math.max(1, settings['hand_grip_strength']);
   bool get broomUnlocked => settings['broom_unlocked'] > 0;
   Vec _grabOffset = Vec.zero;
   Vec? _downPoint, _directionAnchor;
@@ -412,14 +413,15 @@ class Board {
         if (ball == _manualBall) continue;
         final goal = (anchor + entry.value).inside(radius);
         final stretch = goal - ball.position;
-        if (stretch.length > _gripBreakDistance) {
+        if (stretch.length >
+            _gripBreakDistance * (1 + .2 * (gripStrength - 1))) {
           slipped.add(ball);
           continue;
         }
         final acceleration =
-            (stretch * _gripStiffness - ball.velocity * _gripDamping).limit(
-              _gripAcceleration,
-            );
+            (stretch * (_gripStiffness * gripStrength) -
+                    ball.velocity * (_gripDamping * math.sqrt(gripStrength)))
+                .limit(_gripAcceleration * gripStrength);
         ball.velocity = (ball.velocity + acceleration * dt).limit(380);
         final next = ball.position + ball.velocity * dt;
         ball.position = next.inside(radius);

@@ -1,6 +1,9 @@
 # Jardín mecánico
 
-Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.3.3+8**.
+Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual: **0.4.0+9**.
+
+Próximas mejoras CF-06 a CF-08 implementadas en esta revisión: estadísticas más visuales, árbol más cercano en ocho direcciones y cinco mejoras de fuerza para atraer y sujetar más rápido las bolas adicionales. Se conserva el progreso existente.
+
 
 **[Descargar APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149)** · [CI correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) sobre `91b10cb`: 101 pruebas y firma verificadas. Incluye el árbol compacto y la compra de 1 s. Descomprime e instala `jardin-mecanico-debug.apk`.
 
@@ -37,7 +40,7 @@ python3 -m http.server 8123 --directory build/web
 - Monedas de $1/$10/$50/$100/$500 con colores propios, sin cifras ni símbolos sobre sus caras; una bola genera $1 de base. Pilas con valor entero, aterrizaje, recogida por pulsación al inicio y por barrido tras comprar la mejora, fusión y límite de pilas sin perder valor.
 - Día inicial de **13 segundos en total: 10 de producción y 3 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 3 segundos; las compras revelan nuevos caminos.
-- Catorce tipos y 44 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
+- Quince tipos y 49 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
 - Guardado JSON v4 con compatibilidad v1/v2/v3, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano, instrucciones breves y opción de silenciar los sonidos del sistema.

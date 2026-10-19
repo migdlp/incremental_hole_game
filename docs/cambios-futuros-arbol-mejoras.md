@@ -2,22 +2,22 @@
 
 ## Próximas mejoras — 19 de octubre de 2026
 
-**Pendientes de implementar.** Estas dos tareas recogen la petición más reciente. La numeración identifica requisitos y no fija un orden de prioridad.
+**CF-06, CF-07 y CF-08 implementados y verificados localmente para la entrega 0.4.0+9.** Estas tres tareas recogen las peticiones más recientes; el usuario ha autorizado implementarlas, integrarlas y entregar un APK. La numeración identifica requisitos y no fija un orden de prioridad.
 
 ### CF-06 · Estadísticas más visuales y minimalistas
 
-- [ ] Rediseñar la pantalla de estadísticas para que se entienda de un vistazo y tenga una presentación mucho más visual.
-- [ ] Reducir el texto: eliminar explicaciones que no aporten y datos secundarios o irrelevantes para el jugador.
-- [ ] Dar protagonismo a los resultados importantes, con una jerarquía visual clara y poco ruido.
-- [ ] Mantener una presentación sencilla y el acceso al árbol de mejoras. La selección concreta de indicadores y el diseño se decidirán al implementar, sin añadir métricas nuevas por defecto.
+- [x] Rediseñar la pantalla de estadísticas para que se entienda de un vistazo y tenga una presentación mucho más visual.
+- [x] Reducir el texto: eliminar explicaciones que no aporten y datos secundarios o irrelevantes para el jugador.
+- [x] Dar protagonismo a los resultados importantes, con una jerarquía visual clara y poco ruido.
+- [x] Mantener una presentación sencilla y el acceso al árbol de mejoras. La selección concreta de indicadores y el diseño se decidirán al implementar, sin añadir métricas nuevas por defecto.
 
 ### CF-07 · Árbol aún más cercano y con ocho direcciones
 
-- [ ] Acercar los nodos **bastante más que en la compactación CF-05 ya publicada**. Esta es una nueva reducción de distancia, no la descripción del ajuste anterior.
-- [ ] Colocar los nodos respecto a sus conexiones usando únicamente ocho direcciones, separadas por 45°: arriba (norte), arriba-derecha (noreste), derecha (este), abajo-derecha (sureste), abajo (sur), abajo-izquierda (suroeste), izquierda (oeste) y arriba-izquierda (noroeste).
-- [ ] Usar esas posiciones cercanas de forma consistente, con separación suficiente para distinguir y pulsar los nodos y entender sus conexiones.
-- [ ] Conservar los nodos, requisitos y compras existentes; esta tarea trata de su disposición visual.
-- [ ] Dejar para una revisión posterior si algunas ramas deben extenderse más hacia ciertos lados. Por ahora se busca una distribución muy próxima, sin fijar una preferencia lateral ni distancias numéricas todavía.
+- [x] Acercar los nodos **bastante más que en la compactación CF-05 ya publicada**. Esta es una nueva reducción de distancia, no la descripción del ajuste anterior.
+- [x] Colocar los nodos respecto a sus conexiones usando únicamente ocho direcciones, separadas por 45°: arriba (norte), arriba-derecha (noreste), derecha (este), abajo-derecha (sureste), abajo (sur), abajo-izquierda (suroeste), izquierda (oeste) y arriba-izquierda (noroeste).
+- [x] Usar esas posiciones cercanas de forma consistente, con separación suficiente para distinguir y pulsar los nodos y entender sus conexiones.
+- [x] Conservar los nodos, requisitos y compras existentes; esta tarea trata de su disposición visual.
+- [x] Dejar para una revisión posterior si algunas ramas deben extenderse más hacia ciertos lados. Por ahora se busca una distribución muy próxima, sin fijar una preferencia lateral ni distancias numéricas todavía.
 
 ```text
        NO     N     NE
@@ -26,6 +26,25 @@
          ↙    ↓    ↘
        SO     S     SE
 ```
+
+### CF-08 · Fuerza de agarre de la mano
+
+- [x] Añadir una línea de mejoras de fuerza, dentro de Control de bolas (violeta), independiente de la capacidad de mano y del imán de monedas.
+- [x] Mientras ya se lleva una bola, atraer y sujetar las siguientes bolas más rápido al entrar en el alcance del imán de la mano.
+- [x] Mantener el agarre manual de la primera bola, la capacidad comprada y el alcance actual. La mejora refuerza la sujeción física, sin teletransportar ni atraer desde una mano vacía.
+- [x] Hacer la progresión comprable, persistente y visible en el árbol; los niveles más altos deben responder antes y resistir mejor los tirones.
+
+La ejecución de esta tanda comprende CF-06, CF-07 y CF-08, la lista vigente de «Próximas mejoras». Se han completado los tres bloques; no quedan funciones sin implementar dentro de esa lista. Las ideas históricas, los repartos laterales que CF-07 aplaza y la validación física de Android conservan su estado propio; no se atribuye su aprobación a esta lista.
+
+### Resultado de la implementación de esta tanda
+
+- **Estadísticas:** dinero ganado como cifra principal, bolas al hoyo y dinero sin recoger; barra visual del importe cobrado, saldo en cabecera y un único acceso al árbol. Se retiran textos explicativos, récord y comparación como datos secundarios de esta pantalla, conservando sus datos de progreso.
+- **Árbol:** cuadrícula de 64 unidades y objetivos táctiles de 64 × 64, iconos de 52; posiciones y segmentos solo en ocho direcciones. Los precios siguen en la ficha y en las descripciones accesibles. La cuadrícula reserva rutas con al menos 30 unidades de distancia respecto a los nodos ajenos a cada conexión.
+- **Fuerza de agarre:** nueva línea `hand_grip`, cinco niveles de ×1,25 / ×1,5 / ×1,8 / ×2,1 / ×2,5. Costes iniciales de prueba de $25 / $50 / $90 / $160 / $280 en el CSV. Requiere Mano I y cada nivel anterior. Refuerza la fuerza del muelle, ajusta la amortiguación para responder antes y tolera algo más de estiramiento antes de soltar una bola.
+- El árbol conserva sus 44 nodos anteriores y añade cinco de fuerza: **15 tipos y 49 nodos**. No se retiran compras ni se cambian los requisitos anteriores.
+- Esquema JSON v4 y balance 5 conservados: sin comprar fuerza no se añade ninguna clave nueva a la configuración de una jornada antigua. La fuerza anterior equivale a ×1; no se concede la mejora gratis. La compra guarda `hand_grip` y el efecto de la jornada `hand_grip_strength`.
+- **107 pruebas correctas**, incluidas velocidad progresiva de acercamiento, agarre sin teletransporte, resistencia a un tirón, consistencia a 30/60/120 Hz, persistencia, direcciones y rutas sin atravesar nodos. Vista de 320 × 568 con texto al 150 % correcta; capturas visuales del resumen y de la ficha revisadas.
+- Pendientes de aceptación: sensaciones y legibilidad en Android físico, y ajuste definitivo de precios jugando. Estas comprobaciones no se dan por aprobadas por compilar el APK.
 
 ### Comprobación de lo último entregado
 
@@ -40,7 +59,7 @@
 > **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
 
 
-**Referencia viva v0.8 · CF-01 a CF-05 entregados; próximas mejoras CF-06 y CF-07 pendientes.**
+**Referencia viva v0.9 · CF-01 a CF-05 entregados; CF-06 a CF-08 implementados para la entrega 0.4.0+9.**
 
 El usuario autorizó implementar este mapa el 19 de octubre de 2026. El [árbol actual](arbol-de-mejoras.md) documenta su ejecución y [balance.csv](balance.csv) contiene los costes y efectos. Las dos instrucciones más recientes prevalecen sobre el boceto original: Mano I permite llevar **dos** bolas (no tres), cada nivel añade una y la escoba solo aparece tras comprar su desbloqueo. El resto del mapa se implementa con sus cinco niveles, colores y requisitos cruzados.
 
@@ -158,7 +177,7 @@ La primera compra permite llevar dos bolas. La primera se agarra manualmente y, 
 | GEN · Generación de monedas | 🟢 Verde · `#22C55E` | Más bolas por segundo y, más adelante, por emisión. Las bolas generan monedas al entrar en el hoyo. |
 | VAL · Valor de monedas | 🟡 Dorado · `#EAB308` | Más monedas por bola capturada. |
 | REC · Recolección de monedas | 🔵 Azul · `#3B82F6` | Barrido, radio e imán. |
-| CON · Control de bolas | 🟣 Violeta · `#A855F7` | Capacidad de mano, escobas y anchura. |
+| CON · Control de bolas | 🟣 Violeta · `#A855F7` | Capacidad y fuerza de mano, escobas y anchura. |
 | TIE · Tiempo de producción | 🟠 Naranja · `#F97316` | Días con más tiempo para producir. |
 | AUT · Automatización | 🔴 Coral · `#F43F5E` | Robot y velocidad. |
 
@@ -171,6 +190,8 @@ Cada flecha exige comprar el nivel anterior. Las bifurcaciones permiten avanzar 
 ```text
 🟣 MANO I · 20 monedas
 Puedes llevar 2 bolas (+1)
+│
+├─ 🟣 FUERZA DE AGARRE I → II → III → IV → V
 │
 ├─ 🟢 GENERADOR I
 │  Produce un 25 % más rápido
@@ -333,3 +354,5 @@ Los guardados antiguos conservan las compras sin añadir mejoras gratis. Las jor
 - **CF-05 · 2026-10-19:** interfaz compacta, ficha bajo demanda y compra de un segundo, implementadas en rama para revisión. Las notas históricas de compra de tres segundos quedan sustituidas por CF-05.
 
 - **v0.8 · 2026-10-19:** se registran CF-06 (estadísticas visuales y minimalistas) y CF-07 (nodos aún más cercanos y colocación en ocho direcciones). Se comprueba que las últimas mejoras de mano, cabecera y bolas doradas ya están en `main`; esta revisión solo documenta el trabajo siguiente.
+
+- **v0.9 · 2026-10-19:** CF-06 a CF-08 implementados por autorización del usuario, con estadísticas visuales, geometría de ocho direcciones y cinco mejoras de fuerza de mano. 107 pruebas locales correctas; entrega Android registrada al completar la pipeline.

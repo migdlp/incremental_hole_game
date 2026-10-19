@@ -6,6 +6,17 @@ Fecha: 18 de octubre de 2026. Base revisada: `main`, commit `1bf1efa`, prototipo
 
 Estado actual: `0.2.1+3` entregado con APK; pendiente validación en Android físico y OK de jugabilidad. Los resultados y límites se registran al final de este archivo. Recoge las indicaciones del usuario y sustituye el orden de trabajo del [plan anterior](plan-siguiente-iteracion.md) para esta tanda. La documentación general se ha actualizado por petición del usuario el 18 de octubre; esto no sustituye la aceptación de jugabilidad ni el balance final.
 
+## Cambios futuros añadidos — 19 de octubre de 2026
+
+Los requisitos nuevos se mantienen en una única referencia: [CF-01 a CF-04 del MD de cambios futuros](cambios-futuros-arbol-mejoras.md#cambios-añadidos--19-de-octubre-de-2026).
+
+1. **CF-01:** valor base de $1 por bola y monedas de $1, $10, $50, $100 y $500, con color por denominación; sin moneda de $25.
+2. **CF-02:** recogida final con duración inicial de **3 segundos**, sustituyendo los cinco segundos anteriores como objetivo futuro.
+3. **CF-03:** estadísticas con un único botón para ir al árbol; pantalla de árbol independiente con «Comenzar día».
+4. **CF-04:** nodos comprados con icono y color de tipo; no comprados apagados; comprables iluminados en blanco suave.
+
+Estado: requisitos documentados y pendientes de implementar; su numeración no asigna prioridad. Los registros de entregas anteriores se conservan como historia, sin atribuirles estos cambios. La nota vigente sobre capacidad de mano y desbloqueo de escoba se mantiene.
+
 ## Referencias vivas del árbol — actualización de diseño
 
 Por indicación del usuario, el árbol de mejoras queda como trabajo futuro y lo iremos editando conforme se añadan ideas y se acuerden cambios.

@@ -1,4 +1,5 @@
 import 'legacy_balance.dart';
+import 'balance_v4.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -23,7 +24,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 4});
+  DaySettings(this.values, {this.balanceVersion = 5});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -136,10 +137,13 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 4}) {
-    final values = balanceVersion <= 3 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 3) {
-      for (final line in legacyBalanceCsv.trim().split('\n').skip(1)) {
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 5}) {
+    final values = balanceVersion <= 4 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 4) {
+      final historicalCsv = balanceVersion == 4
+          ? balanceV4Csv
+          : legacyBalanceCsv;
+      for (final line in historicalCsv.trim().split('\n').skip(1)) {
         final cells = line.split(',');
         if (cells[0] == 'base' ||
             (cells[0] == 'upgrade' &&

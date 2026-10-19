@@ -48,7 +48,7 @@ void main() {
       final board = session.board!;
       final ball = Ball(board.nextId++, const Vec(100, 250), Vec.zero);
       board.balls.add(ball);
-      session.cycle!.remaining = 5 + 1 / 60;
+      session.cycle!.remaining = 3 + 1 / 60;
       session.touch(ball.position, time: 0);
       session.drag(const Vec(140, 250), time: .01);
       session.tick(1 / 60);
@@ -73,11 +73,11 @@ void main() {
   );
 
   test(
-    'closing coins land, collect and bank once after exactly five seconds',
+    'closing coins land, collect and bank once after exactly three seconds',
     () {
       final session = GameSession(catalog, MemoryStore())..startDay();
       final board = session.board!;
-      session.cycle!.remaining = 5 + 1 / 60;
+      session.cycle!.remaining = 3 + 1 / 60;
       board.captured = 1;
       session.economy.generated = 2;
       board.coins.add(Coin(board.nextId++, const Vec(90, 300), 2));
@@ -86,7 +86,7 @@ void main() {
       session.touch(const Vec(90, 300));
       session.release();
       expect(session.economy.collected, 2);
-      frames(session, 284);
+      frames(session, 164);
       expect(session.running, isTrue);
       frames(session, 1);
       expect(session.running, isFalse);
@@ -102,19 +102,19 @@ void main() {
     board.balls.add(
       Ball(board.nextId++, const Vec(100, 250), const Vec(50, 0)),
     );
-    session.cycle!.remaining = 4;
+    session.cycle!.remaining = 2;
     final restored = GameSession(catalog, MemoryStore())
       ..restore(session.snapshot());
     final ball = restored.board!.balls.single;
     final position = ball.position;
     frames(restored, 60);
-    expect(restored.cycle!.remaining, 4);
+    expect(restored.cycle!.remaining, 2);
     restored.resume();
     restored.touch(position);
     restored.drag(Board.hole);
     frames(restored, 60);
     expect(ball.position, position);
-    expect(restored.cycle!.remaining, closeTo(3, .0001));
+    expect(restored.cycle!.remaining, closeTo(1, .0001));
     expect(restored.board!.heldBall, isNull);
   });
 
@@ -199,7 +199,7 @@ void main() {
           ..levels.addAll({'broom': 1, if (sweep) 'sweep': 1})
           ..startDay();
         final board = session.board!;
-        session.cycle!.remaining = 5 + 1 / 60;
+        session.cycle!.remaining = 3 + 1 / 60;
         session.touch(board.broomPosition);
         session.drag(const Vec(240, 200));
         session.tick(1 / 60);

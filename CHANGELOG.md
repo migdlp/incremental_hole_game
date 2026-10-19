@@ -2,6 +2,16 @@
 
 Se registran entregas y cambios observables. `0.2.1+3` es la versión actual declarada del paquete; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## CF-01 a CF-04 — 2026-10-19 · 0.3.1+6 · Preparado para revisión
+
+- Captura base de $1; denominaciones $1/$10/$50/$100/$500 con colores y sin cifras ni símbolos sobre las monedas. Las pilas representan denominaciones válidas conservando todo el importe; saldo y estadísticas muestran dólares.
+- Recogida final base de 3 segundos, manteniendo 10 de producción, congelación de objetos y oscurecimiento. Ciclo activo inicial de 13 segundos.
+- El pop-up de estadísticas solo ofrece «Ir al árbol de mejoras». El árbol independiente incorpora «Comenzar día», que cancela compras incompletas e inicia directamente la jornada.
+- Nodos adquiridos con icono y color del tipo; comprables iluminados en blanco suave; restantes apagados. Se conserva descubrimiento, zoom, controles y compra por pulsación de tres segundos.
+- Esquema JSON v4 sin cambios; balance 5 para jornadas nuevas y copia congelada del balance 4 para partidas interrumpidas. Las versiones 1–3 conservan su compatibilidad y no se pierden compras ni ahorro.
+- Precios y recompensas mejoradas conservados; ajuste final de balance pendiente. No hay nuevo APK ni validación en Android físico en esta revisión.
+- Verificación local con Flutter 3.35.7 / Dart 3.9.2: 88 pruebas correctas, análisis sin incidencias, formato y enlaces relativos correctos; compilación web correcta. Incluye compatibilidad de jornadas de balance 4 y estados/navegación en 320 × 568.
+
 ## Árbol del mapa futuro — 2026-10-19 · 0.3.0+5
 
 - Mapa de cuatro ramas desde Mano I: Generador, Valor, Barrido y Mano II. Catorce tipos, 44 nodos, cinco niveles por línea y seis colores por efecto, con marcas de compra y candados.

@@ -32,7 +32,8 @@ void main() {
       expect(session.paused, isFalse);
       session.finishDay();
       await tester.pump();
-      expect(find.text('Comenzar día 2'), findsOneWidget);
+      expect(find.text('Comenzar día 2'), findsNothing);
+      expect(find.text('Ir al árbol de mejoras'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await session.pendingWrites;
@@ -199,7 +200,7 @@ void main() {
     await tester.pumpWidget(GardenApp(session: session));
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
-    session.cycle!.remaining = 5 + 1 / 60;
+    session.cycle!.remaining = 3 + 1 / 60;
     for (var i = 0; i < 10; i++) {
       session.tick(1 / 60);
     }

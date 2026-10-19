@@ -1,13 +1,13 @@
 # Árbol de mejoras progresivo
 
-Referencia implementada en **0.3.0+5**, a partir del [mapa de cambios futuros v0.6](cambios-futuros-arbol-mejoras.md), autorizado el 19 de octubre de 2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos de compra.
+Referencia implementada en **0.3.1+6**, a partir del [referencia de cambios futuros v0.7](cambios-futuros-arbol-mejoras.md), autorizado el 19 de octubre de 2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos de compra.
 
 ## Mapa actual
 
 Catorce tipos y **44 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las cuatro ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
-🟣 MANO I · 20 monedas · 2 bolas
+🟣 MANO I · 20 dólares · 2 bolas
 │
 ├─ 🟢 GENERADOR I
 │  └─ Generador II
@@ -24,7 +24,7 @@ Catorce tipos y **44 nodos**, uno por nivel comprable. Cada nivel requiere el an
 │
 └─ 🟣 MANO II · 3 bolas
    ├─ Mano III → IV → V · 4 → 5 → 6 bolas
-   └─ DESBLOQUEAR ESCOBA · 20 monedas
+   └─ DESBLOQUEAR ESCOBA · 20 dólares
       └─ ANCHURA I
          ├─ Anchura II
          │  ├─ Anchura III → IV → V
@@ -50,28 +50,28 @@ Doble emisión intenta crear dos bolas separadas en cada emisión; mantiene el i
 | Tiempo | Naranja `#F97316` |
 | Automatización | Coral `#F43F5E` |
 
-Los nodos conservan el color de su tipo. Una marca indica compra, un candado indica requisito pendiente y el brillo indica disponibilidad económica. Las conexiones heredan el color de su destino.
+Los nodos comprados muestran su icono y color de tipo, con marca de compra. Los no comprados se apagan en gris; si tienen requisitos cumplidos y saldo suficiente, se iluminan en blanco suave. La selección engrosa el borde sin colorear una compra pendiente. Las conexiones adquiridas usan el color del destino y las pendientes son grises. Se conservan arrastre, pellizco y controles de zoom, sin textos de ayuda ni contador de compras sobre el mapa.
 
 ## Recorrido e interacción
 
-1. Desde el resumen nocturno se abre el árbol en una pantalla independiente.
+1. El pop-up de estadísticas tiene un solo botón: «Ir al árbol de mejoras», que abre su pantalla independiente.
 2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Barrido y Mano II.
 3. Pulsar un nodo consulta su efecto y coste; mantener pulsado tres segundos en el nodo seleccionado o en la ficha compra una sola vez.
 4. Soltar antes, arrastrar, añadir otro dedo o pasar a segundo plano cancela la compra sin gastar.
-5. Se conservan arrastre, zoom por pellizco, Acercar/Alejar y Centrar selección. Volver muestra el resumen; Comenzar día inicia la siguiente jornada y aplica las compras.
+5. «Comenzar día» está fijo en la pantalla del árbol: cancela cualquier compra incompleta, inicia directamente la jornada y cierra esa pantalla. Atrás puede volver al resumen, que no permite empezar el día. La bienvenida de una partida nueva conserva su inicio directo.
 
 El catálogo y la sesión comprueban los mismos requisitos que el árbol, incluidos los dos cruces. Las condiciones repetidas que ya se cumplen por un antecesor no se dibujan como conexiones duplicadas.
 
 ## Balance y compatibilidad
 
-Base: 1,5 emisiones/s, dos monedas por bola, diez segundos de producción y cinco de recogida. Mano I cuesta 20 monedas; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
+Base: 1,5 emisiones/s, $1 por bola, diez segundos de producción y tres de recogida final. Mano I cuesta 20 dólares; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
 
-El guardado v4 acepta v1/v2/v3. Conserva compras, saldo y jornadas activas: estas últimas usan el balance histórico hasta terminar; la siguiente jornada usa balance 4. Se registran los niveles heredados sin regalar sus nuevos requisitos. Las compras nuevas exigen el mapa actual. Los antecesores de compras antiguas siguen visibles aunque estén pendientes.
+El guardado v4 acepta v1/v2/v3. Conserva compras, saldo y jornadas activas: estas últimas usan el balance histórico hasta terminar; la siguiente jornada usa balance 5. Una jornada activa de balance 4 conserva su valor de dos monedas y su cierre de cinco segundos hasta terminar; se restaura desde la copia congelada de ese balance. Se registran los niveles heredados sin regalar sus nuevos requisitos. Las compras nuevas exigen el mapa actual. Los antecesores de compras antiguas siguen visibles aunque estén pendientes.
 
 ## Verificación
 
-Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alcance, emisión doble, tablero de 200 bolas, colores, pantalla pequeña y cancelación de compra. La compilación web y el análisis se ejecutan antes de publicar. No hay aceptación táctil ni medición de FPS en Android físico en esta entrega.
+Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alcance, emisión doble, tablero de 200 bolas, colores, pantalla pequeña y cancelación de compra. En esta revisión pasan 88 pruebas, análisis sin incidencias, formato y compilación web con Flutter 3.35.7 / Dart 3.9.2. Las pruebas de pantalla pequeña incluyen 320 × 568. No hay aceptación táctil ni medición de FPS en Android físico en esta entrega.
 
 La evidencia histórica del árbol anterior sigue en [validación](validacion-prototipo.md) y [CI](ci.md); sus APK no contienen automáticamente este mapa nuevo.
 
-Las notas CF-01 a CF-04 añadidas en paralelo siguen pendientes y se conservan en cambios futuros. No forman parte de la entrega del mapa.
+CF-01 a CF-04 y las monedas sin cifras se implementan en esta revisión. El historial de decisiones sigue en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, sus pilas y el valor base se explican en [economía](economia.md).

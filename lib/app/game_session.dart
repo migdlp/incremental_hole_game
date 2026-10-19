@@ -211,7 +211,7 @@ class GameSession extends ChangeNotifier {
       return 'Requiere $name · nivel ${parts[1]}';
     }
     if (economy.balance < next.cost) {
-      return 'Faltan ${next.cost - economy.balance} monedas';
+      return 'Faltan \$${next.cost - economy.balance}';
     }
     return null;
   }
@@ -318,7 +318,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 4)) {
+          (balanceVersion < 1 || balanceVersion > 5)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(

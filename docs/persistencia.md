@@ -1,10 +1,18 @@
 # Referencia de guardado y recuperación
 
+## Actualización vigente — esquema v4 y balance 5
+
+La revisión 0.3.1+6 conserva el esquema JSON v4 y admite balances 1–5. Las jornadas nuevas usan **balance 5**: $1 por bola base y 3 segundos de recogida final. Las jornadas activas de balance 4 conservan sus tiempos y valores completos desde [balance_v4.dart](../lib/features/upgrades/domain/balance_v4.dart); los balances 1–3 siguen usando [legacy_balance.dart](../lib/features/upgrades/domain/legacy_balance.dart). No se modifica el ahorro ni se convierten los importes existentes.
+
+Las monedas siguen guardándose como pilas con `value` entero. La descomposición en denominaciones de $1/$10/$50/$100/$500 es presentación derivada; no añade otro saldo ni requiere migrar los objetos. Ningún agarre se restaura. Al terminar la jornada histórica, el siguiente día adopta el balance actual.
+
+La evidencia de compatibilidad incluye recargar dos veces una jornada de balance 4 con monedas pendientes, recoger y bancar su importe anterior una sola vez, y comenzar luego una jornada de balance 5. Las secciones históricas que siguen conservan el contrato de versiones anteriores; esta actualización prevalece para las versiones actuales.
+
 ## Actualización del árbol — v4
 
 El formato actual escribe `version: 4` y `grandfathered`, un mapa de niveles heredados. Al leer v1/v2/v3 se validan sus requisitos históricos y se conservan sus compras sin conceder requisitos nuevos; al volver a guardar, esta procedencia queda persistida. Los niveles heredados deben ser compras válidas del catálogo anterior. Cualquier compra posterior sigue el CSV actual, incluidos requisitos cruzados separados por `&`.
 
-Las jornadas activas mantienen `balanceVersion` 1/2/3 y los valores congelados en `legacy_balance.dart` hasta terminar, también tras sucesivas restauraciones en v4. Las jornadas nuevas usan balance 4. Se conserva la validación de configuración, contabilidad y objetos antes de modificar la sesión. Las referencias a v3 que siguen documentan el formato anterior.
+Las jornadas activas mantienen `balanceVersion` 1/2/3 y los valores congelados en `legacy_balance.dart` hasta terminar, también tras sucesivas restauraciones en v4. En la entrega del mapa las jornadas nuevas usaban balance 4; ahora usan balance 5. Se conserva la validación de configuración, contabilidad y objetos antes de modificar la sesión. Las referencias a v3 que siguen documentan el formato anterior.
 
 La capacidad de mano se guarda como nivel `hand` y efecto de jornada `hand_capacity`. Los guardados previos sin ese efecto se normalizan a capacidad 1 solo si no hay compras de mano. No se restauran agarres; todas las bolas sostenidas se serializan con velocidad cero. Una escoba seleccionada durante el bug de acceso gratuito vuelve a mano si no está comprada; su pose guardada no concede acceso físico.
 

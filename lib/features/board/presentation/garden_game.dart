@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
+import 'coin_painter.dart';
 
 class GardenGame extends FlameGame {
   GardenGame(this.session)
@@ -354,23 +355,7 @@ class GardenGame extends FlameGame {
       final p =
           offset(Board.hole + (coin.position - Board.hole) * t) -
           Offset(0, math.sin(t * math.pi) * 25);
-      canvas.drawCircle(
-        p + const Offset(0, 3),
-        10,
-        paint(const Color(0x40644c2d)),
-      );
-      canvas.drawCircle(p, 10, paint(const Color(0xffad7416)));
-      canvas.drawCircle(
-        p - const Offset(0, 1),
-        8.5,
-        paint(const Color(0xfff5b83d)),
-      );
-      canvas.drawCircle(
-        p - const Offset(0, 1),
-        5.5,
-        paint(const Color(0xffb47e20), stroke: 1),
-      );
-      label(canvas, '${coin.value}', p - const Offset(0, 1), fontSize: 9);
+      paintCoinPile(canvas, p, coin.value);
     }
     canvas.restore();
   }

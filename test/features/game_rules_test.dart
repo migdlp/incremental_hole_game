@@ -47,17 +47,17 @@ void main() {
     final session = GameSession(catalog, MemoryStore())..startDay();
     capture(session);
     expect(session.board!.captured, 1);
-    expect(session.economy.generated, 2);
+    expect(session.economy.generated, 1);
     expect(session.economy.collected, 0);
     expect(session.economy.balance, 0);
     advance(session, .3);
-    expect(session.economy.generated, 2);
+    expect(session.economy.generated, 1);
     final coin = session.board!.coins.single;
     session.touch(coin.position);
     session.release();
     session.touch(coin.position);
     session.release();
-    expect(session.economy.collected, 2);
+    expect(session.economy.collected, 1);
     expect(session.board!.pending, 0);
   });
   test('coin pile cap and merging preserve every unit of value', () {
@@ -102,14 +102,14 @@ void main() {
       expect(session.running, isFalse);
       expect(session.board, isNull);
       expect(jsonDecode(session.snapshot())['run'], isNull);
-      expect(session.economy.balance, day * 2);
-      expect(session.progress.last!.lost, 2);
-      expect(session.progress.last!.income, 2);
+      expect(session.economy.balance, day);
+      expect(session.progress.last!.lost, 1);
+      expect(session.progress.last!.income, 1);
       session.finishDay();
-      expect(session.economy.balance, day * 2);
+      expect(session.economy.balance, day);
     }
     expect(session.progress.day, 11);
-    expect(session.progress.record, 2);
+    expect(session.progress.record, 1);
   });
   test(
     'purchases enforce phase, funds, prerequisite and level cap atomically',
@@ -165,7 +165,7 @@ void main() {
         ..restore(session.snapshot());
       expect(restored.paused, isTrue);
       expect(restored.board!.paddle, isNull);
-      expect(restored.board!.pending, 2);
+      expect(restored.board!.pending, 1);
       expect(restored.board!.coins.single.landing, greaterThan(0));
       expect(restored.board!.randomState, session.board!.randomState);
       restored.resume();
@@ -174,11 +174,11 @@ void main() {
       restored.release();
       restored.finishDay();
       restored.finishDay();
-      expect(restored.economy.balance, 2);
+      expect(restored.economy.balance, 1);
       final reopened = GameSession(catalog, MemoryStore())
         ..restore(restored.snapshot());
       expect(reopened.running, isFalse);
-      expect(reopened.economy.balance, 2);
+      expect(reopened.economy.balance, 1);
     },
   );
   test('restoring corrupt accounting does not mutate the existing session', () {

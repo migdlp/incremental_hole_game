@@ -157,7 +157,7 @@ void main() {
           isFalse,
         ); // next purchase follows the new map
         reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 4);
+        expect(reopened.board!.settings.balanceVersion, 5);
         expect(reopened.board!.settings['production_duration'], 16);
         expect(reopened.levels.containsKey('hand'), isFalse);
         expect(reopened.levels.containsKey('sweep'), isFalse);
@@ -271,6 +271,47 @@ void main() {
         settings['spawn_interval'],
         closeTo(1 / (1.5 * math.pow(1.25, 5)), 1e-9),
       );
+    },
+  );
+
+  testWidgets(
+    'unowned nodes are dim, affordable nodes are white and bought nodes keep their type',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final session = GameSession(catalog, MemoryStore());
+      await tester.pumpWidget(
+        MaterialApp(home: SkillTreeScreen(session: session)),
+      );
+      await tester.pumpAndSettle();
+      final root = find.byKey(const ValueKey('node-hand:1'));
+      Color? iconColor() => tester
+          .widget<Icon>(
+            find.descendant(
+              of: root,
+              matching: find.byIcon(Icons.back_hand_outlined),
+            ),
+          )
+          .color;
+      expect(iconColor(), const Color(0xff64738a));
+      session.economy.balance = 20;
+      session.setSound(false);
+      await tester.pumpAndSettle();
+      expect(iconColor(), const Color(0xffe2e8f0));
+      final gesture = await tester.startGesture(tester.getCenter(root));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 3100));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(session.levels['hand'], 1);
+      expect(iconColor(), const Color(0xffa855f7));
+      expect(find.byKey(const ValueKey('tree-start-day')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await session.pendingWrites;
+      session.dispose();
     },
   );
 

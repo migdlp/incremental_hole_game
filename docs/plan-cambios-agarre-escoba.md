@@ -1,5 +1,12 @@
 # Plan de cambios: agarre, escoba y progresión de control
 
+## Próximas mejoras registradas — 19 de octubre de 2026
+
+- **CF-06, pendiente:** estadísticas mucho más visuales y minimalistas, con menos texto y sin información irrelevante.
+- **CF-07, pendiente:** árbol con nodos bastante más cerca que en CF-05 y colocación únicamente en las ocho direcciones cardinales y diagonales. El reparto de ramas hacia ciertos lados queda para más adelante.
+
+La especificación se mantiene en una única referencia: [Próximas mejoras](cambios-futuros-arbol-mejoras.md#próximas-mejoras--19-de-octubre-de-2026). Se confirma que mano con peso (`9c79dd3`), cabecera visible y bolas doradas (`8f92527`) ya están en `main`, junto con CF-05. Esta actualización es documental; CF-06 y CF-07 todavía no cambian el juego ni el APK.
+
 > **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
 
 

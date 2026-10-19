@@ -1,12 +1,46 @@
 # Cambios futuros: árbol de mejoras
 
+## Próximas mejoras — 19 de octubre de 2026
+
+**Pendientes de implementar.** Estas dos tareas recogen la petición más reciente. La numeración identifica requisitos y no fija un orden de prioridad.
+
+### CF-06 · Estadísticas más visuales y minimalistas
+
+- [ ] Rediseñar la pantalla de estadísticas para que se entienda de un vistazo y tenga una presentación mucho más visual.
+- [ ] Reducir el texto: eliminar explicaciones que no aporten y datos secundarios o irrelevantes para el jugador.
+- [ ] Dar protagonismo a los resultados importantes, con una jerarquía visual clara y poco ruido.
+- [ ] Mantener una presentación sencilla y el acceso al árbol de mejoras. La selección concreta de indicadores y el diseño se decidirán al implementar, sin añadir métricas nuevas por defecto.
+
+### CF-07 · Árbol aún más cercano y con ocho direcciones
+
+- [ ] Acercar los nodos **bastante más que en la compactación CF-05 ya publicada**. Esta es una nueva reducción de distancia, no la descripción del ajuste anterior.
+- [ ] Colocar los nodos respecto a sus conexiones usando únicamente ocho direcciones, separadas por 45°: arriba (norte), arriba-derecha (noreste), derecha (este), abajo-derecha (sureste), abajo (sur), abajo-izquierda (suroeste), izquierda (oeste) y arriba-izquierda (noroeste).
+- [ ] Usar esas posiciones cercanas de forma consistente, con separación suficiente para distinguir y pulsar los nodos y entender sus conexiones.
+- [ ] Conservar los nodos, requisitos y compras existentes; esta tarea trata de su disposición visual.
+- [ ] Dejar para una revisión posterior si algunas ramas deben extenderse más hacia ciertos lados. Por ahora se busca una distribución muy próxima, sin fijar una preferencia lateral ni distancias numéricas todavía.
+
+```text
+       NO     N     NE
+         ↖    ↑    ↗
+       O ←  nodo  → E
+         ↙    ↓    ↘
+       SO     S     SE
+```
+
+### Comprobación de lo último entregado
+
+- Mano con peso e inercia: implementada y subida en `9c79dd3`.
+- Cabecera y tiempo sin oscurecer durante la recogida final; bolas doradas con probabilidad del 1 % y valor ×10 (base $10): implementados y subidos en `8f92527`.
+- Primera compactación del árbol (CF-05): integrada en `91b10cb`; la [CI 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) pasó 101 pruebas y generó el APK. CF-06 y CF-07 siguen pendientes y no se atribuyen a ese APK.
+
+
 > **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
 
 
 > **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
 
 
-**Referencia viva v0.7 · Implementación de CF-01 a CF-04 en 0.3.1+6, preparada para revisión.**
+**Referencia viva v0.8 · CF-01 a CF-05 entregados; próximas mejoras CF-06 y CF-07 pendientes.**
 
 El usuario autorizó implementar este mapa el 19 de octubre de 2026. El [árbol actual](arbol-de-mejoras.md) documenta su ejecución y [balance.csv](balance.csv) contiene los costes y efectos. Las dos instrucciones más recientes prevalecen sobre el boceto original: Mano I permite llevar **dos** bolas (no tres), cada nivel añade una y la escoba solo aparece tras comprar su desbloqueo. El resto del mapa se implementa con sus cinco niveles, colores y requisitos cruzados.
 
@@ -297,3 +331,5 @@ Los guardados antiguos conservan las compras sin añadir mejoras gratis. Las jor
 - **v0.7 · 2026-10-19:** monedas sin cifras ni símbolos, CF-01 a CF-04 implementados para revisión; esquema JSON v4 conservado y balance 5 para jornadas nuevas. Balance 4 congelado para recuperar jornadas interrumpidas. No se genera APK ni se acredita prueba en Android físico en esta revisión.
 
 - **CF-05 · 2026-10-19:** interfaz compacta, ficha bajo demanda y compra de un segundo, implementadas en rama para revisión. Las notas históricas de compra de tres segundos quedan sustituidas por CF-05.
+
+- **v0.8 · 2026-10-19:** se registran CF-06 (estadísticas visuales y minimalistas) y CF-07 (nodos aún más cercanos y colocación en ocho direcciones). Se comprueba que las últimas mejoras de mano, cabecera y bolas doradas ya están en `main`; esta revisión solo documenta el trabajo siguiente.

@@ -8,6 +8,24 @@ import '../test_support.dart';
 
 void main() {
   test(
+    'compact layout keeps touch targets separated and stays within its canvas',
+    () {
+      final nodes = SkillTree(testCatalog()).nodes;
+      for (var i = 0; i < nodes.length; i++) {
+        final node = nodes[i];
+        expect(node.x, inInclusiveRange(40, 840));
+        expect(node.y, inInclusiveRange(32, 1056));
+        for (final other in nodes.skip(i + 1)) {
+          expect(
+            (Offset(node.x, node.y) - Offset(other.x, other.y)).distance,
+            greaterThanOrEqualTo(80),
+            reason: '${node.id} overlaps ${other.id}',
+          );
+        }
+      }
+    },
+  );
+  test(
     'discovery exposes only the root and purchased immediate successors',
     () {
       final tree = SkillTree(testCatalog());
@@ -69,7 +87,11 @@ void main() {
     },
   );
 
-  Future<GameSession> open(WidgetTester tester, {int balance = 500}) async {
+  Future<GameSession> open(
+    WidgetTester tester, {
+    int balance = 500,
+    bool inspect = true,
+  }) async {
     final session = GameSession(testCatalog(), MemoryStore())
       ..economy.balance = balance;
     await tester.pumpWidget(GardenApp(session: session));
@@ -78,6 +100,10 @@ void main() {
     await tester.tap(find.text('Ir al árbol de mejoras'));
     await tester.pumpAndSettle();
     expect(find.byType(SkillTreeScreen), findsOneWidget);
+    if (inspect) {
+      await tester.tap(find.byKey(const ValueKey('node-hand:1')));
+      await tester.pumpAndSettle();
+    }
     return session;
   }
 
@@ -87,7 +113,7 @@ void main() {
     session.dispose();
   }
 
-  testWidgets('tap inspects; a full three-second hold buys once and persists', (
+  testWidgets('tap inspects; a full one-second hold buys once and persists', (
     tester,
   ) async {
     final session = await open(tester);
@@ -95,9 +121,11 @@ void main() {
     await tester.tap(root);
     await tester.pump();
     expect(session.levels, isEmpty);
-    final gesture = await tester.startGesture(tester.getCenter(root));
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
+    );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 2900));
+    await tester.pump(const Duration(milliseconds: 900));
     expect(session.levels, isEmpty);
     await tester.pump(const Duration(milliseconds: 101));
     expect(session.levels['hand'], 1);
@@ -120,24 +148,23 @@ void main() {
     'early release, dragging, pinch and backgrounding cancel purchase',
     (tester) async {
       final session = await open(tester);
-      final root = find.byKey(const ValueKey('node-hand:1'));
-      var center = tester.getCenter(root);
+      var center = tester.getCenter(
+        find.byKey(const ValueKey('hold-purchase')),
+      );
       var gesture = await tester.startGesture(center);
       await tester.pump();
-      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 400));
       await gesture.up();
       await tester.pump(const Duration(seconds: 2));
       expect(session.levels, isEmpty);
       gesture = await tester.startGesture(center);
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 200));
       await gesture.moveBy(const Offset(40, 0));
       await tester.pump(const Duration(seconds: 4));
       await gesture.up();
       expect(session.levels, isEmpty);
-      await tester.tap(find.byTooltip('Centrar selección'));
-      await tester.pumpAndSettle();
-      center = tester.getCenter(root);
+      center = tester.getCenter(find.byKey(const ValueKey('node-hand:1')));
       gesture = await tester.startGesture(center);
       await tester.pump();
       final second = await tester.startGesture(
@@ -158,9 +185,11 @@ void main() {
       await second.up();
       await gesture.up();
       expect(session.levels, isEmpty);
-      gesture = await tester.startGesture(tester.getCenter(root));
+      gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
+      );
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 200));
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pump(const Duration(seconds: 4));
       await gesture.up();
@@ -172,7 +201,7 @@ void main() {
         tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
       );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 3100));
+      await tester.pump(const Duration(milliseconds: 1100));
       await gesture.up();
       expect(session.levels['hand'], 1);
       await close(tester, session);
@@ -198,7 +227,7 @@ void main() {
       await gesture.up();
       gesture = await tester.startGesture(center);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 3100));
+      await tester.pump(const Duration(milliseconds: 1100));
       await gesture.up();
       expect(session.levels['hand'], 1);
       expect(session.economy.balance, 480);
@@ -224,40 +253,65 @@ void main() {
   });
 
   testWidgets(
-    'tree and detail panel fit a small mobile screen and zoom controls work',
+    'compact tree fits mobile and keeps gesture zoom without controls',
     (tester) async {
-      tester.view.physicalSize = const Size(360, 640);
+      tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.5;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final session = await open(tester);
-      final viewer = tester.widget<InteractiveViewer>(
-        find.byKey(const ValueKey('skill-tree-viewer')),
-      );
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final session = await open(tester, inspect: false);
+      expect(find.text('Árbol de mejoras'), findsNothing);
+      expect(find.byType(BackButton), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+      expect(find.byKey(const ValueKey('upgrade-summary')), findsNothing);
+      expect(find.byKey(const ValueKey('hold-purchase')), findsNothing);
+      expect(find.text('\$500'), findsOneWidget);
+      final viewerFinder = find.byKey(const ValueKey('skill-tree-viewer'));
+      final viewer = tester.widget<InteractiveViewer>(viewerFinder);
       final before = viewer.transformationController!.value.getMaxScaleOnAxis();
-      expect(before, closeTo(.85, .001));
-      await tester.tap(find.byTooltip('Acercar'));
-      await tester.pumpAndSettle();
+      final center = tester.getCenter(viewerFinder);
+      final first = await tester.startGesture(center - const Offset(50, 0));
+      final second = await tester.startGesture(
+        center + const Offset(50, 0),
+        pointer: 2,
+      );
+      await first.moveBy(const Offset(-25, 0));
+      await second.moveBy(const Offset(25, 0));
+      await tester.pump();
       expect(
         viewer.transformationController!.value.getMaxScaleOnAxis(),
         greaterThan(before),
       );
-      await tester.tap(find.byTooltip('Alejar'));
+      await first.up();
+      await second.up();
+      await tester.tap(find.byKey(const ValueKey('node-hand:1')));
       await tester.pumpAndSettle();
-      expect(
-        viewer.transformationController!.value.getMaxScaleOnAxis(),
-        closeTo(before, .001),
+      final text = tester.widget<Text>(
+        find.byKey(const ValueKey('upgrade-summary')),
       );
-      await tester.tap(find.byTooltip('Alejar'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Alejar'));
-      await tester.pumpAndSettle();
-      expect(
-        viewer.transformationController!.value.getMaxScaleOnAxis(),
-        closeTo(before * .64, .001),
-      );
+      expect(text.textSpan!.toPlainText(), 'La mano agarra 2 bolas.');
+      final spans = (text.textSpan! as TextSpan).children!;
+      expect(spans[1].toPlainText(), '2');
+      expect(spans[1].style!.color, const Color(0xff22c55e));
+      expect(find.byKey(const ValueKey('tree-start-day')), findsOneWidget);
       expect(tester.takeException(), isNull);
       await close(tester, session);
     },
   );
+
+  testWidgets('holding a map node inspects without buying', (tester) async {
+    final session = await open(tester, inspect: false);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const ValueKey('node-hand:1'))),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(session.levels, isEmpty);
+    expect(find.byKey(const ValueKey('upgrade-summary')), findsOneWidget);
+    await close(tester, session);
+  });
 }

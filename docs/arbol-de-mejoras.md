@@ -1,5 +1,8 @@
 # Árbol de mejoras progresivo
 
+> **Revisión de interfaz CF-05 preparada para integrar:** cabecera solo con saldo, sin título, atrás ni barra de zoom. Sin ficha hasta tocar un nodo, resumen con cantidades en verde y compra exclusivamente desde el botón manteniendo 1 s. Mapa compacto y conexiones de tramos rectos; ramas y balance conservados. Ver [referencia CF-05](cambios-futuros-arbol-mejoras.md#cf-05--árbol-compacto-y-ficha-bajo-demanda--19-de-octubre-de-2026).
+
+
 Referencia implementada en **0.3.1+6**, a partir del [referencia de cambios futuros v0.7](cambios-futuros-arbol-mejoras.md), autorizado el 19 de octubre de 2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos de compra.
 
 ## Mapa actual
@@ -50,13 +53,13 @@ Doble emisión intenta crear dos bolas separadas en cada emisión; mantiene el i
 | Tiempo | Naranja `#F97316` |
 | Automatización | Coral `#F43F5E` |
 
-Los nodos comprados muestran su icono y color de tipo, con marca de compra. Los no comprados se apagan en gris; si tienen requisitos cumplidos y saldo suficiente, se iluminan en blanco suave. La selección engrosa el borde sin colorear una compra pendiente. Las conexiones adquiridas usan el color del destino y las pendientes son grises. Se conservan arrastre, pellizco y controles de zoom, sin textos de ayuda ni contador de compras sobre el mapa.
+Los nodos comprados muestran su icono y color de tipo, con marca de compra. Los no comprados se apagan en gris; si tienen requisitos cumplidos y saldo suficiente, se iluminan en blanco suave. La selección engrosa el borde sin colorear una compra pendiente. Las conexiones adquiridas usan el color del destino y las pendientes son grises. Se conservan arrastre y pellizco; se retiran los botones de zoom/centrado, el título y el botón visible de atrás. No aparece ficha hasta seleccionar una mejora. La ficha muestra una frase con la cantidad mejorada en verde, precio y compra de un segundo; el desglose anterior sigue disponible al mantener pulsado el resumen. El mapa usa un lienzo de 880 × 1120, saltos verticales de 96 y conexiones rectas, con pasillos para los requisitos cruzados.
 
 ## Recorrido e interacción
 
 1. El pop-up de estadísticas tiene un solo botón: «Ir al árbol de mejoras», que abre su pantalla independiente.
 2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Barrido y Mano II.
-3. Pulsar un nodo consulta su efecto y coste; mantener pulsado tres segundos en el nodo seleccionado o en la ficha compra una sola vez.
+3. Pulsar un nodo consulta su efecto y coste; mantener pulsado un segundo en el botón de compra de la ficha compra una sola vez. El nodo solo consulta, incluso al mantenerlo pulsado.
 4. Soltar antes, arrastrar, añadir otro dedo o pasar a segundo plano cancela la compra sin gastar.
 5. «Comenzar día» está fijo en la pantalla del árbol: cancela cualquier compra incompleta, inicia directamente la jornada y cierra esa pantalla. Atrás puede volver al resumen, que no permite empezar el día. La bienvenida de una partida nueva conserva su inicio directo.
 

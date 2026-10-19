@@ -10,6 +10,14 @@ Se registran entregas y cambios observables. La versión actual del paquete se d
 - El guardado conserva el tipo de las bolas, las capturas doradas y la secuencia aleatoria. Los campos nuevos son opcionales al leer partidas anteriores; se valida el dinero generado con el total normal y dorado.
 - Validación local: 99 pruebas correctas, análisis sin incidencias, formato y compilación web correctos. Prueba de sensación y presentación en Android físico pendiente.
 
+## Árbol compacto y compra de un segundo — 2026-10-19 · En rama
+
+- Cabecera solo con saldo: se retiran título, botón de atrás y controles de zoom/centrado. Se mantienen arrastre, pellizco y «Comenzar día».
+- Ficha oculta al abrir; tocar un nodo muestra un resumen breve con la cantidad mejorada en verde. Precio, requisitos y estado se conservan; el resumen mantiene la información contextual de valores y porcentaje.
+- Compra únicamente desde el botón, manteniendo 1 s. Nodos para consultar; interrupciones, movimientos y varios dedos cancelan sin gastar.
+- Mapa de 880 × 1120 y separación vertical de 96; conexiones con tramos rectos y pasillos para requisitos cruzados. Se conserva el grafo y el balance.
+- 95 pruebas correctas, incluida pantalla de 320 × 568 con texto al 150 %. Sin APK nuevo ni prueba en Android físico en esta revisión.
+
 ## Mano con peso e inercia — 2026-10-19 · 0.3.2+7
 
 - Las bolas adicionales atraídas por la mano usan una fuerza limitada y amortiguada: se acercan durante unas décimas y siguen el arrastre con retraso. La primera bola sigue siendo un agarre manual.

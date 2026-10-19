@@ -21,9 +21,9 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   final transform = TransformationController();
   late final hold = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 3),
+    duration: const Duration(seconds: 1),
   )..addStatusListener(_holdStatus);
-  late SkillNode selected = tree.root;
+  SkillNode? selected;
   SkillNode? holding;
   int? activePointer;
   Offset? origin;
@@ -83,12 +83,12 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     }
   }
 
-  void _down(PointerDownEvent event, SkillNode node) {
+  void _down(PointerDownEvent event, SkillNode node, {bool purchase = false}) {
     if (pointers.length > 1 || activePointer != null) return;
     activePointer = event.pointer;
     origin = event.position;
     moved = false;
-    if (selected.id == node.id && _canBuy(node)) {
+    if (purchase && selected?.id == node.id && _canBuy(node)) {
       holding = node;
       hold.forward(from: 0);
     }
@@ -109,35 +109,19 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     activePointer = null;
     if (!cancel && !moved && pointers.length <= 1) {
       setState(() {
-        if (selected.id != node.id) announcement = null;
+        if (selected?.id != node.id) announcement = null;
         selected = node;
       });
     }
   }
 
   void _center(Size size, {SkillNode? node}) {
-    final target = node ?? selected;
+    final target = node ?? selected ?? tree.root;
     const scale = .85;
     transform.value = Matrix4.diagonal3Values(scale, scale, scale)
       ..setTranslationRaw(
         size.width / 2 - target.x * scale,
         size.height / 2 - target.y * scale,
-        0,
-      );
-  }
-
-  void _zoom(double factor) {
-    _cancel();
-    final size = viewport;
-    if (size == null) return;
-    final current = transform.value.getMaxScaleOnAxis();
-    final next = (current * factor).clamp(.35, 1.8);
-    final focal = Offset(size.width / 2, size.height / 2);
-    final scene = transform.toScene(focal);
-    transform.value = Matrix4.diagonal3Values(next, next, next)
-      ..setTranslationRaw(
-        focal.dx - scene.dx * next,
-        focal.dy - scene.dy * next,
         0,
       );
   }
@@ -159,7 +143,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
       backgroundColor: _background,
       appBar: AppBar(
         backgroundColor: _background,
-        title: const Text('Árbol de mejoras', style: TextStyle(fontSize: 19)),
+        automaticallyImplyLeading: false,
+        toolbarHeight: 48,
         actions: [
           const Icon(Icons.monetization_on_outlined, color: _gold, size: 20),
           Padding(
@@ -199,10 +184,22 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
+                    final previousViewport = viewport;
                     viewport = constraints.biggest;
                     if (!initialized) {
                       initialized = true;
                       _center(viewport!, node: tree.root);
+                    } else if (previousViewport != null &&
+                        previousViewport != viewport) {
+                      final value = transform.value;
+                      transform.value = value.clone()
+                        ..setTranslationRaw(
+                          value.storage[12] +
+                              (viewport!.width - previousViewport.width) / 2,
+                          value.storage[13] +
+                              (viewport!.height - previousViewport.height) / 2,
+                          0,
+                        );
                     }
                     return Stack(
                       children: [
@@ -216,8 +213,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             minScale: .35,
                             maxScale: 1.8,
                             child: SizedBox(
-                              width: 3150,
-                              height: 2150,
+                              width: 880,
+                              height: 1120,
                               child: CustomPaint(
                                 painter: _TreePainter(visible, session.levels),
                                 child: Stack(
@@ -226,7 +223,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                                       Positioned(
                                         key: ValueKey('position-${node.id}'),
                                         left: node.x - 40,
-                                        top: node.y - 40,
+                                        top: node.y - 32,
                                         child: TweenAnimationBuilder<double>(
                                           tween: Tween(begin: 0, end: 1),
                                           duration: const Duration(
@@ -245,53 +242,18 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             ),
                           ),
                         ),
-                        Positioned(
-                          right: 12,
-                          top: 12,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: const Color(0xf023334b),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: Colors.white12),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  tooltip: 'Acercar',
-                                  onPressed: () => _zoom(1.25),
-                                  icon: const Icon(Icons.add),
-                                ),
-                                IconButton(
-                                  tooltip: 'Alejar',
-                                  onPressed: () => _zoom(.8),
-                                  icon: const Icon(Icons.remove),
-                                ),
-                                IconButton(
-                                  tooltip: 'Centrar selección',
-                                  onPressed: () {
-                                    _cancel();
-                                    _center(viewport!);
-                                  },
-                                  icon: const Icon(
-                                    Icons.center_focus_strong_outlined,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ],
                     );
                   },
                 ),
               ),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(context).height * .46,
+              if (selected != null)
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.sizeOf(context).height * .46,
+                  ),
+                  child: SingleChildScrollView(child: _details()),
                 ),
-                child: SingleChildScrollView(child: _details()),
-              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
                 child: SizedBox(
@@ -324,7 +286,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   Widget _node(SkillNode node) {
     final owned = node.owned(widget.session.levels);
     final affordable = _canBuy(node);
-    final isSelected = selected.id == node.id;
+    final isSelected = selected?.id == node.id;
     final typeColor = _typeColor(node);
     final color = owned
         ? typeColor
@@ -351,13 +313,12 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
           animation: hold,
           builder: (context, _) => SizedBox(
             width: 80,
-            height: 98,
             child: Column(
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  width: 76,
-                  height: 76,
+                  width: 64,
+                  height: 64,
                   decoration: BoxDecoration(
                     color: color.withValues(
                       alpha: owned
@@ -366,7 +327,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                           ? .12
                           : .05,
                     ),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: color,
                       width: isSelected ? 2.5 : 1.5,
@@ -425,7 +386,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   }
 
   Widget _details() {
-    final node = selected;
+    final node = selected!;
     final owned = node.owned(widget.session.levels);
     final affordable = _canBuy(node);
     final current = node.level == 1
@@ -450,33 +411,18 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                _icons[node.definition.id],
-                size: 22,
-                color: _typeColor(node),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  _description(node),
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (percentage != null)
-            Text(
-              '+${percentage.toStringAsFixed(1)} %  ·  ${_value(node, current)} → ${_value(node, next)}',
-              style: const TextStyle(color: _mint, fontSize: 14),
+          Tooltip(
+            message:
+                '${node.definition.name} · nivel ${node.level}. '
+                '${_description(node)}. '
+                '${_value(node, current)} → ${_value(node, next)}'
+                '${percentage == null ? '' : ' (+${percentage.toStringAsFixed(1)} %)'}',
+            child: Text.rich(
+              _summary(node),
+              key: const ValueKey('upgrade-summary'),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
-          if (percentage == null && node.definition.unit != 'unlock')
-            Text(_value(node, next), style: const TextStyle(color: _mint)),
+          ),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -525,11 +471,11 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               },
               child: Semantics(
                 label: affordable
-                    ? 'Mantén pulsado tres segundos para comprar'
+                    ? 'Mantén pulsado un segundo para comprar'
                     : 'Saldo insuficiente',
                 child: Listener(
                   key: const ValueKey('hold-purchase'),
-                  onPointerDown: (e) => _down(e, node),
+                  onPointerDown: (e) => _down(e, node, purchase: true),
                   onPointerMove: _move,
                   onPointerUp: (e) => _up(e, node),
                   onPointerCancel: (e) => _up(e, node, cancel: true),
@@ -557,9 +503,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             height: 50,
                             child: Center(
                               child: Text(
-                                affordable
-                                    ? 'Mantén pulsado · 3 s'
-                                    : 'No disponible',
+                                affordable ? 'Comprar · 1 s' : 'No disponible',
                                 style: TextStyle(
                                   color: affordable
                                       ? _gold
@@ -638,11 +582,51 @@ String _description(SkillNode node) => switch (node.definition.id) {
   _ => '',
 };
 
+TextSpan _summary(SkillNode node) {
+  final value = node.upgrade.value;
+  String number(double n) =>
+      n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(2);
+  final (before, amount, after) = switch (node.definition.id) {
+    'hand' => ('La mano agarra ', number(value), ' bolas.'),
+    'paddle' => ('La escoba abarca ', number(value * 4), ' u.'),
+    'collection' => ('Recoge monedas a ', number(value), ' u de distancia.'),
+    'magnet' || 'attraction' => ('El imán alcanza ', number(value), ' u.'),
+    'generator' => ('Genera ', number(1 / value), ' bolas/s.'),
+    'reward' => ('Cada bola da ', '\$${number(value)}', '.'),
+    'duration' => ('Produce durante ', number(value), ' s.'),
+    'robot_speed' => ('El robot avanza a ', number(value), ' u/s.'),
+    'double_spawn' => (
+      'El generador emite ',
+      number(value),
+      ' bolas a la vez.',
+    ),
+    'robot' => ('', '1 robot', ' empuja bolas al hoyo.'),
+    'broom' => ('', 'Desbloquea la escoba', ' para empujar bolas.'),
+    'broom_v' => ('', 'Transforma la escoba en V', ' para reunir bolas.'),
+    'sweep' => ('', 'Recoge deslizando', ' el dedo.'),
+    _ => ('', node.definition.name, '.'),
+  };
+  return TextSpan(
+    children: [
+      TextSpan(text: before),
+      TextSpan(
+        text: amount,
+        style: const TextStyle(
+          color: Color(0xff22c55e),
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      TextSpan(text: after),
+    ],
+  );
+}
+
 String _value(SkillNode node, double value) {
   String number(double n) => n == n.roundToDouble()
       ? '${n.toInt()}'
       : n.toStringAsFixed(n.abs() < 1 ? 2 : 1);
   return switch (node.definition.unit) {
+    'unlock' => value > 0 ? 'Desbloqueada' : 'Sin desbloquear',
     'seconds' => '${number(value)} s',
     'coins' => '\$${number(value)}/bola',
     'balls_per_spawn' => '${number(value)} bolas/emisión',
@@ -678,13 +662,43 @@ class _TreePainter extends CustomPainter {
           ..style = PaintingStyle.stroke;
         final start = Offset(parent.x, parent.y);
         final end = Offset(node.x, node.y);
-        final midY = (start.dy + end.dy) / 2;
-        canvas.drawPath(
-          Path()
-            ..moveTo(start.dx, start.dy)
-            ..cubicTo(start.dx, midY, end.dx, midY, end.dx, end.dy),
-          paint,
+        // Cross-branch dependencies use empty corridors instead of crossing nodes.
+        final bends = switch ((id, node.id)) {
+          ('generator:3', 'double_spawn:1') => [
+            Offset(32, start.dy),
+            Offset(32, end.dy),
+          ],
+          ('paddle:3', 'double_spawn:1') => [
+            Offset(660, start.dy),
+            const Offset(660, 840),
+            const Offset(88, 840),
+          ],
+          ('sweep:1', 'robot:1') => [
+            const Offset(440, 216),
+            const Offset(748, 216),
+            Offset(748, end.dy),
+          ],
+          _ => <Offset>[],
+        };
+        final points = [start, ...bends, end];
+        final firstDirection =
+            (points[1] - start) / (points[1] - start).distance;
+        final lastDirection =
+            (end - points[points.length - 2]) /
+            (end - points[points.length - 2]).distance;
+        final path = Path()
+          ..moveTo(
+            start.dx + firstDirection.dx * 36,
+            start.dy + firstDirection.dy * 36,
+          );
+        for (final bend in bends) {
+          path.lineTo(bend.dx, bend.dy);
+        }
+        path.lineTo(
+          end.dx - lastDirection.dx * 36,
+          end.dy - lastDirection.dy * 36,
         );
+        canvas.drawPath(path, paint);
       }
     }
   }

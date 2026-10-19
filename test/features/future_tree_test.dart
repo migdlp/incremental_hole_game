@@ -300,9 +300,13 @@ void main() {
       session.setSound(false);
       await tester.pumpAndSettle();
       expect(iconColor(), const Color(0xffe2e8f0));
-      final gesture = await tester.startGesture(tester.getCenter(root));
+      await tester.tap(root);
+      await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
+      );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 3100));
+      await tester.pump(const Duration(milliseconds: 1100));
       await gesture.up();
       await tester.pumpAndSettle();
       expect(session.levels['hand'], 1);

@@ -86,11 +86,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(popup, findsNothing);
       expect(find.byKey(const ValueKey('node-hand:1')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('node-hand:1')));
+      await tester.pumpAndSettle();
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
       );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 3100));
+      await tester.pump(const Duration(milliseconds: 1100));
       await gesture.up();
       await tester.pumpAndSettle();
       expect(session.levels['hand'], 1);
@@ -126,11 +128,13 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Ir al árbol de mejoras'));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('node-hand:1')));
+      await tester.pumpAndSettle();
       final gesture = await tester.startGesture(
-        tester.getCenter(find.byKey(const ValueKey('node-hand:1'))),
+        tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
       );
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 400));
       await tester.tap(find.byKey(const ValueKey('tree-start-day')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
@@ -164,12 +168,14 @@ void main() {
       expect(find.byKey(const ValueKey('day-results-popup')), findsOneWidget);
       await tester.tap(find.text('Ir al árbol de mejoras'));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('node-hand:1')));
+      await tester.pumpAndSettle();
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
       );
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-      await tester.pageBack();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 4));
       await gesture.up();

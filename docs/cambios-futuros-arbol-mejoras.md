@@ -1,10 +1,12 @@
 # Cambios futuros: árbol de mejoras
 
+> **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
+
 > **Entrega CF-06 a CF-08 — 19 de octubre de 2026:** [PR #17](https://github.com/migdlp/incremental_hole_game/pull/17) integrada en `main`, código `1cd7b8761a9e1e4eea19761385086e92ec470438`. **APK 0.4.0+9:** [descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776/artifacts/12173036451), disponible hasta el 2 de noviembre de 2026. [Pipeline 39223285776](https://github.com/migdlp/incremental_hole_game/actions/runs/39223285776) correcta: formato, análisis, **107 pruebas**, compilación Android y firma v2 verificada. Incluye estadísticas visuales, árbol compacto de ocho direcciones y cinco niveles de fuerza de agarre. Descomprimir e instalar `jardin-mecanico-debug.apk`. Validación en Android físico y ajuste definitivo de precios pendientes.
 
 ## Próximas mejoras — 19 de octubre de 2026
 
-**CF-09 a CF-15 implementados en 0.5.0+10, en la rama `feat/ui-economy-next`.** Estos requisitos detallan las nuevas peticiones para UI, economía y recogida. Deben poder implementarse leyendo esta sección junto al [árbol actual](arbol-de-mejoras.md) y el [balance](balance.csv). Los valores de balance aquí indicados son objetivos acordados; cualquier precio nuevo que no esté especificado queda por ajustar al implementar.
+**CF-09 a CF-15 integrados en `main` y entregados en el APK 0.5.0+10.** Estos requisitos detallan las nuevas peticiones para UI, economía y recogida. Deben poder implementarse leyendo esta sección junto al [árbol actual](arbol-de-mejoras.md) y el [balance](balance.csv). Los valores de balance aquí indicados son objetivos acordados; cualquier precio nuevo que no esté especificado queda por ajustar al implementar.
 
 ### CF-09 · Mostrar dinero sin el símbolo «$»
 
@@ -65,7 +67,7 @@ Estas propuestas son conceptos, no requisitos completos: no incorporarlas al jue
 - **Bola duplicadora:** al chocar con otra bola, la duplica. Quedan por decidir qué bola se duplica, si hay límite por choque/cadena, cómo interactúa con el límite de bolas y si hay efectos visuales o sonoros.
 - **Bola bomba:** al chocar con otra bola empieza a ponerse roja y muestra una cuenta atrás de 3, 2, 1; después explota y destruye las bolas cercanas. Quedan por decidir el radio, el momento y las reglas de la cuenta atrás, el tratamiento de monedas u objetos cercanos, límites de destrucción y efectos visuales/sonoros.
 
-**Estado:** CF-06, CF-07 y CF-08 se entregaron en el APK 0.4.0+9; CF-09 a CF-15 están implementados y verificados en la revisión 0.5.0+10. La integración y entrega Android se registrarán con su ejecución concreta. Las dos ideas de bolas son exploratorias y no deben contabilizarse como tareas aprobadas para implementar.
+**Estado:** CF-06, CF-07 y CF-08 se entregaron en el APK 0.4.0+9; CF-09 a CF-15 están implementados y verificados en la revisión 0.5.0+10. Integración y entrega Android verificadas en la pipeline 39292311120, enlazada al principio de este documento. Las dos ideas de bolas son exploratorias y no deben contabilizarse como tareas aprobadas para implementar.
 
 
 ### Resultado y decisiones de CF-09 a CF-15
@@ -137,7 +139,7 @@ La tanda anterior comprendía CF-06, CF-07 y CF-08. Se han completado los tres b
 > **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
 
 
-**Referencia viva v1.1 · CF-01 a CF-08 entregados; CF-09 a CF-15 implementados en 0.5.0+10; último APK registrado: 0.4.0+9.**
+**Referencia viva v1.1 · CF-01 a CF-08 entregados; CF-09 a CF-15 entregados; APK actual: 0.5.0+10.**
 
 El usuario autorizó implementar este mapa el 19 de octubre de 2026. El [árbol actual](arbol-de-mejoras.md) documenta su ejecución y [balance.csv](balance.csv) contiene los costes y efectos. Las dos instrucciones más recientes prevalecen sobre el boceto original: Mano I permite llevar **dos** bolas (no tres), cada nivel añade una y la escoba solo aparece tras comprar su desbloqueo. El resto del mapa se implementa con sus cinco niveles, colores y requisitos cruzados.
 

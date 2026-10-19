@@ -213,16 +213,20 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             minScale: .35,
                             maxScale: 1.8,
                             child: SizedBox(
-                              width: 880,
-                              height: 1120,
+                              width: SkillTree.canvasSize,
+                              height: SkillTree.canvasSize,
                               child: CustomPaint(
-                                painter: _TreePainter(visible, session.levels),
+                                painter: _TreePainter(
+                                  visible,
+                                  session.levels,
+                                  tree.paths,
+                                ),
                                 child: Stack(
                                   children: [
                                     for (final node in visible)
                                       Positioned(
                                         key: ValueKey('position-${node.id}'),
-                                        left: node.x - 40,
+                                        left: node.x - 32,
                                         top: node.y - 32,
                                         child: TweenAnimationBuilder<double>(
                                           tween: Tween(begin: 0, end: 1),
@@ -312,72 +316,64 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         child: AnimatedBuilder(
           animation: hold,
           builder: (context, _) => SizedBox(
-            width: 80,
-            child: Column(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: color.withValues(
-                      alpha: owned
-                          ? .18
-                          : affordable
-                          ? .12
-                          : .05,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: color,
-                      width: isSelected ? 2.5 : 1.5,
-                    ),
-                    boxShadow: affordable
-                        ? [
-                            BoxShadow(
-                              color: Colors.white.withValues(alpha: .16),
-                              blurRadius: 24,
-                              spreadRadius: 2,
-                            ),
-                          ]
-                        : [],
+            width: 64,
+            height: 64,
+            child: Center(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: color.withValues(
+                    alpha: owned
+                        ? .18
+                        : affordable
+                        ? .12
+                        : .05,
                   ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Icon(_icons[node.definition.id], size: 30, color: color),
-                      if (owned || locked)
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: Icon(
-                            owned ? Icons.check_circle : Icons.lock_outline,
-                            size: 16,
-                            color: color,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: color,
+                    width: isSelected ? 2.5 : 1.5,
+                  ),
+                  boxShadow: affordable
+                      ? [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: .16),
+                            blurRadius: 24,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(_icons[node.definition.id], size: 26, color: color),
+                    if (owned || locked)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Icon(
+                          owned ? Icons.check_circle : Icons.lock_outline,
+                          size: 16,
+                          color: color,
+                        ),
+                      ),
+                    if (holding?.id == node.id)
+                      Positioned.fill(
+                        child: Padding(
+                          padding: const EdgeInsets.all(3),
+                          child: CircularProgressIndicator(
+                            value: hold.value,
+                            color: _gold,
+                            strokeWidth: 3,
                           ),
                         ),
-                      if (holding?.id == node.id)
-                        Positioned.fill(
-                          child: Padding(
-                            padding: const EdgeInsets.all(3),
-                            child: CircularProgressIndicator(
-                              value: hold.value,
-                              color: _gold,
-                              strokeWidth: 3,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                ExcludeSemantics(
-                  child: Text(
-                    owned ? '✓' : '${node.upgrade.cost}',
-                    style: TextStyle(fontSize: 11, color: color),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -390,7 +386,9 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     final owned = node.owned(widget.session.levels);
     final affordable = _canBuy(node);
     final current = node.level == 1
-        ? (node.definition.id == 'attraction'
+        ? (node.definition.id == 'hand_grip'
+              ? 1.0
+              : node.definition.id == 'attraction'
               ? 65.0
               : widget.session.catalog.base[node.definition.effect] ?? 0)
         : node.definition.levels[node.level - 2].value;
@@ -548,6 +546,7 @@ Color _typeColor(SkillNode node) => switch (node.definition.id) {
 
 const _icons = {
   'hand': Icons.back_hand_outlined,
+  'hand_grip': Icons.front_hand_outlined,
   'broom': Icons.cleaning_services_outlined,
   'paddle': Icons.swap_horiz,
   'broom_v': Icons.call_merge,
@@ -566,6 +565,8 @@ const _icons = {
 String _description(SkillNode node) => switch (node.definition.id) {
   'hand' =>
     'Lleva hasta ${node.upgrade.value.toInt()} bolas: agarra una y acerca la mano a otras para atraerlas',
+  'hand_grip' =>
+    'Atrae y sujeta más rápido las bolas adicionales mientras llevas una bola',
   'broom' => 'Desbloquea la escoba para empujar grupos de bolas',
   'paddle' => 'Aumenta la anchura de la escoba',
   'broom_v' => 'Reúne las bolas con una escoba en V',
@@ -588,6 +589,7 @@ TextSpan _summary(SkillNode node) {
       n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(2);
   final (before, amount, after) = switch (node.definition.id) {
     'hand' => ('La mano agarra ', number(value), ' bolas.'),
+    'hand_grip' => ('Fuerza de agarre ', '×${number(value)}', '.'),
     'paddle' => ('La escoba abarca ', number(value * 4), ' u.'),
     'collection' => ('Recoge monedas a ', number(value), ' u de distancia.'),
     'magnet' || 'attraction' => ('El imán alcanza ', number(value), ' u.'),
@@ -626,6 +628,7 @@ String _value(SkillNode node, double value) {
       ? '${n.toInt()}'
       : n.toStringAsFixed(n.abs() < 1 ? 2 : 1);
   return switch (node.definition.unit) {
+    'multiplier' => '×${number(value == 0 ? 1 : value)}',
     'unlock' => value > 0 ? 'Desbloqueada' : 'Sin desbloquear',
     'seconds' => '${number(value)} s',
     'coins' => '\$${number(value)}/bola',
@@ -639,7 +642,8 @@ String _value(SkillNode node, double value) {
 }
 
 class _TreePainter extends CustomPainter {
-  _TreePainter(this.nodes, this.levels);
+  _TreePainter(this.nodes, this.levels, this.paths);
+  final Map<(String, String), List<(double, double)>> paths;
   final List<SkillNode> nodes;
   final Map<String, int> levels;
   @override
@@ -662,25 +666,9 @@ class _TreePainter extends CustomPainter {
           ..style = PaintingStyle.stroke;
         final start = Offset(parent.x, parent.y);
         final end = Offset(node.x, node.y);
-        // Cross-branch dependencies use empty corridors instead of crossing nodes.
-        final bends = switch ((id, node.id)) {
-          ('generator:3', 'double_spawn:1') => [
-            Offset(32, start.dy),
-            Offset(32, end.dy),
-          ],
-          ('paddle:3', 'double_spawn:1') => [
-            Offset(660, start.dy),
-            const Offset(660, 840),
-            const Offset(88, 840),
-          ],
-          ('sweep:1', 'robot:1') => [
-            const Offset(440, 216),
-            const Offset(748, 216),
-            Offset(748, end.dy),
-          ],
-          _ => <Offset>[],
-        };
-        final points = [start, ...bends, end];
+        final points = paths[(id, node.id)]!
+            .map((p) => Offset(p.$1, p.$2))
+            .toList();
         final firstDirection =
             (points[1] - start) / (points[1] - start).distance;
         final lastDirection =
@@ -688,15 +676,15 @@ class _TreePainter extends CustomPainter {
             (end - points[points.length - 2]).distance;
         final path = Path()
           ..moveTo(
-            start.dx + firstDirection.dx * 36,
-            start.dy + firstDirection.dy * 36,
+            start.dx + firstDirection.dx * 28,
+            start.dy + firstDirection.dy * 28,
           );
-        for (final bend in bends) {
+        for (final bend in points.skip(1).take(points.length - 2)) {
           path.lineTo(bend.dx, bend.dy);
         }
         path.lineTo(
-          end.dx - lastDirection.dx * 36,
-          end.dy - lastDirection.dy * 36,
+          end.dx - lastDirection.dx * 28,
+          end.dy - lastDirection.dy * 28,
         );
         canvas.drawPath(path, paint);
       }

@@ -62,7 +62,7 @@ void main() {
       );
       expect(
         find.descendant(of: popup, matching: find.text('\$4')),
-        findsNWidgets(2),
+        findsOneWidget,
       );
       expect(
         find.descendant(of: popup, matching: find.text('Bolas al hoyo')),

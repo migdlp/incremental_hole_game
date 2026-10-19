@@ -18,7 +18,7 @@ void main() {
         for (final other in nodes.skip(i + 1)) {
           expect(
             (Offset(node.x, node.y) - Offset(other.x, other.y)).distance,
-            greaterThanOrEqualTo(80),
+            greaterThanOrEqualTo(64),
             reason: '${node.id} overlaps ${other.id}',
           );
         }

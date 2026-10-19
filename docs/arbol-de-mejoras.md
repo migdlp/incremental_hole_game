@@ -1,5 +1,8 @@
 # Árbol de mejoras progresivo
 
+> **Entrega 0.4.0+9 preparada:** CF-06 a CF-08 implementados. El árbol usa una cuadrícula de 64 unidades y objetivos de 64 × 64, con posiciones/conexiones en ocho direcciones y rutas que evitan otros nodos. Se conservan los 44 nodos previos y se añaden cinco niveles de fuerza de mano. Ver [próximas mejoras](cambios-futuros-arbol-mejoras.md). Las notas de preparación anteriores se conservan como historia.
+
+
 > **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
 
 
@@ -10,10 +13,12 @@ Referencia implementada en **0.3.1+6**, a partir del [referencia de cambios futu
 
 ## Mapa actual
 
-Catorce tipos y **44 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las cuatro ramas iniciales se pueden desarrollar conjuntamente.
+Quince tipos y **49 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las cuatro ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
 🟣 MANO I · 20 dólares · 2 bolas
+│
+├─ 🟣 FUERZA DE AGARRE I → II → III → IV → V
 │
 ├─ 🟢 GENERADOR I
 │  └─ Generador II
@@ -81,3 +86,7 @@ Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alc
 La evidencia histórica del árbol anterior sigue en [validación](validacion-prototipo.md) y [CI](ci.md); sus APK no contienen automáticamente este mapa nuevo.
 
 CF-01 a CF-04 y las monedas sin cifras se implementan en esta revisión. El historial de decisiones sigue en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, sus pilas y el valor base se explican en [economía](economia.md).
+
+## Fuerza de agarre de la mano
+
+`hand_grip` requiere Mano I y se amplía hasta cinco niveles. Aumenta la rapidez con la que las bolas adicionales se acercan y la resistencia de su sujeción; la primera se sigue agarrando a mano, la capacidad y el alcance no cambian. Se distingue del imán de monedas. Los costes y factores están en el CSV. El agarre conserva movimiento físico, inercia al soltar y cancelación segura al pausar o entrar en recogida final.

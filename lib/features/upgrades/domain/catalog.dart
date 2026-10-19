@@ -40,6 +40,7 @@ class UpgradeCatalog {
   final List<UpgradeDefinition> definitions;
   static const labels = {
     'hand': ['Capacidad de la mano', 'Control'],
+    'hand_grip': ['Fuerza de agarre', 'Control'],
     'broom': ['Escoba recta', 'Control'],
     'paddle': ['Escoba más ancha', 'Control'],
     'broom_v': ['Escoba en V', 'Control'],

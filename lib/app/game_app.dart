@@ -473,73 +473,23 @@ class NightScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 16),
             children: [
-              Text(
-                last == null
-                    ? 'Un pequeño gesto.\nUn jardín que crece.'
-                    : 'Resumen de la jornada',
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  height: 1.15,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                last == null
-                    ? 'Agarra una bola, llévala al hoyo y pulsa sus monedas. Desbloquea escobas para mover grupos.'
-                    : 'Invierte lo recogido o ahorra para más adelante. El juego está detenido hasta el próximo día.',
-                style: const TextStyle(color: Color(0xffb5bdc9), height: 1.4),
-              ),
-              const SizedBox(height: 18),
-              Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'SALDO DISPONIBLE',
-                        style: TextStyle(
-                          color: Color(0xffb5bdc9),
-                          fontSize: 11,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      Text(
-                        '\$${session.economy.balance}',
-                        style: const TextStyle(
-                          fontSize: 26,
-                          color: gold,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (last != null) ...[
-                        const Divider(height: 24),
-                        Wrap(
-                          spacing: 24,
-                          runSpacing: 16,
-                          children: [
-                            _stat('Dinero ganado', '\$${last.income}'),
-                            _stat('Generado', '\$${last.generated}'),
-                            _stat('Sin recoger', '\$${last.lost}'),
-                            _stat('Bolas al hoyo', '${last.captured}'),
-                            _stat(
-                              'Récord diario',
-                              '\$${session.progress.record}',
-                            ),
-                            if (last.previousIncome != null)
-                              _stat(
-                                'Respecto al anterior',
-                                '${last.income - last.previousIncome! >= 0 ? '+' : '-'}\$${(last.income - last.previousIncome!).abs()}',
-                              ),
-                          ],
-                        ),
-                      ],
-                    ],
+              if (last != null)
+                _results()
+              else ...[
+                const Text(
+                  'Un pequeño gesto.\nUn jardín que crece.',
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
                   ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Agarra una bola, llévala al hoyo y recoge sus monedas.',
+                  style: TextStyle(color: Color(0xffb5bdc9), height: 1.4),
+                ),
+              ],
               if (session.recoveryMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
@@ -596,17 +546,103 @@ class NightScreen extends StatelessWidget {
     );
   }
 
-  Widget _stat(String label, String value) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        value,
-        style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700),
+  Widget _results() {
+    final result = session.progress.last!;
+    final collected = result.generated == 0
+        ? 0.0
+        : result.income / result.generated;
+    return Container(
+      key: const ValueKey('visual-day-results'),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(24),
       ),
-      Text(
-        label,
-        style: const TextStyle(color: Color(0xffb5bdc9), fontSize: 11),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.savings_outlined, color: gold, size: 36),
+          const SizedBox(height: 8),
+          const Text(
+            'Dinero ganado',
+            style: TextStyle(color: Color(0xffb5bdc9), fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '\$${result.income}',
+              style: const TextStyle(
+                color: gold,
+                fontSize: 58,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Semantics(
+            label: 'Dinero recogido',
+            value: '\$${result.income} de \$${result.generated}',
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: collected.clamp(0, 1),
+                minHeight: 8,
+                color: const Color(0xff22c55e),
+                backgroundColor: const Color(0xff152136),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _metric(
+                  Icons.adjust_rounded,
+                  '${result.captured}',
+                  'Bolas al hoyo',
+                  cream,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _metric(
+                  Icons.monetization_on_outlined,
+                  '\$${result.lost}',
+                  'Sin recoger',
+                  result.lost == 0
+                      ? const Color(0xff8fc7ba)
+                      : const Color(0xffffbb7c),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-    ],
-  );
+    );
+  }
+
+  Widget _metric(IconData icon, String value, String label, Color color) =>
+      Column(
+        children: [
+          Icon(icon, size: 22, color: color),
+          const SizedBox(height: 6),
+          FittedBox(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Color(0xffb5bdc9), fontSize: 11),
+          ),
+        ],
+      );
 }

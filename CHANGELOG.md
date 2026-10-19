@@ -2,6 +2,14 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Próximas mejoras CF-06 a CF-08 — 2026-10-19 · 0.4.0+9
+
+- Estadísticas visuales y minimalistas: dinero ganado destacado, bolas al hoyo y dinero sin recoger, barra del importe cobrado y una sola acción para ir al árbol.
+- Árbol más cercano, con cuadrícula y objetivos de 64 unidades. Posiciones y segmentos únicamente en las ocho direcciones, con rutas que evitan los nodos. Se mantienen compra de un segundo, ficha bajo demanda, colores y progreso.
+- Cinco niveles nuevos de fuerza de agarre, separados de la capacidad y del imán de monedas. Las bolas adicionales responden antes y resisten mejor los tirones, manteniendo física e inercia.
+- Quince tipos y 49 nodos; los 44 previos se conservan. Sin compras nuevas, las jornadas antiguas mantienen su configuración. Esquema v4 y balance 5 sin cambios.
+- 107 pruebas locales correctas; revisión visual de la ficha y del resumen. Android físico y balance final pendientes. La entrega del APK se registra tras la pipeline.
+
 ## Entrega del árbol compacto — 2026-10-19 · 0.3.3+8
 
 - [PR #16](https://github.com/migdlp/incremental_hole_game/pull/16) integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. El APK incluye también los cambios ya presentes en `main`.

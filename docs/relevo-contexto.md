@@ -1,6 +1,6 @@
 # Relevo de contexto — Incremental Hole Game / Jardín Mecánico
 
-**Actualizado: 20/10/2026 · Último APK entregado: 0.6.0+13.**
+**Actualizado: 20/10/2026 · Último APK entregado: 0.6.0+13, revisión `6746af2`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
 
@@ -19,27 +19,26 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 - Capturar produce monedas físicas. El dinero depende de recogerlas; pendientes y reserva se pierden al acabar. La mano ocupada bloquea cobro e imán de monedas.
 - Solo monedas de **1/10/50/100/500**, mismo tamaño, color propio y sin valor escrito. UI con icono, sin prefijo dólar. Resumen por denominaciones, sin antigua barra verde.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
-- Racha comprable tras Mano I por 40 (código posterior al último APK): ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
+- Racha comprable tras Mano I por 40: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
 - Árbol de 59 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → árbol → comenzar día.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
-Avance de código posterior al APK 0.6.0+13: informes temporales de las últimas
+Incluido en el APK de `6746af2`: informes temporales de las últimas
 20 jornadas debug con emisiones, capturas/doradas, pico de combo y monedas
-generadas/cobradas/perdidas; se pueden copiar desde el panel. No hay nuevo APK
-de este avance. La petición inicial fue recorrer las mejoras futuras y añadir
+generadas/cobradas/perdidas; se pueden copiar desde el panel. La petición inicial fue recorrer las mejoras futuras y añadir
 las nuevas bolas como mejoras probables desde debug; después el usuario priorizó
 Racha comprable, dos especiales recargables y control de escoba con dos puntos. Se ha propuesto aislar
 prototipos configurables en debug, probar ambas variantes de bomba y una tabla
 provisional de tiers 1/2/3/5/8. **Son propuestas pendientes de respuesta, no
 reglas aprobadas.** También sigue pendiente la interacción dorada → tier máximo.
 
-Código posterior al APK: dos especiales comprables —Captura total y Aceleración—,
+Incluidos en el APK: dos especiales comprables —Captura total y Aceleración—,
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
 el otro agarre. Guardado v7 / balance v8, con balance v7 congelado para jornadas
-antiguas. No hay nuevo APK de estos cambios aún. Verificación local: 151 pruebas y análisis
+antiguas. Verificación local y CI: 151 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
 ## Próximas mejoras y decisiones abiertas
@@ -70,9 +69,9 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 
 ## Última entrega y comprobaciones
 
-[Descargar APK 0.6.0+13 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439/artifacts/12256028572). Descomprimir e instalar `jardin-mecanico-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
+[Descargar APK 0.6.0+13 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628/artifacts/12277113160). Descomprimir e instalar `jardin-mecanico-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
-135 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+151 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
 
 ## Acceso a GitHub desde Codex Cloud (20/10/2026)
 
@@ -117,7 +116,7 @@ migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
 no reconstruir el historial de commits. El último APK es 0.6.0+13:
-agujero arriba, generador abajo, ciclo 15+5, combos y debug del árbol.
+agujero arriba, generador abajo, ciclo 15+5, racha comprable, especiales, escoba de dos dedos y debug por botón.
 No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi
 siguiente petición concreta.

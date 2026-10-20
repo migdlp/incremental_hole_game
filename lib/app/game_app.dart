@@ -321,6 +321,9 @@ class _DayScreenState extends State<DayScreen> {
                       tooltip: 'Pausar',
                       onPressed: session.pause,
                       color: Colors.black,
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xeef1e5cd),
+                      ),
                       icon: const Icon(Icons.pause_rounded),
                     ),
                   ),
@@ -328,21 +331,31 @@ class _DayScreenState extends State<DayScreen> {
                     top: 15,
                     right: 16,
                     child: IgnorePointer(
-                      child: Row(
-                        key: const ValueKey('gameplay-balance'),
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CoinIcon(),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${session.economy.balance + (session.running ? session.economy.collected : 0)}',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xeef1e5cd),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          key: const ValueKey('gameplay-balance'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CoinIcon(),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${session.economy.balance + (session.running ? session.economy.collected : 0)}',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

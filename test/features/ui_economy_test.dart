@@ -297,7 +297,7 @@ void main() {
   );
 
   testWidgets(
-    'day countdown excludes collection and collection starts its independent bar at full',
+    'one timer stays in place and changes color when collection begins',
     (tester) async {
       final session = GameSession(catalog, MemoryStore())
         ..startDay()
@@ -308,34 +308,54 @@ void main() {
       expect(
         tester
             .widget<LinearProgressIndicator>(
-              find.byKey(const ValueKey('day-timer')),
+              find.byKey(const ValueKey('phase-timer')),
             )
             .value,
         1,
       );
-      expect(find.byKey(const ValueKey('collection-timer')), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      final timer = find.byKey(const ValueKey('phase-timer'));
+      final timerElement = tester.element(timer);
+      final timerRect = tester.getRect(timer);
+      final productionColor = tester
+          .widget<LinearProgressIndicator>(timer)
+          .color;
+      final seconds = find.byKey(const ValueKey('remaining-seconds'));
+      expect(tester.getRect(seconds).bottom, lessThan(timerRect.top));
+      expect(tester.getRect(seconds).right, closeTo(timerRect.right, .01));
+      expect(tester.widget<Text>(seconds).style!.fontSize, lessThan(16));
+      final boardRect = tester.getRect(
+        find.byKey(const ValueKey('gameplay-board')),
+      );
+      final balanceRect = tester.getRect(
+        find.byKey(const ValueKey('gameplay-balance')),
+      );
+      expect(boardRect.contains(balanceRect.topLeft), isTrue);
+      expect(boardRect.contains(balanceRect.bottomRight), isTrue);
+      expect(balanceRect.center.dx, greaterThan(boardRect.center.dx));
+      expect(
+        boardRect.contains(tester.getCenter(find.byTooltip('Pausar'))),
+        isTrue,
+      );
+      expect(
+        find.textContaining(RegExp(r'D[Íí]A?\s*\d', caseSensitive: false)),
+        findsNothing,
+      );
+      expect(find.text('Día'), findsNothing);
+      expect(find.text('Recogida'), findsNothing);
+      expect(find.textContaining('Agarra'), findsNothing);
       session.cycle!.advance(15);
       session.board!.enterClosing();
       session.resume();
       session.pause();
       await tester.pump();
       expect(find.text('5 s'), findsOneWidget);
-      expect(
-        tester
-            .widget<LinearProgressIndicator>(
-              find.byKey(const ValueKey('day-timer')),
-            )
-            .value,
-        0,
-      );
-      expect(
-        tester
-            .widget<LinearProgressIndicator>(
-              find.byKey(const ValueKey('collection-timer')),
-            )
-            .value,
-        1,
-      );
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(tester.element(timer), same(timerElement));
+      expect(tester.getRect(timer), timerRect);
+      final collectionTimer = tester.widget<LinearProgressIndicator>(timer);
+      expect(collectionTimer.value, 1);
+      expect(collectionTimer.color, isNot(productionColor));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await session.pendingWrites;

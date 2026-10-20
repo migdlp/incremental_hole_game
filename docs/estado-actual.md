@@ -11,7 +11,7 @@ Los cuatro ejes de progresión son generar más bolas, capturar una proporción 
 ## Jornada y tablero vigentes
 
 - Arena lógica de 360 × 560. **Agujero arriba** en (180, 50) y **generador abajo** en (180, 480), con salida y velocidad inicial de las bolas hacia arriba. Ajuste de posiciones en código posterior al APK del commit `046ebb0`; pendiente de comprobar en móvil. Se retira la leyenda del jardín del tablero y la frase «Tu jardín te espera» de la pausa.
-- Base de **15 s de producción y 5 s de recogida final**, con barras independientes. Las mejoras de duración dan 18/21/24/27/30 s de producción; la recogida permanece en 5 s.
+- Base de **15 s de producción y 5 s de recogida final**, con una sola barra en el mismo sitio: verde durante producción y naranja durante recogida; contador pequeño encima y alineado a la derecha, sin rótulos de fase. Las mejoras de duración dan 18/21/24/27/30 s de producción; la recogida permanece en 5 s.
 - Emisión inicial de **1,5 bolas/s**: primera bola tras aproximadamente ⅔ s. Generador y Doble emisión aumentan la producción.
 - Durante producción se controlan bolas y se recogen monedas. Durante recogida final se congelan bolas, escoba y robot; se permite cobrar monedas. La cabecera y el contador permanecen legibles sin oscurecer.
 - Al terminar, lo pendiente se pierde. El tablero siguiente empieza vacío y conserva saldo y mejoras.
@@ -71,7 +71,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 - Descubrimiento progresivo: comprados y siguientes nodos accesibles. La partida nueva comienza mostrando Mano I.
 - Nodos comprados con icono y color de categoría; pendientes apagados, comprables con iluminación blanca suave. Conexiones de tramos rectos horizontales, verticales o diagonales.
 - Sin ficha inicial. Tocar un nodo muestra una frase esquemática, cantidades destacadas en verde, coste y requisitos. La compra exige mantener su botón **1 s**; soltar antes, mover, interrumpir o usar otro dedo cancela.
-- Resultados → botón único «Ir al árbol de mejoras» → pantalla del árbol → «Comenzar día». La bienvenida de una partida nueva conserva su inicio directo.
+- Resultados → botón único «Tienda» → tienda → «Comenzar día». La bienvenida de una partida nueva conserva su inicio directo.
 
 ## Debug implementado
 
@@ -121,3 +121,17 @@ No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, b
 4. Documentos de implementación, persistencia e historial cuando la tarea lo requiera. Los planes antiguos contienen decisiones reemplazadas; no deben prevalecer sobre este estado y el código.
 
 El último APK se construyó desde `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Para este relevo importan el comportamiento vigente y las decisiones futuras, no reconstruir el historial de commits.
+
+## Simplificación de gameplay posterior al APK de `6746af2`
+
+No se muestra el número de día en gameplay, resultados ni al comenzar. El saldo
+total (saldo guardado más lo recogido durante producción/recogida) y la pausa
+negra se superponen dentro del tablero; al terminar no se suman dos veces los
+ingresos. Se retiran instrucciones de agarre/cobro, nombres de fases y la
+leyenda GENERADOR. El tablero conserva proporciones y gana espacio al compactar
+la cabecera. La racha conserva su indicador dentro del tablero.
+
+Los ajustes normales incluyen Sonidos del sistema y Feedback visual. Este último
+empieza desactivado y se guarda. Solo controla círculos de pulsación, alcance del
+imán y marcas/líneas de agarre; no cambia la física, el alcance ni los controles.
+La pausa muestra icono de pausa, Juego pausado, ajustes y Continuar.

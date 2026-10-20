@@ -204,7 +204,7 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(find.text('Ir al árbol de mejoras'), findsOneWidget);
+        expect(find.text('Tienda'), findsOneWidget);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
         await session.pendingWrites;

@@ -95,9 +95,9 @@ void main() {
     final session = GameSession(testCatalog(), MemoryStore())
       ..economy.balance = balance;
     await tester.pumpWidget(GardenApp(session: session));
-    await tester.scrollUntilVisible(find.text('Ir al árbol de mejoras'), 200);
+    await tester.scrollUntilVisible(find.text('Tienda'), 200);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Ir al árbol de mejoras'));
+    await tester.tap(find.text('Tienda'));
     await tester.pumpAndSettle();
     expect(find.byType(SkillTreeScreen), findsOneWidget);
     if (inspect) {

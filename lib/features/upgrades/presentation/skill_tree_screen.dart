@@ -384,7 +384,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     title: const Text('Vista del jugador'),
                     subtitle: Text(
                       session.debugFullTree
-                          ? 'Árbol completo. Compras gratuitas con sus requisitos.'
+                          ? 'Tienda completa. Compras gratuitas con sus requisitos.'
                           : 'Solo nodos comprados y siguientes; precios y estados normales.',
                     ),
                     value: !session.debugFullTree,
@@ -435,7 +435,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                   TextButton(
                     key: const ValueKey('debug-close-tools'),
                     onPressed: () => Navigator.of(sheetContext).pop(),
-                    child: const Text('Volver al árbol'),
+                    child: const Text('Volver a la tienda'),
                   ),
                   OutlinedButton(
                     key: const ValueKey('debug-exit'),

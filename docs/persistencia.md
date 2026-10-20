@@ -179,3 +179,10 @@ siguen pasando por la contabilidad normal. Se validan cargas, tiempos y objetivo
 El tiempo cerrado o pausado no recarga. Una nueva jornada reinicia las cargas.
 Los dos agarres de escoba son transitorios: se guarda su pose física, no dedos
 activos; restaurar deja la sesión pausada y sin agarres.
+
+## Preferencia de feedback visual
+
+El JSON v7 admite el campo opcional booleano `visualFeedback`. Se guarda con las
+preferencias, igual que `sound`. Si falta en una partida anterior, se restaura
+como `false`; no se reinicia el progreso ni la jornada. Es presentación: no
+modifica la configuración económica ni la geometría o controles del tablero.

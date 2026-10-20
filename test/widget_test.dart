@@ -15,15 +15,15 @@ void main() {
       final session = GameSession(testCatalog(), MemoryStore());
       await tester.pumpWidget(GardenApp(session: session));
       expect(find.text('JARDÍN MECÁNICO'), findsOneWidget);
-      expect(find.text('Comenzar día 1'), findsOneWidget);
-      await tester.tap(find.text('Comenzar día 1'));
+      expect(find.text('Comenzar día'), findsOneWidget);
+      await tester.tap(find.text('Comenzar día'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       expect(session.running, isTrue);
       expect(find.byTooltip('Pausar'), findsOneWidget);
       await tester.tap(find.byTooltip('Pausar'));
       await tester.pump();
-      expect(find.text('Un pequeño descanso'), findsOneWidget);
+      expect(find.text('Juego pausado'), findsOneWidget);
       final remaining = session.cycle!.remaining;
       await tester.pump(const Duration(seconds: 2));
       expect(session.cycle!.remaining, remaining);
@@ -33,7 +33,7 @@ void main() {
       session.finishDay();
       await tester.pump();
       expect(find.text('Comenzar día 2'), findsNothing);
-      expect(find.text('Ir al árbol de mejoras'), findsOneWidget);
+      expect(find.text('Tienda'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await session.pendingWrites;

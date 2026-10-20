@@ -131,8 +131,8 @@ void main() {
   Future<GameSession> open(WidgetTester tester) async {
     final session = GameSession(catalog, MemoryStore());
     await tester.pumpWidget(GardenApp(session: session));
-    await tester.scrollUntilVisible(find.text('Ir al árbol de mejoras'), 200);
-    await tester.tap(find.text('Ir al árbol de mejoras'));
+    await tester.scrollUntilVisible(find.text('Tienda'), 200);
+    await tester.tap(find.text('Tienda'));
     await tester.pumpAndSettle();
     return session;
   }

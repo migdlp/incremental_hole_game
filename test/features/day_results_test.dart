@@ -82,7 +82,7 @@ void main() {
       expect(session.selectedTool, BallTool.hand);
       expect(session.economy.balance, 104);
       expect(session.progress.day, 2);
-      await tester.tap(find.text('Ir al árbol de mejoras'));
+      await tester.tap(find.text('Tienda'));
       await tester.pumpAndSettle();
       expect(popup, findsNothing);
       expect(find.byKey(const ValueKey('node-hand:1')), findsOneWidget);
@@ -126,7 +126,7 @@ void main() {
       session.finishDay();
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Ir al árbol de mejoras'));
+      await tester.tap(find.text('Tienda'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('node-hand:1')));
       await tester.pumpAndSettle();
@@ -166,7 +166,7 @@ void main() {
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('day-results-popup')), findsOneWidget);
-      await tester.tap(find.text('Ir al árbol de mejoras'));
+      await tester.tap(find.text('Tienda'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('node-hand:1')));
       await tester.pumpAndSettle();

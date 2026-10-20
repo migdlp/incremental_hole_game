@@ -26,6 +26,7 @@ class GameSession extends ChangeNotifier {
   DayCycle? cycle;
   bool paused = false;
   bool sound = true;
+  bool visualFeedback = false;
   String? saveError;
   String? recoveryMessage;
   double _accumulator = 0, _uiClock = 0, _checkpoint = 0;
@@ -253,6 +254,12 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setVisualFeedback(bool value) {
+    visualFeedback = value;
+    save();
+    notifyListeners();
+  }
+
   /// Debug play is temporary: purchases and days never reach the real save.
   bool enterDebug() {
     if (debugEnabled || running) return false;
@@ -402,6 +409,7 @@ class GameSession extends ChangeNotifier {
     'record': progress.record,
     'levels': levels,
     'sound': sound,
+    'visualFeedback': visualFeedback,
     'last': progress.last?.toJson(),
     'run': !running
         ? null
@@ -567,6 +575,7 @@ class GameSession extends ChangeNotifier {
     }
     // Commit only after validating every module; a failed load leaves no partial state.
     final savedSound = json['sound'] as bool;
+    final savedVisualFeedback = json['visualFeedback'] as bool? ?? false;
     progress.day = day;
     progress.record = record;
     progress.last = last;
@@ -591,6 +600,7 @@ class GameSession extends ChangeNotifier {
     board = restoredBoard;
     cycle = restoredCycle;
     sound = savedSound;
+    visualFeedback = savedVisualFeedback;
     paused = running;
     _accumulator = 0;
   }

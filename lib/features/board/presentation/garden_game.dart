@@ -204,13 +204,6 @@ class GardenGame extends FlameGame {
       ),
       paint(const Color(0xff697583)),
     );
-    label(
-      canvas,
-      'GENERADOR',
-      generator + const Offset(0, 38),
-      color: const Color(0xff64573f),
-      fontSize: 10,
-    );
     for (final ball in board.balls) {
       final p = offset(ball.position);
       canvas.drawCircle(
@@ -268,7 +261,8 @@ class GardenGame extends FlameGame {
         paint(const Color(0xfff1e5cd)),
       );
     }
-    if (board.paddle case final Vec point) {
+    if (session.visualFeedback && board.paddle != null) {
+      final point = board.paddle!;
       final p = offset(point);
       if (board.canCollectCoins && board.settings['magnet_radius'] > 0) {
         canvas.drawCircle(

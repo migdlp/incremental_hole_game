@@ -14,14 +14,14 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 
 - **Agujero arriba, generador abajo y emisión hacia arriba.** Último cambio solicitado; ya entregado en APK.
 - Ajuste posterior al APK de `046ebb0`: agujero en (180, 50), generador en (180, 480), sin leyenda del jardín en el tablero ni «Tu jardín te espera» en pausa. Se ha seguido la última indicación del usuario de subir el agujero y bajar el generador; comprobar las posiciones jugando en móvil.
-- **15 s de producción + 5 s de recogida final**; barras independientes. Durante recogida se congelan bolas, escoba y robot. No hay temporizador en compras.
+- **15 s de producción + 5 s de recogida final**; una sola barra que cambia de verde a naranja en el mismo sitio, con segundos pequeños encima a la derecha y sin nombres de fase. Durante recogida se congelan bolas, escoba y robot. No hay temporizador en compras.
 - Generación base 1,5 bolas/s; límite de 200 bolas. Mano base de una bola, capacidad mejorable hasta seis y fuerza de agarre mejorable. Escoba física desbloqueable, anchura/V y robot que empuja bolas.
 - Capturar produce monedas físicas. El dinero depende de recogerlas; pendientes y reserva se pierden al acabar. La mano ocupada bloquea cobro e imán de monedas.
 - Solo monedas de **1/10/50/100/500**, mismo tamaño, color propio y sin valor escrito. UI con icono, sin prefijo dólar. Resumen por denominaciones, sin antigua barra verde.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
 - Racha comprable tras Mano I por 40: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
 - Árbol de 59 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
-- Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → árbol → comenzar día.
+- Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → Tienda → Comenzar día. No mostrar números de día al jugador.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
 Incluido en el APK de `6746af2`: informes temporales de las últimas
@@ -121,3 +121,11 @@ No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi
 siguiente petición concreta.
 ```
+
+## Última simplificación de interfaz
+
+El saldo total y la pausa negra están dentro del tablero. Se eliminan números
+de día, instrucciones de juego y la leyenda del generador. La interfaz usa
+Tienda y Comenzar día. Feedback visual en ajustes normales empieza desactivado,
+se guarda y solo oculta/muestra las marcas de pulsación/área/agarre. La pausa
+muestra Juego pausado con icono de pausa, ajustes y Continuar. Ver estado actual.

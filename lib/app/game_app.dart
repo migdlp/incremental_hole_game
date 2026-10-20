@@ -192,251 +192,217 @@ class _DayScreenState extends State<DayScreen> {
   Widget build(BuildContext context) {
     final session = widget.session;
     final closing = session.phase == DayPhase.closing;
+    final cycle = session.cycle;
+    final seconds = cycle == null
+        ? 0
+        : (closing ? cycle.remaining : cycle.remaining - cycle.closing).ceil();
+    final remaining = cycle == null
+        ? 0.0
+        : (closing
+                  ? cycle.remaining / cycle.closing
+                  : (cycle.remaining - cycle.closing) / cycle.production)
+              .clamp(0.0, 1.0);
+    final color = closing ? const Color(0xffd1764c) : const Color(0xff69b4a5);
     return Column(
       children: [
-        Stack(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'DÍA ${session.running ? session.progress.day : session.progress.last?.day ?? session.progress.day}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                letterSpacing: 2,
-                                color: Color(0xffb5bdc9),
-                              ),
-                            ),
-                            Text(
-                              '${session.cycle == null ? 0 : (closing ? session.cycle!.remaining : session.cycle!.remaining - session.cycle!.closing).ceil()} s',
-                              style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w800,
-                                color: closing
-                                    ? const Color(0xffffae83)
-                                    : cream,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const CoinIcon(),
-                      const SizedBox(width: 7),
-                      Text(
-                        '${session.economy.collected}',
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        tooltip: 'Pausar',
-                        onPressed: session.pause,
-                        icon: const Icon(Icons.pause_rounded),
-                      ),
-                    ],
-                  ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '$seconds s',
+                key: const ValueKey('remaining-seconds'),
+                style: const TextStyle(
+                  color: cream,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      _phaseBar(
-                        'day-timer',
-                        'Día',
-                        session.cycle == null
-                            ? 0
-                            : ((session.cycle!.remaining -
-                                          session.cycle!.closing) /
-                                      session.cycle!.production)
-                                  .clamp(0.0, 1.0),
-                        const Color(0xff69b4a5),
-                      ),
-                      if (closing) ...[
-                        const SizedBox(height: 6),
-                        _phaseBar(
-                          'collection-timer',
-                          'Recogida',
-                          (session.cycle!.remaining / session.cycle!.closing)
-                              .clamp(0.0, 1.0),
-                          const Color(0xffd1764c),
-                        ),
-                      ],
-                    ],
-                  ),
+              ),
+              const SizedBox(height: 3),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: LinearProgressIndicator(
+                  key: const ValueKey('phase-timer'),
+                  value: remaining,
+                  minHeight: 5,
+                  backgroundColor: surface,
+                  color: color,
+                  semanticsLabel: 'Tiempo restante',
                 ),
-                if (session.running)
-                  StreakIndicator(
-                    combo: session.board!.combo,
-                    closing: closing,
-                  ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 5),
-                  child: Text(
-                    !session.running
-                        ? 'Jornada finalizada'
-                        : closing
-                        ? 'ÚLTIMOS SEGUNDOS · Recoge las monedas'
-                        : session.economy.generated > 0
-                        ? (session.board!.sweepEnabled
-                              ? 'Toca o desliza para recoger las monedas'
-                              : 'Pulsa las monedas para recogerlas')
-                        : session.board!.broomUnlocked
-                        ? 'Escoba: un dedo mueve; dos dedos orientan y barren'
-                        : session.board!.handCapacity > 1
-                        ? 'Agarra y acerca otras bolas'
-                        : 'Agarra una bola y llévala al hoyo',
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: closing
-                          ? const Color(0xffffae83)
-                          : const Color(0xffc6cfdb),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
         Expanded(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Listener(
-                  onPointerDown: (event) {
-                    if (session.paused) return;
-                    final point = game.boardPoint(event.localPosition);
-                    if (point == null) return;
-                    if (pointer != null) {
-                      if (secondPointer == null &&
-                          session.grabSecondBroomPoint(point)) {
-                        secondPointer = event.pointer;
-                      }
-                      return;
-                    }
-                    pointer = event.pointer;
-                    session.touch(
-                      point,
-                      time: event.timeStamp.inMicroseconds / 1e6,
-                    );
-                  },
-                  onPointerMove: (event) {
-                    if (session.paused ||
-                        (event.pointer != pointer &&
-                            event.pointer != secondPointer)) {
-                      return;
-                    }
-                    final point = game.boardPoint(event.localPosition);
-                    if (point == null) {
-                      pointer = secondPointer = null;
-                      session.release(cancel: true);
-                    } else if (event.pointer == secondPointer) {
-                      session.dragSecondBroomPoint(point);
-                    } else {
-                      session.drag(
-                        point,
-                        time: event.timeStamp.inMicroseconds / 1e6,
-                      );
-                    }
-                  },
-                  onPointerUp: (event) {
-                    if (event.pointer == secondPointer) {
-                      session.releaseSecondBroomPoint();
-                      secondPointer = null;
-                    } else if (event.pointer == pointer) {
-                      if (secondPointer != null) {
-                        session.releaseSecondBroomPoint(promote: true);
-                        pointer = secondPointer;
-                        secondPointer = null;
-                        return;
-                      }
-                      pointer = null;
-                      final point = game.boardPoint(event.localPosition);
-                      if (point != null) {
-                        session.drag(
+          child: Center(
+            child: AspectRatio(
+              aspectRatio: 360 / 560,
+              child: Stack(
+                key: const ValueKey('gameplay-board'),
+                children: [
+                  Positioned.fill(
+                    child: Listener(
+                      onPointerDown: (event) {
+                        if (session.paused) return;
+                        final point = game.boardPoint(event.localPosition);
+                        if (point == null) return;
+                        if (pointer != null) {
+                          if (secondPointer == null &&
+                              session.grabSecondBroomPoint(point)) {
+                            secondPointer = event.pointer;
+                          }
+                          return;
+                        }
+                        pointer = event.pointer;
+                        session.touch(
                           point,
                           time: event.timeStamp.inMicroseconds / 1e6,
                         );
-                      }
-                      session.release(
-                        cancel: point == null,
-                        time: event.timeStamp.inMicroseconds / 1e6,
-                      );
-                    }
-                  },
-                  onPointerCancel: (event) {
-                    if (event.pointer == pointer ||
-                        event.pointer == secondPointer) {
-                      pointer = secondPointer = null;
-                      session.release(cancel: true);
-                    }
-                  },
-                  child: GameWidget(game: game),
-                ),
-              ),
-              if (session.paused)
-                Positioned.fill(
-                  child: ColoredBox(
-                    color: const Color(0xc0111c2e),
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(28),
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.nights_stay_outlined,
-                                  size: 40,
-                                  color: gold,
+                      },
+                      onPointerMove: (event) {
+                        if (session.paused ||
+                            (event.pointer != pointer &&
+                                event.pointer != secondPointer)) {
+                          return;
+                        }
+                        final point = game.boardPoint(event.localPosition);
+                        if (point == null) {
+                          pointer = secondPointer = null;
+                          session.release(cancel: true);
+                        } else if (event.pointer == secondPointer) {
+                          session.dragSecondBroomPoint(point);
+                        } else {
+                          session.drag(
+                            point,
+                            time: event.timeStamp.inMicroseconds / 1e6,
+                          );
+                        }
+                      },
+                      onPointerUp: (event) {
+                        if (event.pointer == secondPointer) {
+                          session.releaseSecondBroomPoint();
+                          secondPointer = null;
+                        } else if (event.pointer == pointer) {
+                          if (secondPointer != null) {
+                            session.releaseSecondBroomPoint(promote: true);
+                            pointer = secondPointer;
+                            secondPointer = null;
+                            return;
+                          }
+                          pointer = null;
+                          final point = game.boardPoint(event.localPosition);
+                          if (point != null) {
+                            session.drag(
+                              point,
+                              time: event.timeStamp.inMicroseconds / 1e6,
+                            );
+                          }
+                          session.release(
+                            cancel: point == null,
+                            time: event.timeStamp.inMicroseconds / 1e6,
+                          );
+                        }
+                      },
+                      onPointerCancel: (event) {
+                        if (event.pointer == pointer ||
+                            event.pointer == secondPointer) {
+                          pointer = secondPointer = null;
+                          session.release(cancel: true);
+                        }
+                      },
+                      child: GameWidget(game: game),
+                    ),
+                  ),
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: IconButton(
+                      tooltip: 'Pausar',
+                      onPressed: session.pause,
+                      color: Colors.black,
+                      icon: const Icon(Icons.pause_rounded),
+                    ),
+                  ),
+                  Positioned(
+                    top: 15,
+                    right: 16,
+                    child: IgnorePointer(
+                      child: Row(
+                        key: const ValueKey('gameplay-balance'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CoinIcon(),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${session.economy.balance + (session.running ? session.economy.collected : 0)}',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (session.running)
+                    Positioned(
+                      bottom: 8,
+                      left: 0,
+                      right: 0,
+                      child: IgnorePointer(
+                        child: StreakIndicator(
+                          combo: session.board!.combo,
+                          closing: closing,
+                        ),
+                      ),
+                    ),
+                  if (session.paused)
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: const Color(0xc0111c2e),
+                        child: Center(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(16),
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.pause_rounded,
+                                      size: 36,
+                                      color: gold,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      'Juego pausado',
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    _SettingsOptions(session: session),
+                                    FilledButton.icon(
+                                      onPressed: session.resume,
+                                      icon: const Icon(
+                                        Icons.play_arrow_rounded,
+                                      ),
+                                      label: const Text('Continuar'),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  'Un pequeño descanso',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'El tiempo está detenido.',
-                                  textAlign: TextAlign.center,
-                                ),
-                                SwitchListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  title: const Text('Sonidos del sistema'),
-                                  value: session.sound,
-                                  onChanged: session.setSound,
-                                ),
-                                FilledButton.icon(
-                                  onPressed: session.resume,
-                                  icon: const Icon(Icons.play_arrow_rounded),
-                                  label: const Text('Continuar'),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
         if (session.running) SpecialAbilityBar(session: session),
@@ -445,31 +411,30 @@ class _DayScreenState extends State<DayScreen> {
   }
 }
 
-Widget _phaseBar(String id, String label, double remaining, Color color) =>
-    Semantics(
-      label: label,
-      value: '${(remaining * 100).round()} % de tiempo restante',
-      child: Row(
-        children: [
-          SizedBox(
-            width: 64,
-            child: Text(label, style: TextStyle(fontSize: 11, color: color)),
-          ),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: LinearProgressIndicator(
-                key: ValueKey(id),
-                value: remaining,
-                minHeight: 5,
-                backgroundColor: surface,
-                color: color,
-              ),
-            ),
-          ),
-        ],
+class _SettingsOptions extends StatelessWidget {
+  const _SettingsOptions({required this.session});
+  final GameSession session;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: const Text('Sonidos del sistema'),
+        value: session.sound,
+        onChanged: session.setSound,
       ),
-    );
+      SwitchListTile(
+        key: const ValueKey('visual-feedback-setting'),
+        contentPadding: EdgeInsets.zero,
+        title: const Text('Feedback visual'),
+        value: session.visualFeedback,
+        onChanged: session.setVisualFeedback,
+      ),
+    ],
+  );
+}
 
 class _DayResultsOverlay extends StatelessWidget {
   const _DayResultsOverlay({required this.session});
@@ -529,9 +494,7 @@ class NightScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  last == null
-                      ? 'JARDÍN MECÁNICO'
-                      : 'Día ${last.day} completado',
+                  last == null ? 'JARDÍN MECÁNICO' : 'Resultados',
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -567,10 +530,6 @@ class NightScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Agarra una bola, llévala al hoyo y recoge sus monedas.',
-                  style: TextStyle(color: Color(0xffb5bdc9), height: 1.4),
-                ),
               ],
               if (session.recoveryMessage != null)
                 Padding(
@@ -582,12 +541,7 @@ class NightScreen extends StatelessWidget {
                 ),
               if (last == null) ...[
                 const SizedBox(height: 16),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Sonidos del sistema'),
-                  value: session.sound,
-                  onChanged: session.setSound,
-                ),
+                _SettingsOptions(session: session),
               ],
             ],
           ),
@@ -609,15 +563,15 @@ class NightScreen extends StatelessWidget {
                       builder: (_) => SkillTreeScreen(session: session),
                     ),
                   ),
-                  icon: const Icon(Icons.account_tree_outlined),
-                  label: const Text('Ir al árbol de mejoras'),
+                  icon: const Icon(Icons.storefront_outlined),
+                  label: const Text('Tienda'),
                 ),
                 if (last == null) ...[
                   const SizedBox(height: 8),
                   FilledButton.icon(
                     onPressed: session.startDay,
                     icon: const Icon(Icons.wb_sunny_outlined),
-                    label: Text('Comenzar día ${session.progress.day}'),
+                    label: const Text('Comenzar día'),
                   ),
                 ],
               ],

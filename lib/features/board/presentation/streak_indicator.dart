@@ -29,7 +29,7 @@ class StreakIndicator extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: active ? .14 : .05),
+            color: const Color(0xeb111c2e),
             border: Border.all(
               color: color.withValues(alpha: active ? .8 : .25),
             ),

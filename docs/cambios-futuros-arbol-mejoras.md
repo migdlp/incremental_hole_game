@@ -1,6 +1,6 @@
 # Cambios futuros: mecánicas y árbol de mejoras
 
-Actualizado el **20/10/2026**, contrastado con el último APK **0.6.0+13**, a partir del brainstorm de Incremental Hole Game / Jardín Mecánico. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
+Actualizado el **20/10/2026**, contrastado con el último APK **0.6.0+13**, a partir del brainstorm del proyecto, ahora llamado Feed the Hole. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
 
 ## Cómo priorizar al retomar
 

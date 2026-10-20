@@ -1,8 +1,17 @@
-# PRD — Game Incremental
+# PRD — Feed the Hole
 
 Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y objetivos pendientes del MVP
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
+
+## Identidad comercial — G01
+
+El nombre comercial y visible es **Feed the Hole**. Se aplica al nombre Android,
+la interfaz y la versión web. El repositorio sigue siendo
+`migdlp/incremental_hole_game` y el identificador Android sigue siendo
+`com.migdlp.incremental_hole_game`. No se rediseñan icono, gráficos ni paleta.
+Se conservan mecánicas, compras, progreso, claves de guardado y migraciones.
+Las referencias de versiones anteriores se conservan como historia.
 
 ## 1. Visión
 

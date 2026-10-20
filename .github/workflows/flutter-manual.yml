@@ -2,9 +2,21 @@ name: Flutter - APK manual
 
 on:
   workflow_dispatch:
+    inputs:
+      previous_apk_run_id:
+        description: 'Ejecución anterior para comprobar actualización (opcional)'
+        required: false
+        default: ''
+        type: string
+      previous_apk_artifact:
+        description: 'Nombre del artefacto APK anterior'
+        required: false
+        default: 'jardin-mecanico-debug-apk'
+        type: string
 
 permissions:
   contents: read
+  actions: read
 
 defaults:
   run:
@@ -87,19 +99,56 @@ jobs:
 
       - name: Verificar firma y preparar descarga
         run: |
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose \
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs \
             build/app/outputs/flutter-apk/app-debug.apk \
             2>&1 | tee "$RUNNER_TEMP/flutter-logs/apk-signature.log"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging \
+            build/app/outputs/flutter-apk/app-debug.apk \
+            > "$RUNNER_TEMP/flutter-logs/apk-manifest.log"
+          grep -F "package: name='com.migdlp.incremental_hole_game'" "$RUNNER_TEMP/flutter-logs/apk-manifest.log"
+          grep -Fx "application-label:'Feed the Hole'" "$RUNNER_TEMP/flutter-logs/apk-manifest.log"
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-debug.apk dist/jardin-mecanico-debug.apk
+          cp build/app/outputs/flutter-apk/app-debug.apk dist/feed-the-hole-debug.apk
           cd dist
-          sha256sum jardin-mecanico-debug.apk > jardin-mecanico-debug.apk.sha256
+          sha256sum feed-the-hole-debug.apk > feed-the-hole-debug.apk.sha256
+
+      - name: Comprobar actualización sobre APK anterior
+        if: ${{ inputs.previous_apk_run_id != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_RUN: ${{ inputs.previous_apk_run_id }}
+          PREVIOUS_ARTIFACT: ${{ inputs.previous_apk_artifact }}
+        run: |
+          [[ "$PREVIOUS_RUN" =~ ^[0-9]+$ ]]
+          previous_dir="$RUNNER_TEMP/previous-apk"
+          gh run download "$PREVIOUS_RUN" --repo "$GITHUB_REPOSITORY" \
+            --name "$PREVIOUS_ARTIFACT" --dir "$previous_dir"
+          mapfile -t previous_apks < <(find "$previous_dir" -type f -name '*.apk')
+          [[ "${#previous_apks[@]}" -eq 1 ]]
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs \
+            "${previous_apks[0]}" > "$RUNNER_TEMP/flutter-logs/previous-apk-signature.log"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging \
+            "${previous_apks[0]}" > "$RUNNER_TEMP/flutter-logs/previous-apk-manifest.log"
+          old_certificate=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/flutter-logs/previous-apk-signature.log")
+          new_certificate=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/flutter-logs/apk-signature.log")
+          [[ -n "$old_certificate" && -n "$new_certificate" ]]
+          if [[ "$old_certificate" != "$new_certificate" ]]; then
+            echo '::error::La firma difiere de la APK anterior. Se necesita su keystore para actualizar conservando los datos.'
+            exit 1
+          fi
+          old_package=$(head -n 1 "$RUNNER_TEMP/flutter-logs/previous-apk-manifest.log" | cut -d "'" -f 2)
+          new_package=$(head -n 1 "$RUNNER_TEMP/flutter-logs/apk-manifest.log" | cut -d "'" -f 2)
+          old_code=$(head -n 1 "$RUNNER_TEMP/flutter-logs/previous-apk-manifest.log" | cut -d "'" -f 4)
+          new_code=$(head -n 1 "$RUNNER_TEMP/flutter-logs/apk-manifest.log" | cut -d "'" -f 4)
+          [[ "$old_package" == "$new_package" && "$new_code" -gt "$old_code" ]]
+          echo 'Mismo paquete y certificado; versionCode incrementado. Pendiente prueba de instalación en dispositivo.' \
+            | tee "$RUNNER_TEMP/flutter-logs/apk-update-check.log"
 
       - name: Guardar APK descargable
         id: apk
         uses: actions/upload-artifact@v4
         with:
-          name: jardin-mecanico-debug-apk
+          name: feed-the-hole-debug-apk
           path: dist/
           if-no-files-found: error
           compression-level: 0

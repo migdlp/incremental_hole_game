@@ -23,7 +23,7 @@ class GardenApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
-    title: 'Jardín mecánico',
+    title: 'Feed the Hole',
     theme: ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: ink,
@@ -507,7 +507,7 @@ class NightScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  last == null ? 'JARDÍN MECÁNICO' : 'Resultados',
+                  last == null ? 'Feed the Hole' : 'Resultados',
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -535,7 +535,7 @@ class NightScreen extends StatelessWidget {
                 _results()
               else ...[
                 const Text(
-                  'Un pequeño gesto.\nUn jardín que crece.',
+                  'Cada bola cuenta.',
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,

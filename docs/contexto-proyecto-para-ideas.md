@@ -1,10 +1,10 @@
-# Incremental Hole Game — contexto para proponer ideas
+# Feed the Hole — contexto para proponer ideas
 
 ## Qué es el proyecto
 
-**Incremental Hole Game** es un juego incremental para móvil, en desarrollo activo. El jugador dirige bolas por una arena y trata de meterlas en un hoyo. Cada bola capturada genera monedas; recogerlas permite comprar mejoras permanentes y preparar jornadas más productivas. El placer central combina una interacción física sencilla con el crecimiento visible de la economía y nuevas formas de controlar o automatizar el tablero.
+**Feed the Hole** es un juego incremental para móvil, en desarrollo activo. El jugador dirige bolas por una arena y trata de meterlas en un hoyo. Cada bola capturada genera monedas; recogerlas permite comprar mejoras permanentes y preparar jornadas más productivas. El placer central combina una interacción física sencilla con el crecimiento visible de la economía y nuevas formas de controlar o automatizar el tablero.
 
-El proyecto se conoce también como **Jardín Mecánico** en el APK actual. La versión vigente del código y el último APK entregado son **0.6.0+13** (20/10/2026). Para continuar el desarrollo en otro chat, consultar el [relevo de contexto](relevo-contexto.md). El juego es individual y no depende de conexión, cuentas ni servicios en línea.
+El nombre comercial es **Feed the Hole** desde G01. Los APK anteriores a G01 conservarán su nombre histórico. La versión vigente del código y el último APK entregado son **0.6.0+13** (20/10/2026). Para continuar el desarrollo en otro chat, consultar el [relevo de contexto](relevo-contexto.md). El juego es individual y no depende de conexión, cuentas ni servicios en línea.
 
 ## Bucle principal
 

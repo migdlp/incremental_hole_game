@@ -14,7 +14,7 @@ void main() {
     (tester) async {
       final session = GameSession(testCatalog(), MemoryStore());
       await tester.pumpWidget(GardenApp(session: session));
-      expect(find.text('JARDÍN MECÁNICO'), findsOneWidget);
+      expect(find.text('Feed the Hole'), findsOneWidget);
       expect(find.text('Comenzar día'), findsOneWidget);
       await tester.tap(find.text('Comenzar día'));
       await tester.pump();

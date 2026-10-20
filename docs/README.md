@@ -1,4 +1,4 @@
-# Documentación de Jardín mecánico
+# Documentación de Feed the Hole
 
 Referencias de relevo actualizadas el **20/10/2026** para el último APK **0.6.0+13**. Empieza por [relevo de contexto](relevo-contexto.md), [estado actual](estado-actual.md) y [cambios futuros](cambios-futuros-arbol-mejoras.md). Los planes y evidencias de entregas anteriores se conservan como historia; sus cifras pueden estar reemplazadas.
 

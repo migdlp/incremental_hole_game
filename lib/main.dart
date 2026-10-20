@@ -90,7 +90,7 @@ class _BootstrapState extends State<Bootstrap> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Text(
-                          'No pudimos abrir el jardín',
+                          'No pudimos abrir Feed the Hole',
                           style: TextStyle(fontSize: 24),
                         ),
                         const SizedBox(height: 16),

@@ -1,4 +1,4 @@
-# Relevo de contexto — Incremental Hole Game / Jardín Mecánico
+# Relevo de contexto — Feed the Hole
 
 **Actualizado: 20/10/2026 · Último APK entregado: 0.6.0+13, revisión `4d815d9`.**
 
@@ -111,7 +111,7 @@ credenciales; `046ebb0` está publicado.
 ## Mensaje para pegar en un chat nuevo
 
 ```text
-Continúa el proyecto Incremental Hole Game / Jardín Mecánico del repo
+Continúa el proyecto Feed the Hole del repo
 migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
@@ -129,3 +129,12 @@ de día, instrucciones de juego y la leyenda del generador. La interfaz usa
 Tienda y Comenzar día. Feedback visual en ajustes normales empieza desactivado,
 se guarda y solo oculta/muestra las marcas de pulsación/área/agarre. La pausa
 muestra Juego pausado con icono de pausa, ajustes y Continuar. Ver estado actual.
+
+## G01 — Feed the Hole
+
+La marca comercial pasa a Feed the Hole en el build 0.6.0+14. No renombrar
+`GardenApp`, `GardenGame`, el paquete Dart, el repositorio ni el identificador
+Android por motivos cosméticos. Se mantienen `progress.json`, su copia, el
+guardado v7 y todas las migraciones. Iconos, gráficos y reglas se conservan.
+La actualización sobre APK anteriores requiere además conservar la firma;
+verificarla contra la entrega anterior antes de afirmar compatibilidad.

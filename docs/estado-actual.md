@@ -1,4 +1,4 @@
-# Estado actual de Incremental Hole Game / Jardín Mecánico
+# Estado actual de Feed the Hole
 
 Actualizado: **20/10/2026**. Referencia de APK entregado: **0.6.0+13**. La revisión `4d815d9` incorpora interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
@@ -135,3 +135,12 @@ Los ajustes normales incluyen Sonidos del sistema y Feedback visual. Este últim
 empieza desactivado y se guarda. Solo controla círculos de pulsación, alcance del
 imán y marcas/líneas de agarre; no cambia la física, el alcance ni los controles.
 La pausa muestra icono de pausa, Juego pausado, ajustes y Continuar.
+
+## G01 — identidad comercial
+
+El nombre comercial pasa a Feed the Hole en `0.6.0+14`: Android, pantalla de
+bienvenida, título de aplicación, errores de inicio y manifiesto/título web.
+El package ID, repositorio, nombres internos, rutas de guardado y migraciones
+se mantienen. La renombración no toca compras, progreso, físicas ni balance.
+Se conserva el historial anterior. La aceptación de actualización requiere
+comparar firma y paquete con la APK anterior y comprobarla en un dispositivo.

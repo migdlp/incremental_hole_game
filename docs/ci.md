@@ -9,10 +9,10 @@ La pipeline prepara JDK Temurin 21 completo, Android SDK Platforms 35/36, Build 
 
 Después ejecuta doctor, resolución de dependencias, comprobación de formato, análisis, pruebas y `flutter build apk --debug --no-pub` sobre la aplicación del repositorio. Si falta la aplicación, falla expresamente. Un fallo de análisis, pruebas o compilación impide generar el artefacto del APK.
 
-Cuando termina correctamente, el resumen de la ejecución enlaza el artefacto **jardin-mecanico-debug-apk**. También se encuentra al final de la página de la ejecución, en **Artifacts**. Contiene:
+Cuando termina correctamente, el resumen de la ejecución enlaza el artefacto **feed-the-hole-debug-apk**. También se encuentra al final de la página de la ejecución, en **Artifacts**. Contiene:
 
-- `jardin-mecanico-debug.apk`, con firma comprobada mediante `apksigner`.
-- `jardin-mecanico-debug.apk.sha256`, para comprobar la integridad de la descarga.
+- `feed-the-hole-debug.apk`, con firma comprobada mediante `apksigner`.
+- `feed-the-hole-debug.apk.sha256`, para comprobar la integridad de la descarga.
 
 Los registros se guardan en **flutter-validation-logs**, incluso cuando falla la ejecución. Ambos artefactos se conservan 14 días. Es necesario iniciar sesión en GitHub para descargar los artefactos.
 
@@ -36,3 +36,20 @@ El build anterior [39138119402](https://github.com/migdlp/incremental_hole_game/
 El job usa Ubuntu 24.04 y tiene un límite de 40 minutos. Bash propaga errores de tuberías con `pipefail`; los registros se guardan con `tee`. Una nueva ejecución sobre la misma referencia cancela otra que siga en curso, según el grupo de concurrencia del workflow. La comparación de lockfile es estricta mediante `flutter pub get --enforce-lockfile`.
 
 El certificado debug no se conserva mediante una configuración de firma propia entre runners. Para actualizar una app ya instalada, revisar [compatibilidad de firma](guia-desarrollo.md) antes de desinstalar y perder progreso. No hay firma de producción ni publicación en tiendas, aunque el esqueleto Android conserve una configuración `release` de plantilla basada en firma debug.
+
+## G01 — nombre y compatibilidad de actualización
+
+El nuevo build comercial es Feed the Hole, `0.6.0+14`. Se conserva
+`com.migdlp.incremental_hole_game`; el APK y el artefacto nuevos se llaman
+`feed-the-hole-debug.apk` y `feed-the-hole-debug-apk`. Los artefactos anteriores
+conservan sus nombres y referencias originales.
+
+La pipeline comprueba con aapt el nombre visible y el identificador compilados.
+`apksigner --print-certs` registra el certificado público, sin revelar claves.
+Los inputs opcionales `previous_apk_run_id` y `previous_apk_artifact` permiten
+descargar una entrega anterior y comparar paquete, certificado y versionCode.
+Si no coinciden las firmas, se bloquea la publicación del nuevo APK: hace falta
+el keystore anterior, no una migración de datos ni desinstalar la aplicación.
+No afirmar compatibilidad de actualización solo porque el package ID coincida.
+Para G01, la referencia es la entrega `39458229638`, artefacto
+`jardin-mecanico-debug-apk`. Sigue pendiente probar la instalación en un móvil.

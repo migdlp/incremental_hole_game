@@ -2,6 +2,13 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.6.0+14 — G01: Feed the Hole
+
+- Nuevo nombre visible en Android, interfaz y web: Feed the Hole.
+- Documentación vigente y PRD actualizados; referencias históricas conservadas.
+- Mismo identificador Android, repositorio, almacenamiento y migraciones.
+- Sin cambios de mecánicas, iconos ni gráficos.
+
 ## 0.6.0+13
 
 - Agujero arriba y generador abajo, intercambiando sus posiciones. El generador emite hacia arriba y su salida visual sigue esa dirección.

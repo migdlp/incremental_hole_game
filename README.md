@@ -1,4 +1,8 @@
-# Jardín mecánico / Incremental Hole Game
+# Feed the Hole
+
+**G01:** el código de `0.6.0+14` utiliza Feed the Hole como nombre comercial.
+La APK anterior enlazada abajo mantiene su nombre histórico; la entrega nueva
+requiere comprobar también su firma para actualizar conservando los datos.
 
 Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.6.0+13, revisión `4d815d9`**, 20/10/2026.
 

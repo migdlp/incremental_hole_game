@@ -2,6 +2,10 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.6.0+13
+
+- Agujero arriba y generador abajo, intercambiando sus posiciones. El generador emite hacia arriba y su salida visual sigue esa dirección.
+
 ## 0.6.0+12
 
 - Jornada base de 20 segundos: 15 para generar bolas y 5 para recoger monedas.

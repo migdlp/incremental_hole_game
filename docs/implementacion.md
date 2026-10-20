@@ -82,7 +82,7 @@ En cada paso, `Board.update` procesa aterrizaje, emisión si hay producción, im
 
 ## Física e interacción
 
-El mundo mide `360 × 560`; hoyo `(180, 412)` y generador `(180, 60)`. El render escala uniformemente y centra el mundo. La entrada fuera del tablero no se transforma en una pulsación válida. Solo el primer puntero controla el tablero. Su `timeStamp` se pasa a dominio para calcular velocidad sin depender de la frecuencia de eventos.
+El mundo mide `360 × 560`; hoyo arriba en `(180, 60)` y generador abajo en `(180, 412)`, con salida y emisión de bolas hacia arriba. El render escala uniformemente y centra el mundo. La entrada fuera del tablero no se transforma en una pulsación válida. Solo el primer puntero controla el tablero. Su `timeStamp` se pasa a dominio para calcular velocidad sin depender de la frecuencia de eventos.
 
 - La herramienta inicial es `BallTool.hand`. `touch` selecciona una bola próxima y conserva su ID y desplazamiento respecto al dedo. La tolerancia es radio de bola + 12 unidades. Una moneda aterrizada en el radio de recogida tiene prioridad; un gesto vacío no agarra bolas al cruzarlas después.
 - La bola agarrada sigue el objetivo hasta 700 u/s y participa como cuerpo dirigido en los contactos. `releasePointer` usa la velocidad del tramo final de 80 ms, limitada a 380 u/s; por debajo de 18 u/s queda quieta. Parar antes de soltar elimina la inercia anterior. Cancelar no lanza ni confirma un cobro.

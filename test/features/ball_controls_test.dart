@@ -90,15 +90,15 @@ void main() {
     'capture held ball once and never reacquire during the same gesture',
     () {
       final board = Board(catalog.settings({}));
-      final ball = addBall(board, const Vec(180, 360));
+      final ball = addBall(board, Board.hole + const Vec(0, 52));
       board.touch(ball.position);
       board.drag(Board.hole);
       simulate(board, .2);
       expect(board.captured, 1);
       expect(board.heldBall, isNull);
       expect(board.balls, isEmpty);
-      addBall(board, const Vec(180, 350));
-      board.drag(const Vec(180, 350));
+      addBall(board, Board.hole + const Vec(0, 62));
+      board.drag(Board.hole + const Vec(0, 62));
       simulate(board, .1);
       expect(board.heldBall, isNull);
       board.releasePointer();
@@ -171,24 +171,25 @@ void main() {
       catalog.settings({'broom': 1, 'paddle': 1, 'broom_v': 1}),
       tool: BallTool.vee,
     );
-    final left = addBall(board, const Vec(150, 215));
-    final right = addBall(board, const Vec(210, 215));
-    final outside = addBall(board, const Vec(50, 220));
-    board.broomPosition = const Vec(180, 180);
-    board.touch(const Vec(180, 180));
+    final left = addBall(board, const Vec(150, 257));
+    final right = addBall(board, const Vec(210, 257));
+    final outside = addBall(board, const Vec(50, 252));
+    board.broomPosition = const Vec(180, 292);
+    board.toolAngle = -math.pi / 2;
+    board.touch(board.broomPosition);
     expect(board.segments.length, 2);
     for (var i = 1; i <= 120; i++) {
-      board.drag(Vec(180, 180 + i * .6));
+      board.drag(Vec(180, 292 - i * .6));
       board.update(1 / 60, producing: false);
     }
     expect(left.position.x, greaterThan(150));
     expect(right.position.x, lessThan(210));
     expect(right.position.x - left.position.x, lessThan(60));
     expect(outside.position.x, 50);
-    expect(outside.position.y, 220);
+    expect(outside.position.y, 252);
     expect(board.captured, 0);
     for (var i = 121; i <= 450; i++) {
-      board.drag(Vec(180, 180 + i * .6));
+      board.drag(Vec(180, 292 - i * .6));
       board.update(1 / 60, producing: false);
     }
     board.releasePointer();

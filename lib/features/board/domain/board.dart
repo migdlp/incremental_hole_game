@@ -54,8 +54,8 @@ class Board {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
   }
   static const width = 360.0, height = 560.0;
-  static const hole = Vec(180, 412);
-  static const generator = Vec(180, 60);
+  static const hole = Vec(180, 60);
+  static const generator = Vec(180, 412);
   final DaySettings settings;
   final CaptureCombo combo;
   final balls = <Ball>[];
@@ -338,7 +338,7 @@ class Board {
       if (spawnClock + 1e-9 >= settings['spawn_interval']) {
         spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
         final count = math.max(1, settings['balls_per_spawn'].toInt());
-        final center = generator + Vec((random() - .5) * 42, 30);
+        final center = generator + Vec((random() - .5) * 42, -30);
         for (var index = 0; index < count; index++) {
           final spawn =
               center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
@@ -348,7 +348,7 @@ class Board {
               Ball(
                 nextId++,
                 spawn,
-                Vec((random() - .5) * 36, 85),
+                Vec((random() - .5) * 36, -85),
                 golden: random() < .01,
               ),
             );

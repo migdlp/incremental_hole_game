@@ -19,7 +19,7 @@ La jornada base tiene **15 segundos de producción y 5 segundos de recogida**. L
 
 ## Control de bolas y tablero
 
-- La arena contiene un generador, un hoyo y bolas que rebotan entre sí y contra los bordes. El hoyo atrae las bolas cercanas y las captura al entrar en su radio.
+- La arena contiene un generador abajo, un hoyo arriba y bolas que rebotan entre sí y contra los bordes. El generador emite hacia arriba. El hoyo atrae las bolas cercanas y las captura al entrar en su radio.
 - La mano inicial puede llevar una bola. La primera se agarra directamente con el dedo. Al comprar capacidad, se pueden transportar hasta **2, 3, 4, 5 y 6 bolas**. Con una bola ya agarrada, las siguientes cercanas son atraídas hacia la mano; no se teletransportan y conservan movimiento e inercia.
 - La rama **Fuerza de agarre** hace que las bolas adicionales se acerquen y se sujeten con más fuerza. No aumenta la capacidad ni es el imán de monedas.
 - La escoba se desbloquea como herramienta física; después se amplía y puede transformarse en V. Empuja bolas, no las recoge ni genera dinero.

@@ -211,7 +211,7 @@ class GardenGame extends FlameGame {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromCenter(
-          center: generator + const Offset(0, -6),
+          center: generator + const Offset(0, 6),
           width: 42,
           height: 22,
         ),
@@ -222,7 +222,7 @@ class GardenGame extends FlameGame {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromCenter(
-          center: generator + const Offset(0, 21),
+          center: generator + const Offset(0, -21),
           width: 26,
           height: 12,
         ),
@@ -233,7 +233,7 @@ class GardenGame extends FlameGame {
     label(
       canvas,
       'GENERADOR',
-      generator + const Offset(0, -38),
+      generator + const Offset(0, 38),
       color: const Color(0xff64573f),
       fontSize: 10,
     );

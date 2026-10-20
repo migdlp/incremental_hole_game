@@ -253,8 +253,8 @@ void main() {
     'capturing the manual ball frees its slot without promoting a spring to a rigid grip',
     () {
       final board = Board(catalog.settings({'hand': 1}));
-      final first = ball(board, const Vec(180, 360));
-      final second = ball(board, const Vec(206, 360));
+      final first = ball(board, Board.hole + const Vec(0, 52));
+      final second = ball(board, Board.hole + const Vec(26, 52));
       board.touch(first.position);
       step(board, 240);
       first.position = Board.hole;
@@ -262,10 +262,10 @@ void main() {
       step(board, 1);
       expect(board.captured, 1);
       expect(board.heldBalls, [second]);
-      final third = ball(board, const Vec(220, 370));
+      final third = ball(board, Board.hole + const Vec(40, 42));
       step(board, 1);
       expect(board.heldBalls, containsAll([second, third]));
-      expect(second.position.y, lessThan(370));
+      expect(second.position.y, greaterThan(Board.hole.y + 42));
     },
   );
 

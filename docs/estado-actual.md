@@ -1,5 +1,7 @@
 # Estado actual del prototipo
 
+> **Revisión 0.6.0+13:** agujero arriba y generador abajo; la salida del generador y las bolas apuntan hacia arriba. Las 135 pruebas pasan con esta disposición.
+
 > **Revisión 0.6.0+12:** jornada base de 15 s de producción y 5 s de recogida. Las jornadas activas guardadas con balances anteriores mantienen sus tiempos. Incluye el modo debug del árbol, detallado abajo. La suite completa pasa 135 pruebas y `flutter analyze` no encuentra problemas. No se pudo compilar APK local porque el entorno no tiene Android SDK.
 
 > **Depuración incorporada en 0.6.0+11:** acceso oculto manteniendo el saldo del árbol 3 s, vista completa o del jugador, compras gratuitas con requisitos, compra total y jornadas temporales sin escribir sobre el progreso normal. [Instrucciones](modo-debug.md).

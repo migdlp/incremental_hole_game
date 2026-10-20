@@ -144,3 +144,9 @@ El package ID, repositorio, nombres internos, rutas de guardado y migraciones
 se mantienen. La renombración no toca compras, progreso, físicas ni balance.
 Se conserva el historial anterior. La aceptación de actualización requiere
 comparar firma y paquete con la APK anterior y comprobarla en un dispositivo.
+
+**Resultado G01:** código de marca publicado en `fd3d8f2`; el APK compila y su
+nombre/paquete son correctos. La comparación con la última APK detectó firmas
+diferentes y detuvo la publicación. Falta localizar y reutilizar el keystore
+original para cumplir la actualización conservando datos.
+[Diagnóstico y evidencia de G01](g01-feed-the-hole.md).

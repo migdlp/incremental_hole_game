@@ -138,3 +138,9 @@ Android por motivos cosméticos. Se mantienen `progress.json`, su copia, el
 guardado v7 y todas las migraciones. Iconos, gráficos y reglas se conservan.
 La actualización sobre APK anteriores requiere además conservar la firma;
 verificarla contra la entrega anterior antes de afirmar compatibilidad.
+
+**Resultado G01:** código de marca publicado en `fd3d8f2`; el APK compila y su
+nombre/paquete son correctos. La comparación con la última APK detectó firmas
+diferentes y detuvo la publicación. Falta localizar y reutilizar el keystore
+original para cumplir la actualización conservando datos.
+[Diagnóstico y evidencia de G01](g01-feed-the-hole.md).

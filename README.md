@@ -1,10 +1,11 @@
 # Feed the Hole
 
 **G01:** el código de `0.6.0+14` utiliza Feed the Hole como nombre comercial.
-La APK anterior enlazada abajo mantiene su nombre histórico; la entrega nueva
-requiere comprobar también su firma para actualizar conservando los datos.
+La APK anterior enlazada abajo mantiene su nombre histórico. La compilación G01
+ha confirmado una firma distinta y no se publica como actualización: hace falta
+reutilizar su keystore original. [Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.6.0+13, revisión `4d815d9`**, 20/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código G01: 0.6.0+14. Último APK entregado: 0.6.0+13, revisión `4d815d9`**, 20/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 

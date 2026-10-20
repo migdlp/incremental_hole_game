@@ -4,7 +4,7 @@ Disponible en el código de la revisión 0.6.0+11. Es una sesión de pruebas tem
 
 ## Acceso desde el móvil
 
-1. Abre el árbol de mejoras entre jornadas.
+1. Abre la tienda entre jornadas.
 2. Pulsa el botón **DEBUG**, arriba a la izquierda.
 3. Se activa la prueba y aparece el panel «Depuración». Mientras esté activa, el botón **DEBUG** del árbol vuelve a abrir este panel.
 

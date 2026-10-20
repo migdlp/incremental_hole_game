@@ -1,6 +1,6 @@
 # Relevo de contexto — Incremental Hole Game / Jardín Mecánico
 
-**Actualizado: 20/10/2026 · Último APK entregado: 0.6.0+13, revisión `6746af2`.**
+**Actualizado: 20/10/2026 · Último APK entregado: 0.6.0+13, revisión `4d815d9`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
 
@@ -24,7 +24,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → Tienda → Comenzar día. No mostrar números de día al jugador.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
-Incluido en el APK de `6746af2`: informes temporales de las últimas
+Incluido en el APK de `4d815d9`: informes temporales de las últimas
 20 jornadas debug con emisiones, capturas/doradas, pico de combo y monedas
 generadas/cobradas/perdidas; se pueden copiar desde el panel. La petición inicial fue recorrer las mejoras futuras y añadir
 las nuevas bolas como mejoras probables desde debug; después el usuario priorizó
@@ -38,7 +38,7 @@ con carga automática durante producción y mejoras de recarga, potencia y durac
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
 el otro agarre. Guardado v7 / balance v8, con balance v7 congelado para jornadas
-antiguas. Verificación local y CI: 151 pruebas y análisis
+antiguas. Verificación local y CI: 154 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
 ## Próximas mejoras y decisiones abiertas
@@ -69,9 +69,9 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 
 ## Última entrega y comprobaciones
 
-[Descargar APK 0.6.0+13 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628/artifacts/12277113160). Descomprimir e instalar `jardin-mecanico-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
+[Descargar APK 0.6.0+13 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638/artifacts/12281513638). Descomprimir e instalar `jardin-mecanico-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
-151 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+154 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
 
 ## Acceso a GitHub desde Codex Cloud (20/10/2026)
 

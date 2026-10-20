@@ -1,6 +1,6 @@
 # Estado actual de Incremental Hole Game / Jardín Mecánico
 
-Actualizado: **20/10/2026**. Referencia de APK entregado: **0.6.0+13**. La revisión `6746af2` incorpora la racha comprable, dos especiales, escoba de dos puntos, botón DEBUG y ajuste de posiciones. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **20/10/2026**. Referencia de APK entregado: **0.6.0+13**. La revisión `4d815d9` incorpora interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -86,18 +86,18 @@ Acceso directo: botón **DEBUG**, arriba a la izquierda del árbol. Un toque abr
 **Incluido en el último APK:** el panel debug muestra el informe
 de la última jornada y permite copiar los últimos 20: emisiones efectivas,
 capturas, doradas, pico de combo y monedas generadas/cobradas/perdidas. Estos
-datos son temporales y se descartan al reiniciar la prueba o salir. Incluido en el APK de la revisión `6746af2` enlazado abajo. Las nuevas bolas aún no se
+datos son temporales y se descartan al reiniciar la prueba o salir. Incluido en el APK de la revisión `4d815d9` enlazado abajo. Las nuevas bolas aún no se
 han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
-**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628/artifacts/12277113160)**. Descomprimir e instalar `jardin-mecanico-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
+**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638/artifacts/12281513638)**. Descomprimir e instalar `jardin-mecanico-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628): formato, análisis, **151 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `6746af2`. Incluye Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638): formato, análisis, **154 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `4d815d9`. Incluye Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
 
 Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 59 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 
-La revisión entregada pasa 151 pruebas automáticas, además de análisis sin avisos.
+La revisión entregada pasa 154 pruebas automáticas, además de análisis sin avisos.
 Incluyen compra y persistencia de Racha, cargas/activaciones de especiales,
 compatibilidad con jornadas anteriores, eventos reales de dos dedos y pantalla
 de 320 × 568 con texto al 150 %. La pausa permite desplazar su panel si el
@@ -122,7 +122,7 @@ No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, b
 
 El último APK se construyó desde `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Para este relevo importan el comportamiento vigente y las decisiones futuras, no reconstruir el historial de commits.
 
-## Simplificación de gameplay posterior al APK de `6746af2`
+## Simplificación de gameplay incluida en `4d815d9`
 
 No se muestra el número de día en gameplay, resultados ni al comenzar. El saldo
 total (saldo guardado más lo recogido durante producción/recogida) y la pausa

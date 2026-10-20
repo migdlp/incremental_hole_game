@@ -1,12 +1,12 @@
 # Jardín mecánico / Incremental Hole Game
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.6.0+13, revisión `6746af2`**, 20/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.6.0+13, revisión `4d815d9`**, 20/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
-**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628/artifacts/12277113160)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39447501628): formato, análisis, **151 pruebas**, compilación Android y firma. Descomprimir e instalar `jardin-mecanico-debug.apk`. Los artefactos tienen retención limitada.
+**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638/artifacts/12281513638)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638): formato, análisis, **154 pruebas**, compilación Android y firma. Descomprimir e instalar `jardin-mecanico-debug.apk`. Los artefactos tienen retención limitada.
 
-La última entrega incluye **agujero arriba, generador abajo, emisión hacia arriba, jornada base de 15+5 segundos, combos y debug del árbol**. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
+La última entrega incluye **interfaz de juego simplificada, una sola barra de tiempo, saldo y pausa dentro del tablero y feedback visual opcional apagado por defecto**, además de racha comprable, especiales y escoba de dos dedos. La interfaz usa «Tienda» y «Comenzar día», sin mostrar números de día. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 

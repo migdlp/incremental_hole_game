@@ -2,6 +2,7 @@ import 'legacy_balance.dart';
 import 'balance_v4.dart';
 import 'balance_v5.dart';
 import 'balance_v6.dart';
+import 'balance_v7.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -26,7 +27,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 7});
+  DaySettings(this.values, {this.balanceVersion = 8});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -56,6 +57,13 @@ class UpgradeCatalog {
     'duration': ['Día más largo', 'Tiempo'],
     'robot': ['Robot ayudante', 'Automatización'],
     'robot_speed': ['Velocidad del robot', 'Automatización'],
+    'combo': ['Racha de capturas', 'Valor'],
+    'capture_all': ['Captura total', 'Control'],
+    'capture_recharge': ['Recarga de captura total', 'Control'],
+    'boost': ['Aceleración especial', 'Producción'],
+    'boost_power': ['Potencia de aceleración', 'Producción'],
+    'boost_duration': ['Duración de aceleración', 'Producción'],
+    'boost_recharge': ['Recarga de aceleración', 'Producción'],
   };
 
   factory UpgradeCatalog.fromCsv(String csv) {
@@ -140,10 +148,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 7}) {
-    final values = balanceVersion <= 6 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 6) {
-      final historicalCsv = balanceVersion == 6
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 8}) {
+    final values = balanceVersion <= 7 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 7) {
+      final historicalCsv = balanceVersion == 7
+          ? balanceV7Csv
+          : balanceVersion == 6
           ? balanceV6Csv
           : balanceVersion == 5
           ? balanceV5Csv
@@ -197,7 +207,7 @@ class UpgradeCatalog {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 7,
+    int balanceVersion = 8,
   }) {
     if (previousTree.isNotEmpty) {
       validateLevels(

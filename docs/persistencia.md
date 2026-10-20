@@ -164,3 +164,18 @@ Una segunda llamada a `finishDay()` se ignora al no haber jornada. Tras cargar u
 La evidencia de archivo disponible procede de pruebas Linux y la de web de recargas en Chromium. La aceptación de recuperación y cierre forzado en Android físico sigue pendiente en [estado actual](estado-actual.md).
 
 El tablero congelado detrás del pop-up de resultados es un detalle de presentación en memoria. `run` sigue siendo `null` al cerrar y no se guarda ese fondo; al reabrir una noche se muestra un tablero vacío detenido con los resultados y las compras conservados.
+
+## Actualización: guardado v7 y balance v8
+
+La racha pasa a requerir compra. El balance v7 está congelado en
+`balance_v7.dart`: jornadas antiguas conservan recompensa, tiempos y racha hasta
+terminar; las nuevas usan v8 y exigen el desbloqueo. Se mantiene lectura de JSON
+v1–v6, conservando saldo y niveles.
+
+Los tableros v8 guardan `specials` (cargas y duración restante) y `captureAllIds`
+(bolas ya presentes al activar Captura total). Una activación pendiente se
+consume una vez en el siguiente paso, incluso si se guarda antes; las monedas
+siguen pasando por la contabilidad normal. Se validan cargas, tiempos y objetivos.
+El tiempo cerrado o pausado no recarga. Una nueva jornada reinicia las cargas.
+Los dos agarres de escoba son transitorios: se guarda su pose física, no dedos
+activos; restaurar deja la sesión pausada y sin agarres.

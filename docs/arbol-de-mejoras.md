@@ -1,19 +1,20 @@
 # Árbol de mejoras progresivo
 
-Referencia vigente: **0.6.0+13**, 20/10/2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
+Código posterior a **0.6.0+13**, 20/10/2026; el APK enlazado en estado actual aún no incluye estos cambios. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
 **Debug:** mantener el saldo del árbol 3 s para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
 ## Mapa actual
 
-Quince tipos y **49 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las seis ramas iniciales se pueden desarrollar conjuntamente.
+Veintidós tipos y **59 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las seis ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
-🟣 MANO I · 13 dólares · 2 bolas
+🟣 MANO I · 13 monedas · 2 bolas
 │
 ├─ 🟣 FUERZA DE AGARRE I → II → III → IV → V
 │
 ├─ 🟢 GENERADOR I
+│  ├─ ACELERACIÓN · 100 → POTENCIA / DURACIÓN I–II / RECARGA I–II
 │  └─ Generador II
 │     ├─ Generador III → IV → V
 │     │  └─ 🟢 DOBLE EMISIÓN (+ Anchura III)
@@ -21,15 +22,18 @@ Quince tipos y **49 nodos**, uno por nivel comprable. Cada nivel requiere el ant
 │
 ├─ 🟡 VALOR I → II → III → IV → V
 │
+├─ 🟡 RACHA · 40 monedas
+│  └─ CAPTURA TOTAL · 120 → RECARGA I → II
+│
 ├─ 🔵 BARRIDO DE MONEDAS (opcional)
 │
 ├─ 🔵 ÁREA I → II → III
 │                 ├─ Área IV → V
-│                 └─ IMÁN · 300 dólares → ATRACCIÓN I → II → III
+│                 └─ IMÁN · 300 monedas → ATRACCIÓN I → II → III
 │
 └─ 🟣 MANO II · 3 bolas
    ├─ Mano III → IV → V · 4 → 5 → 6 bolas
-   └─ DESBLOQUEAR ESCOBA · 20 dólares
+   └─ DESBLOQUEAR ESCOBA · 20 monedas
       └─ ANCHURA I
          ├─ Anchura II
          │  ├─ Anchura III → IV → V
@@ -60,7 +64,7 @@ Los nodos comprados muestran su icono y color de tipo, con marca de compra. Los 
 ## Recorrido e interacción
 
 1. El pop-up de estadísticas tiene un solo botón: «Ir al árbol de mejoras», que abre su pantalla independiente.
-2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Barrido, Área I, Fuerza I y Mano II.
+2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Racha, Barrido, Área I, Fuerza I y Mano II.
 3. Pulsar un nodo consulta su efecto y coste; mantener pulsado un segundo en el botón de compra de la ficha compra una sola vez. El nodo solo consulta, incluso al mantenerlo pulsado.
 4. Soltar antes, arrastrar, añadir otro dedo o pasar a segundo plano cancela la compra sin gastar.
 5. «Comenzar día» está fijo en la pantalla del árbol: cancela cualquier compra incompleta, inicia directamente la jornada y cierra esa pantalla. Atrás puede volver al resumen, que no permite empezar el día. La bienvenida de una partida nueva conserva su inicio directo.
@@ -69,9 +73,9 @@ El catálogo y la sesión comprueban los mismos requisitos que el árbol, inclui
 
 ## Balance y compatibilidad
 
-Base: 1,5 emisiones/s, valor normal 1 por bola, 15 segundos de producción y 5 de recogida final. Día más largo I–V aumenta la producción a 18/21/24/27/30 segundos; el cierre sigue en 5. Mano I cuesta 13 dólares; Valor sigue 2/3/5/8/13 y el imán cuesta 300 tras Área III; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
+Base: 1,5 emisiones/s, valor normal 1 por bola, 15 segundos de producción y 5 de recogida final. Día más largo I–V aumenta la producción a 18/21/24/27/30 segundos; el cierre sigue en 5. Mano I cuesta 13 monedas; Valor sigue 2/3/5/8/13 y el imán cuesta 300 tras Área III; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
 
-El guardado JSON v6 conserva compras, saldo y jornadas activas de versiones anteriores. Las jornadas con balance 1–6 mantienen su configuración hasta terminar; la siguiente jornada usa balance 7. Los balances históricos están congelados. El imán comprado antes del cambio conserva su acceso sin regalar Área II/III; las nuevas compras requieren Área III. Las pilas antiguas se descomponen en monedas válidas sin alterar su importe pendiente. Ver [persistencia](persistencia.md).
+El guardado JSON v7 conserva compras, saldo y jornadas activas de versiones anteriores. Las jornadas con balance 1–7 mantienen su configuración hasta terminar; la siguiente jornada usa balance 8. Los balances históricos están congelados. El imán comprado antes del cambio conserva su acceso sin regalar Área II/III; las nuevas compras requieren Área III. Las pilas antiguas se descomponen en monedas válidas sin alterar su importe pendiente. Ver [persistencia](persistencia.md).
 
 ## Verificación
 
@@ -84,3 +88,12 @@ Los cambios pendientes se consultan en [cambios futuros](cambios-futuros-arbol-m
 ## Fuerza de agarre de la mano
 
 `hand_grip` requiere Mano I y se amplía hasta cinco niveles. Aumenta la rapidez con la que las bolas adicionales se acercan y la resistencia de su sujeción; la primera se sigue agarrando a mano, la capacidad y el alcance no cambian. Se distingue del imán de monedas. Los costes y factores están en el CSV. El agarre conserva movimiento físico, inercia al soltar y cancelación segura al pausar o entrar en recogida final.
+
+## Racha y especiales (balance de prueba)
+
+Racha deja de ser gratuita. Conserva ventana y multiplicadores, con indicador
+desde la primera captura. Captura total requiere Racha; Aceleración requiere
+Generador I. El CSV define los costes, recargas y mejoras. La recarga de Captura
+total baja de 12 a 10/8 s; Aceleración pasa de ×2 a ×3, dura 4 → 5/6 s y carga en
+10 → 8/6 s. Estas cifras son provisionales para probar. No cambian saldo ni
+compras anteriores. Las jornadas antiguas se completan con su configuración.

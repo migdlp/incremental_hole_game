@@ -1,6 +1,6 @@
 # Estado actual de Incremental Hole Game / Jardín Mecánico
 
-Actualizado: **20/10/2026**. Referencia: **0.6.0+13**, último APK entregado al usuario. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **20/10/2026**. Referencia de APK entregado: **0.6.0+13**. El código de trabajo posterior incorpora la racha comprable, dos especiales y la escoba de dos puntos; estos cambios todavía no están en ese APK. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -24,6 +24,7 @@ Los cuatro ejes de progresión son generar más bolas, capturar una proporción 
 - La primera bola se agarra manualmente. Solo una mano ya ocupada atrae bolas adicionales cercanas, hasta su capacidad. Conservan movimiento físico, retraso e inercia y pueden soltarse con tirones fuertes.
 - Fuerza de agarre I–V acelera la aproximación y refuerza la sujeción de las bolas adicionales. No aumenta capacidad ni recoge monedas.
 - La escoba se desbloquea tras Mano II. Es un objeto físico que se puede agarrar; Anchura y V modifican esa misma herramienta. Empuja bolas y no cobra monedas.
+- La escoba muestra dos puntos de agarre. Un dedo traslada conservando orientación; dos dedos fijan traslado y giro, sin estirar la herramienta. Al levantar uno se conserva el otro agarre; pausa/cancelación/recogida liberan ambos. El giro mantiene límite físico de 3 rad/s. La V usa el mismo control.
 - Un robot desbloqueable empuja bolas hacia el agujero; su velocidad se mejora. No recoge monedas.
 - **Mientras haya alguna bola agarrada, se bloquean tanto el cobro como la atracción de monedas.**
 
@@ -35,13 +36,36 @@ Los cuatro ejes de progresión son generar más bolas, capturar una proporción 
 - Denominaciones únicas: **1 / 10 / 50 / 100 / 500**. Colores: dorado / verde esmeralda / azul / violeta / coral. Todas tienen las mismas dimensiones y no muestran cifras ni símbolos en su cara. La UI usa icono de moneda sin prefijo dólar.
 - Toque para cobrar; Barrido permite arrastrar. Área mejora la recogida manual sin exigir Barrido ni Imán. **Imán cuesta 300 y requiere Área III**; Atracción amplía su alcance.
 - Resumen diario con recuento por denominación, de mayor a menor. La antigua barra verde cobrado/generado está eliminada.
-- Combos desde el inicio: ventana inclusiva de **1 s**; capturas 1–4 **×1**, 5–9 **×2**, desde la décima **×3**. La quinta y décima usan ya su nuevo multiplicador. No se modifican premios anteriores.
+- Racha comprable en el árbol (`combo`): requiere Mano I y cuesta **40**. Sin comprarla no hay racha ni multiplicadores. Una vez desbloqueada: ventana inclusiva de **1 s**; capturas 1–4 **×1**, 5–9 **×2**, desde la décima **×3**. La quinta y décima usan ya su nuevo multiplicador. No se modifican premios anteriores.
 - Se combinan Valor × dorada × combo. Toda recompensa sigue requiriendo recoger sus monedas. Todas las capturas, incluidas las asistidas, cuentan provisionalmente.
-- La racha termina al superar la ventana o entrar en recogida final. Pausar y restaurar no consumen tiempo. La UI muestra COMBO ×2/×3; se quiere que el jugador descubra los umbrales, sin explicar la fórmula en pantalla.
+- La racha termina al superar la ventana o entrar en recogida final. Pausar y restaurar no consumen tiempo. Un indicador muestra «Racha lista», contador desde la primera captura, multiplicador y barra de tiempo restante. No se explican los umbrales ni la fórmula en pantalla.
+
+## Habilidades especiales comprables
+
+**Balance provisional de prueba**, ajustable desde `balance.csv`:
+
+| Mejora | Requisito | Coste | Efecto |
+| --- | --- | --- | --- |
+| Captura total | Racha | 120 | Captura todas las bolas presentes al activar. |
+| Recarga de captura I / II | Captura total | 160 / 280 | Carga de 12 → 10 → 8 s. |
+| Aceleración especial | Generador I | 100 | Generación ×2 durante 4 s. |
+| Potencia de aceleración | Aceleración | 220 | Generación ×3 mientras está activa. |
+| Duración I / II | Aceleración | 140 / 240 | Duración de 4 → 5 → 6 s. |
+| Recarga de aceleración I / II | Aceleración | 140 / 240 | Carga de 10 → 8 → 6 s. |
+
+Los botones «Captura» y «Turbo» muestran carga/lista y duración activa. Se empieza
+cada día sin carga; solo carga el tiempo de producción simulado. La aceleración
+recarga después de terminar su efecto. No se pueden activar en pausa ni en
+recogida final. Captura total sin bolas conserva la carga. Solo captura las bolas
+presentes al pulsar, no futuras emisiones; genera monedas físicas y usa los combos
+si se han comprado. No cobra dinero directamente. La aceleración respeta el
+límite de 200 bolas y los obstáculos de salida. Las jornadas debug permiten
+comprarlas y probarlas sin escribir progreso real. No son las tres habilidades
+aleatorias propuestas en CF-19, que siguen pendientes.
 
 ## Árbol e interfaz
 
-**49 nodos en 15 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
+**59 nodos en 22 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
 
 - Pantalla independiente, sin título, botón visible de atrás ni botones de zoom. Navegación con arrastre y pellizco.
 - Descubrimiento progresivo: comprados y siguientes nodos accesibles. La partida nueva comienza mostrando Mano I.
@@ -53,11 +77,18 @@ Los cuatro ejes de progresión son generar más bolas, capturar una proporción 
 
 Acceso oculto: **mantener pulsado 3 s el saldo del árbol**, arriba a la derecha. No está en las opciones normales.
 
-- Vista completa: encuadra los 49 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
+- Vista completa: encuadra los 59 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
 - Vista del jugador: descubrimiento y compras normales usando saldo y mejoras de prueba. Ambas vistas comparten esa configuración; para ver el principio hay que reiniciar la prueba desde cero.
 - Añadir 1000 monedas de prueba, reiniciar, jugar jornadas de prueba y salir.
 - La prueba es temporal: no sobrescribe el progreso normal. Salir o reabrir recupera la partida real. Durante una jornada de prueba se muestra DEBUG y un botón de salida.
 - [Instrucciones detalladas](modo-debug.md).
+
+**Avance de código posterior al último APK:** el panel debug muestra el informe
+de la última jornada y permite copiar los últimos 20: emisiones efectivas,
+capturas, doradas, pico de combo y monedas generadas/cobradas/perdidas. Estos
+datos son temporales y se descartan al reiniciar la prueba o salir. Este avance
+no está incluido en el APK 0.6.0+13 enlazado abajo. Las nuevas bolas aún no se
+han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
@@ -65,7 +96,14 @@ Acceso oculto: **mantener pulsado 3 s el saldo del árbol**, arriba a la derecha
 
 [Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439): formato, análisis, **135 pruebas**, compilación Android y verificación de firma correctos. Incluye los combos, debug, el ciclo 15+5 y las posiciones intercambiadas.
 
-Las pruebas del debug comprueban acceso oculto, presencia y encuadre de los 49 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
+Las pruebas del debug de esa entrega comprobaron acceso oculto, presencia y encuadre de los 49 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
+
+El código posterior pasa 151 pruebas automáticas, además de análisis sin avisos.
+Incluyen compra y persistencia de Racha, cargas/activaciones de especiales,
+compatibilidad con jornadas anteriores, eventos reales de dos dedos y pantalla
+de 320 × 568 con texto al 150 %. La pausa permite desplazar su panel si el
+espacio es reducido. Estas comprobaciones no generan un nuevo APK ni sustituyen
+la prueba física.
 
 Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y fichas, tacto y rendimiento con carga, guardado/segundo plano/cierre y diversión del nuevo tablero. Falta medir ingresos y jornadas entre compras para ajustar el balance.
 
@@ -73,7 +111,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v6** y balance vigente **v7** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–6 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
+Guardado JSON **v7** y balance vigente **v8** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–7 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, prestigio ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

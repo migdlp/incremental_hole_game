@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import '../core/vec.dart';
 import '../features/board/domain/board.dart';
+import '../features/board/domain/debug_day_report.dart';
+import '../features/board/domain/special_abilities.dart';
 import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/economy/domain/economy.dart';
@@ -32,6 +34,9 @@ class GameSession extends ChangeNotifier {
   bool _disposed = false;
   String? _debugBaseline;
   bool _debugFullTree = true;
+  final _debugReports = <DebugDayReport>[];
+  List<DebugDayReport> get debugReports => List.unmodifiable(_debugReports);
+  int _debugMaxCombo = 1;
   bool get debugEnabled => _debugBaseline != null;
   bool get debugFullTree => debugEnabled && _debugFullTree;
   bool get running => cycle != null;
@@ -70,6 +75,7 @@ class GameSession extends ChangeNotifier {
       closing: settings['closing_duration'],
     );
     economy.begin();
+    _debugMaxCombo = 1;
     paused = false;
     _accumulator = 0;
     _checkpoint = 0;
@@ -109,6 +115,9 @@ class GameSession extends ChangeNotifier {
   void _step(double dt, bool producing) {
     if (dt <= 0) return;
     final events = board!.update(dt, producing: producing);
+    if (debugEnabled) {
+      _debugMaxCombo = math.max(_debugMaxCombo, board!.combo.multiplier);
+    }
     economy.collect(events.collected);
     for (final value in events.rewards) {
       economy.generated += value;
@@ -123,6 +132,20 @@ class GameSession extends ChangeNotifier {
 
   void finishDay() {
     if (!running) return;
+    if (debugEnabled) {
+      _debugReports.add(
+        DebugDayReport(
+          day: progress.day,
+          spawned: board!.spawned,
+          captured: board!.captured,
+          goldenCaptured: board!.goldenCaptured,
+          maxCombo: _debugMaxCombo,
+          generated: economy.generated,
+          collected: economy.collected,
+        ),
+      );
+      if (_debugReports.length > 20) _debugReports.removeAt(0);
+    }
     final result = DayResult(
       day: progress.day,
       income: economy.collected,
@@ -164,6 +187,22 @@ class GameSession extends ChangeNotifier {
     if (collected > 0) notifyListeners();
   }
 
+  bool grabSecondBroomPoint(Vec position) =>
+      running && !paused && board!.grabSecondBroomPoint(position);
+
+  void dragSecondBroomPoint(Vec position) {
+    if (running && !paused) board!.dragSecondBroomPoint(position);
+  }
+
+  void releaseSecondBroomPoint({bool promote = false}) {
+    if (!running) return;
+    if (promote) {
+      board!.promoteSecondBroomPoint();
+    } else {
+      board!.releaseSecondBroomPoint();
+    }
+  }
+
   bool toolAvailable(BallTool tool) {
     final settings = catalog.settings(levels);
     return switch (tool) {
@@ -196,6 +235,18 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool activateSpecial(SpecialAbility ability) {
+    if (!running ||
+        paused ||
+        phase != DayPhase.production ||
+        !board!.activateSpecial(ability)) {
+      return false;
+    }
+    save();
+    notifyListeners();
+    return true;
+  }
+
   void setSound(bool value) {
     sound = value;
     save();
@@ -208,6 +259,7 @@ class GameSession extends ChangeNotifier {
     final baseline = snapshot();
     save();
     _debugBaseline = baseline;
+    _debugReports.clear();
     _debugFullTree = true;
     notifyListeners();
     return true;
@@ -218,6 +270,7 @@ class GameSession extends ChangeNotifier {
     if (baseline == null) return;
     restore(baseline);
     _debugBaseline = null;
+    _debugReports.clear();
     _debugFullTree = true;
     _checkpoint = _uiClock = 0;
     notifyListeners();
@@ -292,6 +345,7 @@ class GameSession extends ChangeNotifier {
 
   void debugReset() {
     if (!debugEnabled || running) return;
+    _debugReports.clear();
     levels.clear();
     _grandfathered.clear();
     _previousTree.clear();
@@ -339,7 +393,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 6,
+    'version': 7,
     'grandfathered': _grandfathered,
     'previousTree': _previousTree,
     'tool': selectedTool.name,
@@ -369,7 +423,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 3 &&
         json['version'] != 4 &&
         json['version'] != 5 &&
-        json['version'] != 6) {
+        json['version'] != 6 &&
+        json['version'] != 7) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -443,7 +498,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 7)) {
+          (balanceVersion < 1 || balanceVersion > 8)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -476,7 +531,7 @@ class GameSession extends ChangeNotifier {
         remaining: remaining,
       );
       final savedBoard = run['board'] as Map<String, dynamic>;
-      if (json['version'] == 6 && savedBoard['combo'] == null) {
+      if ((json['version'] as int) >= 6 && savedBoard['combo'] == null) {
         throw const FormatException('Falta el estado del combo');
       }
       // An active pre-combo day must keep its original rewards until it ends.
@@ -484,6 +539,10 @@ class GameSession extends ChangeNotifier {
         throw const FormatException('Combo en guardado anterior');
       }
       restoredBoard = Board.fromJson(settings, savedBoard);
+      if (balanceVersion >= 8 &&
+          restoredBoard.combo.enabled != (settings['combo_unlocked'] > 0)) {
+        throw const FormatException('Racha sin desbloquear');
+      }
       restoredBoard.tool = restoredTool;
       if (restoredCycle.phase == DayPhase.closing) {
         restoredBoard.enterClosing();

@@ -4,6 +4,7 @@ import '../../automation/domain/robot.dart';
 import 'tool.dart';
 import 'coin_denomination.dart';
 import 'capture_combo.dart';
+import 'special_abilities.dart';
 import '../../upgrades/domain/catalog.dart';
 
 class Ball {
@@ -49,8 +50,13 @@ class Board {
     this.settings, {
     this.randomState = 42,
     this.tool = BallTool.hand,
-    bool combosEnabled = true,
-  }) : combo = CaptureCombo(enabled: combosEnabled) {
+    bool? combosEnabled,
+  }) : specials = SpecialAbilities(settings),
+       combo = CaptureCombo(
+         enabled:
+             combosEnabled ??
+             (settings.balanceVersion < 8 || settings['combo_unlocked'] > 0),
+       ) {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
   }
   static const width = 360.0, height = 560.0;
@@ -58,6 +64,20 @@ class Board {
   static const generator = Vec(180, 412);
   final DaySettings settings;
   final CaptureCombo combo;
+  final SpecialAbilities specials;
+  final _captureAllIds = <int>{};
+
+  bool activateSpecial(SpecialAbility ability) {
+    if (coinOnly || (ability == SpecialAbility.captureAll && balls.isEmpty)) {
+      return false;
+    }
+    if (!specials.activate(ability)) return false;
+    if (ability == SpecialAbility.captureAll) {
+      _captureAllIds.addAll(balls.map((ball) => ball.id));
+    }
+    return true;
+  }
+
   final balls = <Ball>[];
   final coins = <Coin>[];
   // Only five denomination counters are queued if the visible-object cap fills.
@@ -69,6 +89,55 @@ class Board {
   late Vec broomPosition;
   Vec _broomGrabOffset = Vec.zero;
   bool holdingBroom = false;
+  Vec? _secondBroomTarget;
+  Vec _broomPivotOffset = Vec.zero;
+  double _broomReferenceAngle = 0, _broomReferenceToolAngle = 0;
+  bool get hasSecondBroomPoint => _secondBroomTarget != null;
+  List<Vec> get broomHandles =>
+      segments.isEmpty ? const [] : [segments.first.a, segments.last.b];
+
+  bool _onBroom(Vec point, double tolerance) =>
+      segments.any(
+        (segment) => (segment.closest(point) - point).length <= tolerance,
+      ) ||
+      broomHandles.any((handle) => (handle - point).length <= 22);
+
+  bool grabSecondBroomPoint(Vec point) {
+    if (coinOnly ||
+        !holdingBroom ||
+        target == null ||
+        hasSecondBroomPoint ||
+        !_onBroom(point, 22) ||
+        (point - target!).length < 18) {
+      return false;
+    }
+    _secondBroomTarget = point.inside(0);
+    final axis = point - target!;
+    _broomReferenceAngle = math.atan2(axis.y, axis.x);
+    _broomReferenceToolAngle = toolAngle;
+    _broomPivotOffset = broomPosition - (target! + point) * .5;
+    return true;
+  }
+
+  void dragSecondBroomPoint(Vec point) {
+    if (hasSecondBroomPoint) _secondBroomTarget = point.inside(0);
+  }
+
+  void releaseSecondBroomPoint() {
+    _secondBroomTarget = null;
+    if (target != null) _broomGrabOffset = broomPosition - target!;
+    _desiredAngle = toolAngle;
+  }
+
+  void promoteSecondBroomPoint() {
+    final point = _secondBroomTarget;
+    if (point == null) return;
+    paddle = target = point;
+    _downPoint = _directionAnchor = point;
+    _samples.clear();
+    releaseSecondBroomPoint();
+  }
+
   bool coinOnly = false;
   BallTool get broomTool =>
       settings['v_unlocked'] > 0 ? BallTool.vee : BallTool.broom;
@@ -122,6 +191,7 @@ class Board {
   int nextId = 1;
   int randomState;
   int captured = 0;
+  int spawned = 0;
   int goldenCaptured = 0;
   double spawnClock = 0;
   double get radius => settings['ball_radius'];
@@ -153,6 +223,7 @@ class Board {
     _manualBall = null;
     _slippedBalls.clear();
     holdingBroom = false;
+    _secondBroomTarget = null;
     paddle = null;
     target = null;
     _downPoint = null;
@@ -216,9 +287,7 @@ class Board {
         !coinOnly &&
         broomUnlocked &&
         !onCoin &&
-        (segments.any(
-              (segment) => (segment.closest(paddle!) - paddle!).length <= 12,
-            ) ||
+        (_onBroom(paddle!, 12) ||
             segmentDistance(paddle!, broomPosition, handle) <= 12);
     tool = holdingBroom ? broomTool : BallTool.hand;
     if (holdingBroom) {
@@ -251,7 +320,7 @@ class Board {
     final destination = point.inside(0);
     if ((destination - _downPoint!).length > 8) _dragged = true;
     final direction = destination - _directionAnchor!;
-    if (direction.length >= 3) {
+    if (direction.length >= 3 && !holdingBroom) {
       _desiredAngle = math.atan2(direction.y, direction.x);
       _directionAnchor = destination;
     }
@@ -334,8 +403,10 @@ class Board {
       coin.landing = math.max(0, coin.landing - dt);
     }
     if (producing && !coinOnly) {
-      spawnClock += dt;
-      if (spawnClock + 1e-9 >= settings['spawn_interval']) {
+      final acceleratedTime = math.min(dt, specials.boostRemaining);
+      spawnClock += dt + acceleratedTime * (specials.generationMultiplier - 1);
+      specials.advance(dt);
+      while (spawnClock + 1e-9 >= settings['spawn_interval']) {
         spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
         final count = math.max(1, settings['balls_per_spawn'].toInt());
         final center = generator + Vec((random() - .5) * 42, -30);
@@ -344,6 +415,7 @@ class Board {
               center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
           if (balls.length < settings['ball_limit'] &&
               balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
+            spawned++;
             balls.add(
               Ball(
                 nextId++,
@@ -414,7 +486,8 @@ class Board {
     var captures = 0, goldenCaptures = 0;
     final rewards = <int>[];
     balls.removeWhere((ball) {
-      if ((ball.position - hole).length > settings['hole_capture_radius']) {
+      if (!_captureAllIds.contains(ball.id) &&
+          (ball.position - hole).length > settings['hole_capture_radius']) {
         return false;
       }
       _heldBalls.remove(ball);
@@ -427,6 +500,7 @@ class Board {
       );
       return true;
     });
+    _captureAllIds.clear();
     captured += captures;
     goldenCaptured += goldenCaptures;
     return BoardEvents(
@@ -497,9 +571,25 @@ class Board {
     }
     if (!holdingBroom) return;
     final previousBroom = broomPosition;
-    final goal = (target! + _broomGrabOffset).inside(
-      broomHalfWidth + broomThickness,
-    );
+    var desiredCenter = target! + _broomGrabOffset;
+    final second = _secondBroomTarget;
+    if (second != null) {
+      final axis = second - target!;
+      if (axis.length >= 18) {
+        _desiredAngle =
+            _broomReferenceToolAngle +
+            math.atan2(axis.y, axis.x) -
+            _broomReferenceAngle;
+      }
+      final rotation = _desiredAngle - _broomReferenceToolAngle;
+      final c = math.cos(rotation), s = math.sin(rotation);
+      final rotatedOffset = Vec(
+        _broomPivotOffset.x * c - _broomPivotOffset.y * s,
+        _broomPivotOffset.x * s + _broomPivotOffset.y * c,
+      );
+      desiredCenter = (target! + second) * .5 + rotatedOffset;
+    }
+    final goal = desiredCenter.inside(broomHalfWidth + broomThickness);
     broomPosition = previousBroom + (goal - previousBroom).limit(900 * dt);
     var angle = (_desiredAngle - toolAngle + math.pi) % (2 * math.pi) - math.pi;
     if (broomTool == BallTool.broom) {
@@ -633,6 +723,10 @@ class Board {
     'captured': captured,
     'goldenCaptured': goldenCaptured,
     'combo': combo.toJson(),
+    if (settings.balanceVersion >= 8) ...{
+      'specials': specials.toJson(),
+      'captureAllIds': _captureAllIds.toList(),
+    },
     'spawnClock': spawnClock,
     'broomPosition': broomPosition.toJson(),
     'broomAngle': toolAngle,
@@ -746,6 +840,24 @@ class Board {
     if (ids.toSet().length != ids.length ||
         ids.any((id) => id <= 0 || id >= board.nextId)) {
       throw const FormatException('IDs de tablero inválidos');
+    }
+    if (settings.balanceVersion >= 8) {
+      final specials = json['specials'];
+      final pending = json['captureAllIds'];
+      if (specials is! Map<String, dynamic> ||
+          pending is! List ||
+          pending.any(
+            (id) => id is! int || !board.balls.any((ball) => ball.id == id),
+          ) ||
+          pending.toSet().length != pending.length ||
+          (pending.isNotEmpty &&
+              !board.specials.unlocked(SpecialAbility.captureAll))) {
+        throw const FormatException('Estado de habilidades inválido');
+      }
+      board.specials.restore(specials);
+      board._captureAllIds.addAll(pending.cast<int>());
+    } else if (json['specials'] != null || json['captureAllIds'] != null) {
+      throw const FormatException('Habilidades en una jornada anterior');
     }
     // Old saves used arbitrary-value piles. Split them once without changing
     // pending money; overflow is emitted as individual coins when space frees.

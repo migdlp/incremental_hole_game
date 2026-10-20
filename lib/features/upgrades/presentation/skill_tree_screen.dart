@@ -410,6 +410,26 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     'Reinicia la prueba para ver cómo empieza una partida.',
                   ),
                   const SizedBox(height: 12),
+                  if (session.debugReports.isNotEmpty) ...[
+                    const Text('Última jornada de prueba'),
+                    SelectableText(
+                      session.debugReports.last.summary,
+                      key: const ValueKey('debug-day-report'),
+                    ),
+                    TextButton.icon(
+                      key: const ValueKey('debug-copy-reports'),
+                      onPressed: () => Clipboard.setData(
+                        ClipboardData(
+                          text: session.debugReports
+                              .map((report) => report.summary)
+                              .join('\n\n'),
+                        ),
+                      ),
+                      icon: const Icon(Icons.copy),
+                      label: const Text('Copiar jornadas de prueba'),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   FilledButton(
                     key: const ValueKey('debug-buy-all'),
                     onPressed: session.running
@@ -555,7 +575,10 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               : widget.session.catalog.base[node.definition.effect] ?? 0)
         : node.definition.levels[node.level - 2].value;
     final next = node.upgrade.value;
-    final isInterval = node.definition.effect == 'spawn_interval';
+    final isInterval =
+        node.definition.effect == 'spawn_interval' ||
+        node.definition.id == 'capture_recharge' ||
+        node.definition.id == 'boost_recharge';
     final percentage = current > 0
         ? ((isInterval ? current / next : next / current) - 1) * 100
         : null;
@@ -710,8 +733,13 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 }
 
 Color _typeColor(SkillNode node) => switch (node.definition.id) {
-  'generator' || 'double_spawn' => const Color(0xff22c55e),
-  'reward' => const Color(0xffeab308),
+  'generator' ||
+  'double_spawn' ||
+  'boost' ||
+  'boost_power' ||
+  'boost_duration' ||
+  'boost_recharge' => const Color(0xff22c55e),
+  'reward' || 'combo' => const Color(0xffeab308),
   'sweep' ||
   'collection' ||
   'magnet' ||
@@ -734,6 +762,13 @@ const _icons = {
   'double_spawn': Icons.filter_2_outlined,
   'generator': Icons.speed,
   'reward': Icons.toll_outlined,
+  'combo': Icons.local_fire_department_outlined,
+  'capture_all': Icons.blur_circular,
+  'capture_recharge': Icons.hourglass_bottom,
+  'boost': Icons.rocket_launch_outlined,
+  'boost_power': Icons.bolt,
+  'boost_duration': Icons.timer_outlined,
+  'boost_recharge': Icons.hourglass_bottom,
   'duration': Icons.more_time,
   'robot': Icons.smart_toy_outlined,
   'robot_speed': Icons.bolt,
@@ -754,6 +789,17 @@ String _description(SkillNode node) => switch (node.definition.id) {
   'double_spawn' => 'Emite dos bolas a la vez sin cambiar la cadencia',
   'generator' => 'El generador lanza bolas más rápido',
   'reward' => 'Obtén más monedas por cada bola',
+  'combo' => 'Encadena capturas para multiplicar sus monedas',
+  'capture_all' =>
+    'Activa la habilidad cargada para capturar todas las bolas; recoge sus monedas',
+  'capture_recharge' => 'Reduce el tiempo de carga de Captura total',
+  'boost' =>
+    'Activa la habilidad cargada para acelerar temporalmente el generador',
+  'boost_power' =>
+    'Aumenta la velocidad del generador durante la aceleración especial',
+  'boost_duration' =>
+    'Mantiene activa la aceleración especial durante más tiempo',
+  'boost_recharge' => 'Reduce el tiempo de carga de la aceleración especial',
   'duration' => 'Aumenta el tiempo de producción del día',
   'robot' => 'Un robot empuja bolas hacia el hoyo',
   'robot_speed' => 'El robot se mueve más rápido',
@@ -772,6 +818,17 @@ TextSpan _summary(SkillNode node) {
     'magnet' || 'attraction' => ('El imán alcanza ', number(value), ' u.'),
     'generator' => ('Genera ', number(1 / value), ' bolas/s.'),
     'reward' => ('Cada bola da ', number(value), '.'),
+    'combo' => ('', 'Desbloquea la racha', ' de capturas.'),
+    'capture_all' => (
+      '',
+      'Captura todas las bolas',
+      ' con una habilidad recargable.',
+    ),
+    'capture_recharge' => ('Captura total carga en ', number(value), ' s.'),
+    'boost' => ('', 'Acelera el generador', ' con una habilidad recargable.'),
+    'boost_power' => ('Aceleración especial ', '×${number(value)}', '.'),
+    'boost_duration' => ('La aceleración dura ', number(value), ' s.'),
+    'boost_recharge' => ('La aceleración carga en ', number(value), ' s.'),
     'duration' => ('Produce durante ', number(value), ' s.'),
     'robot_speed' => ('El robot avanza a ', number(value), ' u/s.'),
     'double_spawn' => (

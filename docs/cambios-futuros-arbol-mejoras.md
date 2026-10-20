@@ -48,11 +48,16 @@ Antes de implementarla hay que decidir:
 
 ## CF-18 · Revisar balance y progresión de combos
 
-La mecánica básica ya está en el código y no es una tarea pendiente. Falta probar y decidir su versión definitiva:
+La mecánica básica y su desbloqueo mediante compra ya están en el código: Racha requiere Mano I y cuesta 40. Incluye indicador con capturas, multiplicador y barra temporal desde la primera captura. Estos cambios son posteriores al APK 0.6.0+13. Falta probar su balance y decidir posibles ampliaciones:
+
+Ya hay instrumentación en el código posterior al APK 0.6.0+13: el panel debug
+permite consultar y copiar informes temporales con pico de combo, emisiones,
+capturas/doradas y monedas generadas/cobradas/perdidas. Falta obtener y comparar
+resultados de juego; la instrumentación no fija nuevos parámetros ni completa
+esta propuesta.
 
 - Medir si la ventana de 1 segundo y los multiplicadores ×1/×2/×3 ofrecen un ritmo divertido.
 - Revisar la decisión provisional de que todas las capturas, incluidas las asistidas por robot, continúen la racha. El sistema actual no distingue quién causó una captura.
-- Confirmar si los combos deben seguir disponibles desde el principio, como en la primera implementación.
 - Diseñar posibles mejoras del árbol: ventana, recompensas u otras variantes, con precios, límites y requisitos todavía por decidir.
 - Evaluar combinaciones con tiers, doradas, doble emisión y futuros mecanismos.
 - Mantener descubrimiento por feedback visual: no publicar en la interfaz los umbrales ni la fórmula.
@@ -109,7 +114,7 @@ No elegir todavía uno de los dos comportamientos. Definir radio, potencia/destr
 
 ## CF-24 · Nuevos controles táctiles
 
-**Opciones para estudiar.** El lanzamiento mediante gesto rápido ya existe; cualquier ampliación debe aportar algo respecto a su inercia y capacidad actuales.
+**Opciones para estudiar.** La escoba ya tiene control con dos puntos en el código posterior al APK 0.6.0+13: un dedo traslada y dos dedos orientan. Falta validar el tacto en Android. El lanzamiento mediante gesto rápido ya existe; cualquier ampliación debe aportar algo respecto a su inercia y capacidad actuales.
 
 - Lanzamiento más potente o mejorable.
 - Disparo de grupos con patrón concentrado o en abanico.

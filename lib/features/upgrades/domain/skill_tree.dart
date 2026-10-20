@@ -27,6 +27,13 @@ class SkillTree {
       'duration': line(2, 1, -1, 0, 5),
       'double_spawn': line(-2, 0, 0, 0, 1),
       'reward': line(5, 2, 0, -1, 5),
+      'combo': line(6, 2, 0, 0, 1),
+      'capture_all': line(7, 3, 0, 0, 1),
+      'capture_recharge': line(8, 3, 1, 0, 2),
+      'boost': line(3, 2, 0, 0, 1),
+      'boost_power': line(2, 2, 0, 0, 1),
+      'boost_duration': line(3, 4, 0, 1, 2),
+      'boost_recharge': line(3, 0, 1, 0, 2),
       'sweep': line(4, 4, 0, 0, 1),
       'collection': line(4, 3, -1, 0, 5),
       'magnet': line(2, 4, 0, 0, 1),
@@ -95,7 +102,10 @@ class SkillTree {
     }
 
     final start = (parent.x, parent.y), end = (child.x, child.y);
-    if (clear(start, end)) return [start, end];
+    final dx = (end.$1 - start.$1).abs(), dy = (end.$2 - start.$2).abs();
+    if ((dx == 0 || dy == 0 || dx == dy) && clear(start, end)) {
+      return [start, end];
+    }
     (double, double) point((int, int) cell) =>
         (48.0 + cell.$1 * 32, 48.0 + cell.$2 * 32);
     final source = (

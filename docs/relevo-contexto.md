@@ -18,10 +18,28 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 - Capturar produce monedas físicas. El dinero depende de recogerlas; pendientes y reserva se pierden al acabar. La mano ocupada bloquea cobro e imán de monedas.
 - Solo monedas de **1/10/50/100/500**, mismo tamaño, color propio y sin valor escrito. UI con icono, sin prefijo dólar. Resumen por denominaciones, sin antigua barra verde.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
-- Combos implementados desde el inicio: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Mostrar feedback, no explicar umbrales en UI.
-- Árbol de 49 nodos y 15 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
+- Racha comprable tras Mano I por 40 (código posterior al último APK): ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
+- Árbol de 59 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → árbol → comenzar día.
 - **Debug:** mantener saldo del árbol 3 s. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
+
+Avance de código posterior al APK 0.6.0+13: informes temporales de las últimas
+20 jornadas debug con emisiones, capturas/doradas, pico de combo y monedas
+generadas/cobradas/perdidas; se pueden copiar desde el panel. No hay nuevo APK
+de este avance. La petición inicial fue recorrer las mejoras futuras y añadir
+las nuevas bolas como mejoras probables desde debug; después el usuario priorizó
+Racha comprable, dos especiales recargables y control de escoba con dos puntos. Se ha propuesto aislar
+prototipos configurables en debug, probar ambas variantes de bomba y una tabla
+provisional de tiers 1/2/3/5/8. **Son propuestas pendientes de respuesta, no
+reglas aprobadas.** También sigue pendiente la interacción dorada → tier máximo.
+
+Código posterior al APK: dos especiales comprables —Captura total y Aceleración—,
+con carga automática durante producción y mejoras de recarga, potencia y duración.
+Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
+actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
+el otro agarre. Guardado v7 / balance v8, con balance v7 congelado para jornadas
+antiguas. No hay nuevo APK de estos cambios aún. Verificación local: 151 pruebas y análisis
+sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
 ## Próximas mejoras y decisiones abiertas
 
@@ -29,7 +47,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 | --- | --- | --- |
 | CF-16 · Tiers individuales | Valor propio por bola y reemplazo de Valor I–V | Número, valores, colores, probabilidades, nueva rama y migración de compras |
 | CF-17 · Potenciadora | Elevar tiers por contacto estratégico | Depende de CF-16; cargas, consumo, contactos, objetivos y límites |
-| CF-18 · Combos | Revisar la implementación y posibles mejoras | Probar ventana/multiplicadores; confirmar capturas asistidas, disponibilidad inicial y expansión del árbol |
+| CF-18 · Combos | Revisar la implementación y posibles mejoras | Probar ventana/multiplicadores; confirmar capturas asistidas y posibles ampliaciones del árbol; desbloqueo por compra ya implementado |
 | CF-19 · Tres habilidades aleatorias | Elegir una tras noches/hitos, además del árbol | Frecuencia, catálogo, rarezas, duración, acumulación y guardado |
 | CF-20 · Pinball | Flippers manuales y bumpers físicos | Controles móviles, colocación, fuerza, tamaño y límites de contacto |
 | CF-21 · Fábrica configurable | Barreras, deflectores, aros, núcleos, aspas, cañones o ráfagas | Elegir piezas y concretar controles, anclajes, capacidades, requisitos y economía |

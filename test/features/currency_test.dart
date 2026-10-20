@@ -116,7 +116,7 @@ void main() {
       reopened.finishDay();
       reopened.startDay();
       expect(reopened.economy.balance, 125);
-      expect(reopened.board!.settings.balanceVersion, 7);
+      expect(reopened.board!.settings.balanceVersion, 8);
       expect(reopened.board!.settings['ball_value'], 1);
       expect(reopened.cycle!.closing, 5);
       expect(reopened.cycle!.remaining, 20);

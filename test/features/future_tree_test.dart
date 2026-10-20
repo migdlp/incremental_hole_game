@@ -16,9 +16,9 @@ void main() {
       session.purchase(catalog.definitions.firstWhere((d) => d.id == id));
 
   test(
-    'map has six initial paths, five-level lines and the agreed crossings',
+    'map has seven initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(49));
+      expect(tree.nodes, hasLength(59));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -33,6 +33,7 @@ void main() {
           'collection:1',
           'hand:2',
           'hand_grip:1',
+          'combo:1',
         },
       );
       expect(tree.byId('broom:1').parents, ['hand:2']);
@@ -166,7 +167,7 @@ void main() {
           isFalse,
         ); // next purchase follows the new map
         reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 7);
+        expect(reopened.board!.settings.balanceVersion, 8);
         expect(reopened.board!.settings['production_duration'], 21);
         expect(reopened.levels.containsKey('hand'), isFalse);
         expect(reopened.levels.containsKey('sweep'), isFalse);

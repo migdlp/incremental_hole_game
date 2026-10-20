@@ -1,13 +1,12 @@
 import 'dart:convert';
-import 'dart:ui' as ui;
-import 'package:flame/components.dart' show Vector2;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
 import 'package:incremental_hole_game/features/board/domain/capture_combo.dart';
 import 'package:incremental_hole_game/features/board/domain/coin_denomination.dart';
-import 'package:incremental_hole_game/features/board/presentation/garden_game.dart';
+import 'package:incremental_hole_game/features/board/presentation/streak_indicator.dart';
 import '../test_support.dart';
 
 void capture(GameSession session, {bool golden = false}) {
@@ -66,7 +65,7 @@ void main() {
 
   test('golden and purchased values multiply the current capture only', () {
     final session = GameSession(catalog, MemoryStore())
-      ..levels.addAll({'hand': 1, 'reward': 2})
+      ..levels.addAll({'hand': 1, 'reward': 2, 'combo': 1})
       ..startDay();
     var expectedUnits = 0;
     for (var i = 1; i <= 12; i++) {
@@ -102,7 +101,9 @@ void main() {
   test(
     'same-step normal and golden captures keep their order at threshold',
     () {
-      final session = GameSession(catalog, MemoryStore())..startDay();
+      final session = GameSession(catalog, MemoryStore())
+        ..levels.addAll({'hand': 1, 'combo': 1})
+        ..startDay();
       for (var i = 0; i < 3; i++) {
         capture(session);
       }
@@ -123,7 +124,9 @@ void main() {
   );
 
   test('combo money still requires pickup and is banked exactly once', () {
-    final session = GameSession(catalog, MemoryStore())..startDay();
+    final session = GameSession(catalog, MemoryStore())
+      ..levels.addAll({'hand': 1, 'combo': 1})
+      ..startDay();
     for (var i = 0; i < 10; i++) {
       capture(session, golden: i == 9);
     }
@@ -149,7 +152,9 @@ void main() {
   test(
     'pause, reload and closing preserve accounting without gifting time',
     () {
-      final session = GameSession(catalog, MemoryStore())..startDay();
+      final session = GameSession(catalog, MemoryStore())
+        ..levels.addAll({'hand': 1, 'combo': 1})
+        ..startDay();
       for (var i = 0; i < 9; i++) {
         capture(session);
       }
@@ -181,11 +186,15 @@ void main() {
   );
 
   test(
-    'active v5 day keeps old rewards across reload; next day gains combos',
+    'active v5 day keeps old rewards; next day requires buying the streak',
     () {
       final original = GameSession(catalog, MemoryStore())..startDay();
       final old = jsonDecode(original.snapshot()) as Map<String, dynamic>;
       old['version'] = 5;
+      old['run']['balanceVersion'] = 7;
+      old['run']['settings'] = catalog.settings({}, balanceVersion: 7).toJson();
+      old['run']['board'].remove('specials');
+      old['run']['board'].remove('captureAllIds');
       old['run']['board'].remove('combo');
       final migrated = GameSession(catalog, MemoryStore())
         ..restore(jsonEncode(old));
@@ -204,12 +213,15 @@ void main() {
       for (var i = 0; i < 5; i++) {
         capture(reopened);
       }
-      expect(reopened.economy.generated, 6);
+      expect(reopened.economy.generated, 5);
+      expect(reopened.board!.combo.enabled, isFalse);
     },
   );
 
   test('invalid combo state and altered rewards reject restore atomically', () {
-    final session = GameSession(catalog, MemoryStore())..startDay();
+    final session = GameSession(catalog, MemoryStore())
+      ..levels.addAll({'hand': 1, 'combo': 1})
+      ..startDay();
     for (var i = 0; i < 5; i++) {
       capture(session);
     }
@@ -229,47 +241,47 @@ void main() {
     }
   });
 
-  test(
-    'combo feedback appears only for active multipliers, not in closing',
-    () async {
-      final session = GameSession(catalog, MemoryStore())..startDay();
-      final game = GardenGame(session)..onGameResize(Vector2(360, 560));
-      Future<List<int>> pixel() async {
-        final recorder = ui.PictureRecorder();
-        game.render(ui.Canvas(recorder));
-        final picture = recorder.endRecording();
-        final image = await picture.toImage(360, 560);
-        final data = (await image.toByteData(
-          format: ui.ImageByteFormat.rawRgba,
-        ))!;
-        final color = data.buffer.asUint8List().sublist(
-          (150 * 360 + 110) * 4,
-          (150 * 360 + 110) * 4 + 3,
+  testWidgets(
+    'streak feedback starts at first capture and shows remaining window',
+    (tester) async {
+      final combo = CaptureCombo(enabled: false);
+      await tester.pumpWidget(
+        MaterialApp(home: StreakIndicator(combo: combo, closing: false)),
+      );
+      expect(find.byKey(const ValueKey('streak-indicator')), findsNothing);
+      final unlocked = CaptureCombo();
+      Future<void> draw({bool closing = false}) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreakIndicator(combo: unlocked, closing: closing),
+          ),
         );
-        image.dispose();
-        picture.dispose();
-        return color;
       }
 
-      final initial = await pixel();
-      session.board!.coinOnly = true;
-      final closingBackground = await pixel();
-      session.board!.coinOnly = false;
-      for (var i = 0; i < 5; i++) {
-        capture(session);
+      await draw();
+      expect(find.text('Racha lista'), findsOneWidget);
+      unlocked.capture(golden: false);
+      unlocked.advance(.4);
+      await draw();
+      expect(find.text('RACHA · 1'), findsOneWidget);
+      expect(find.text('×1'), findsOneWidget);
+      expect(
+        tester
+            .widget<LinearProgressIndicator>(
+              find.byKey(const ValueKey('streak-window')),
+            )
+            .value,
+        closeTo(.6, .001),
+      );
+      for (var i = 0; i < 4; i++) {
+        unlocked.capture(golden: false);
       }
-      expect(await pixel(), isNot(initial));
-      advance(session, 1.1);
-      expect(await pixel(), initial);
-      for (var i = 0; i < 10; i++) {
-        capture(session);
-      }
-      expect(session.board!.combo.multiplier, 3);
-      expect(await pixel(), isNot(initial));
-      session.board!.enterClosing();
-      expect(await pixel(), closingBackground);
-      await session.pendingWrites;
-      session.dispose();
+      await draw();
+      expect(find.text('×2'), findsOneWidget);
+      unlocked.end();
+      await draw(closing: true);
+      expect(find.text('Racha terminada'), findsOneWidget);
+      expect(find.byKey(const ValueKey('streak-window')), findsNothing);
     },
   );
 }

@@ -12,7 +12,7 @@ El acceso está separado de las opciones normales. Un toque o una pulsación cor
 
 ## Ver el árbol completo o la vista del jugador
 
-- **Vista del jugador desactivada:** muestra los 49 nodos y sus conexiones. Al entrar o volver a esta vista, el mapa se encuadra completo; puedes acercarte y arrastrarlo para inspeccionar las ramas. Cualquier nodo pendiente se puede comprar gratis desde su ficha, manteniendo el botón un segundo. Se adquieren también sus niveles anteriores y requisitos, incluidos los cruces entre ramas, para que la configuración sea válida al jugar.
+- **Vista del jugador desactivada:** muestra los 59 nodos y sus conexiones. Al entrar o volver a esta vista, el mapa se encuadra completo; puedes acercarte y arrastrarlo para inspeccionar las ramas. Cualquier nodo pendiente se puede comprar gratis desde su ficha, manteniendo el botón un segundo. Se adquieren también sus niveles anteriores y requisitos, incluidos los cruces entre ramas, para que la configuración sea válida al jugar.
 - **Vista del jugador activada:** usa exactamente el descubrimiento normal: nodos comprados y siguientes nodos accesibles. Conserva precios, requisitos y colores/estados de disponibilidad normales. Las compras realizadas en esta vista descuentan el saldo de prueba, como en una partida normal.
 
 Las dos vistas comparten las mismas compras de prueba. Si compras todo, la vista del jugador mostrará todo porque ya lo tienes adquirido. Para comprobar el inicio, pulsa «Reiniciar prueba desde cero» y activa «Vista del jugador».
@@ -27,6 +27,19 @@ Cambiar de vista no compra ni elimina mejoras. Si una ficha seleccionada deja de
 - **Volver al árbol:** cierra el panel conservando la prueba.
 - **Salir de depuración:** descarta la prueba y recupera el punto de partida normal.
 
+### Informes de jornadas de prueba (código posterior al APK 0.6.0+13)
+
+Tras terminar una jornada, el panel muestra bolas emitidas y capturadas,
+capturas doradas, multiplicador máximo de combo y monedas generadas, cobradas
+y perdidas. «Copiar jornadas de prueba» copia los últimos 20 informes para
+comparar configuraciones. «Emitidas» cuenta solo las emisiones que han podido
+crear una bola, sin contar intentos bloqueados por espacio o por el límite.
+
+Los informes solo existen en memoria durante debug. Reiniciar la prueba o salir
+los elimina; una partida normal no registra informes. No alteran el guardado,
+las recompensas ni los umbrales del combo. Son observaciones para probar el
+balance, no una aceptación del manejo en Android físico.
+
 Puedes pulsar «Comenzar día» y jugar con las mejoras de prueba. Durante la jornada aparece **DEBUG · prueba temporal**, con el botón «Salir de debug». Las modificaciones de mejoras se realizan entre jornadas para conservar la configuración activa del día.
 
 ## Progreso y guardado
@@ -34,3 +47,17 @@ Puedes pulsar «Comenzar día» y jugar con las mejoras de prueba. Durante la jo
 Entrar toma una instantánea del progreso normal y solicita su guardado. Las compras, monedas y jornadas de depuración permanecen en memoria y no se escriben en el guardado ni en su copia. Al salir se restaura la instantánea; al cerrar y reabrir la aplicación se carga la partida normal, sin activar depuración.
 
 La prueba comienza con tu progreso actual. Reiniciar la prueba o comprar gratis no afecta a ese punto de partida. Este modo no añade campos al esquema JSON ni concede compras gratuitas fuera de la sesión de depuración.
+
+## Probar racha, especiales y nueva escoba
+
+En el árbol completo, comprar gratis Racha, Captura total o Aceleración adquiere
+también sus requisitos. Sus ramas permiten probar recargas, potencia ×3 y duración.
+«Comprar todo» incluye estas mejoras. El día empieza sin carga: observar los
+botones «Captura» y «Turbo», esperar a «Lista» y pulsar durante producción. Las
+monedas de Captura total se recogen normalmente. Racha muestra contador y barra.
+
+Para la escoba, agarrar un extremo y después el otro con un segundo dedo. Mover
+ambos para trasladarla y girarla. Soltar cualquiera mantiene el otro agarre; con
+un solo dedo se traslada sin giro automático. Probar también escoba en V, pausa,
+recogida final y salida de debug. Las nuevas reglas todavía requieren validación
+en un móvil físico.

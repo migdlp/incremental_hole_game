@@ -106,28 +106,23 @@ void main() {
     },
   );
 
-  test(
-    'broom follows perpendicular, limits rotation and holds still on stop',
-    () {
-      final board = Board(catalog.settings({'broom': 1}), tool: BallTool.broom);
-      board.broomPosition = const Vec(180, 180);
-      board.touch(const Vec(180, 180));
-      final initial = board.toolAngle;
-      board.drag(const Vec(230, 180));
-      board.update(1 / 60, producing: false);
-      expect(
-        (board.toolAngle - initial).abs(),
-        lessThanOrEqualTo(3 / 60 + 1e-6),
-      );
-      simulate(board, .7);
-      final segment = board.segments.single;
-      expect((segment.b - segment.a).unit.x.abs(), lessThan(.001));
-      final angle = board.toolAngle;
-      board.drag(const Vec(230.1, 180.1));
-      simulate(board, .4);
-      expect(board.toolAngle, closeTo(angle, .001));
-    },
-  );
+  test('one finger translates the broom without changing its orientation', () {
+    final board = Board(catalog.settings({'broom': 1}), tool: BallTool.broom);
+    board.broomPosition = const Vec(180, 180);
+    board.touch(const Vec(180, 180));
+    final initial = board.toolAngle;
+    board.drag(const Vec(230, 180));
+    board.update(1 / 60, producing: false);
+    expect((board.toolAngle - initial).abs(), lessThanOrEqualTo(3 / 60 + 1e-6));
+    simulate(board, .7);
+    final segment = board.segments.single;
+    expect((segment.b - segment.a).unit.y.abs(), lessThan(.001));
+    expect(board.toolAngle, initial);
+    final angle = board.toolAngle;
+    board.drag(const Vec(230.1, 180.1));
+    simulate(board, .4);
+    expect(board.toolAngle, closeTo(angle, .001));
+  });
 
   test('straight broom carries a front group without radial scatter', () {
     final board = Board(catalog.settings({'broom': 1}), tool: BallTool.broom);
@@ -325,6 +320,8 @@ void main() {
       final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
       data['version'] = 1;
       data['run']['board'].remove('combo');
+      data['run']['board'].remove('specials');
+      data['run']['board'].remove('captureAllIds');
       data['run']['settings'] = catalog
           .settings(session.levels, balanceVersion: 1)
           .toJson();
@@ -342,7 +339,7 @@ void main() {
       expect(restored.board!.settings['robot_count'], 1);
       expect(restored.board!.sweepEnabled, isFalse);
       expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 6);
+      expect(jsonDecode(restored.snapshot())['version'], 7);
     },
   );
 

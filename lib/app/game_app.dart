@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../features/board/presentation/garden_game.dart';
 import '../features/board/presentation/coin_icon.dart';
+import '../features/board/presentation/streak_indicator.dart';
+import '../features/board/presentation/special_ability_bar.dart';
 import '../features/board/domain/coin_denomination.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
@@ -158,7 +160,7 @@ class DayScreen extends StatefulWidget {
 
 class _DayScreenState extends State<DayScreen> {
   late final GardenGame game = GardenGame(widget.session);
-  int? pointer;
+  int? pointer, secondPointer;
   int lastIncome = 0;
   DateTime lastSound = DateTime(2000);
   @override
@@ -168,7 +170,9 @@ class _DayScreenState extends State<DayScreen> {
   }
 
   void _changes() {
-    if (!widget.session.running || widget.session.paused) pointer = null;
+    if (!widget.session.running || widget.session.paused) {
+      pointer = secondPointer = null;
+    }
     if (widget.session.economy.collected > lastIncome &&
         widget.session.sound &&
         DateTime.now().difference(lastSound).inMilliseconds > 150) {
@@ -270,6 +274,11 @@ class _DayScreenState extends State<DayScreen> {
                     ],
                   ),
                 ),
+                if (session.running)
+                  StreakIndicator(
+                    combo: session.board!.combo,
+                    closing: closing,
+                  ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 5),
                   child: Text(
@@ -282,11 +291,13 @@ class _DayScreenState extends State<DayScreen> {
                               ? 'Toca o desliza para recoger las monedas'
                               : 'Pulsa las monedas para recogerlas')
                         : session.board!.broomUnlocked
-                        ? 'Agarra una bola o recoge la escoba para barrer'
+                        ? 'Escoba: un dedo mueve; dos dedos orientan y barren'
                         : session.board!.handCapacity > 1
-                        ? 'Agarra una bola y acércala a otras para recogerlas'
+                        ? 'Agarra y acerca otras bolas'
                         : 'Agarra una bola y llévala al hoyo',
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
                       color: closing
@@ -305,9 +316,16 @@ class _DayScreenState extends State<DayScreen> {
               Positioned.fill(
                 child: Listener(
                   onPointerDown: (event) {
-                    if (pointer != null || session.paused) return;
+                    if (session.paused) return;
                     final point = game.boardPoint(event.localPosition);
                     if (point == null) return;
+                    if (pointer != null) {
+                      if (secondPointer == null &&
+                          session.grabSecondBroomPoint(point)) {
+                        secondPointer = event.pointer;
+                      }
+                      return;
+                    }
                     pointer = event.pointer;
                     session.touch(
                       point,
@@ -315,20 +333,35 @@ class _DayScreenState extends State<DayScreen> {
                     );
                   },
                   onPointerMove: (event) {
-                    if (event.pointer != pointer || session.paused) return;
+                    if (session.paused ||
+                        (event.pointer != pointer &&
+                            event.pointer != secondPointer)) {
+                      return;
+                    }
                     final point = game.boardPoint(event.localPosition);
-                    if (point != null) {
+                    if (point == null) {
+                      pointer = secondPointer = null;
+                      session.release(cancel: true);
+                    } else if (event.pointer == secondPointer) {
+                      session.dragSecondBroomPoint(point);
+                    } else {
                       session.drag(
                         point,
                         time: event.timeStamp.inMicroseconds / 1e6,
                       );
-                    } else {
-                      pointer = null;
-                      session.release(cancel: true);
                     }
                   },
                   onPointerUp: (event) {
-                    if (event.pointer == pointer) {
+                    if (event.pointer == secondPointer) {
+                      session.releaseSecondBroomPoint();
+                      secondPointer = null;
+                    } else if (event.pointer == pointer) {
+                      if (secondPointer != null) {
+                        session.releaseSecondBroomPoint(promote: true);
+                        pointer = secondPointer;
+                        secondPointer = null;
+                        return;
+                      }
                       pointer = null;
                       final point = game.boardPoint(event.localPosition);
                       if (point != null) {
@@ -344,8 +377,9 @@ class _DayScreenState extends State<DayScreen> {
                     }
                   },
                   onPointerCancel: (event) {
-                    if (event.pointer == pointer) {
-                      pointer = null;
+                    if (event.pointer == pointer ||
+                        event.pointer == secondPointer) {
+                      pointer = secondPointer = null;
                       session.release(cancel: true);
                     }
                   },
@@ -356,7 +390,7 @@ class _DayScreenState extends State<DayScreen> {
                 Positioned.fill(
                   child: ColoredBox(
                     color: const Color(0xc0111c2e),
-                    child: Center(
+                    child: SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.all(28),
                         child: Card(
@@ -405,6 +439,7 @@ class _DayScreenState extends State<DayScreen> {
             ],
           ),
         ),
+        if (session.running) SpecialAbilityBar(session: session),
       ],
     );
   }

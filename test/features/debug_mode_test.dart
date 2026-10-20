@@ -170,11 +170,30 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('debug-close-tools')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('node-robot_speed:5')), findsOneWidget);
+    final tree = SkillTree(catalog);
+    expect(tree.nodes, hasLength(49));
+    for (final node in tree.nodes) {
+      final position = find.byKey(ValueKey('position-${node.id}'));
+      expect(position, findsOneWidget, reason: 'Falta el nodo ${node.id}');
+    }
     final viewer = tester.widget<InteractiveViewer>(
       find.byKey(const ValueKey('skill-tree-viewer')),
     );
     final scale = viewer.transformationController!.value.getMaxScaleOnAxis();
     expect(scale, lessThan(.85));
+    final viewport = tester.getRect(
+      find.byKey(const ValueKey('skill-tree-viewer')),
+    );
+    for (final node in tree.nodes) {
+      final center = tester.getCenter(
+        find.byKey(ValueKey('position-${node.id}')),
+      );
+      expect(
+        viewport.contains(center),
+        isTrue,
+        reason: 'El nodo ${node.id} queda fuera del mapa visible',
+      );
+    }
     // A deep node can be bought directly, including all its prerequisites.
     await tester.tap(find.byKey(const ValueKey('node-robot_speed:5')));
     await tester.pumpAndSettle();

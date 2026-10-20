@@ -1,6 +1,6 @@
 kind,id,level,cost,effect,effect_value,unit,requires,cap
-base,production_duration,0,0,production_duration,10,seconds,,25
-base,closing_duration,0,0,closing_duration,3,seconds,,3
+base,production_duration,0,0,production_duration,15,seconds,,30
+base,closing_duration,0,0,closing_duration,5,seconds,,5
 base,spawn_interval,0,0,spawn_interval,0.6666666666666666,seconds,,
 base,ball_value,0,0,ball_value,1,coins,,13
 base,paddle_radius,0,0,paddle_radius,20,logical_units,,40
@@ -45,11 +45,11 @@ upgrade,paddle,3,110,paddle_radius,32,broom_width,broom:1,40
 upgrade,paddle,4,180,paddle_radius,36,broom_width,broom:1,40
 upgrade,paddle,5,300,paddle_radius,40,broom_width,broom:1,40
 upgrade,broom_v,1,160,v_unlocked,1,unlock,paddle:1,1
-upgrade,duration,1,80,production_duration,13,seconds,generator:2,25
-upgrade,duration,2,130,production_duration,16,seconds,generator:2,25
-upgrade,duration,3,220,production_duration,19,seconds,generator:2,25
-upgrade,duration,4,360,production_duration,22,seconds,generator:2,25
-upgrade,duration,5,590,production_duration,25,seconds,generator:2,25
+upgrade,duration,1,80,production_duration,18,seconds,generator:2,30
+upgrade,duration,2,130,production_duration,21,seconds,generator:2,30
+upgrade,duration,3,220,production_duration,24,seconds,generator:2,30
+upgrade,duration,4,360,production_duration,27,seconds,generator:2,30
+upgrade,duration,5,590,production_duration,30,seconds,generator:2,30
 upgrade,robot,1,300,robot_count,1,robots,paddle:2&sweep:1,1
 upgrade,robot_speed,1,100,robot_speed,51.74999999999999,logical_units_per_second,robot:1,
 upgrade,robot_speed,2,170,robot_speed,59.51249999999999,logical_units_per_second,robot:1,

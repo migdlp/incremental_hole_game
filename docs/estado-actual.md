@@ -1,6 +1,8 @@
 # Estado actual del prototipo
 
-> **Depuración en la revisión 0.6.0+11:** acceso oculto manteniendo el saldo del árbol 3 s, vista completa o del jugador, compras gratuitas con requisitos, compra total y jornadas temporales sin escribir sobre el progreso normal. [Instrucciones](modo-debug.md). La revisión pasa 134 pruebas.
+> **Revisión 0.6.0+12:** jornada base de 15 s de producción y 5 s de recogida. Las jornadas activas guardadas con balances anteriores mantienen sus tiempos. Incluye el modo debug del árbol, detallado abajo. La suite completa pasa 135 pruebas y `flutter analyze` no encuentra problemas. No se pudo compilar APK local porque el entorno no tiene Android SDK.
+
+> **Depuración incorporada en 0.6.0+11:** acceso oculto manteniendo el saldo del árbol 3 s, vista completa o del jugador, compras gratuitas con requisitos, compra total y jornadas temporales sin escribir sobre el progreso normal. [Instrucciones](modo-debug.md).
 
 > **Revisión de código 0.6.0+11:** combos de capturas implementados con ventana de 1 s, multiplicadores ×1/×2/×3 y feedback visual bajo descubrimiento. Cuentan provisionalmente las capturas asistidas. Guardado JSON v6 conserva las jornadas antiguas sin combos hasta terminar. 125 pruebas correctas. Tiers, potenciadora y los demás conceptos del brainstorm se detallan en [cambios futuros](cambios-futuros-arbol-mejoras.md); aún no están implementados. Última entrega APK documentada: 0.5.0+10. Las notas inferiores son históricas.
 
@@ -23,7 +25,7 @@ Corte: 18 de octubre de 2026, aplicación `0.2.2+4`, con resultados modales y ge
 | Tablero | Arena 360 × 560, un generador, un hoyo, bolas circulares, mano individual y escobas recta/en V con un puntero | [Board](../lib/features/board/domain/board.dart), [GardenGame](../lib/features/board/presentation/garden_game.dart) | Empuje y recogida observados; sensación en móvil pendiente |
 | Física | Fricción, bordes, separación e impulso entre bolas mediante rejilla espacial | [Board](../lib/features/board/domain/board.dart) | Pruebas de agarre, inercia, orientación, anchura, V y límites; no certifican comodidad en móvil |
 | Monedas | Captura genera valor físico, aterrizaje, pulsación inicial y barrido comprado, fusión y límite de pilas | [Board](../lib/features/board/domain/board.dart) | Pruebas de cobro único y conservación del valor |
-| Ciclo | Producción, cierre, pausa y noche; 10 + 3 s como base; emisión de 1,5 bolas/s; noche sin límite | [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart), [GameSession](../lib/app/game_session.dart) | Diez ciclos controlados y límite temporal probados |
+| Ciclo | Producción, cierre, pausa y noche; 15 + 5 s como base; emisión de 1,5 bolas/s; noche sin límite | [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart), [GameSession](../lib/app/game_session.dart) | Ciclo y balances históricos cubiertos por pruebas |
 | Economía | Enteros; ingreso diario separado del ahorro; cierre único; pendientes perdidos | [Economy](../lib/features/economy/domain/economy.dart), [GameSession](../lib/app/game_session.dart) | Cierre repetido y compras inválidas probados |
 | Mejoras | Catorce tipos, 44 nodos, costes, niveles y requisitos; efectos al siguiente día | [Catálogo](../lib/features/upgrades/domain/catalog.dart), [CSV](balance.csv) | Validación de catálogo, dependencias y compras |
 | Automatización | Un robot que empuja, velocidad mejorable e imán alrededor del dedo activo | [Robot](../lib/features/automation/domain/robot.dart), [Board](../lib/features/board/domain/board.dart) | Casos controlados de robot e imán superados |

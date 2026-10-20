@@ -2,6 +2,14 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.6.0+12
+
+- Jornada base de 20 segundos: 15 para generar bolas y 5 para recoger monedas.
+- Las mejoras de duración progresan ahora de 18 a 30 segundos de producción.
+- Las jornadas guardadas con balance v1–v6 conservan su configuración hasta finalizar; el nuevo balance se aplica al comenzar otra jornada.
+- El modo debug del árbol cuenta con pruebas para ambas vistas, compras y pantalla móvil.
+- Verificación local: 135 pruebas y análisis estático correctos. El APK requiere la pipeline Android porque este entorno no tiene Android SDK.
+
 ## Combos y planificación del brainstorm — 2026-10-19 · 0.6.0+11 (sin entrega APK registrada)
 
 - Combos desde el inicio: ventana inclusiva de 1 s; ×2 desde la quinta captura y ×3 desde la décima. Feedback visual sin publicar la fórmula en la UI. Cuentan provisionalmente todas las capturas, incluidas las asistidas.

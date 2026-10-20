@@ -24,7 +24,7 @@ Cada bola que emite el generador tiene una probabilidad independiente del 1 % de
 
 ## Duración, producción y cobro
 
-La jornada base tiene **10 segundos de producción + 3 de recogida final = 13 segundos**. La barra del día mide solo producción; al agotarse, queda vacía y aparece una segunda barra para recogida. El contador muestra el tiempo de la fase activa. Estadísticas y árbol no tienen temporizador. La recogida final congela bolas, escoba y robot; solo permite cobrar monedas y conserva el oscurecimiento del tablero, manteniendo la cabecera y el tiempo sin oscurecer.
+La jornada base tiene **15 segundos de producción + 5 de recogida final = 20 segundos**. La barra del día mide solo producción; al agotarse, queda vacía y aparece una segunda barra para recogida. El contador muestra el tiempo de la fase activa. Estadísticas y árbol no tienen temporizador. La recogida final congela bolas, escoba y robot; solo permite cobrar monedas y conserva el oscurecimiento del tablero, manteniendo la cabecera y el tiempo sin oscurecer.
 
 La producción base sigue siendo 1,5 bolas/s. Sin bloqueos, intenta emitir quince bolas en diez segundos: **$15 generados con quince bolas normales** si se capturan todas. Las doradas aumentan ese importe; $15 ya no es un máximo absoluto. El ingreso se banca únicamente al cobrar las monedas. Bloqueos del generador, bolas sin capturar y monedas sin recoger reducen el ingreso. Estas cifras no miden la experiencia real del jugador.
 

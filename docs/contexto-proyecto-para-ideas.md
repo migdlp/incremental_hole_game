@@ -11,11 +11,11 @@ El proyecto se conoce también como **Jardín Mecánico** en el APK actual. La v
 1. Comienza una jornada con el tablero vacío y las mejoras compradas ya activas.
 2. El generador emite bolas durante la fase de producción. El jugador las agarra, las mueve y las lanza para que entren en el hoyo.
 3. Cada captura genera una recompensa representada por monedas físicas. Las monedas no se suman al saldo hasta que el jugador las recoge.
-4. Al acabar la producción comienza una fase independiente de recogida final. Dura **3 segundos** de base; durante ella se recogen monedas, pero no se mueven bolas ni funcionan las herramientas de bolas.
+4. Al acabar la producción comienza una fase independiente de recogida final. Dura **5 segundos** de base; durante ella se recogen monedas, pero no se mueven bolas ni funcionan las herramientas de bolas.
 5. El resultado diario muestra lo ganado y las monedas recogidas por denominación. Desde ahí se abre el árbol de mejoras.
 6. En el árbol se compran mejoras con el saldo acumulado y se pulsa **«Comenzar día»** para iniciar la siguiente jornada.
 
-La jornada base tiene **10 segundos de producción y 3 segundos de recogida**. Las barras de ambas fases son independientes. Las bolas y monedas que queden al terminar la recogida no se conservan; el saldo bancado, las mejoras y el progreso sí.
+La jornada base tiene **15 segundos de producción y 5 segundos de recogida**. Las barras de ambas fases son independientes. Las bolas y monedas que queden al terminar la recogida no se conservan; el saldo bancado, las mejoras y el progreso sí.
 
 ## Control de bolas y tablero
 
@@ -34,7 +34,7 @@ La jornada base tiene **10 segundos de producción y 3 segundos de recogida**. L
 - El importe se muestra en la interfaz con el icono de moneda, sin el símbolo `$` delante. El resumen diario cuenta las monedas por denominación, de mayor a menor.
 - Al principio se recogen monedas pulsándolas. La mejora opcional **Barrido** permite recogerlas también arrastrando. La rama **Área** permite recoger varias monedas cercanas al pulsar; el **Imán**, más adelante, atrae monedas alrededor del dedo activo.
 - Si el jugador tiene una o más bolas agarradas, se bloquean la recogida y la atracción de monedas. Las monedas pendientes al final de la noche se pierden.
-- La base genera 1,5 bolas por segundo durante 10 segundos. El valor final cobrado depende de las capturas, las bolas doradas y de cuánto consiga recoger el jugador.
+- La base genera 1,5 bolas por segundo durante 15 segundos. El valor final cobrado depende de las capturas, las bolas doradas y de cuánto consiga recoger el jugador.
 
 ## Combos de capturas
 

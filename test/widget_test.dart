@@ -200,15 +200,15 @@ void main() {
     await tester.pumpWidget(GardenApp(session: session));
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
-    session.cycle!.remaining = 3 + 1 / 60;
+    session.cycle!.remaining = 5 + 1 / 60;
     for (var i = 0; i < 10; i++) {
       session.tick(1 / 60);
     }
     await tester.pump();
     expect(session.board!.coinOnly, isTrue);
     expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
-    expect(find.text('3 s'), findsOneWidget);
-    expect(tester.widget<Text>(find.text('3 s')).style!.color!.a, 1);
+    expect(find.text('5 s'), findsOneWidget);
+    expect(tester.widget<Text>(find.text('5 s')).style!.color!.a, 1);
     await tester.tap(find.byTooltip('Pausar'));
     await tester.pump();
     expect(session.paused, isTrue);

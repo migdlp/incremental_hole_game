@@ -90,7 +90,7 @@ Abre el servidor desde un navegador que tenga acceso a ese entorno. El puerto es
 ## 3. Primera partida y resultado esperado
 
 1. Con almacenamiento vacío aparece el taller, saldo cero y «Comenzar día 1».
-2. Inicia el día: el contador empieza en 15 s: 10 de producción y 5 de cierre. La primera bola se intenta emitir a los 3 s y no hay bola inmediata.
+2. Inicia el día: el contador empieza en 20 s: 15 de producción y 5 de cierre. La primera bola se intenta emitir a los ⅔ s y no hay bola inmediata.
 3. Pulsa una bola para agarrarla y arrástrala al hoyo; suelta despacio para colocar o con un gesto final rápido para lanzar. Una captura produce una moneda visible; el contador diario no sube hasta recogerla.
 4. Pulsa y levanta sobre las monedas aterrizadas para cobrarlas. Cruzarlas arrastrando no cobra sin comprar barrido. Pulsa pausa: tiempo y simulación deben detenerse; al continuar no se recupera tiempo de pared.
 5. En los últimos cinco segundos aparece el aviso de recogida y se detiene el generador.

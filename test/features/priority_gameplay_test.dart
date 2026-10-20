@@ -48,7 +48,7 @@ void main() {
       final board = session.board!;
       final ball = Ball(board.nextId++, const Vec(100, 250), Vec.zero);
       board.balls.add(ball);
-      session.cycle!.remaining = 3 + 1 / 60;
+      session.cycle!.remaining = 5 + 1 / 60;
       session.touch(ball.position, time: 0);
       session.drag(const Vec(140, 250), time: .01);
       session.tick(1 / 60);
@@ -73,11 +73,11 @@ void main() {
   );
 
   test(
-    'closing coins land, collect and bank once after exactly three seconds',
+    'closing coins land, collect and bank once after exactly five seconds',
     () {
       final session = GameSession(catalog, MemoryStore())..startDay();
       final board = session.board!;
-      session.cycle!.remaining = 3 + 1 / 60;
+      session.cycle!.remaining = 5 + 1 / 60;
       board.captured = 1;
       session.economy.generated = 2;
       board.coins.add(Coin(board.nextId++, const Vec(90, 300), 2));
@@ -86,7 +86,7 @@ void main() {
       session.touch(const Vec(90, 300));
       session.release();
       expect(session.economy.collected, 2);
-      frames(session, 164);
+      frames(session, 284);
       expect(session.running, isTrue);
       frames(session, 1);
       expect(session.running, isFalse);
@@ -199,7 +199,7 @@ void main() {
           ..levels.addAll({'broom': 1, if (sweep) 'sweep': 1})
           ..startDay();
         final board = session.board!;
-        session.cycle!.remaining = 3 + 1 / 60;
+        session.cycle!.remaining = 5 + 1 / 60;
         session.touch(board.broomPosition);
         session.drag(const Vec(240, 200));
         session.tick(1 / 60);

@@ -32,7 +32,7 @@ Preparación → comenzar día → generar y empujar bolas → recoger monedas �
 
 El tablero muestra el hoyo, el generador, la herramienta, las bolas, las monedas y el robot cuando esté desbloqueado. La interfaz muestra tiempo restante, dinero recogido en ese día y acceso a pausa.
 
-Balance actual para probar: 15 segundos totales, 10 de producción y 5 finales de recogida; emisión inicial cada 3 segundos. En esos 5 segundos el generador se detiene, pero el jugador y el robot pueden seguir moviendo bolas y recogiendo monedas. Ambos tiempos son provisionales; los 5 segundos forman parte del día y se comunican claramente en pantalla.
+Balance actual para probar: 20 segundos totales, 15 de producción y 5 finales de recogida; emisión inicial cada ⅔ de segundo (1,5 bolas/s). En esos 5 segundos el generador se detiene, pero el jugador y el robot pueden seguir moviendo bolas y recogiendo monedas. Ambos tiempos son provisionales; los 5 segundos forman parte del día y se comunican claramente en pantalla.
 
 La mano transporta una sola bola; las escobas barren grupos con un frente perpendicular al arrastre y giro suavizado. La V reúne por contacto, sin aspirar. El hoyo tiene una pequeña zona de captura para evitar que acertar resulte frustrante. Al inicio hay que pulsar las monedas para cobrarlas: arrastrar para empujar bolas no las recoge. Tras comprar recogida por barrido, pasar el dedo sobre una moneda también la cobra; entonces recogida y empuje pueden compartir gesto, sin cambiar de herramienta.
 

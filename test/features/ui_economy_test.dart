@@ -162,7 +162,7 @@ void main() {
         ..restore(session.snapshot());
       reopened.finishDay();
       reopened.startDay();
-      expect(reopened.board!.settings.balanceVersion, 6);
+      expect(reopened.board!.settings.balanceVersion, 7);
       expect(reopened.board!.settings['ball_value'], 13);
       expect(reopened.board!.settings['magnet_radius'], 65);
       expect(reopened.levels['collection'], 1);
@@ -304,7 +304,7 @@ void main() {
         ..pause();
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pump();
-      expect(find.text('10 s'), findsOneWidget);
+      expect(find.text('15 s'), findsOneWidget);
       expect(
         tester
             .widget<LinearProgressIndicator>(
@@ -314,12 +314,12 @@ void main() {
         1,
       );
       expect(find.byKey(const ValueKey('collection-timer')), findsNothing);
-      session.cycle!.advance(10);
+      session.cycle!.advance(15);
       session.board!.enterClosing();
       session.resume();
       session.pause();
       await tester.pump();
-      expect(find.text('3 s'), findsOneWidget);
+      expect(find.text('5 s'), findsOneWidget);
       expect(
         tester
             .widget<LinearProgressIndicator>(

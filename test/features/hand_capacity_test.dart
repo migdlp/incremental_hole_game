@@ -315,6 +315,7 @@ void main() {
     json['run']['board'].remove('combo');
     json['run']['balanceVersion'] = 3;
     json['run']['settings'] = catalog.settings({}, balanceVersion: 3).toJson();
+    json['run']['remaining'] = 15;
     json['tool'] = 'broom';
     json['run']['settings'].remove('hand_capacity');
     final restored = GameSession(catalog, MemoryStore())

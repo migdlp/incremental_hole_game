@@ -109,7 +109,7 @@ void main() {
     expect(restored.economy.balance, session.economy.balance);
     expect(restored.board!.settings['balls_per_spawn'], 2);
     expect(restored.board!.settings['magnet_radius'], 95);
-    expect(restored.board!.settings['production_duration'], 13);
+    expect(restored.board!.settings['production_duration'], 18);
   });
 
   test(
@@ -166,8 +166,8 @@ void main() {
           isFalse,
         ); // next purchase follows the new map
         reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 6);
-        expect(reopened.board!.settings['production_duration'], 16);
+        expect(reopened.board!.settings.balanceVersion, 7);
+        expect(reopened.board!.settings['production_duration'], 21);
         expect(reopened.levels.containsKey('hand'), isFalse);
         expect(reopened.levels.containsKey('sweep'), isFalse);
         expect(reopened.economy.balance, 123);

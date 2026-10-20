@@ -95,7 +95,7 @@ No hay un campo de historial completo ni se guarda una fecha para generar progre
 `run` contiene `remaining` (segundos), `collected`, `generated`, `settings`, `balanceVersion` y `board`.
 
 - `settings` contiene las bases y efectos comprados al iniciar el día. La carga exige igualdad con el catálogo de esos niveles y de la versión de balance correspondiente.
-- `balanceVersion = 3` identifica el balance actual: 10 + 5 s y emisión base de 1,5 bolas/s. `2` conserva 10 + 5 s y emisión cada 3 s; `1`, 60 + 5 s y emisión cada 0,75 s. No es la versión del esquema JSON.
+- `balanceVersion = 7` identifica el balance actual: 15 + 5 s y emisión base de 1,5 bolas/s. Las jornadas activas guardadas con versiones 1–6 conservan sus tiempos y balance hasta que terminan; el nuevo balance se aplica al comenzar el día siguiente. No es la versión del esquema JSON.
 - `board.random` conserva el estado entero del generador congruencial; la semilla inicial es `day * 7919`.
 - `board.nextId`, `captured` y `spawnClock` conservan identificadores, capturas y progreso del intervalo de emisión.
 - `board.balls` contiene objetos `{id, p: [x, y], v: [vx, vy]}`.

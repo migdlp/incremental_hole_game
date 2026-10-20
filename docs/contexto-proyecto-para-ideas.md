@@ -74,7 +74,7 @@ El árbol es una pantalla independiente. Se navega arrastrando y con pellizco; n
 
 ## Modo de depuración para probar ideas
 
-En el árbol, mantener el saldo pulsado durante tres segundos abre un modo temporal de pruebas. Permite ver todo el mapa, comprar cualquier nodo gratis con sus requisitos, comprar todas las mejoras y comenzar jornadas de prueba. También permite activar la **Vista del jugador**, que usa el descubrimiento progresivo, precios y estados normales sobre las compras y saldo de prueba. Reiniciar la prueba sirve para inspeccionar la progresión desde cero. Al salir o reabrir se recupera la partida normal; las pruebas no se guardan sobre ella.
+En el árbol, el botón DEBUG de arriba a la izquierda abre con un toque un modo temporal de pruebas. Permite ver todo el mapa, comprar cualquier nodo gratis con sus requisitos, comprar todas las mejoras y comenzar jornadas de prueba. También permite activar la **Vista del jugador**, que usa el descubrimiento progresivo, precios y estados normales sobre las compras y saldo de prueba. Reiniciar la prueba sirve para inspeccionar la progresión desde cero. Al salir o reabrir se recupera la partida normal; las pruebas no se guardan sobre ella.
 
 ## Estado del proyecto
 

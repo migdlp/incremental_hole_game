@@ -5,10 +5,10 @@ Disponible en el código de la revisión 0.6.0+11. Es una sesión de pruebas tem
 ## Acceso desde el móvil
 
 1. Abre el árbol de mejoras entre jornadas.
-2. Mantén pulsado el saldo de monedas de la esquina superior derecha durante **3 segundos**.
+2. Pulsa el botón **DEBUG**, arriba a la izquierda.
 3. Se activa la prueba y aparece el panel «Depuración». Mientras esté activa, el botón **DEBUG** del árbol vuelve a abrir este panel.
 
-El acceso está separado de las opciones normales. Un toque o una pulsación corta en el saldo no activa el modo.
+El botón está siempre visible en el árbol. El saldo de monedas ya no activa el modo.
 
 ## Ver el árbol completo o la vista del jugador
 

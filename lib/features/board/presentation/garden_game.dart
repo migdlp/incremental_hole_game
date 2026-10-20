@@ -132,13 +132,6 @@ class GardenGame extends FlameGame {
       RRect.fromRectAndRadius(bounds.deflate(13), const Radius.circular(19)),
       paint(const Color(0x30766543), stroke: 2),
     );
-    label(
-      canvas,
-      'J A R D Í N   M E C Á N I C O',
-      const Offset(180, 525),
-      color: const Color(0xff756347),
-      fontSize: 10,
-    );
     final hole = offset(Board.hole);
     final radius = board.settings['hole_capture_radius'];
     canvas.drawOval(

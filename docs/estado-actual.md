@@ -10,7 +10,7 @@ Los cuatro ejes de progresión son generar más bolas, capturar una proporción 
 
 ## Jornada y tablero vigentes
 
-- Arena lógica de 360 × 560. **Agujero arriba** en (180, 60) y **generador abajo** en (180, 412), con salida y velocidad inicial de las bolas hacia arriba. Es el último cambio pedido y entregado.
+- Arena lógica de 360 × 560. **Agujero arriba** en (180, 50) y **generador abajo** en (180, 480), con salida y velocidad inicial de las bolas hacia arriba. Ajuste de posiciones en código posterior al APK del commit `046ebb0`; pendiente de comprobar en móvil. Se retira la leyenda del jardín del tablero y la frase «Tu jardín te espera» de la pausa.
 - Base de **15 s de producción y 5 s de recogida final**, con barras independientes. Las mejoras de duración dan 18/21/24/27/30 s de producción; la recogida permanece en 5 s.
 - Emisión inicial de **1,5 bolas/s**: primera bola tras aproximadamente ⅔ s. Generador y Doble emisión aumentan la producción.
 - Durante producción se controlan bolas y se recogen monedas. Durante recogida final se congelan bolas, escoba y robot; se permite cobrar monedas. La cabecera y el contador permanecen legibles sin oscurecer.
@@ -75,7 +75,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 
 ## Debug implementado
 
-Acceso oculto: **mantener pulsado 3 s el saldo del árbol**, arriba a la derecha. No está en las opciones normales.
+Acceso directo: botón **DEBUG**, arriba a la izquierda del árbol. Un toque abre el panel; el saldo ya no requiere ni reconoce una pulsación mantenida para entrar.
 
 - Vista completa: encuadra los 59 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
 - Vista del jugador: descubrimiento y compras normales usando saldo y mejoras de prueba. Ambas vistas comparten esa configuración; para ver el principio hay que reiniciar la prueba desde cero.

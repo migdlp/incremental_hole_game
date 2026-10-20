@@ -13,6 +13,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 ## Estado que hay que conservar
 
 - **Agujero arriba, generador abajo y emisión hacia arriba.** Último cambio solicitado; ya entregado en APK.
+- Ajuste posterior al APK de `046ebb0`: agujero en (180, 50), generador en (180, 480), sin leyenda del jardín en el tablero ni «Tu jardín te espera» en pausa. Se ha seguido la última indicación del usuario de subir el agujero y bajar el generador; comprobar las posiciones jugando en móvil.
 - **15 s de producción + 5 s de recogida final**; barras independientes. Durante recogida se congelan bolas, escoba y robot. No hay temporizador en compras.
 - Generación base 1,5 bolas/s; límite de 200 bolas. Mano base de una bola, capacidad mejorable hasta seis y fuerza de agarre mejorable. Escoba física desbloqueable, anchura/V y robot que empuja bolas.
 - Capturar produce monedas físicas. El dinero depende de recogerlas; pendientes y reserva se pierden al acabar. La mano ocupada bloquea cobro e imán de monedas.
@@ -21,7 +22,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 - Racha comprable tras Mano I por 40 (código posterior al último APK): ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
 - Árbol de 59 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → árbol → comenzar día.
-- **Debug:** mantener saldo del árbol 3 s. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
+- **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
 Avance de código posterior al APK 0.6.0+13: informes temporales de las últimas
 20 jornadas debug con emisiones, capturas/doradas, pico de combo y monedas
@@ -72,6 +73,32 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 [Descargar APK 0.6.0+13 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439/artifacts/12256028572). Descomprimir e instalar `jardin-mecanico-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
 135 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+
+## Acceso a GitHub desde Codex Cloud (20/10/2026)
+
+El commit `046ebb06aa28b4662f5ca1d8635f4bde0d9a4101` se publicó sin force push
+en `build/apk-0.6.0+13`. Los primeros intentos desde el sandbox devolvían
+`Failed to connect to proxy port 8080` y `gh auth status` indicaba token inválido.
+La solución comprobada fue ejecutar los comandos de red con
+`sandbox_permissions: "with_additional_permissions"` y
+`additional_permissions: {"network": {"enabled": true}}` en `exec_command`.
+Con esa configuración funcionaron `git ls-remote`, `git push`, `gh auth status`
+y el lanzamiento del workflow manual. No hubo que cambiar el proxy, las
+credenciales ni la política del environment. No interpretar esos errores desde
+un comando sin acceso de red como prueba de credenciales caducadas.
+
+Para el APK, usar `.github/workflows/flutter-manual.yml` sobre la rama publicada;
+GitHub Actions instala Flutter y Android SDK. Flutter encontrado en `/tmp/flutter`
+no estaba en el PATH de esta tarea y no había Android SDK local. No instalar un
+SDK completo solo para suplir la pipeline. Conservar los commits y comprobar el
+SHA remoto antes de publicar; no usar reset, clean ni force push para reparar
+conectividad.
+
+La [pipeline 39436411074](https://github.com/migdlp/incremental_hole_game/actions/runs/39436411074)
+terminó correctamente sobre ese SHA: formato, análisis, pruebas, APK y firma v2.
+[Descargar el APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39436411074/artifacts/12272966859).
+La reparación de conectividad no necesitó cambios en el código ni en las
+credenciales; `046ebb0` está publicado.
 
 ## Cómo trabajar al retomar
 

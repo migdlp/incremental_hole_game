@@ -60,8 +60,8 @@ class Board {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
   }
   static const width = 360.0, height = 560.0;
-  static const hole = Vec(180, 60);
-  static const generator = Vec(180, 412);
+  static const hole = Vec(180, 50);
+  static const generator = Vec(180, 480);
   final DaySettings settings;
   final CaptureCombo combo;
   final SpecialAbilities specials;

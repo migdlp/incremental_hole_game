@@ -6,7 +6,7 @@ Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige
 
 **[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439/artifacts/12256028572)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439): formato, análisis, **135 pruebas**, compilación Android y firma. Descomprimir e instalar `jardin-mecanico-debug.apk`. Los artefactos tienen retención limitada.
 
-La última entrega incluye **agujero arriba, generador abajo, emisión hacia arriba, jornada base de 15+5 segundos, combos y debug del árbol**. Para debug, mantener pulsado el saldo del árbol 3 s. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
+La última entrega incluye **agujero arriba, generador abajo, emisión hacia arriba, jornada base de 15+5 segundos, combos y debug del árbol**. En el código actual, debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 

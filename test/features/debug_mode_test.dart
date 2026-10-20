@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_app.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/features/board/domain/tool.dart';
+import 'package:incremental_hole_game/features/board/presentation/coin_icon.dart';
 import 'package:incremental_hole_game/features/upgrades/domain/skill_tree.dart';
 import 'package:incremental_hole_game/features/upgrades/presentation/skill_tree_screen.dart';
 import '../test_support.dart';
@@ -137,11 +138,7 @@ void main() {
   }
 
   Future<void> activate(WidgetTester tester) async {
-    final gesture = await tester.startGesture(
-      tester.getCenter(find.byKey(const ValueKey('tree-debug-entry'))),
-    );
-    await tester.pump(const Duration(milliseconds: 3100));
-    await gesture.up();
+    await tester.tap(find.byKey(const ValueKey('tree-debug-tools')));
     await tester.pumpAndSettle();
   }
 
@@ -151,64 +148,65 @@ void main() {
     session.dispose();
   }
 
-  testWidgets('hidden access needs a long hold and exposes the complete tree', (
-    tester,
-  ) async {
-    final session = await open(tester);
-    expect(find.text('DEBUG'), findsNothing);
-    expect(find.byKey(const ValueKey('node-robot_speed:5')), findsNothing);
-    final gesture = await tester.startGesture(
-      tester.getCenter(find.byKey(const ValueKey('tree-debug-entry'))),
-    );
-    await tester.pump(const Duration(seconds: 1));
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(session.debugEnabled, isFalse);
-    await activate(tester);
-    expect(session.debugEnabled, isTrue);
-    expect(find.text('Depuración'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('debug-close-tools')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('node-robot_speed:5')), findsOneWidget);
-    final tree = SkillTree(catalog);
-    expect(tree.nodes, hasLength(59));
-    for (final node in tree.nodes) {
-      final position = find.byKey(ValueKey('position-${node.id}'));
-      expect(position, findsOneWidget, reason: 'Falta el nodo ${node.id}');
-    }
-    final viewer = tester.widget<InteractiveViewer>(
-      find.byKey(const ValueKey('skill-tree-viewer')),
-    );
-    final scale = viewer.transformationController!.value.getMaxScaleOnAxis();
-    expect(scale, lessThan(.85));
-    final viewport = tester.getRect(
-      find.byKey(const ValueKey('skill-tree-viewer')),
-    );
-    for (final node in tree.nodes) {
-      final center = tester.getCenter(
-        find.byKey(ValueKey('position-${node.id}')),
-      );
+  testWidgets(
+    'top-left debug button opens tools and exposes the complete tree',
+    (tester) async {
+      final session = await open(tester);
+      expect(find.text('DEBUG'), findsOneWidget);
+      expect(find.byKey(const ValueKey('node-robot_speed:5')), findsNothing);
+      final button = find.byKey(const ValueKey('tree-debug-tools'));
+      final balance = find.byType(CoinIcon);
       expect(
-        viewport.contains(center),
-        isTrue,
-        reason: 'El nodo ${node.id} queda fuera del mapa visible',
+        tester.getCenter(button).dx,
+        lessThan(tester.getCenter(balance).dx),
       );
-    }
-    // A deep node can be bought directly, including all its prerequisites.
-    await tester.tap(find.byKey(const ValueKey('node-robot_speed:5')));
-    await tester.pumpAndSettle();
-    expect(find.text('Comprar gratis · 1 s'), findsOneWidget);
-    final hold = await tester.startGesture(
-      tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1100));
-    await hold.up();
-    await tester.pumpAndSettle();
-    expect(session.levels['robot_speed'], 5);
-    expect(session.economy.balance, 0);
-    await close(tester, session);
-  });
+      expect(session.debugEnabled, isFalse);
+      await activate(tester);
+      expect(session.debugEnabled, isTrue);
+      expect(find.text('Depuración'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('debug-close-tools')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('node-robot_speed:5')), findsOneWidget);
+      final tree = SkillTree(catalog);
+      expect(tree.nodes, hasLength(59));
+      for (final node in tree.nodes) {
+        final position = find.byKey(ValueKey('position-${node.id}'));
+        expect(position, findsOneWidget, reason: 'Falta el nodo ${node.id}');
+      }
+      final viewer = tester.widget<InteractiveViewer>(
+        find.byKey(const ValueKey('skill-tree-viewer')),
+      );
+      final scale = viewer.transformationController!.value.getMaxScaleOnAxis();
+      expect(scale, lessThan(.85));
+      final viewport = tester.getRect(
+        find.byKey(const ValueKey('skill-tree-viewer')),
+      );
+      for (final node in tree.nodes) {
+        final center = tester.getCenter(
+          find.byKey(ValueKey('position-${node.id}')),
+        );
+        expect(
+          viewport.contains(center),
+          isTrue,
+          reason: 'El nodo ${node.id} queda fuera del mapa visible',
+        );
+      }
+      // A deep node can be bought directly, including all its prerequisites.
+      await tester.tap(find.byKey(const ValueKey('node-robot_speed:5')));
+      await tester.pumpAndSettle();
+      expect(find.text('Comprar gratis · 1 s'), findsOneWidget);
+      final hold = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('hold-purchase'))),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1100));
+      await hold.up();
+      await tester.pumpAndSettle();
+      expect(session.levels['robot_speed'], 5);
+      expect(session.economy.balance, 0);
+      await close(tester, session);
+    },
+  );
 
   testWidgets(
     'debug controls alternate real discovery, reset, buy all and exit',
@@ -243,7 +241,8 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('debug-exit')));
       await tester.pumpAndSettle();
       expect(session.snapshot(), baseline);
-      expect(find.text('DEBUG'), findsNothing);
+      expect(session.debugEnabled, isFalse);
+      expect(find.text('DEBUG'), findsOneWidget);
       expect(find.byKey(const ValueKey('node-hand:2')), findsNothing);
       await close(tester, session);
     },

@@ -414,7 +414,7 @@ class _DayScreenState extends State<DayScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 const Text(
-                                  'El tiempo está detenido. Tu jardín te espera.',
+                                  'El tiempo está detenido.',
                                   textAlign: TextAlign.center,
                                 ),
                                 SwitchListTile(

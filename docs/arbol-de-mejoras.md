@@ -2,7 +2,7 @@
 
 Código posterior a **0.6.0+13**, 20/10/2026; el APK enlazado en estado actual aún no incluye estos cambios. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
-**Debug:** mantener el saldo del árbol 3 s para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
+**Debug:** pulsar el botón DEBUG, arriba a la izquierda, para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
 ## Mapa actual
 

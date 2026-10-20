@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import '../../../app/game_session.dart';
 import '../../board/presentation/coin_icon.dart';
@@ -191,44 +190,30 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         backgroundColor: _background,
         automaticallyImplyLeading: false,
         toolbarHeight: 48,
-        title: session.debugEnabled
-            ? TextButton.icon(
-                key: const ValueKey('tree-debug-tools'),
-                onPressed: _openDebug,
-                icon: const Icon(Icons.bug_report_outlined, size: 18),
-                label: const Text('DEBUG'),
-              )
-            : null,
+        centerTitle: false,
+        titleSpacing: 12,
+        title: TextButton.icon(
+          key: const ValueKey('tree-debug-tools'),
+          onPressed: _openDebug,
+          icon: const Icon(Icons.bug_report_outlined, size: 18),
+          label: const Text('DEBUG'),
+        ),
         actions: [
-          RawGestureDetector(
-            key: const ValueKey('tree-debug-entry'),
-            gestures: {
-              LongPressGestureRecognizer:
-                  GestureRecognizerFactoryWithHandlers<
-                    LongPressGestureRecognizer
-                  >(
-                    () => LongPressGestureRecognizer(
-                      duration: const Duration(seconds: 3),
-                    ),
-                    (recognizer) => recognizer.onLongPress = _openDebug,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+            child: Row(
+              children: [
+                const CoinIcon(),
+                const SizedBox(width: 7),
+                Text(
+                  '${session.economy.balance}',
+                  style: const TextStyle(
+                    color: _gold,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 21,
                   ),
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-              child: Row(
-                children: [
-                  const CoinIcon(),
-                  const SizedBox(width: 7),
-                  Text(
-                    '${session.economy.balance}',
-                    style: const TextStyle(
-                      color: _gold,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 21,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

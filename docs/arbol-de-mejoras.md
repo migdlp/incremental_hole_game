@@ -1,23 +1,8 @@
 # Árbol de mejoras progresivo
 
-> **Modo de depuración:** mantén el saldo pulsado 3 s para ver el árbol completo, comprar nodos gratis con sus requisitos y alternar la Vista del jugador. Las pruebas son temporales y no sustituyen el progreso guardado. [Instrucciones](modo-debug.md).
+Referencia vigente: **0.6.0+13**, 20/10/2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
-> **Revisión de código 0.6.0+11:** combos disponibles desde el inicio en las nuevas jornadas. Esta revisión no cambia nodos, costes ni requisitos. La sustitución de Valor por tiers individuales y las posibles mejoras del combo siguen pendientes en [cambios futuros](cambios-futuros-arbol-mejoras.md). Última entrega APK documentada: 0.5.0+10.
-
-> **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
-
-> **Referencia actualizada a 0.5.0+10:** CF-09 a CF-15 implementados: Mano I de 13, Área manual desde Mano I e Imán de 300 tras Área III. Guardado v5 y balance 6; los precios en la UI usan icono de moneda.
-
-> **Tanda anterior 0.4.0+9:** CF-06 a CF-08 implementados. El árbol usa una cuadrícula de 64 unidades y objetivos de 64 × 64, con posiciones/conexiones en ocho direcciones y rutas que evitan otros nodos. Se conservan los 44 nodos previos y se añaden cinco niveles de fuerza de mano. Ver [próximas mejoras](cambios-futuros-arbol-mejoras.md). Las notas de preparación anteriores se conservan como historia.
-
-
-> **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
-
-
-> **Revisión de interfaz CF-05 preparada para integrar:** cabecera solo con saldo, sin título, atrás ni barra de zoom. Sin ficha hasta tocar un nodo, resumen con cantidades en verde y compra exclusivamente desde el botón manteniendo 1 s. Mapa compacto y conexiones de tramos rectos; ramas y balance conservados. Ver [referencia CF-05](cambios-futuros-arbol-mejoras.md#cf-05--árbol-compacto-y-ficha-bajo-demanda--19-de-octubre-de-2026).
-
-
-Referencia actual del código **0.5.0+10**, a partir del [referencia de cambios futuros v0.7](cambios-futuros-arbol-mejoras.md), autorizado el 19 de octubre de 2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos de compra.
+**Debug:** mantener el saldo del árbol 3 s para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
 ## Mapa actual
 
@@ -84,17 +69,17 @@ El catálogo y la sesión comprueban los mismos requisitos que el árbol, inclui
 
 ## Balance y compatibilidad
 
-Base: 1,5 emisiones/s, $1 por bola, diez segundos de producción y tres de recogida final. Mano I cuesta 13 dólares; Valor sigue 2/3/5/8/13 y el imán cuesta 300 tras Área III; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
+Base: 1,5 emisiones/s, valor normal 1 por bola, 15 segundos de producción y 5 de recogida final. Día más largo I–V aumenta la producción a 18/21/24/27/30 segundos; el cierre sigue en 5. Mano I cuesta 13 dólares; Valor sigue 2/3/5/8/13 y el imán cuesta 300 tras Área III; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
 
-El guardado v5 acepta v1–v4. Conserva compras, saldo y jornadas activas con balance 1–5 hasta terminar; la siguiente jornada usa balance 6. Se congelan los balances históricos, incluido el 5. El imán comprado antes del cambio conserva su acceso sin regalar Área II/III; las nuevas compras requieren Área III. Las pilas antiguas se descomponen en monedas válidas sin alterar su importe pendiente. Ver [persistencia](persistencia.md).
+El guardado JSON v6 conserva compras, saldo y jornadas activas de versiones anteriores. Las jornadas con balance 1–6 mantienen su configuración hasta terminar; la siguiente jornada usa balance 7. Los balances históricos están congelados. El imán comprado antes del cambio conserva su acceso sin regalar Área II/III; las nuevas compras requieren Área III. Las pilas antiguas se descomponen en monedas válidas sin alterar su importe pendiente. Ver [persistencia](persistencia.md).
 
 ## Verificación
 
-Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alcance, emisión doble, tablero de 200 bolas, colores, pantalla pequeña y cancelación de compra. En esta revisión pasan 116 pruebas, análisis sin incidencias, formato y compilación web con Flutter 3.35.7 / Dart 3.9.2. Las pruebas de pantalla pequeña incluyen 320 × 568. No hay aceptación táctil ni medición de FPS en Android físico en esta entrega.
+Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alcance, emisión doble, tablero de 200 bolas, colores, pantalla pequeña y cancelación de compra. La entrega 0.6.0+13 pasa 135 pruebas, análisis, formato, compilación Android y firma con Flutter 3.35.7 / Dart 3.9.2. Las pruebas de debug incluyen presencia y encuadre de los 49 nodos y compra de un nodo profundo. Las pruebas de pantalla pequeña incluyen 320 × 568. No hay aceptación táctil ni medición de FPS en Android físico en esta entrega.
 
 La evidencia histórica del árbol anterior sigue en [validación](validacion-prototipo.md) y [CI](ci.md); sus APK no contienen automáticamente este mapa nuevo.
 
-CF-01 a CF-04 y las monedas sin cifras se implementan en esta revisión. Los cambios pendientes se consultan en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, las denominaciones y el valor base se explican en [economía](economia.md).
+Los cambios pendientes se consultan en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, las denominaciones y el valor base se explican en [economía](economia.md).
 
 ## Fuerza de agarre de la mano
 

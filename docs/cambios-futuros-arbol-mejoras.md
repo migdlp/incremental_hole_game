@@ -1,6 +1,14 @@
 # Cambios futuros: mecánicas y árbol de mejoras
 
-Actualizado el 19/10/2026 a partir del brainstorm de Incremental Hole Game / Jardín Mecánico. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
+Actualizado el **20/10/2026**, contrastado con el último APK **0.6.0+13**, a partir del brainstorm de Incremental Hole Game / Jardín Mecánico. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
+
+## Cómo priorizar al retomar
+
+- Leer el [relevo](relevo-contexto.md) y el [estado actual](estado-actual.md) antes de elegir trabajo. La siguiente petición del usuario determina la tarea; esta lista no es una orden de implementar todas las ideas.
+- **Dirección deseada, diseño incompleto:** CF-16 (tiers) y CF-17 (potenciadora). Concretar primero CF-16; no inventar valores, colores o migraciones definitivas.
+- **Mecánica existente por revisar:** CF-18 (combos). Probar el balance vigente; no volver a implementarla como si faltara.
+- **Ideas sin reglas aprobadas:** CF-19 a CF-24. Duplicadora y bomba/impulso siguen pendientes de discusión; no cerrar sus reglas solo para poder implementarlas.
+- La validación física y económica del último APK sigue pendiente. No confundir pruebas automáticas correctas con aceptación del usuario en un móvil.
 
 ## Dirección de diseño
 

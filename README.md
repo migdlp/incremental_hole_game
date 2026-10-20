@@ -1,21 +1,14 @@
-# Jardín mecánico
+# Jardín mecánico / Incremental Hole Game
 
-> **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.6.0+13**, 20/10/2026.
 
-Prototipo jugable de un incremental en Flutter + Flame. Empieza agarrando una bola, llévala o lánzala al hoyo, pulsa sus monedas y desbloquea escobas para mover grupos. Versión actual del código: **0.5.0+10**.
+**Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
-CF-09 a CF-15 implementadas: importes con iconos, monedas individuales de tamaño uniforme, recuento del día, tiempos separados, recogida solo con mano vacía y nueva curva de Valor. Mano I cuesta 13; Área precede al Imán. Las ideas de bolas nuevas siguen sin implementar.
+**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439/artifacts/12256028572)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439): formato, análisis, **135 pruebas**, compilación Android y firma. Descomprimir e instalar `jardin-mecanico-debug.apk`. Los artefactos tienen retención limitada.
 
+La última entrega incluye **agujero arriba, generador abajo, emisión hacia arriba, jornada base de 15+5 segundos, combos y debug del árbol**. Para debug, mantener pulsado el saldo del árbol 3 s. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 
-**[Descargar APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149)** · [CI correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) sobre `91b10cb`: 101 pruebas y firma verificadas. Incluye el árbol compacto y la compra de 1 s. Descomprime e instala `jardin-mecanico-debug.apk`.
-
-
-**[Descargar APK 0.3.1+6 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676)** · [CI correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) sobre `27b3950`: 88 pruebas y firma verificadas. Descomprime e instala `jardin-mecanico-debug.apk`; disponible hasta el 2 de noviembre de 2026.
-
-
-El mapa de [cambios futuros](docs/cambios-futuros-arbol-mejoras.md) se incorpora al árbol: seis ramas iniciales, cinco niveles, seis colores, Doble emisión y alcance del imán. Se conservan las compras anteriores y el balance de las jornadas interrumpidas; las nuevas jornadas usan balance 6.
-
-La aplicación y su pipeline manual de APK están fusionadas en `main`. La aceptación del MVP en un Android físico sigue pendiente. Empieza por el [índice de documentación](docs/README.md), el [estado actual](docs/estado-actual.md) o la [guía de desarrollo](docs/guia-desarrollo.md).
+El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 
 ## Ejecutar
 

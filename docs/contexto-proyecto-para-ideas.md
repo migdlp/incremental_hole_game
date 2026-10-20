@@ -4,7 +4,7 @@
 
 **Incremental Hole Game** es un juego incremental para móvil, en desarrollo activo. El jugador dirige bolas por una arena y trata de meterlas en un hoyo. Cada bola capturada genera monedas; recogerlas permite comprar mejoras permanentes y preparar jornadas más productivas. El placer central combina una interacción física sencilla con el crecimiento visible de la economía y nuevas formas de controlar o automatizar el tablero.
 
-El proyecto se conoce también como **Jardín Mecánico** en el APK actual. La versión del código en esta revisión es **0.6.0+11**; la última entrega APK documentada es **0.5.0+10**. El juego es individual y no depende de conexión, cuentas ni servicios en línea.
+El proyecto se conoce también como **Jardín Mecánico** en el APK actual. La versión vigente del código y el último APK entregado son **0.6.0+13** (20/10/2026). Para continuar el desarrollo en otro chat, consultar el [relevo de contexto](relevo-contexto.md). El juego es individual y no depende de conexión, cuentas ni servicios en línea.
 
 ## Bucle principal
 
@@ -33,7 +33,7 @@ La jornada base tiene **15 segundos de producción y 5 segundos de recogida**. L
 - Solo existen monedas de **$1, $10, $50, $100 y $500**. Todas tienen las mismas dimensiones y no llevan cifras ni texto; el color indica la denominación. Las recompensas se representan como combinaciones de esas monedas.
 - El importe se muestra en la interfaz con el icono de moneda, sin el símbolo `$` delante. El resumen diario cuenta las monedas por denominación, de mayor a menor.
 - Al principio se recogen monedas pulsándolas. La mejora opcional **Barrido** permite recogerlas también arrastrando. La rama **Área** permite recoger varias monedas cercanas al pulsar; el **Imán**, más adelante, atrae monedas alrededor del dedo activo.
-- Si el jugador tiene una o más bolas agarradas, se bloquean la recogida y la atracción de monedas. Las monedas pendientes al final de la noche se pierden.
+- Si el jugador tiene una o más bolas agarradas, se bloquean la recogida y la atracción de monedas. Las monedas pendientes al terminar la recogida final se pierden.
 - La base genera 1,5 bolas por segundo durante 15 segundos. El valor final cobrado depende de las capturas, las bolas doradas y de cuánto consiga recoger el jugador.
 
 ## Combos de capturas
@@ -66,7 +66,7 @@ CONTROL · Mano I (13) → capacidad hasta 6 bolas
             └─ Robot (requiere Anchura II y Barrido) → Velocidad I–V
 ```
 
-Las compras se hacen entre jornadas. Mano I cuesta **13**; Valor aumenta la recompensa normal por captura a **2/3/5/8/13**; el Imán cuesta **300** y requiere Área III. Los demás costes y efectos están en [`balance.csv`](balance.csv), que es la fuente vigente para cifras y requisitos. El ritmo de precios aún debe probarse jugando.
+Las mejoras de duración dan 18/21/24/27/30 segundos de producción; la recogida final dura 5 segundos. Las compras se hacen entre jornadas. Mano I cuesta **13**; Valor aumenta la recompensa normal por captura a **2/3/5/8/13**; el Imán cuesta **300** y requiere Área III. Los demás costes y efectos están en [`balance.csv`](balance.csv), que es la fuente vigente para cifras y requisitos. El ritmo de precios aún debe probarse jugando.
 
 ## Presentación y controles del árbol
 
@@ -78,7 +78,7 @@ En el árbol, mantener el saldo pulsado durante tres segundos abre un modo tempo
 
 ## Estado del proyecto
 
-La entrega **0.5.0+10** pasó formato, análisis, 116 pruebas, compilación Android y verificación de firma en CI. La revisión de código **0.6.0+11** añade combos y modo de depuración; pasa 134 pruebas; su entrega APK aún no está registrada. Esto no sustituye la prueba de controles y legibilidad en un teléfono físico. También falta validar jugando el ritmo real de ingresos y compras.
+La entrega **0.6.0+13** pasó formato, análisis, **135 pruebas**, compilación Android y verificación de firma en CI. Incluye combos, debug, ciclo 15+5 y agujero arriba/generador abajo. [Descargar el APK (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439/artifacts/12256028572). Esto no sustituye la prueba de controles y legibilidad en un teléfono físico. También falta validar jugando el ritmo real de ingresos y compras. El [estado actual](estado-actual.md) recoge lo implementado y los límites de verificación; [cambios futuros](cambios-futuros-arbol-mejoras.md) mantiene los pendientes.
 
 El diseño futuro apunta a una fábrica sencilla y configurable que ayude sin sustituir al jugador. Los cuatro ejes son generación, porcentaje de captura, valor/tier de las bolas y recogida de monedas. La rama Valor global actual se quiere sustituir por tiers individuales, pero todavía faltan sus valores, colores, probabilidades y migración. Las doradas deberán valer ×10 de su tier y nunca existir en el tier máximo. Sigue abierta la regla de una dorada que intenta evolucionar a ese máximo. Una bola potenciadora podría elevar tiers por contacto cuando se concreten sus cargas y límites.
 

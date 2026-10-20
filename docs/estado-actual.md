@@ -1,87 +1,87 @@
-# Estado actual del prototipo
+# Estado actual de Incremental Hole Game / Jardín Mecánico
 
-> **Revisión 0.6.0+13:** agujero arriba y generador abajo; la salida del generador y las bolas apuntan hacia arriba. Las 135 pruebas pasan con esta disposición.
+Actualizado: **20/10/2026**. Referencia: **0.6.0+13**, último APK entregado al usuario. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
-> **Revisión 0.6.0+12:** jornada base de 15 s de producción y 5 s de recogida. Las jornadas activas guardadas con balances anteriores mantienen sus tiempos. Incluye el modo debug del árbol, detallado abajo. La suite completa pasa 135 pruebas y `flutter analyze` no encuentra problemas. No se pudo compilar APK local porque el entorno no tiene Android SDK.
+## Juego y dirección
 
-> **Depuración incorporada en 0.6.0+11:** acceso oculto manteniendo el saldo del árbol 3 s, vista completa o del jugador, compras gratuitas con requisitos, compra total y jornadas temporales sin escribir sobre el progreso normal. [Instrucciones](modo-debug.md).
+Juego incremental móvil con físicas arcade. El jugador manipula bolas para meterlas en un agujero, recoge las monedas físicas que producen y compra mejoras permanentes entre jornadas. La automatización debe ayudar a agrupar y dirigir bolas, manteniendo una ventaja clara para quien juega activamente.
 
-> **Revisión de código 0.6.0+11:** combos de capturas implementados con ventana de 1 s, multiplicadores ×1/×2/×3 y feedback visual bajo descubrimiento. Cuentan provisionalmente las capturas asistidas. Guardado JSON v6 conserva las jornadas antiguas sin combos hasta terminar. 125 pruebas correctas. Tiers, potenciadora y los demás conceptos del brainstorm se detallan en [cambios futuros](cambios-futuros-arbol-mejoras.md); aún no están implementados. Última entrega APK documentada: 0.5.0+10. Las notas inferiores son históricas.
+Los cuatro ejes de progresión son generar más bolas, capturar una proporción mayor, aumentar el valor de las capturas y recoger mejor las monedas. El sistema de tiers individuales y la fábrica configurable son dirección futura, todavía no sistemas implementados.
 
-> Actualización 0.3.3+8: cabecera sin oscurecer durante la recogida final; 1 % de bolas doradas con recompensa ×10 (base $10), guardado y contabilidad por tipo. Conserva la mano con peso de 0.3.2+7. Los enlaces de APK inferiores corresponden a sus versiones históricas.
+## Jornada y tablero vigentes
 
-> **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
+- Arena lógica de 360 × 560. **Agujero arriba** en (180, 60) y **generador abajo** en (180, 412), con salida y velocidad inicial de las bolas hacia arriba. Es el último cambio pedido y entregado.
+- Base de **15 s de producción y 5 s de recogida final**, con barras independientes. Las mejoras de duración dan 18/21/24/27/30 s de producción; la recogida permanece en 5 s.
+- Emisión inicial de **1,5 bolas/s**: primera bola tras aproximadamente ⅔ s. Generador y Doble emisión aumentan la producción.
+- Durante producción se controlan bolas y se recogen monedas. Durante recogida final se congelan bolas, escoba y robot; se permite cobrar monedas. La cabecera y el contador permanecen legibles sin oscurecer.
+- Al terminar, lo pendiente se pierde. El tablero siguiente empieza vacío y conserva saldo y mejoras.
+- Límite de **200 bolas**, **1000 monedas visibles** y reserva por denominación para monedas pendientes de emitir. La reserva no se cobra automáticamente.
+- Pausa y segundo plano detienen la simulación. No hay ingresos por tiempo con el juego cerrado.
 
+## Mano, escoba y robot
 
-> Revisión 0.3.1+6 preparada para integrar: CF-01 a CF-04, monedas sin cifras, $1 por captura base, 3 s de recogida final y recorrido estadísticas → árbol → comenzar día. La implementación se verifica con pruebas y compilación web; Android físico pendiente. Ver [economía](economia.md), [árbol](arbol-de-mejoras.md) y [compatibilidad](persistencia.md). Esta nota prevalece sobre las cifras históricas inferiores.
+- Mano base de una bola. Mano I cuesta **13** y permite dos; los cinco niveles alcanzan 2/3/4/5/6 bolas.
+- La primera bola se agarra manualmente. Solo una mano ya ocupada atrae bolas adicionales cercanas, hasta su capacidad. Conservan movimiento físico, retraso e inercia y pueden soltarse con tirones fuertes.
+- Fuerza de agarre I–V acelera la aproximación y refuerza la sujeción de las bolas adicionales. No aumenta capacidad ni recoge monedas.
+- La escoba se desbloquea tras Mano II. Es un objeto físico que se puede agarrar; Anchura y V modifican esa misma herramienta. Empuja bolas y no cobra monedas.
+- Un robot desbloqueable empuja bolas hacia el agujero; su velocidad se mejora. No recoge monedas.
+- **Mientras haya alguna bola agarrada, se bloquean tanto el cobro como la atracción de monedas.**
 
-> Actualización vigente — 19 de octubre: se implementa el [mapa futuro v0.6](cambios-futuros-arbol-mejoras.md) en 0.3.0+5: 44 nodos, cuatro ramas, cinco niveles, seis colores, Doble emisión y alcance del imán. Mano inicial de una bola, mejoras a 2/3/4/5/6 y escoba solo tras comprarla. Guardado/balance v4 conserva las compras y jornadas antiguas. Esta nota sustituye estados anteriores que la contradigan; ver [árbol actual](arbol-de-mejoras.md) y [historial](../CHANGELOG.md).
+## Monedas, recompensa y combos
 
-Corte: 18 de octubre de 2026, aplicación `0.2.2+4`, con resultados modales y generación inicial de 1,5 bolas/s. La evidencia histórica de APK se identifica debajo por commit. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está pendiente.
+- Capturar genera monedas físicas; recogerlas permite contabilizar el ingreso. La jornada se liquida una sola vez, sin cobrar automáticamente lo pendiente.
+- Bola normal base: **1**. La rama global Valor sigue vigente: **2/3/5/8/13** por captura normal, antes de dorada y combo.
+- Doradas: **1 %** de las emisiones; recompensa **×10** del valor normal vigente. Actualmente no hay tiers individuales.
+- Denominaciones únicas: **1 / 10 / 50 / 100 / 500**. Colores: dorado / verde esmeralda / azul / violeta / coral. Todas tienen las mismas dimensiones y no muestran cifras ni símbolos en su cara. La UI usa icono de moneda sin prefijo dólar.
+- Toque para cobrar; Barrido permite arrastrar. Área mejora la recogida manual sin exigir Barrido ni Imán. **Imán cuesta 300 y requiere Área III**; Atracción amplía su alcance.
+- Resumen diario con recuento por denominación, de mayor a menor. La antigua barra verde cobrado/generado está eliminada.
+- Combos desde el inicio: ventana inclusiva de **1 s**; capturas 1–4 **×1**, 5–9 **×2**, desde la décima **×3**. La quinta y décima usan ya su nuevo multiplicador. No se modifican premios anteriores.
+- Se combinan Valor × dorada × combo. Toda recompensa sigue requiriendo recoger sus monedas. Todas las capturas, incluidas las asistidas, cuentan provisionalmente.
+- La racha termina al superar la ventana o entrar en recogida final. Pausar y restaurar no consumen tiempo. La UI muestra COMBO ×2/×3; se quiere que el jugador descubra los umbrales, sin explicar la fórmula en pantalla.
 
-## Qué está implementado
+## Árbol e interfaz
 
-| Área | Comportamiento actual | Código principal | Evidencia y límite |
-| --- | --- | --- | --- |
-| Arranque | Carga el balance, abre el guardado y muestra el taller o una jornada restaurada pausada | [main.dart](../lib/main.dart) | Apertura y restauración revisadas en navegador |
-| Tablero | Arena 360 × 560, un generador, un hoyo, bolas circulares, mano individual y escobas recta/en V con un puntero | [Board](../lib/features/board/domain/board.dart), [GardenGame](../lib/features/board/presentation/garden_game.dart) | Empuje y recogida observados; sensación en móvil pendiente |
-| Física | Fricción, bordes, separación e impulso entre bolas mediante rejilla espacial | [Board](../lib/features/board/domain/board.dart) | Pruebas de agarre, inercia, orientación, anchura, V y límites; no certifican comodidad en móvil |
-| Monedas | Captura genera valor físico, aterrizaje, pulsación inicial y barrido comprado, fusión y límite de pilas | [Board](../lib/features/board/domain/board.dart) | Pruebas de cobro único y conservación del valor |
-| Ciclo | Producción, cierre, pausa y noche; 15 + 5 s como base; emisión de 1,5 bolas/s; noche sin límite | [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart), [GameSession](../lib/app/game_session.dart) | Ciclo y balances históricos cubiertos por pruebas |
-| Economía | Enteros; ingreso diario separado del ahorro; cierre único; pendientes perdidos | [Economy](../lib/features/economy/domain/economy.dart), [GameSession](../lib/app/game_session.dart) | Cierre repetido y compras inválidas probados |
-| Mejoras | Catorce tipos, 44 nodos, costes, niveles y requisitos; efectos al siguiente día | [Catálogo](../lib/features/upgrades/domain/catalog.dart), [CSV](balance.csv) | Validación de catálogo, dependencias y compras |
-| Automatización | Un robot que empuja, velocidad mejorable e imán alrededor del dedo activo | [Robot](../lib/features/automation/domain/robot.dart), [Board](../lib/features/board/domain/board.dart) | Casos controlados de robot e imán superados |
-| Progreso | Ahorro, niveles, día, récord, último resultado y comparación con el anterior | [Progress](../lib/features/progression/domain/progress.dart) | Guardado/restauración y ciclos probados; no hay historial completo |
-| Persistencia | JSON v4, migración v1/v2/v3 y balance 5 con restauración histórica de balances 1–4; cola de escrituras; principal y copia; restauración pausada | [Referencia](persistencia.md) | Recuperación en archivos temporales Linux; falta ensayo en Android real |
-| Interfaz | Jornada, pausa, resultados en pop-up bloqueante y árbol progresivo con arrastre/zoom, ficha y compra de 3 s | [game_app.dart](../lib/app/game_app.dart) | Pruebas de widgets de descubrimiento y compra/cancelación; Android físico pendiente |
-| Sonido | Clic del sistema al cobrar/comprar, con opción de silencio | [game_app.dart](../lib/app/game_app.dart) | Sin audio propio ni volumen independiente; sonido real no certificado en todos los destinos |
-| Entrega | Android vertical y web de apoyo; SDK fijado y lockfile versionado | [Configuración](../pubspec.yaml), [.fvmrc](../.fvmrc) | APK y web compilados; sin validación en teléfono |
-| CI | Activación exclusivamente manual, formato, análisis, pruebas, APK, firma y artefactos | [Workflow](../.github/workflows/flutter-manual.yml) | Ejecución manual correcta en `main`; ver [CI](ci.md) |
+**49 nodos en 15 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
 
-## Evidencias publicadas
+- Pantalla independiente, sin título, botón visible de atrás ni botones de zoom. Navegación con arrastre y pellizco.
+- Descubrimiento progresivo: comprados y siguientes nodos accesibles. La partida nueva comienza mostrando Mano I.
+- Nodos comprados con icono y color de categoría; pendientes apagados, comprables con iluminación blanca suave. Conexiones de tramos rectos horizontales, verticales o diagonales.
+- Sin ficha inicial. Tocar un nodo muestra una frase esquemática, cantidades destacadas en verde, coste y requisitos. La compra exige mantener su botón **1 s**; soltar antes, mover, interrumpir o usar otro dedo cancela.
+- Resultados → botón único «Ir al árbol de mejoras» → pantalla del árbol → «Comenzar día». La bienvenida de una partida nueva conserva su inicio directo.
 
-- [PR #8](https://github.com/migdlp/incremental_hole_game/pull/8), `1a8fed7`: agarre, escobas, barrido comprado y guardado v2. [CI 39136783858](https://github.com/migdlp/incremental_hole_game/actions/runs/39136783858): 36 pruebas, APK y firma correctos.
-- [PR #10](https://github.com/migdlp/incremental_hole_game/pull/10), `1d71843`: día inicial de 15 segundos totales, generación cuatro veces más lenta y guardado v3. [CI 39138119402](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402): 41 pruebas, análisis, APK y firma correctos.
-- [Descargar APK del balance, antes del árbol](https://github.com/migdlp/incremental_hole_game/actions/runs/39138119402/artifacts/12141030218): `0.2.1+3`, retención hasta el 1 de noviembre de 2026. Ver [CI](ci.md) para regenerarlo.
-- [PR #12](https://github.com/migdlp/incremental_hole_game/pull/12), `1720fba`: árbol progresivo y siete pruebas nuevas; [CI 39141075339](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339) correcta con **48 pruebas**, APK y firma; [descarga actual](https://github.com/migdlp/incremental_hole_game/actions/runs/39141075339/artifacts/12142120297); ver [árbol](arbol-de-mejoras.md) para distinguir descubrimiento y requisitos del CSV.
-- [Registro de validación](validacion-prototipo.md): separa la evidencia inicial y la de controles/balance actuales.
+## Debug implementado
 
-Las pruebas de simulación usan objetos controlados. En `0.2.0+2`, la revisión del navegador con generación normal y puntero logró 2 capturas y 4 monedas cobradas, sin errores JavaScript; herramientas compradas se comprobaron con un guardado aislado. El balance de `0.2.1+3` se verificó con cinco pruebas adicionales y CI, sin una nueva sesión manual de balance. Ninguno de esos resultados demuestra rendimiento o comodidad en Android físico.
+Acceso oculto: **mantener pulsado 3 s el saldo del árbol**, arriba a la derecha. No está en las opciones normales.
 
-## Diferencias entre diseño y entrega
+- Vista completa: encuadra los 49 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
+- Vista del jugador: descubrimiento y compras normales usando saldo y mejoras de prueba. Ambas vistas comparten esa configuración; para ver el principio hay que reiniciar la prueba desde cero.
+- Añadir 1000 monedas de prueba, reiniciar, jugar jornadas de prueba y salir.
+- La prueba es temporal: no sobrescribe el progreso normal. Salir o reabrir recupera la partida real. Durante una jornada de prueba se muestra DEBUG y un botón de salida.
+- [Instrucciones detalladas](modo-debug.md).
 
-| Propuesta del diseño | Situación real |
-| --- | --- |
-| Árbol con conexiones visuales | Implementado con descubrimiento, zoom y compra por pulsación de 3 s; pendiente aceptación física |
-| Audio con recursos propios, concurrencia y volumen | Solo clic del sistema y silencio; `flame_audio` no está instalado |
-| Sistema de partículas y carga de 150 partículas | `particle_limit` está en el CSV, pero no existe sistema de partículas ni pools |
-| Modelos separados `RunState`, `BoardSnapshot`, `SaveEnvelope` | Se componen mapas JSON desde `GameSession` y `Board`; esas clases no existen |
-| Eventos de tablero con IDs y tipos | `BoardEvents` devuelve conteo de capturas e importe recogido; los objetos retirados evitan repetir eventos |
-| Coordinación directa de automatización desde sesión | `Board` posee el robot y consulta su controlador puro |
-| Tipos de contenido y puertos públicos más amplios | Hay un tipo de bola, once IDs de mejora y un puerto de guardado; sin motor genérico ni archivos públicos de exportación por módulo |
-| Suite `integration_test` y perfil en móvil | Existen pruebas de reglas/sesión y widgets; no hay suite `integration_test` ni mediciones físicas |
-| Primera bola inmediata en la propuesta económica inicial | El código espera a acumular el intervalo de generación; se ha corregido la explicación de economía |
+## Entrega y comprobaciones
 
-## Seguimiento de esta tanda
+**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439/artifacts/12256028572)**. Descomprimir e instalar `jardin-mecanico-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-El [plan de cambios](plan-cambios-agarre-escoba.md) registra los bloques implementados, parámetros provisionales, criterios comprobados y APK entregados. Agarre, escobas, compra de barrido, limpieza nocturna y compatibilidad están implementados. La documentación general se actualiza ahora por indicación del usuario; esto no certifica pruebas físicas ni el balance definitivo.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39403619439): formato, análisis, **135 pruebas**, compilación Android y verificación de firma correctos. Incluye los combos, debug, el ciclo 15+5 y las posiciones intercambiadas.
 
-El árbol progresivo ya está implementado; quedan aceptación de su interacción y ajuste de precios/ritmo de progreso. La aspiradora está aparcada; las demás [ideas](ideas-herramientas-bolas.md) no son alcance comprometido.
+Las pruebas del debug comprueban acceso oculto, presencia y encuadre de los 49 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 
-## Pendiente de aceptación
+Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y fichas, tacto y rendimiento con carga, guardado/segundo plano/cierre y diversión del nuevo tablero. Falta medir ingresos y jornadas entre compras para ajustar el balance.
 
-| Prioridad | Tarea | Evidencia para cerrarla |
-| --- | --- | --- |
-| Alta | Elegir Android físico y validar entrada, legibilidad y grupos | Registrar modelo, Android, versión/commit, recorrido y problemas observados |
-| Alta | Probar guardado nativo e interrupciones | Salir a segundo plano, reabrir, forzar cierre y verificar que no hay doble cobro; documentar pérdida desde el último guardado |
-| Alta | Validar economía y progresión | Diez jornadas manuales con el balance nuevo; acordar precios, primera compra y acceso al robot. La hipótesis anterior de 3–5 días no está vigente |
-| Alta | Medir rendimiento | Modo profile, 200 bolas y 100 pilas, tres jornadas y revisión tras diez ciclos; objetivo de 60 FPS aún sin verificar |
-| Media | Completar audio y volumen | Recursos propios con licencia, silencio y control independiente; prueba real por destino |
-| Media | Completar presentación | Aceptación táctil del árbol existente, respuesta visual final e iconos de instalación propios |
-| Según necesidad | Ampliar pruebas de integración y robustez | Añadir regresiones de errores observados, recuperación y evolución de esquema antes de declarar garantías más amplias |
+## Persistencia y alcance técnico
 
-La carga de partículas de la especificación solo podrá medirse cuando exista ese sistema. No se registra como prueba realizada.
+Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-## Fuera de este MVP
+Guardado JSON **v6** y balance vigente **v7** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–6 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
 
-Sin backend, cuentas, nube, clasificación, monetización, prestigio, recompensas por tiempo cerrado, múltiples tableros, varios robots, robot recolector de dinero ni monedas especiales. iOS y escritorio nativo no están configurados como destinos de esta entrega. Una versión firmada para tienda no forma parte de la pipeline actual.
+No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, prestigio ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
+
+## Orden de lectura y continuación
+
+1. [Relevo](relevo-contexto.md) y este estado actual.
+2. [Cambios futuros](cambios-futuros-arbol-mejoras.md): pendientes y decisiones abiertas, no lista de tareas ya terminadas.
+3. [Árbol](arbol-de-mejoras.md), [economía](economia.md) y [balance.csv](balance.csv) para cambiar reglas concretas.
+4. Documentos de implementación, persistencia e historial cuando la tarea lo requiera. Los planes antiguos contienen decisiones reemplazadas; no deben prevalecer sobre este estado y el código.
+
+El último APK se construyó desde `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Para este relevo importan el comportamiento vigente y las decisiones futuras, no reconstruir el historial de commits.

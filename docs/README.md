@@ -1,15 +1,16 @@
 # Documentación de Jardín mecánico
 
-Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` hasta `1720fba`, incluido el árbol progresivo. La documentación distingue implementación, evidencias de prueba y objetivos pendientes.
+Referencias de relevo actualizadas el **20/10/2026** para el último APK **0.6.0+13**. Empieza por [relevo de contexto](relevo-contexto.md), [estado actual](estado-actual.md) y [cambios futuros](cambios-futuros-arbol-mejoras.md). Los planes y evidencias de entregas anteriores se conservan como historia; sus cifras pueden estar reemplazadas.
 
 ## Empieza por tu tarea
 
 | Quiero… | Leer |
 | --- | --- |
+| Continuar en otro chat o dar relevo | [Relevo de contexto](relevo-contexto.md) |
 | Inspeccionar el árbol completo y probar mejoras gratis | [Modo de depuración](modo-debug.md) |
 | Dar contexto rápido y pedir ideas | [Resumen para compartir](contexto-proyecto-para-ideas.md) |
 | Saber qué está terminado y qué falta | [Estado actual](estado-actual.md) |
-| Preparar los cambios de la siguiente iteración | [Seguimiento de agarre, escobas y balance](plan-cambios-agarre-escoba.md) |
+| Preparar los cambios de la siguiente iteración | [Cambios futuros y decisiones abiertas](cambios-futuros-arbol-mejoras.md) |
 | Explorar herramientas para recoger y lanzar bolas | [Ideas de herramientas](ideas-herramientas-bolas.md) |
 | Ejecutar el proyecto y completar una primera partida | [Guía de desarrollo](guia-desarrollo.md) |
 | Descargar o generar un APK | [Pipeline manual](ci.md) |
@@ -23,7 +24,7 @@ Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` 
 | Actualizar esta documentación | [Guía para documentar](guia-documentacion.md) |
 | Consultar la evolución de la entrega | [Historial de cambios](../CHANGELOG.md) |
 
-Para incorporarse al desarrollo: estado actual → guía de desarrollo → implementación → persistencia → decisiones. Para probar el APK, basta con la guía de CI y los escenarios manuales de la guía de desarrollo.
+Para incorporarse al desarrollo: relevo → estado actual → cambios futuros; después consultar las referencias técnicas que requiera la tarea. Para probar el APK, basta con la guía de CI y los escenarios manuales de la guía de desarrollo.
 
 ## Producto y diseño objetivo
 

@@ -1,6 +1,6 @@
 # Economía y monedas
 
-Referencia de la implementación 0.6.0+11 (código; última entrega APK documentada: 0.5.0+10). La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
+Referencia de la implementación y último APK entregado: **0.6.0+13** (20/10/2026). La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
 
 ## Valor y denominaciones
 
@@ -26,7 +26,7 @@ Cada bola que emite el generador tiene una probabilidad independiente del 1 % de
 
 La jornada base tiene **15 segundos de producción + 5 de recogida final = 20 segundos**. La barra del día mide solo producción; al agotarse, queda vacía y aparece una segunda barra para recogida. El contador muestra el tiempo de la fase activa. Estadísticas y árbol no tienen temporizador. La recogida final congela bolas, escoba y robot; solo permite cobrar monedas y conserva el oscurecimiento del tablero, manteniendo la cabecera y el tiempo sin oscurecer.
 
-La producción base sigue siendo 1,5 bolas/s. Sin bloqueos, intenta emitir quince bolas en diez segundos: **$15 generados con quince bolas normales** si se capturan todas. Las doradas aumentan ese importe; $15 ya no es un máximo absoluto. El ingreso se banca únicamente al cobrar las monedas. Bloqueos del generador, bolas sin capturar y monedas sin recoger reducen el ingreso. Estas cifras no miden la experiencia real del jugador.
+La producción base es 1,5 bolas/s durante 15 segundos: sin bloqueos y con una bola por emisión, se emiten 22 bolas en una jornada base. Si todas son normales y se capturan sin combo, generan 22 de valor; las doradas, combos y mejoras pueden aumentar ese importe. El ingreso se banca únicamente al cobrar las monedas. Bloqueos del generador, bolas sin capturar y monedas sin recoger reducen el ingreso. Estas cifras no miden la experiencia real del jugador.
 
 Generador, duración y recompensa son mejoras independientes. Los precios y efectos por nivel se consultan en el CSV; sus conexiones se explican en el [árbol actual](arbol-de-mejoras.md). Las compras se aplican al siguiente día. Mano I cuesta 13. Los niveles de Valor dan 2/3/5/8/13 por captura normal: multiplicar el valor entero anterior por 1,65 y redondear al entero más próximo. Los factores efectivos iniciales varían por el redondeo. Sus precios se mantienen en 40/70/110/180/300.
 
@@ -44,7 +44,7 @@ Con una o más bolas agarradas se bloquean todos los cobros de monedas y su atra
 - La representación por denominaciones no cambia estos cálculos ni crea dinero.
 - No hay ingresos mientras el juego está cerrado.
 
-Las nuevas jornadas usan balance 6. Las jornadas guardadas con balance 1–5 mantienen su configuración original y su valor hasta terminar, aunque la presentación use ya los nuevos colores. El siguiente día adopta el CSV actual. Ver [persistencia](persistencia.md).
+Las nuevas jornadas usan balance 7. Las jornadas guardadas con balance 1–6 mantienen su configuración original y su valor hasta terminar, aunque la presentación use ya los nuevos colores. El siguiente día adopta el CSV actual. Ver [persistencia](persistencia.md).
 
 ## Ajuste pendiente
 

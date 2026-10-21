@@ -2,6 +2,32 @@
 
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
+## C01 · 0.13.0+21 · 21/10/2026
+
+Fuente `c6f9125`, rama `build/apk-0.6.0+13`.
+[Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/39669624882):
+**298 pruebas**, formato y análisis sin avisos; APK compilado y firma v2 verificada.
+Etiqueta Feed the Hole, paquete `com.migdlp.incremental_hole_game`, versionCode 21.
+[APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39669624882/artifacts/12379681616).
+
+Cobro completo y contabilidad independiente del pool, liquidación y restauración
+sin duplicados, pausa, retirada sin reembolso autorizada, reconstrucción de
+balances antiguos y Robot heredado, escrituras coalescidas con disco bloqueado,
+100.000 recompensas con memoria acotada, 200 bolas con Captura total, doradas y
+racha bajo presupuestos 0/1/24, curvas variables, destino real del monedero,
+render sin mutación, control táctil, pantalla pequeña y DEBUG aislado.
+Los tests antiguos de monedas quedan identificados como históricos; la jornada
+actual cierra directamente sin recogida y los resultados muestran cobro íntegro.
+
+No hay prueba Android física ni medición de 60 FPS. Presupuesto inicial 24,
+trayectorias y adaptación provisionales. [Medición pendiente y procedimiento](c01-cobro-automatico.md).
+El APK debug no permite certificar rendimiento; medir profile con DevTools y
+herramientas Android, también fuera de DEBUG para incluir el coste del guardado.
+
+Persisten los avisos no bloqueantes de Node 20/24 y setup-java@v4.
+La pipeline estándar verifica esta firma, sin certificar actualización sobre
+APK anteriores con otra firma. No desinstalar si se quiere conservar su progreso.
+
 ## S01 · 0.12.0+20 · 21/10/2026
 
 Fuente `8eaff28`, rama `build/apk-0.6.0+13`.

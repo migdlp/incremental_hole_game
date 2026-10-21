@@ -17,6 +17,8 @@ base,capture_all_cooldown,0,0,capture_all_cooldown,12,seconds,,12
 base,boost_cooldown,0,0,boost_cooldown,10,seconds,,10
 base,boost_duration,0,0,boost_duration,4,seconds,,6
 base,boost_multiplier,0,0,boost_multiplier,2,multiplier,,3
+base,wall_restitution,0,0,wall_restitution,0.40,multiplier,,1.60
+base,ball_speed_limit,0,0,ball_speed_limit,380,logical_units_per_second,,380
 upgrade,hand,1,13,hand_capacity,2,balls,,
 upgrade,hand,2,30,hand_capacity,3,balls,,
 upgrade,hand,3,50,hand_capacity,4,balls,,
@@ -76,3 +78,6 @@ upgrade,boost_duration,1,140,boost_duration,5,seconds,boost:1,6
 upgrade,boost_duration,2,240,boost_duration,6,seconds,boost:1,6
 upgrade,boost_recharge,1,140,boost_cooldown,8,seconds,boost:1,10
 upgrade,boost_recharge,2,240,boost_cooldown,6,seconds,boost:1,10
+upgrade,walls,1,40,wall_restitution,1.10,multiplier,hand:1,1.60
+upgrade,walls,2,100,wall_restitution,1.35,multiplier,hand:1,1.60
+upgrade,walls,3,220,wall_restitution,1.60,multiplier,hand:1,1.60

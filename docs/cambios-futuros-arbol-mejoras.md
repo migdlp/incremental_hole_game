@@ -136,3 +136,11 @@ Definir gesto, límites, feedback y relación con los controles existentes. Evit
 ## Cómo continuar
 
 Para cada propuesta, concretar reglas, impacto económico, requisitos del árbol, guardado, casos límite y un plan de pruebas por fases. Las decisiones expresamente abiertas se discutirán antes de fijarlas. Al completar una tarea, se quitará de este documento y se actualizarán las referencias de lo implementado.
+
+## Calibración pendiente M01
+
+La especificación funcional de Paredes rebotadoras ya está implementada y no es
+un diseño abierto. Solo quedan probar precios, dependencias exactas y calibración
+final: ×0,40/×1,10/×1,35/×1,60 y 380 u/s son provisionales. Para comprar en pruebas
+se usan 40/100/220 y Mano I, también provisionales. M01 no completa los flippers,
+bumpers ni otras piezas de CF-20. [Estado M01](m01-paredes-rebotadoras.md).

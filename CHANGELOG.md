@@ -2,6 +2,15 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.7.0+15 — M01: Paredes rebotadoras
+
+- Tres niveles de potencia de rebote, automáticos y persistentes, configurables
+  en CSV. Multiplicadores, precios y requisitos provisionales de prueba.
+- Límites de velocidad, resolución convencional de esquinas y captura de bolas
+  rápidas por recorrido/subpasos. Monedas y recogida final conservadas.
+- Líneas elásticas y ondas por impacto, con efectos transitorios acotados.
+- Balance v9; las jornadas anteriores conservan sus ajustes v8 congelados.
+
 ## 0.6.0+14 — G01: Feed the Hole
 
 - Nuevo nombre visible en Android, interfaz y web: Feed the Hole.

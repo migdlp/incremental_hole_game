@@ -3,6 +3,7 @@ import 'balance_v4.dart';
 import 'balance_v5.dart';
 import 'balance_v6.dart';
 import 'balance_v7.dart';
+import 'balance_v8.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -27,7 +28,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 8});
+  DaySettings(this.values, {this.balanceVersion = 9});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -43,6 +44,7 @@ class UpgradeCatalog {
   final List<UpgradeDefinition> definitions;
   static const labels = {
     'hand': ['Capacidad de la mano', 'Control'],
+    'walls': ['Paredes rebotadoras', 'Control'],
     'hand_grip': ['Fuerza de agarre', 'Control'],
     'broom': ['Escoba recta', 'Control'],
     'paddle': ['Escoba más ancha', 'Control'],
@@ -135,6 +137,8 @@ class UpgradeCatalog {
       'particle_limit',
       'hand_capacity',
       'balls_per_spawn',
+      'wall_restitution',
+      'ball_speed_limit',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }
@@ -148,10 +152,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 8}) {
-    final values = balanceVersion <= 7 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 7) {
-      final historicalCsv = balanceVersion == 7
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 9}) {
+    final values = balanceVersion <= 8 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 8) {
+      final historicalCsv = balanceVersion == 8
+          ? balanceV8Csv
+          : balanceVersion == 7
           ? balanceV7Csv
           : balanceVersion == 6
           ? balanceV6Csv
@@ -207,7 +213,7 @@ class UpgradeCatalog {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 8,
+    int balanceVersion = 9,
   }) {
     if (previousTree.isNotEmpty) {
       validateLevels(

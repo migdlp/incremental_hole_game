@@ -4,6 +4,8 @@ Referencias de relevo actualizadas el **20/10/2026** para el último APK **0.6.0
 
 [G01 — cambio de nombre a Feed the Hole y bloqueo de firma](g01-feed-the-hole.md).
 
+[M01 — paredes rebotadoras, balance provisional y pruebas](m01-paredes-rebotadoras.md).
+
 ## Empieza por tu tarea
 
 | Quiero… | Leer |

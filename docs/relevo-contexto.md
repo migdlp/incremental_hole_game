@@ -20,7 +20,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 - Solo monedas de **1/10/50/100/500**, mismo tamaño, color propio y sin valor escrito. UI con icono, sin prefijo dólar. Resumen por denominaciones, sin antigua barra verde.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
 - Racha comprable tras Mano I por 40: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
-- Árbol de 59 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
+- Árbol de 62 nodos y 23 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → Tienda → Comenzar día. No mostrar números de día al jugador.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
@@ -152,3 +152,13 @@ Pasaron formato, análisis, 154 pruebas, compilación y validación del nombre,
 paquete y firma del binario. Se omitió la comparación de actualización con la
 APK anterior: el conflicto de firma previamente confirmado sigue pendiente.
 No presentar esta entrega como actualización que conserve el progreso instalado.
+
+## M01 — paredes rebotadoras
+
+Implementadas en 0.7.0+15: rebote base ×0,40 y rama Paredes rebotadoras I–III
+(×1,10/×1,35/×1,60), con límite configurable inicial de 380 u/s. Precios
+40/100/220 y Mano I son provisionales de prueba, no aprobados. Efectos elásticos
+y ondas independientes de la física; monedas y recogida conservan sus reglas.
+Guardado v7, balance v9 y balance v8 congelado para jornadas anteriores.
+[Detalle y pruebas M01](m01-paredes-rebotadoras.md). No dar por implementadas
+las otras piezas de pinball ni las nuevas bolas especiales.

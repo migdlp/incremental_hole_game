@@ -5,11 +5,12 @@ import 'package:flutter/painting.dart';
 import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
+import '../domain/wall_impact.dart';
 import '../domain/coin_denomination.dart';
 import 'coin_painter.dart';
 
 class GardenGame extends FlameGame {
-  GardenGame(this.session)
+  GardenGame(this.session, {this.wallEffectsEnabled = true})
     : _displayBoard =
           session.board ?? Board(session.catalog.settings(session.levels));
   // Presentation only: the completed day has already been banked and discarded
@@ -39,6 +40,7 @@ class GardenGame extends FlameGame {
   }
 
   final GameSession session;
+  bool wallEffectsEnabled;
   double _time = 0;
   final _labels = <String, TextPainter>{};
   double get scale => math.min(size.x / Board.width, size.y / Board.height);
@@ -101,6 +103,38 @@ class GardenGame extends FlameGame {
     );
   }
 
+  void _renderElasticWalls(Canvas canvas, Board board) {
+    if (board.wallRestitution <= 1) return;
+    for (final wall in WallSide.values) {
+      final vertical = wall == WallSide.left || wall == WallSide.right;
+      final extent = vertical ? Board.height : Board.width;
+      final impacts = wallEffectsEnabled
+          ? board.wallImpacts.where((impact) => impact.wall == wall).toList()
+          : <WallImpact>[];
+      final path = Path();
+      for (var coordinate = 4.0; coordinate <= extent - 4; coordinate += 8) {
+        var deformation = 0.0;
+        for (final impact in impacts) {
+          deformation += impact.displacementAt(coordinate);
+        }
+        deformation = deformation.clamp(-10.0, 12.0);
+        final point = switch (wall) {
+          WallSide.left => Offset(4 + deformation, coordinate),
+          WallSide.right => Offset(Board.width - 4 - deformation, coordinate),
+          WallSide.top => Offset(coordinate, 4 + deformation),
+          WallSide.bottom => Offset(coordinate, Board.height - 4 - deformation),
+        };
+        if (coordinate == 4) {
+          path.moveTo(point.dx, point.dy);
+        } else {
+          path.lineTo(point.dx, point.dy);
+        }
+      }
+      canvas.drawPath(path, paint(const Color(0x40247d73), stroke: 6));
+      canvas.drawPath(path, paint(const Color(0xff247d73), stroke: 2.5));
+    }
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -132,6 +166,7 @@ class GardenGame extends FlameGame {
       RRect.fromRectAndRadius(bounds.deflate(13), const Radius.circular(19)),
       paint(const Color(0x30766543), stroke: 2),
     );
+    _renderElasticWalls(canvas, board);
     final hole = offset(Board.hole);
     final radius = board.settings['hole_capture_radius'];
     canvas.drawOval(

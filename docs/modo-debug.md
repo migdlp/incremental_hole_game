@@ -12,7 +12,7 @@ El botón está siempre visible en el árbol. El saldo de monedas ya no activa e
 
 ## Ver el árbol completo o la vista del jugador
 
-- **Vista del jugador desactivada:** muestra los 59 nodos y sus conexiones. Al entrar o volver a esta vista, el mapa se encuadra completo; puedes acercarte y arrastrarlo para inspeccionar las ramas. Cualquier nodo pendiente se puede comprar gratis desde su ficha, manteniendo el botón un segundo. Se adquieren también sus niveles anteriores y requisitos, incluidos los cruces entre ramas, para que la configuración sea válida al jugar.
+- **Vista del jugador desactivada:** muestra los 62 nodos y sus conexiones. Al entrar o volver a esta vista, el mapa se encuadra completo; puedes acercarte y arrastrarlo para inspeccionar las ramas. Cualquier nodo pendiente se puede comprar gratis desde su ficha, manteniendo el botón un segundo. Se adquieren también sus niveles anteriores y requisitos, incluidos los cruces entre ramas, para que la configuración sea válida al jugar.
 - **Vista del jugador activada:** usa exactamente el descubrimiento normal: nodos comprados y siguientes nodos accesibles. Conserva precios, requisitos y colores/estados de disponibilidad normales. Las compras realizadas en esta vista descuentan el saldo de prueba, como en una partida normal.
 
 Las dos vistas comparten las mismas compras de prueba. Si compras todo, la vista del jugador mostrará todo porque ya lo tienes adquirido. Para comprobar el inicio, pulsa «Reiniciar prueba desde cero» y activa «Vista del jugador».

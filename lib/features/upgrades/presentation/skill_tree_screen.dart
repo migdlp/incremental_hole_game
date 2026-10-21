@@ -737,6 +737,7 @@ Color _typeColor(SkillNode node) => switch (node.definition.id) {
 const _icons = {
   'hand': Icons.back_hand_outlined,
   'hand_grip': Icons.front_hand_outlined,
+  'walls': Icons.compare_arrows,
   'broom': Icons.cleaning_services_outlined,
   'paddle': Icons.swap_horiz,
   'broom_v': Icons.call_merge,
@@ -762,6 +763,7 @@ const _icons = {
 String _description(SkillNode node) => switch (node.definition.id) {
   'hand' =>
     'Lleva hasta ${node.upgrade.value.toInt()} bolas: agarra una y acerca la mano a otras para atraerlas',
+  'walls' => 'Aumenta la potencia del rebote de las cuatro paredes',
   'hand_grip' =>
     'Atrae y sujeta más rápido las bolas adicionales mientras llevas una bola',
   'broom' => 'Desbloquea la escoba para empujar grupos de bolas',
@@ -797,6 +799,7 @@ TextSpan _summary(SkillNode node) {
       n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(2);
   final (before, amount, after) = switch (node.definition.id) {
     'hand' => ('La mano agarra ', number(value), ' bolas.'),
+    'walls' => ('Rebote de paredes ', '×${number(value)}', '.'),
     'hand_grip' => ('Fuerza de agarre ', '×${number(value)}', '.'),
     'paddle' => ('La escoba abarca ', number(value * 4), ' u.'),
     'collection' => ('Recoge monedas a ', number(value), ' u de distancia.'),

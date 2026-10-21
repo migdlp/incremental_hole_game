@@ -5,6 +5,7 @@ import 'tool.dart';
 import 'coin_denomination.dart';
 import 'capture_combo.dart';
 import 'special_abilities.dart';
+import 'wall_impact.dart';
 import '../../upgrades/domain/catalog.dart';
 
 class Ball {
@@ -66,6 +67,43 @@ class Board {
   final CaptureCombo combo;
   final SpecialAbilities specials;
   final _captureAllIds = <int>{};
+  final wallImpacts = <WallImpact>[];
+  static const maximumWallImpacts = 32;
+  double get wallRestitution =>
+      settings['wall_restitution'] > 0 ? settings['wall_restitution'] : .4;
+  double get maximumSpeed =>
+      settings['ball_speed_limit'] > 0 ? settings['ball_speed_limit'] : 380;
+
+  void _wallImpact(WallSide wall, double coordinate, double speed) {
+    if (wallRestitution <= 1 || speed < 1) return;
+    if (wallImpacts.length == maximumWallImpacts) wallImpacts.removeAt(0);
+    wallImpacts.add(
+      WallImpact(wall, coordinate, (speed / maximumSpeed).clamp(0.0, 1.0)),
+    );
+  }
+
+  void _bounceWalls(Ball ball) {
+    final position = ball.position;
+    var vx = ball.velocity.x, vy = ball.velocity.y;
+    if (position.x <= radius && vx < 0) {
+      _wallImpact(WallSide.left, position.y, -vx);
+      vx = -vx * wallRestitution;
+    } else if (position.x >= width - radius && vx > 0) {
+      _wallImpact(WallSide.right, position.y, vx);
+      vx = -vx * wallRestitution;
+    }
+    if (position.y <= radius && vy < 0) {
+      _wallImpact(WallSide.top, position.x, -vy);
+      vy = -vy * wallRestitution;
+    } else if (position.y >= height - radius && vy > 0) {
+      _wallImpact(WallSide.bottom, position.x, vy);
+      vy = -vy * wallRestitution;
+    }
+    // Limit once after both normals: a corner never applies the multiplier twice
+    // to the whole vector. Inward/stationary contacts only get position correction.
+    ball.velocity = Vec(vx, vy).limit(maximumSpeed);
+    ball.position = position.inside(radius);
+  }
 
   bool activateSpecial(SpecialAbility ability) {
     if (coinOnly || (ability == SpecialAbility.captureAll && balls.isEmpty)) {
@@ -214,7 +252,7 @@ class Board {
           ? Vec.zero
           : ball == _manualBall
           ? velocity
-          : ball.velocity.limit(380);
+          : ball.velocity.limit(maximumSpeed);
     }
     if (!cancel && !_dragged && !_heldDuringGesture && _downPoint != null) {
       collected = _collect(_downPoint!, _downPoint!);
@@ -255,7 +293,7 @@ class Board {
     final elapsed = end.time - start.time;
     if (elapsed < .008) return Vec.zero;
     final velocity = (end.point - start.point) * (1 / elapsed);
-    return velocity.length < 18 ? Vec.zero : velocity.limit(380);
+    return velocity.length < 18 ? Vec.zero : velocity.limit(maximumSpeed);
   }
 
   void _sample(Vec point, double time) {
@@ -398,6 +436,10 @@ class Board {
 
   BoardEvents update(double dt, {required bool producing}) {
     var collected = 0;
+    for (final impact in wallImpacts) {
+      impact.age += dt;
+    }
+    wallImpacts.removeWhere((impact) => impact.age >= WallImpact.lifetime);
     _flushCoins();
     for (final coin in coins) {
       coin.landing = math.max(0, coin.landing - dt);
@@ -455,6 +497,28 @@ class Board {
         _push(robot.position, 15, movement * (1 / dt), 2);
       }
     }
+    final sweptCaptures = <int>{};
+    var captures = 0, goldenCaptures = 0;
+    final rewards = <int>[];
+    void captureBalls() {
+      balls.removeWhere((ball) {
+        if (!_captureAllIds.contains(ball.id) &&
+            !sweptCaptures.contains(ball.id) &&
+            (ball.position - hole).length > settings['hole_capture_radius']) {
+          return false;
+        }
+        _heldBalls.remove(ball);
+        if (ball == _manualBall) _manualBall = null;
+        _slippedBalls.remove(ball);
+        captures++;
+        if (ball.golden) goldenCaptures++;
+        rewards.add(
+          settings['ball_value'].toInt() * combo.capture(golden: ball.golden),
+        );
+        return true;
+      });
+    }
+
     // Small steps bound translation and rotating tips below a ball diameter.
     final steps = math.max(1, (dt / (1 / 240)).ceil());
     final step = dt / steps;
@@ -467,39 +531,23 @@ class Board {
         if (toHole.length < settings['hole_capture_radius'] + 15) {
           ball.velocity = ball.velocity + toHole.unit * (220 * step);
         }
-        ball.velocity = ball.velocity.limit(380) * friction;
+        ball.velocity = ball.velocity.limit(maximumSpeed) * friction;
         if (ball.velocity.length < 1) ball.velocity = Vec.zero;
+        final previous = ball.position;
         ball.position = ball.position + ball.velocity * step;
-        final bounded = ball.position.inside(radius);
-        if (bounded.x != ball.position.x) {
-          ball.velocity = Vec(-ball.velocity.x * .4, ball.velocity.y);
+        _bounceWalls(ball);
+        if (segmentDistance(hole, previous, ball.position) <=
+            settings['hole_capture_radius']) {
+          sweptCaptures.add(ball.id);
         }
-        if (bounded.y != ball.position.y) {
-          ball.velocity = Vec(ball.velocity.x, -ball.velocity.y * .4);
-        }
-        ball.position = bounded;
       }
+      captureBalls();
       _collide();
       _contactBroom(Vec.zero, 0);
+      captureBalls();
+      sweptCaptures.clear();
     }
     _clock += dt;
-    var captures = 0, goldenCaptures = 0;
-    final rewards = <int>[];
-    balls.removeWhere((ball) {
-      if (!_captureAllIds.contains(ball.id) &&
-          (ball.position - hole).length > settings['hole_capture_radius']) {
-        return false;
-      }
-      _heldBalls.remove(ball);
-      if (ball == _manualBall) _manualBall = null;
-      _slippedBalls.remove(ball);
-      captures++;
-      if (ball.golden) goldenCaptures++;
-      rewards.add(
-        settings['ball_value'].toInt() * combo.capture(golden: ball.golden),
-      );
-      return true;
-    });
     _captureAllIds.clear();
     captured += captures;
     goldenCaptured += goldenCaptures;
@@ -537,7 +585,9 @@ class Board {
         final goal = (target! + _grabOffset).inside(radius);
         final previous = ball.position;
         ball.position = previous + (goal - previous).limit(700 * dt);
-        ball.velocity = (ball.position - previous) * (1 / dt);
+        ball.velocity = ((ball.position - previous) * (1 / dt)).limit(
+          maximumSpeed,
+        );
       }
       final anchor = _manualBall == null
           ? paddle!
@@ -557,7 +607,7 @@ class Board {
             (stretch * (_gripStiffness * gripStrength) -
                     ball.velocity * (_gripDamping * math.sqrt(gripStrength)))
                 .limit(_gripAcceleration * gripStrength);
-        ball.velocity = (ball.velocity + acceleration * dt).limit(380);
+        ball.velocity = (ball.velocity + acceleration * dt).limit(maximumSpeed);
         final next = ball.position + ball.velocity * dt;
         ball.position = next.inside(radius);
         if (ball.position.x != next.x) ball.velocity = Vec(0, ball.velocity.y);
@@ -636,11 +686,13 @@ class Board {
         ball.position = (ball.position + normal * overlap).inside(radius);
         final arm = contact - broomPosition;
         final rotating = Vec(-arm.y, arm.x) * rotation;
-        final surface = (velocity + rotating.limit(80)).limit(380);
+        final surface = (velocity + rotating.limit(80)).limit(maximumSpeed);
         final relative = surface - ball.velocity;
         final impulse = relative.x * normal.x + relative.y * normal.y;
         if (impulse > 0) {
-          ball.velocity = (ball.velocity + normal * impulse).limit(380);
+          ball.velocity = (ball.velocity + normal * impulse).limit(
+            maximumSpeed,
+          );
         }
       }
     }
@@ -660,7 +712,7 @@ class Board {
         velocity.x * normal.x + velocity.y * normal.y,
       );
       ball.velocity = (ball.velocity + normal * (projected * .7 + 18)).limit(
-        380,
+        maximumSpeed,
       );
     }
   }
@@ -705,11 +757,11 @@ class Board {
                 math.max(0.0, relative.x * n.x + relative.y * n.y) * .65;
             if (!heldA) {
               ball.velocity = (ball.velocity - n * impulse * (heldB ? 2 : 1))
-                  .limit(380);
+                  .limit(maximumSpeed);
             }
             if (!heldB) {
               other.velocity = (other.velocity + n * impulse * (heldA ? 2 : 1))
-                  .limit(380);
+                  .limit(maximumSpeed);
             }
           }
         }
@@ -793,7 +845,7 @@ class Board {
         Ball(
           row['id'] as int,
           Vec.fromJson(row['p']),
-          Vec.fromJson(row['v']),
+          Vec.fromJson(row['v']).limit(board.maximumSpeed),
           golden: golden,
         ),
       );

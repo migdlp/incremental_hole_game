@@ -6,7 +6,7 @@ Código posterior a **0.6.0+13**, 20/10/2026; el APK enlazado en estado actual a
 
 ## Mapa actual
 
-Veintidós tipos y **59 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las seis ramas iniciales se pueden desarrollar conjuntamente.
+Veintidós tipos y **62 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las seis ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
 🟣 MANO I · 13 monedas · 2 bolas

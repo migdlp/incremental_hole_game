@@ -186,3 +186,11 @@ El JSON v7 admite el campo opcional booleano `visualFeedback`. Se guarda con las
 preferencias, igual que `sound`. Si falta en una partida anterior, se restaura
 como `false`; no se reinicia el progreso ni la jornada. Es presentación: no
 modifica la configuración económica ni la geometría o controles del tablero.
+
+## M01 — balance v9 y paredes
+
+El esquema JSON sigue en v7. `levels.walls` conserva I–III mediante la validación
+y compras existentes; el ajuste de la jornada queda fijado al empezar. Se admite
+balance 9 y se conserva el CSV v8 en `balance_v8.dart`; las jornadas activas v8
+no reciben campos nuevos. Las anteriores utilizan rebote ×0,40 y límite 380 como
+fallback de física. Los impactos visuales son transitorios y no se serializan.

@@ -506,7 +506,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 8)) {
+          (balanceVersion < 1 || balanceVersion > 9)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(

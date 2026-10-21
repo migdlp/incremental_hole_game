@@ -44,8 +44,8 @@ una respuesta cada 120 ms. [Física, guardado y pruebas](m02-bate-beisbol.md).
 Prototipo **0.9.0+17**, incluido en el APK enlazado abajo. Evento aleatorio desde la primera
 jornada compatible: probabilidad configurable 5 %, un objeto móvil durante
 producción y 3–6 pulsaciones para romperlo. Activa inclinación del teléfono hasta
-10 s o hasta recogida, con anuncio breve. Sensores Android comprobados mediante
-lecturas reales; sin hardware compatible no aparece en juego normal.
+10 s o hasta recogida, con anuncio breve. La detección Android exige
+lecturas válidas; sin hardware compatible no aparece en juego normal.
 
 Mueve bolas y escoba/bate libres, con fuerza gradual y límite técnico existente.
 No afecta agarres ni monedas. Pausa/segundo plano congelan el tiempo; guardar y

@@ -62,8 +62,8 @@ ni nuevas bolas como parte de esta tarea.
 ## E01 · Gravedad entregada
 
 APK 0.9.0+17 generado por la pipeline habitual. 5 % por jornada compatible, máximo un objeto,
-3–6 pulsaciones y hasta 10 s de producción inclinando el móvil. Sensor Android
-probado mediante lectura real (gravedad, o acelerómetro filtrado); sin sensores no
+3–6 pulsaciones y hasta 10 s de producción inclinando el móvil. La detección Android
+exige una lectura real (gravedad, o acelerómetro filtrado); sin sensores no
 aparece en juego normal. Bolas y escoba/bate libres reciben fuerza gradual;
 agarres y monedas no. Se conservan estado y tiempo al pausar/restaurar, sin nuevo
 sorteo ni activación; cierre limpia todo. RNG separado del emisor de bolas.

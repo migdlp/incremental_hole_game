@@ -96,3 +96,13 @@ en mapa completo (se incluyen requisitos de prueba). Comenzar día; un dedo muev
 dos giran, también mientras dispara. La franja inferior limita cuerpo y cañón,
 con línea roja. Probar paredes, salida bloqueada, pausa y pose en jornada siguiente.
 Salir de depuración recupera progreso y pose reales. [Guía física y balance](m03-generador-lanzador.md).
+
+## Probar S01 · Alimentación y cuotas
+
+En Tienda → DEBUG → Alimentación y cuotas, activar **Simular fallo de cuota**
+y elegir objetivo. Cambiar opciones reinicia el período temporal. **Simular
+jornada sin capturas** permite llegar al quinto vencimiento; el fallo bloquea
+solo la prueba. **Reiniciar período de prueba** conserva compras temporales;
+salir restaura la partida real. Las capturas, también Captura total, siempre
+cuentan con racha y doradas. Sin armar esta simulación, las cuotas normales
+provisionales se muestran sin derrota. [Guía S01](s01-alimentacion-cuotas.md).

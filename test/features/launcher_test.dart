@@ -566,6 +566,8 @@ void main() {
   test('v12 in-progress saves retain old settings until the next day', () {
     final s = GameSession(catalog, MemoryStore())..startDay();
     final data = jsonDecode(s.snapshot()) as Map<String, dynamic>;
+    data['version'] = 7;
+    data.remove('feeding');
     data['run']['balanceVersion'] = 12;
     data['run']['settings'] = catalog.settings({}, balanceVersion: 12).toJson();
     (data['run']['board'] as Map).remove('launcher');
@@ -575,7 +577,7 @@ void main() {
     expect(s.board!.launcher.unlocked, isFalse);
     s.finishDay();
     s.startDay();
-    expect(s.board!.settings.balanceVersion, 13);
+    expect(s.board!.settings.balanceVersion, 14);
     s.dispose();
   });
 

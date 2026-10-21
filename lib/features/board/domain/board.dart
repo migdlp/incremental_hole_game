@@ -46,9 +46,12 @@ class BoardEvents {
     this.collected, {
     this.goldenCaptured = 0,
     this.rewards = const [],
+    this.normalFood = 0,
+    this.instantFood = 0,
   });
   final int captured, collected, goldenCaptured;
   final List<int> rewards;
+  final int normalFood, instantFood;
 }
 
 class Board {
@@ -319,6 +322,7 @@ class Board {
   int nextId = 1;
   int randomState;
   int captured = 0;
+  int normalFood = 0, instantFood = 0;
   int spawned = 0;
   int goldenCaptured = 0;
   double spawnClock = 0;
@@ -646,6 +650,7 @@ class Board {
     }
     final sweptCaptures = <int>{};
     var captures = 0, goldenCaptures = 0;
+    var normalFeeding = 0, instantFeeding = 0;
     final rewards = <int>[];
     void captureBalls() {
       balls.removeWhere((ball) {
@@ -659,9 +664,14 @@ class Board {
         _slippedBalls.remove(ball);
         captures++;
         if (ball.golden) goldenCaptures++;
-        rewards.add(
-          settings['ball_value'].toInt() * combo.capture(golden: ball.golden),
-        );
+        final reward =
+            settings['ball_value'].toInt() * combo.capture(golden: ball.golden);
+        if (_captureAllIds.contains(ball.id)) {
+          instantFeeding += reward;
+        } else {
+          normalFeeding += reward;
+        }
+        rewards.add(reward);
         return true;
       });
     }
@@ -727,11 +737,15 @@ class Board {
     _captureAllIds.clear();
     captured += captures;
     goldenCaptured += goldenCaptures;
+    normalFood += normalFeeding;
+    instantFood += instantFeeding;
     return BoardEvents(
       captures,
       collected,
       goldenCaptured: goldenCaptures,
       rewards: rewards,
+      normalFood: normalFeeding,
+      instantFood: instantFeeding,
     );
   }
 
@@ -1177,6 +1191,8 @@ class Board {
     },
     'spawnClock': spawnClock,
     if (settings.balanceVersion >= 12) 'blackHole': blackHole.toJson(),
+    if (settings.balanceVersion >= 14)
+      'feeding': {'normal': normalFood, 'instant': instantFood},
     if (settings.balanceVersion >= 13) 'launcher': launcher.toJson(),
     if (settings.balanceVersion >= 11) ...{
       'gravity': gravity.toJson(),
@@ -1277,6 +1293,18 @@ class Board {
       }
       board.launcher = Launcher.fromJson(settings, saved);
     }
+    if (settings.balanceVersion >= 14) {
+      final food = json['feeding'];
+      if (food is! Map<String, dynamic> ||
+          food['normal'] is! int ||
+          food['instant'] is! int ||
+          food['normal'] < 0 ||
+          food['instant'] < 0) {
+        throw const FormatException('Capturas de alimentación inválidas');
+      }
+      board.normalFood = food['normal'] as int;
+      board.instantFood = food['instant'] as int;
+    }
     final margin = board.broomHalfWidth + broomThickness;
     final boundedBroom = board.broomPosition.inside(margin);
     if ((boundedBroom - board.broomPosition).length > .0001) {
@@ -1332,6 +1360,16 @@ class Board {
         board.goldenCaptured < 0 ||
         board.goldenCaptured > board.captured) {
       throw const FormatException('Tablero guardado inválido');
+    }
+    if (settings.balanceVersion >= 14 &&
+        (board.normalFood + board.instantFood !=
+                (board.captured +
+                        9 * board.goldenCaptured +
+                        board.combo.bonusUnits) *
+                    settings['ball_value'].toInt() ||
+            board.normalFood % settings['ball_value'].toInt() != 0 ||
+            board.instantFood % settings['ball_value'].toInt() != 0)) {
+      throw const FormatException('Contabilidad de alimentación inválida');
     }
     final ids = [
       ...board.balls.map((b) => b.id),

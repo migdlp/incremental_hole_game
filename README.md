@@ -29,6 +29,12 @@ Pendiente de validación física. [Sensores y pruebas](docs/e01-gravedad.md).
 segundo emisor orientable, frecuencia independiente, presión física y pose
 persistente. Desbloqueo y parámetros provisionales; disponible en DEBUG.
 
+**S01 (0.12.0+20):** [Alimentación y cuotas](docs/s01-alimentacion-cuotas.md).
+Todas las capturas cuentan con racha y doradas, también Captura total, sin
+necesidad de recoger monedas. Anillo y períodos de cinco jornadas; cuotas
+provisionales visibles en juego normal, sin derrota hasta BAL01/S03.
+DEBUG permite simular el fallo sin alterar la partida real.
+
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 
 ## Ejecutar
@@ -58,7 +64,7 @@ python3 -m http.server 8123 --directory build/web
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 1 segundo; las compras revelan nuevos caminos.
 - 26 tipos y 69 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
-- Guardado JSON v7 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
+- Guardado JSON v8 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano y opción de silenciar los sonidos del sistema.
 
 La tabla `docs/balance.csv` se empaqueta como recurso y se valida al cargar: es la fuente editable del balance actual. Las jornadas antiguas conservan su configuración hasta terminar; el siguiente día usa el balance nuevo. La noche descarta también cualquier bola agarrada.

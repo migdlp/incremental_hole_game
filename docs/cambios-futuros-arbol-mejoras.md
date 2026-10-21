@@ -179,3 +179,12 @@ velocidad fija, geometría, esfuerzo máximo transmitido, umbral de presión, ma
 y amortiguación. Probar bloqueo, tacto y acumulación real en Android físico.
 No son balance aprobado; no ampliar a múltiples cañones, nuevas bolas, retroceso
 ni mejoras de potencia.
+
+## Integración pendiente S01
+
+[Alimentación y cuotas](s01-alimentacion-cuotas.md) implementa registro, anillo y
+períodos. Usuario confirmó que todo cuenta, incluidos combos y Captura total, y
+cuotas provisionales en juego normal. Quedan BAL01 (cantidades y progresión),
+S03 (derrota/reinicio/prestigio) y S02 (personalidad). Incumplir no causa pérdidas
+reales; fallo reversible solo en DEBUG. No convertir los valores provisionales
+10/+10 en balance definitivo ni introducir pérdidas irreversibles antes de S03.

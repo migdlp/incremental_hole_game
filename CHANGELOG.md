@@ -2,6 +2,18 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.12.0+20 — S01: prototipo de alimentación y cuotas
+
+- Alimentación con recompensa completa, incluidos combos, doradas y Captura total;
+  independiente de recoger monedas, sin descontar dinero.
+- Períodos de cinco jornadas, resumen y anillo bajo las bolas sin cambiar captura.
+  Cumplir antes no adelanta el período ni da recompensas.
+- Cuotas provisionales también en juego normal (10/+10, pendientes de BAL01).
+  Incumplimiento informado sin derrota ni pérdidas hasta S03; simulación DEBUG
+  y reinicio reversibles, aislados de la partida real.
+- JSON v8 / balance v14 con v13 congelado. Restauración sin repetir alimentación
+  y migración desde jornadas anteriores sin inventar capturas históricas.
+
 ## 0.11.0+19 — M03: Generador lanzador
 
 - Segundo generador orientable con frecuencia propia, potencia fija y compra

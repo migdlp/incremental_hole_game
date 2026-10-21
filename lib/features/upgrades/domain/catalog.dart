@@ -8,6 +8,7 @@ import 'balance_v9.dart';
 import 'balance_v10.dart';
 import 'balance_v11.dart';
 import 'balance_v12.dart';
+import 'balance_v13.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -32,7 +33,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 13});
+  DaySettings(this.values, {this.balanceVersion = 14});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -164,6 +165,8 @@ class UpgradeCatalog {
       'gravity_response',
       'gravity_ball_damping',
       'gravity_tool_damping',
+      'feeding_quota_initial',
+      'feeding_quota_step',
       'launcher_interval',
       'launcher_speed',
       'launcher_body_radius',
@@ -218,6 +221,11 @@ class UpgradeCatalog {
       }
       previousLauncherInterval = level.value;
     }
+    for (final key in ['feeding_quota_initial', 'feeding_quota_step']) {
+      if (base[key]! != base[key]!.roundToDouble()) {
+        throw const FormatException('Cuota de prueba no entera');
+      }
+    }
     return UpgradeCatalog._(base, definitions);
   }
 
@@ -228,10 +236,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 13}) {
-    final values = balanceVersion <= 12 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 12) {
-      final historicalCsv = balanceVersion == 12
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 14}) {
+    final values = balanceVersion <= 13 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 13) {
+      final historicalCsv = balanceVersion == 13
+          ? balanceV13Csv
+          : balanceVersion == 12
           ? balanceV12Csv
           : balanceVersion == 11
           ? balanceV11Csv
@@ -297,7 +307,7 @@ class UpgradeCatalog {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 13,
+    int balanceVersion = 14,
   }) {
     if (previousTree.isNotEmpty) {
       validateLevels(

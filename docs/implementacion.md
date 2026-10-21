@@ -2,6 +2,18 @@
 
 Referencia de `0.2.2+4`: cadencia inicial de 1,5 bolas/s y resultados en un pop-up sobre el juego detenido. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
 
+## Ampliación vigente · S01
+
+`Board.captureBalls` calcula una única recompensa por captura, incluyendo racha
+y dorada, y acredita ese mismo valor al contador normal o instantáneo.
+`GameSession` acredita `FeedingProgress` una vez por evento. Cobrar monedas es
+independiente: alimentar no cobra ni descuenta saldo. Períodos de cinco jornadas,
+reinicio al comenzar el siguiente y anillo bajo bolas/herramientas sin cambiar
+la física. Cuotas provisionales normales 10/+10; incumplir no causa derrota.
+DEBUG puede armar un fallo reversible. JSON v8 / balance v14, v13 congelado;
+validación de contadores y migración sin alimentación histórica.
+[Contrato y pruebas](s01-alimentacion-cuotas.md).
+
 ## Ampliación vigente · M03
 
 `Launcher` concentra geometría, límites dependientes de orientación, RNG, reloj,

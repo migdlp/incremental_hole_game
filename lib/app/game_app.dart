@@ -8,6 +8,7 @@ import '../features/board/presentation/streak_indicator.dart';
 import '../features/board/presentation/special_ability_bar.dart';
 import '../features/board/domain/coin_denomination.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
+import '../features/feeding/presentation/feeding_summary.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
 
@@ -551,6 +552,7 @@ class NightScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
               ],
+              FeedingSummary(session: session),
               if (session.recoveryMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),

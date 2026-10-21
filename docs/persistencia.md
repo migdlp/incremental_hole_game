@@ -1,6 +1,18 @@
 # Referencia de guardado y recuperación
 
-## Contrato vigente · M03, 0.11.0+19
+## Contrato vigente · S01, 0.12.0+20
+
+JSON v8 / balance v14. `feeding` guarda período, jornadas, puntos normales e
+instantáneos, contadores de jornada, objetivo y paso provisional. Tablero v14
+guarda `feeding.normal` / `feeding.instant`; su suma debe coincidir con
+`ball_value × (captured + 9 × goldenCaptured + combo.bonusUnits)` y los contadores
+de jornada con la sesión. Restaurar no vuelve a acreditar capturas. v1–v7 migra
+sin alimentación histórica; una jornada activa antigua termina con su balance
+y S01 empieza en la siguiente completa. v13 queda congelado. DEBUG no persiste
+sus experimentos ni su fallo reversible. Se conservan saldo, compras, opciones,
+archivos y paquete. [Detalle S01](s01-alimentacion-cuotas.md).
+
+## Ampliación M03, 0.11.0+19
 
 JSON v7 / balance v13. Campo opcional raíz `launcherPose` para posición/ángulo
 entre jornadas; guardados anteriores usan pose inicial. Tablero v13 guarda

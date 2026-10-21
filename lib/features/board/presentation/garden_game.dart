@@ -57,7 +57,6 @@ class GardenGame extends FlameGame {
 
   final GameSession session;
   bool wallEffectsEnabled;
-  double _time = 0;
   final _batFeedback = BatFeedback();
   final _blackHoleFeedback = BlackHoleFeedback();
   final _launcherFeedback = LauncherFeedback();
@@ -95,9 +94,6 @@ class GardenGame extends FlameGame {
         sound: session.sound,
         haptics: session.haptics,
       );
-    }
-    if (session.running && !session.paused && !session.board!.coinOnly) {
-      _time += dt;
     }
   }
 
@@ -438,12 +434,26 @@ class GardenGame extends FlameGame {
       false,
       paint(const Color(0xffeaddc2), stroke: 3),
     );
-    final pulse = (math.sin(_time * 3) + 1) / 2;
+    final feeding = session.feeding;
+    final feedingRadius = radius + 13;
     canvas.drawCircle(
       hole,
-      radius + 14 + pulse * 3,
-      paint(const Color(0x15247d73), stroke: 2),
+      feedingRadius,
+      paint(const Color(0x40247d73), stroke: 3),
     );
+    final progress = feeding.fraction;
+    if (progress != null && progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: hole, radius: feedingRadius),
+        -math.pi / 2,
+        progress * math.pi * 2,
+        false,
+        paint(
+          feeding.met ? const Color(0xff8dd4b2) : const Color(0xff247d73),
+          stroke: 3,
+        ),
+      );
+    }
     _renderBlackHoleSuction(canvas, board);
     final generator = offset(Board.generator);
     canvas.drawRRect(

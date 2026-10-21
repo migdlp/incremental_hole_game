@@ -1,3 +1,4 @@
+import '../../feeding/presentation/feeding_summary.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -237,6 +238,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
           top: false,
           child: Column(
             children: [
+              FeedingSummary(session: session, compact: true),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -325,7 +327,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                   width: double.infinity,
                   child: FilledButton.icon(
                     key: const ValueKey('tree-start-day'),
-                    onPressed: session.running
+                    onPressed: session.running || session.debugFeedingFailed
                         ? null
                         : () {
                             _cancel();
@@ -531,6 +533,75 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                                   },
                           ),
                         ),
+                      ),
+                    ],
+                  ),
+                  ExpansionTile(
+                    key: const ValueKey('debug-feeding-tools'),
+                    title: const Text('Alimentación y cuotas'),
+                    tilePadding: EdgeInsets.zero,
+                    children: [
+                      const Text(
+                        'Cuotas experimentales. Cambiar una opción reinicia solo el período de prueba.',
+                      ),
+                      SwitchListTile(
+                        key: const ValueKey('debug-feeding-enabled'),
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Simular fallo de cuota'),
+                        value: session.debugFeedingQuotas,
+                        onChanged: session.running
+                            ? null
+                            : (value) =>
+                                  session.debugConfigureFeeding(quotas: value),
+                      ),
+                      DropdownButton<int>(
+                        key: const ValueKey('debug-feeding-target'),
+                        isExpanded: true,
+                        value:
+                            session.feeding.target ??
+                            session.feedingInitialQuota,
+                        items:
+                            {
+                                  ...[
+                                    1,
+                                    session.feedingInitialQuota,
+                                    100,
+                                    1000,
+                                  ],
+                                  if (session.feeding.target != null)
+                                    session.feeding.target!,
+                                }
+                                .map(
+                                  (amount) => DropdownMenuItem(
+                                    value: amount,
+                                    child: Text('Cuota de prueba: $amount'),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: session.running
+                            ? null
+                            : (amount) {
+                                if (amount != null) {
+                                  session.debugConfigureFeeding(
+                                    quotas: true,
+                                    target: amount,
+                                  );
+                                }
+                              },
+                      ),
+                      TextButton(
+                        key: const ValueKey('debug-feeding-empty-day'),
+                        onPressed: session.running || session.debugFeedingFailed
+                            ? null
+                            : session.debugSimulateEmptyDay,
+                        child: const Text('Simular jornada sin capturas'),
+                      ),
+                      TextButton(
+                        key: const ValueKey('debug-feeding-restart'),
+                        onPressed: session.running
+                            ? null
+                            : session.debugRestartFeedingPeriod,
+                        child: const Text('Reiniciar período de prueba'),
                       ),
                     ],
                   ),

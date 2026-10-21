@@ -107,7 +107,7 @@ void main() {
       reopened.board!.settings['spawn_interval'],
       closeTo(1 / 1.875, 1e-9),
     );
-    expect(reopened.board!.settings.balanceVersion, 13);
+    expect(reopened.board!.settings.balanceVersion, 14);
     expect(reopened.economy.balance, 123);
     expect(reopened.levels, session.levels);
   });
@@ -117,6 +117,8 @@ void main() {
     final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
     json['run']['board'].remove('specials');
     json['run']['board'].remove('captureAllIds');
+    json['version'] = 7;
+    json.remove('feeding');
     json['run']['balanceVersion'] = 2;
     json['run']['settings'] = catalog.settings({}, balanceVersion: 2).toJson();
     json['run']['remaining'] = 15;
@@ -130,7 +132,7 @@ void main() {
     reloaded.finishDay();
     reloaded.startDay();
     expect(1 / reloaded.board!.settings['spawn_interval'], closeTo(1.5, 1e-9));
-    expect(reloaded.board!.settings.balanceVersion, 13);
+    expect(reloaded.board!.settings.balanceVersion, 14);
   });
 
   test('saved balance 6 keeps the old 10 plus 3 second day', () {
@@ -138,6 +140,8 @@ void main() {
     final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
     json['run']['board'].remove('specials');
     json['run']['board'].remove('captureAllIds');
+    json['version'] = 7;
+    json.remove('feeding');
     json['run']['balanceVersion'] = 6;
     json['run']['settings'] = catalog.settings({}, balanceVersion: 6).toJson();
     json['run']['remaining'] = 13;
@@ -148,7 +152,7 @@ void main() {
     expect(restored.cycle!.remaining, 13);
     restored.finishDay();
     restored.startDay();
-    expect(restored.board!.settings.balanceVersion, 13);
+    expect(restored.board!.settings.balanceVersion, 14);
     expect(restored.cycle!.remaining, 20);
   });
 

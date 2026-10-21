@@ -518,6 +518,8 @@ void main() {
     () async {
       final s = GameSession(catalog, MemoryStore())..startDay();
       final data = jsonDecode(s.snapshot()) as Map<String, dynamic>;
+      data['version'] = 7;
+      data.remove('feeding');
       data['run']['balanceVersion'] = 10;
       data['run']['settings'] = catalog
           .settings({}, balanceVersion: 10)
@@ -539,7 +541,7 @@ void main() {
       expect(restored.board!.gravity.hasObject, isFalse);
       restored.finishDay();
       restored.startDay();
-      expect(restored.board!.settings.balanceVersion, 13);
+      expect(restored.board!.settings.balanceVersion, 14);
       await s.pendingWrites;
       await restored.pendingWrites;
       s.dispose();

@@ -316,6 +316,8 @@ void main() {
     () async {
       final session = GameSession(catalog, MemoryStore())..startDay();
       final saved = jsonDecode(session.snapshot()) as Map<String, dynamic>;
+      saved['version'] = 7;
+      saved.remove('feeding');
       saved['run']['balanceVersion'] = 9;
       saved['run']['settings'] = catalog
           .settings({}, balanceVersion: 9)
@@ -331,7 +333,7 @@ void main() {
       restored.resume();
       restored.finishDay();
       restored.startDay();
-      expect(restored.board!.settings.balanceVersion, 13);
+      expect(restored.board!.settings.balanceVersion, 14);
       await session.pendingWrites;
       await restored.pendingWrites;
       session.dispose();

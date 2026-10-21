@@ -375,6 +375,8 @@ void main() {
     () {
       final s = GameSession(catalog, MemoryStore())..startDay();
       final data = jsonDecode(s.snapshot()) as Map<String, dynamic>;
+      data['version'] = 7;
+      data.remove('feeding');
       data['run']['balanceVersion'] = 11;
       data['run']['settings'] = catalog
           .settings({}, balanceVersion: 11)
@@ -389,7 +391,7 @@ void main() {
       s.finishDay();
       s.startDay();
       expect(s.board!.blackHole.enabled, isTrue);
-      expect(s.board!.settings.balanceVersion, 13);
+      expect(s.board!.settings.balanceVersion, 14);
       s.dispose();
     },
   );

@@ -11,6 +11,7 @@ import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/economy/domain/economy.dart';
 import '../features/progression/domain/progress.dart';
+import '../features/feeding/domain/feeding_progress.dart';
 import '../features/upgrades/domain/catalog.dart';
 import '../persistence/save_store.dart';
 
@@ -20,7 +21,13 @@ class GameSession extends ChangeNotifier {
     this.store, {
     this.motion = const NoMotionInput(),
     int? eventSeed,
-  }) : _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000);
+  }) : _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000) {
+    feeding = FeedingProgress(
+      startDay: 1,
+      target: feedingInitialQuota,
+      quotaStep: feedingQuotaStep,
+    );
+  }
   final MotionInput motion;
   int _eventRandomState;
   bool _backgrounded = false;
@@ -79,6 +86,9 @@ class GameSession extends ChangeNotifier {
   final SaveStore store;
   final economy = Economy();
   final progress = Progress();
+  late FeedingProgress feeding;
+  bool _debugFeedingTrials = false;
+  bool get debugFeedingFailed => debugFeedingQuotas && feeding.missed;
   final levels = <String, int>{};
   final _grandfathered = <String, int>{};
   final _previousTree = <String, int>{};
@@ -128,7 +138,8 @@ class GameSession extends ChangeNotifier {
   }
 
   void startDay() {
-    if (running) return;
+    if (running || debugFeedingFailed) return;
+    feeding.beginDay(progress.day);
     final settings = catalog.settings(levels);
     _eventRandomState = (1664525 * _eventRandomState + 1013904223) & 0xffffffff;
     board = Board(
@@ -196,6 +207,11 @@ class GameSession extends ChangeNotifier {
     if (debugEnabled) {
       _debugMaxCombo = math.max(_debugMaxCombo, board!.combo.multiplier);
     }
+    feeding.credit(
+      progress.day,
+      normal: events.normalFood,
+      instant: events.instantFood,
+    );
     economy.collect(events.collected);
     for (final value in events.rewards) {
       economy.generated += value;
@@ -240,6 +256,7 @@ class GameSession extends ChangeNotifier {
     _launcherPosition = board!.launcher.position;
     _launcherAngle = board!.launcher.angle;
     board!.blackHole.finishDay();
+    feeding.finishDay(progress.day);
     progress.finish(result);
     board = null;
     cycle = null;
@@ -372,6 +389,7 @@ class GameSession extends ChangeNotifier {
     final baseline = snapshot();
     save();
     _debugBaseline = baseline;
+    _debugFeedingTrials = false;
     _debugReports.clear();
     _debugFullTree = true;
     notifyListeners();
@@ -384,6 +402,7 @@ class GameSession extends ChangeNotifier {
     board?.blackHole.finishDay();
     restore(baseline);
     _debugBaseline = null;
+    _debugFeedingTrials = false;
     debugForceGravity = false;
     debugGravityTilt = 'sensor';
     debugBlackHoleObjects = 0;
@@ -457,6 +476,30 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get debugFeedingQuotas => debugEnabled && _debugFeedingTrials;
+  int get feedingInitialQuota => catalog.base['feeding_quota_initial']!.toInt();
+  int get feedingQuotaStep => catalog.base['feeding_quota_step']!.toInt();
+  void debugConfigureFeeding({required bool quotas, int? target}) {
+    if (!debugEnabled || running) return;
+    final amount = target ?? feedingInitialQuota;
+    if (amount < 1 || amount > 1000000) return;
+    _debugFeedingTrials = quotas;
+    feeding = FeedingProgress(
+      startDay: progress.day,
+      target: quotas ? amount : null,
+      quotaStep: quotas ? feedingQuotaStep : 0,
+    );
+    notifyListeners();
+  }
+
+  void debugRestartFeedingPeriod() =>
+      debugConfigureFeeding(quotas: debugFeedingQuotas, target: feeding.target);
+  void debugSimulateEmptyDay() {
+    if (!debugEnabled || running || debugFeedingFailed) return;
+    startDay();
+    finishDay();
+  }
+
   void debugAddCoins() {
     if (!debugEnabled || running) return;
     economy.balance += 1000;
@@ -466,6 +509,12 @@ class GameSession extends ChangeNotifier {
   void debugReset() {
     if (!debugEnabled || running) return;
     _debugReports.clear();
+    _debugFeedingTrials = false;
+    feeding = FeedingProgress(
+      startDay: 1,
+      target: feedingInitialQuota,
+      quotaStep: feedingQuotaStep,
+    );
     debugForceGravity = false;
     debugGravityTilt = 'sensor';
     debugBlackHoleObjects = 0;
@@ -519,7 +568,8 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 7,
+    'version': 8,
+    'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
     'launcherPose': {
       'position': (board?.launcher.position ?? _launcherPosition).toJson(),
@@ -557,7 +607,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 4 &&
         json['version'] != 5 &&
         json['version'] != 6 &&
-        json['version'] != 7) {
+        json['version'] != 7 &&
+        json['version'] != 8) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -634,7 +685,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 13)) {
+          (balanceVersion < 1 || balanceVersion > 14)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -728,6 +779,37 @@ class GameSession extends ChangeNotifier {
         throw const FormatException('Contabilidad inválida');
       }
     }
+    final savedFeeding = json['feeding'];
+    final FeedingProgress restoredFeeding;
+    if ((json['version'] as int) >= 8) {
+      if (savedFeeding is! Map<String, dynamic>) {
+        throw const FormatException('Falta la alimentación');
+      }
+      restoredFeeding = FeedingProgress.fromJson(
+        savedFeeding,
+        day: day,
+        running: run != null,
+      );
+      if (restoredBoard != null &&
+          restoredBoard.settings.balanceVersion >= 14 &&
+          (restoredFeeding.startDay > day ||
+              restoredFeeding.runNormal != restoredBoard.normalFood ||
+              restoredFeeding.runInstant != restoredBoard.instantFood)) {
+        throw const FormatException('Capturas de alimentación incoherentes');
+      }
+      if (restoredBoard != null &&
+          restoredBoard.settings.balanceVersion < 14 &&
+          restoredFeeding.startDay != day + 1) {
+        throw const FormatException('Migración de alimentación incoherente');
+      }
+    } else {
+      // Historical captures cannot be reconstructed without guessing ability use.
+      restoredFeeding = FeedingProgress(
+        startDay: day + (run != null ? 1 : 0),
+        target: feedingInitialQuota,
+        quotaStep: feedingQuotaStep,
+      );
+    }
     // Commit only after validating every module; a failed load leaves no partial state.
     final savedEventRandom = json['eventRandom'] ?? _eventRandomState;
     if (savedEventRandom is! int ||
@@ -781,6 +863,7 @@ class GameSession extends ChangeNotifier {
           'Partida actualizada: conservas saldo y mejoras. '
           'Las monedas se recogen pulsando; el barrido se compra aparte.';
     }
+    feeding = restoredFeeding;
     _launcherPosition = savedLauncher.position;
     _launcherAngle = savedLauncher.angle;
     _eventRandomState = savedEventRandom;

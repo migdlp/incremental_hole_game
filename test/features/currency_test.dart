@@ -88,6 +88,8 @@ void main() {
       final json =
           jsonDecode(GameSession(catalog, MemoryStore()).snapshot())
               as Map<String, dynamic>;
+      json['version'] = 7;
+      json.remove('feeding');
       json['balance'] = 123;
       json['run'] = {
         'remaining': 4.0,
@@ -116,7 +118,7 @@ void main() {
       reopened.finishDay();
       reopened.startDay();
       expect(reopened.economy.balance, 125);
-      expect(reopened.board!.settings.balanceVersion, 13);
+      expect(reopened.board!.settings.balanceVersion, 14);
       expect(reopened.board!.settings['ball_value'], 1);
       expect(reopened.cycle!.closing, 5);
       expect(reopened.cycle!.remaining, 20);

@@ -4,6 +4,23 @@ Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y 
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
 
+## Objetivo central aprobado · S01, prototipo
+
+Cada captura alimenta con toda su recompensa, incluidos racha y dorada ×10.
+**Captura total sigue la misma regla**, por decisión expresa del usuario.
+No hace falta recoger las monedas y alimentar no descuenta dinero.
+Anillo alrededor del hoyo y resumen entre jornadas; períodos de cinco jornadas,
+sin premios ni cierre anticipado al cumplir. Al empezar el siguiente período
+se reinicia la alimentación y aumenta la cuota.
+
+El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
+inicial 10 y aumento 10 por período, centralizados en `balance.csv`. Son valores
+para probar, pendientes de BAL01, no balance definitivo. Incumplir se informa,
+pero no causa derrota ni pérdidas hasta integrar S03 y validar BAL01.
+DEBUG permite simular un fallo reversible sin modificar la partida real.
+JSON v8 / balance v14, con v13 congelado y sin inventar capturas históricas.
+S02 (personalidad), S03 (prestigio) y BAL01 siguen pendientes.
+
 ## Extensión funcional vigente · M03
 
 [Generador lanzador](m03-generador-lanzador.md): segundo productor físico,

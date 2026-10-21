@@ -217,6 +217,8 @@ void main() {
   test('v8 active saves keep their old settings until the next day', () async {
     final session = GameSession(catalog, MemoryStore())..startDay();
     final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
+    data['version'] = 7;
+    data.remove('feeding');
     data['run']['balanceVersion'] = 8;
     data['run']['settings'] = catalog.settings({}, balanceVersion: 8).toJson();
     final restored = GameSession(catalog, MemoryStore())
@@ -227,7 +229,7 @@ void main() {
     restored.resume();
     restored.finishDay();
     restored.startDay();
-    expect(restored.board!.settings.balanceVersion, 13);
+    expect(restored.board!.settings.balanceVersion, 14);
     expect(restored.board!.wallRestitution, .4);
     await session.pendingWrites;
     await restored.pendingWrites;

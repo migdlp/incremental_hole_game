@@ -37,7 +37,7 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v7 / balance v13, con balances anteriores congelados para jornadas
+el otro agarre. Guardado v8 / balance v14, con balances anteriores congelados para jornadas
 antiguas. Verificación CI de la entrega: 262 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
@@ -58,6 +58,23 @@ respetan ajustes, con respuesta agrupada. JSON v7, balance v10 con v9 congelado.
 Precios 60/120/240, Mano I y potencia ×1/×1,35/×1,70 son **provisionales**.
 [Estado M02 y guía de prueba](m02-bate-beisbol.md). No implementar otras piezas
 ni nuevas bolas como parte de esta tarea.
+
+## S01 · Alimentación y cuotas
+
+Cada captura alimenta con toda su recompensa, incluidos racha y dorada ×10.
+**Captura total sigue la misma regla**, por decisión expresa del usuario.
+No hace falta recoger las monedas y alimentar no descuenta dinero.
+Anillo alrededor del hoyo y resumen entre jornadas; períodos de cinco jornadas,
+sin premios ni cierre anticipado al cumplir. Al empezar el siguiente período
+se reinicia la alimentación y aumenta la cuota.
+
+El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
+inicial 10 y aumento 10 por período, centralizados en `balance.csv`. Son valores
+para probar, pendientes de BAL01, no balance definitivo. Incumplir se informa,
+pero no causa derrota ni pérdidas hasta integrar S03 y validar BAL01.
+DEBUG permite simular un fallo reversible sin modificar la partida real.
+JSON v8 / balance v14, con v13 congelado y sin inventar capturas históricas.
+[Contrato y pruebas](s01-alimentacion-cuotas.md).
 
 ## M03 · Generador lanzador
 

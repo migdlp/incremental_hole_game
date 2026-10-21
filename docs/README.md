@@ -59,3 +59,5 @@ La estructura adapta [Diátaxis](https://diataxis.fr/) a este repositorio: recor
 - [E02 · Agujero negro: prototipo y guía de prueba](e02-agujero-negro.md).
 
 - [M03 · Generador lanzador: prototipo y guía física](m03-generador-lanzador.md).
+
+- [S01 · Alimentación y cuotas: integración, DEBUG y dependencias](s01-alimentacion-cuotas.md).

@@ -1,5 +1,9 @@
 # S01 — Sistema de alimentación y cuotas
 
+**S03 sustituye la previsualización sin derrota:** el usuario autorizó perder
+la partida al incumplir las cuotas provisionales actuales, también en normal.
+[Prestigio y migración](s03-prestigio-metaprogresion.md).
+
 **Actualización C01:** alimentación y cuotas conservadas; el dinero se cobra
 automáticamente y no hay fase de recogida. JSON vigente v9 / balance v15. Los
 detalles v8 de esta entrega describen su contrato histórico. [C01](c01-cobro-automatico.md).

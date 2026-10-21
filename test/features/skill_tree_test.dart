@@ -29,7 +29,7 @@ void main() {
     'discovery exposes only the root and purchased immediate successors',
     () {
       final tree = SkillTree(testCatalog());
-      expect(tree.visible({}).map((n) => n.id), ['hand:1']);
+      expect(tree.visible({}).map((n) => n.id), ['prestige:1', 'hand:1']);
       expect(
         tree.visible({'hand': 1}).map((n) => n.id),
         containsAll(['hand:2', 'generator:1']),

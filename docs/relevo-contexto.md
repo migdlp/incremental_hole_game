@@ -1,5 +1,26 @@
 # Relevo de contexto — Feed the Hole
 
+## S03 · Prestigio y derrota (0.14.0+22)
+
+**Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
+provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
+**DERROTA**, sin estadísticas. Continuar abre la tienda de prestigio; Nueva partida
+vuelve al día 1. Se reinician monedas, mejoras, herramientas y alimentación, y se
+conservan estrellas cobradas, compras permanentes, descubrimientos y datos P01 pendientes.
+
+Nodo Prestigio visible desde el comienzo al explorar, mayor y girado 45°, tanto en
+normal como DEBUG. Su compra exige confirmación y reinicia inmediatamente, sin
+botón posterior. Configuración de prueba: 10.000 monedas, Generador V + Valor V +
+Duración V, esquina avanzada (48,48). **No son decisiones finales de BAL01.**
+
+La tienda muestra estrellas y permite nueva partida, sin catálogo P02 ni premios
+P01 inventados. Morir no concede estrellas. JSON v10 / balance v16, con v15 congelado.
+Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
+una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
+[Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
+
+S03 sustituye la regla anterior de cuotas sin derrota; P01, P02 y BAL01 continúan pendientes.
+
 ## C01 · Cobro automático vigente (0.13.0+21)
 
 Cada captura calcula una única recompensa completa (Valor, dorada y racha),
@@ -39,7 +60,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 - Monedas decorativas sin cifras, colores por rango; UI con icono, sin prefijo dólar. Resumen de cobro automático íntegro.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
 - Racha comprable tras Mano I por 40: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
-- Árbol de 59 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Barrido, Área, Imán y Atracción retirados sin reembolso; Robot solo requiere Escoba ancha II, confirmado por el usuario.
+- Árbol de 60 nodos y 23 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Barrido, Área, Imán y Atracción retirados sin reembolso; Robot solo requiere Escoba ancha II, confirmado por el usuario.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → Tienda → Comenzar día. No mostrar números de día al jugador.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
@@ -56,7 +77,7 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v9 / balance v15, con balances anteriores congelados para jornadas
+el otro agarre. Guardado v10 / balance v16, con balances anteriores congelados para jornadas
 antiguas. Verificación CI de la entrega: 298 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
@@ -89,8 +110,8 @@ se reinicia la alimentación y aumenta la cuota.
 
 El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
 inicial 10 y aumento 10 por período, centralizados en `balance.csv`. Son valores
-para probar, pendientes de BAL01, no balance definitivo. Incumplir se informa,
-pero no causa derrota ni pérdidas hasta integrar S03 y validar BAL01.
+para probar, pendientes de BAL01, no balance definitivo. S03 activa ahora la derrota al incumplir, también en juego normal por autorización
+expresa del usuario; los valores continúan provisionales hasta BAL01.
 DEBUG permite simular un fallo reversible sin modificar la partida real.
 JSON v8 / balance v14, con v13 congelado y sin inventar capturas históricas.
 [Contrato y pruebas](s01-alimentacion-cuotas.md).
@@ -205,7 +226,7 @@ migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
 no reconstruir el historial de commits. El último APK es 0.13.0+21:
-agujero arriba, generador abajo, producción de 15 s con cobro automático y sin recogida final, alimentación con racha y cuotas provisionales sin derrota real, generador lanzador, eventos Agujero negro y Gravedad por inclinación, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
+agujero arriba, generador abajo, producción de 15 s con cobro automático y sin recogida final, alimentación con racha y cuotas provisionales con derrota, tienda de prestigio y nodo voluntario confirmado, generador lanzador, eventos Agujero negro y Gravedad por inclinación, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
 No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi
 siguiente petición concreta.

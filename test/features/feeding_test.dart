@@ -251,22 +251,20 @@ void main() {
     },
   );
 
-  test(
-    'normal play has no irreversible defeat or economy reset before BAL01 and S03',
-    () {
-      final s = session(levels: {'hand': 1})..economy.balance = 99;
-      for (var i = 0; i < 16; i++) {
-        s.startDay();
-        expect(s.running, isTrue);
-        s.finishDay();
-      }
-      expect(s.economy.balance, 99);
-      expect(s.levels, {'hand': 1});
-      expect(s.feeding.period, 4);
-      expect(s.feeding.target, s.feedingInitialQuota + 3 * s.feedingQuotaStep);
-      s.dispose();
-    },
-  );
+  test('normal play now ends on the fifth missed quota after S03 approval', () {
+    final s = session(levels: {'hand': 1})..economy.balance = 99;
+    for (var i = 0; i < 5; i++) {
+      s.startDay();
+      expect(s.running, isTrue);
+      s.finishDay();
+    }
+    expect(s.canPlayRun, isFalse);
+    expect(s.economy.balance, 0);
+    expect(s.levels, isEmpty);
+    expect(s.progress.day, 1);
+    expect(s.meta.stars, 0);
+    s.dispose();
+  });
 
   test('pause and background cannot feed or consume quota days', () {
     final s = session()..startDay();
@@ -394,7 +392,7 @@ void main() {
       s.finishDay();
       expect(s.feeding.completedDays, 0);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 15);
+      expect(s.board!.settings.balanceVersion, 16);
       capture(s, golden: true);
       expect(s.feeding.points, 10);
       expect(s.economy.balance, 211);
@@ -407,6 +405,7 @@ void main() {
     'v7 night saves keep currency, upgrades and day without inventing historical feeding',
     () {
       final s = session(levels: {'hand': 1})..economy.balance = 200;
+      s.enterDebug();
       for (var i = 0; i < 7; i++) {
         s.startDay();
         capture(s);

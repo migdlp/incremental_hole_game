@@ -1,12 +1,20 @@
 # Árbol de mejoras progresivo
 
+## Nodo especial S03
+
+Prestigio es un rombo mayor girado 45°, siempre descubierto, en la esquina
+avanzada (48,48). Comprar tras confirmar termina inmediatamente la partida.
+Precio de prueba 10.000; requiere Generador V, Valor V y Duración V. Posición,
+precio y dependencias pendientes de BAL01. 60 nodos / 23 tipos. Comprar todo en
+DEBUG excluye este nodo. [Contrato](s03-prestigio-metaprogresion.md).
+
 ## Retirada C01
 
 Barrido, Área, Imán y Atracción no están en el catálogo activo. Compras antiguas
 retiradas sin reembolso por autorización del usuario. Robot mantiene únicamente
 Escoba ancha II. 59 nodos / 22 tipos; no se rediseña la rama liberada.
 
-Código **0.13.0+21**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
+Código **0.14.0+22**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
 **Debug:** pulsar el botón DEBUG, arriba a la izquierda, para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
@@ -20,7 +28,7 @@ configurable. [Comportamiento y pruebas](m03-generador-lanzador.md).
 
 ## Mapa actual
 
-Veintidós tipos y **59 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las siete ramas iniciales se pueden desarrollar conjuntamente.
+Veintitrés tipos y **60 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las siete ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
 🟣 MANO I · 13 monedas · 2 bolas

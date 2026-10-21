@@ -10,6 +10,7 @@ import 'balance_v11.dart';
 import 'balance_v12.dart';
 import 'balance_v13.dart';
 import 'balance_v14.dart';
+import 'balance_v15.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -34,7 +35,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 15});
+  DaySettings(this.values, {this.balanceVersion = 16});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -49,6 +50,7 @@ class UpgradeCatalog {
   final Map<String, double> base;
   final List<UpgradeDefinition> definitions;
   static const labels = {
+    'prestige': ['Prestigio', 'Prestigio'],
     'hand': ['Capacidad de la mano', 'Control'],
     'walls': ['Paredes rebotadoras', 'Control'],
     'bat': ['Bate de béisbol', 'Control'],
@@ -242,10 +244,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 15}) {
-    final values = balanceVersion <= 14 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 14) {
-      final historicalCsv = balanceVersion == 14
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 16}) {
+    final values = balanceVersion <= 15 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 15) {
+      final historicalCsv = balanceVersion == 15
+          ? balanceV15Csv
+          : balanceVersion == 14
           ? balanceV14Csv
           : balanceVersion == 13
           ? balanceV13Csv
@@ -332,7 +336,7 @@ class UpgradeCatalog {
     bool legacy = false,
     bool retiredRemoved = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 15,
+    int balanceVersion = 16,
   }) {
     bool met(UpgradeLevel level) => level.requirements.every(
       (requirement) =>

@@ -11,6 +11,7 @@ import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/feeding/presentation/feeding_summary.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
+import '../features/prestige/presentation/prestige_screen.dart';
 
 const ink = Color(0xff111c2e);
 const surface = Color(0xff23334b);
@@ -116,9 +117,10 @@ class _SessionScreenState extends State<SessionScreen>
                     ],
                   ),
                 Expanded(
-                  child:
-                      widget.session.running ||
-                          widget.session.progress.last != null
+                  child: !widget.session.canPlayRun
+                      ? PrestigeScreen(session: widget.session)
+                      : widget.session.running ||
+                            widget.session.progress.last != null
                       ? Stack(
                           children: [
                             Positioned.fill(
@@ -623,7 +625,7 @@ class NightScreen extends StatelessWidget {
                 if (last == null) ...[
                   const SizedBox(height: 8),
                   FilledButton.icon(
-                    onPressed: session.startDay,
+                    onPressed: session.prestigeReady ? session.startDay : null,
                     icon: const Icon(Icons.wb_sunny_outlined),
                     label: const Text('Comenzar día'),
                   ),

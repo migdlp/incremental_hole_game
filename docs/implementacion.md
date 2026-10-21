@@ -1,5 +1,26 @@
 # Cómo está implementado el juego
 
+## S03 · Prestigio y derrota (0.14.0+22)
+
+**Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
+provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
+**DERROTA**, sin estadísticas. Continuar abre la tienda de prestigio; Nueva partida
+vuelve al día 1. Se reinician monedas, mejoras, herramientas y alimentación, y se
+conservan estrellas cobradas, compras permanentes, descubrimientos y datos P01 pendientes.
+
+Nodo Prestigio visible desde el comienzo al explorar, mayor y girado 45°, tanto en
+normal como DEBUG. Su compra exige confirmación y reinicia inmediatamente, sin
+botón posterior. Configuración de prueba: 10.000 monedas, Generador V + Valor V +
+Duración V, esquina avanzada (48,48). **No son decisiones finales de BAL01.**
+
+La tienda muestra estrellas y permite nueva partida, sin catálogo P02 ni premios
+P01 inventados. Morir no concede estrellas. JSON v10 / balance v16, con v15 congelado.
+Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
+una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
+[Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
+
+S03 sustituye la regla anterior de cuotas sin derrota; P01, P02 y BAL01 continúan pendientes.
+
 ## C01 · Cobro automático vigente (0.13.0+21)
 
 Cada captura calcula una única recompensa completa (Valor, dorada y racha),

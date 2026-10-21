@@ -21,6 +21,7 @@ class SkillTree {
         (48.0 + (x + dx * i + 2) * spacing, 48.0 + (y + dy * i + 2) * spacing),
     ];
     final routes = {
+      'prestige': [(48.0, 48.0)],
       'hand': [...line(5, 3, 0, 0, 1), ...line(6, 4, 1, 1, 4)],
       'hand_grip': [...line(6, 3, 0, 0, 1), ...line(7, 2, 1, -1, 4)],
       'generator': line(4, 2, -1, -1, 5),
@@ -177,6 +178,7 @@ class SkillTree {
     }
 
     for (final node in nodes) {
+      if (node.definition.id == 'prestige') ids.add(node.id);
       if (node.owned(levels)) reveal(node);
       if (unlocked(node, levels)) ids.add(node.id);
     }

@@ -1,5 +1,26 @@
 # Estado actual de Feed the Hole
 
+## S03 · Prestigio y derrota (0.14.0+22)
+
+**Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
+provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
+**DERROTA**, sin estadísticas. Continuar abre la tienda de prestigio; Nueva partida
+vuelve al día 1. Se reinician monedas, mejoras, herramientas y alimentación, y se
+conservan estrellas cobradas, compras permanentes, descubrimientos y datos P01 pendientes.
+
+Nodo Prestigio visible desde el comienzo al explorar, mayor y girado 45°, tanto en
+normal como DEBUG. Su compra exige confirmación y reinicia inmediatamente, sin
+botón posterior. Configuración de prueba: 10.000 monedas, Generador V + Valor V +
+Duración V, esquina avanzada (48,48). **No son decisiones finales de BAL01.**
+
+La tienda muestra estrellas y permite nueva partida, sin catálogo P02 ni premios
+P01 inventados. Morir no concede estrellas. JSON v10 / balance v16, con v15 congelado.
+Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
+una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
+[Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
+
+S03 sustituye la regla anterior de cuotas sin derrota; P01, P02 y BAL01 continúan pendientes.
+
 ## C01 · Cobro automático vigente (0.13.0+21)
 
 Cada captura calcula una única recompensa completa (Valor, dorada y racha),
@@ -69,8 +90,8 @@ se reinicia la alimentación y aumenta la cuota.
 
 El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
 inicial 10 y aumento 10 por período, centralizados en `balance.csv`. Son valores
-para probar, pendientes de BAL01, no balance definitivo. Incumplir se informa,
-pero no causa derrota ni pérdidas hasta integrar S03 y validar BAL01.
+para probar, pendientes de BAL01, no balance definitivo. S03 activa ahora la derrota al incumplir, también en juego normal por autorización
+expresa del usuario; los valores continúan provisionales hasta BAL01.
 DEBUG permite simular un fallo reversible sin modificar la partida real.
 JSON v8 / balance v14, con v13 congelado y sin inventar capturas históricas.
 [Alcance y prueba](s01-alimentacion-cuotas.md).
@@ -159,7 +180,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 
 ## Árbol e interfaz
 
-**59 nodos en 22 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
+**60 nodos en 23 tipos**, incluido el nodo de acción Prestigio, con Generación verde, Valor dorado, Control violeta, Tiempo naranja, Automatización coral y la acción especial de Prestigio. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
 
 - Pantalla independiente, sin título, botón visible de atrás ni botones de zoom. Navegación con arrastre y pellizco.
 - Descubrimiento progresivo: comprados y siguientes nodos accesibles. La partida nueva comienza mostrando Mano I.
@@ -171,7 +192,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 
 Acceso directo: botón **DEBUG**, arriba a la izquierda del árbol. Un toque abre el panel; el saldo ya no requiere ni reconoce una pulsación mantenida para entrar.
 
-- Vista completa: encuadra los 59 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
+- Vista completa: encuadra los 60 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo (excluye Prestigio para no terminar la prueba).
 - Vista del jugador: descubrimiento y compras normales usando saldo y mejoras de prueba. Ambas vistas comparten esa configuración; para ver el principio hay que reiniciar la prueba desde cero.
 - Añadir 1000 monedas de prueba, reiniciar, jugar jornadas de prueba y salir.
 - La prueba es temporal: no sobrescribe el progreso normal. Salir o reabrir recupera la partida real. Durante una jornada de prueba se muestra DEBUG y un botón de salida.
@@ -205,9 +226,9 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v9** y balance vigente **v15** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–14 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
+Guardado JSON **v10** y balance vigente **v16** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–15 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. S03 permite reiniciar expresamente la partida al incumplir cuota o comprar Prestigio tras confirmar, conservando la metaprogresión.
 
-No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, prestigio ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
+No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, catálogo permanente de P02 ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 
 ## Orden de lectura y continuación
 

@@ -1,5 +1,26 @@
 # PRD — Feed the Hole
 
+## S03 · Prestigio y derrota (0.14.0+22)
+
+**Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
+provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
+**DERROTA**, sin estadísticas. Continuar abre la tienda de prestigio; Nueva partida
+vuelve al día 1. Se reinician monedas, mejoras, herramientas y alimentación, y se
+conservan estrellas cobradas, compras permanentes, descubrimientos y datos P01 pendientes.
+
+Nodo Prestigio visible desde el comienzo al explorar, mayor y girado 45°, tanto en
+normal como DEBUG. Su compra exige confirmación y reinicia inmediatamente, sin
+botón posterior. Configuración de prueba: 10.000 monedas, Generador V + Valor V +
+Duración V, esquina avanzada (48,48). **No son decisiones finales de BAL01.**
+
+La tienda muestra estrellas y permite nueva partida, sin catálogo P02 ni premios
+P01 inventados. Morir no concede estrellas. JSON v10 / balance v16, con v15 congelado.
+Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
+una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
+[Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
+
+S03 sustituye la regla anterior de cuotas sin derrota; P01, P02 y BAL01 continúan pendientes.
+
 ## C01 · Cobro automático vigente (0.13.0+21)
 
 Cada captura calcula una única recompensa completa (Valor, dorada y racha),
@@ -34,11 +55,11 @@ se reinicia la alimentación y aumenta la cuota.
 
 El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
 inicial 10 y aumento 10 por período, centralizados en `balance.csv`. Son valores
-para probar, pendientes de BAL01, no balance definitivo. Incumplir se informa,
-pero no causa derrota ni pérdidas hasta integrar S03 y validar BAL01.
+para probar, pendientes de BAL01, no balance definitivo. S03 activa ahora la derrota al incumplir, también en juego normal por autorización
+expresa del usuario; los valores continúan provisionales hasta BAL01.
 DEBUG permite simular un fallo reversible sin modificar la partida real.
 JSON v8 / balance v14, con v13 congelado y sin inventar capturas históricas.
-S02 (personalidad), S03 (prestigio) y BAL01 siguen pendientes.
+S03 aporta ya derrota/reinicio; S02, P01, P02 y BAL01 siguen pendientes.
 
 ## Extensión funcional vigente · M03
 

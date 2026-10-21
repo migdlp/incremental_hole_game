@@ -13,6 +13,7 @@ import '../features/economy/domain/economy.dart';
 import '../features/rewards/domain/reward_delivery.dart';
 import '../features/rewards/domain/reward_frame_metrics.dart';
 import '../features/progression/domain/progress.dart';
+import '../features/prestige/domain/meta_progress.dart';
 import '../features/feeding/domain/feeding_progress.dart';
 import '../features/upgrades/domain/catalog.dart';
 import '../persistence/save_store.dart';
@@ -109,6 +110,87 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  MetaProgress meta = MetaProgress();
+  MetaProgress? _metaFloor;
+  int _durableMetaRevision = 0;
+  bool _allowPrestigeRollback = false;
+  bool debugPrestigeRules = false;
+  bool get prestigeReady =>
+      debugEnabled ||
+      (meta.revision <= _durableMetaRevision && saveError == null);
+  bool get canPlayRun => meta.phase == PrestigePhase.playing;
+  bool get quotaDefeatEnabled => !debugEnabled || debugPrestigeRules;
+  void debugSetPrestigeRules(bool value) {
+    if (!debugEnabled || running || !canPlayRun) return;
+    debugPrestigeRules = value;
+    notifyListeners();
+  }
+
+  void _clearRun() {
+    recoveryMessage = null;
+    release(cancel: true);
+    board?.enterClosing();
+    board?.blackHole.finishDay();
+    board = null;
+    cycle = null;
+    paused = false;
+    economy.balance = economy.collected = economy.generated = 0;
+    progress.day = 1;
+    progress.record = 0;
+    progress.last = null;
+    levels.clear();
+    _grandfathered.clear();
+    _previousTree.clear();
+    _retiredRunLevels.clear();
+    selectedTool = BallTool.hand;
+    _launcherPosition = const Vec(285, 510);
+    _launcherAngle = math.pi * 1.75;
+    feeding = FeedingProgress(
+      startDay: 1,
+      target: feedingInitialQuota,
+      quotaStep: feedingQuotaStep,
+    );
+    rewards = _newRewards();
+    rewardVisuals = _newVisuals();
+    debugForceGravity = false;
+    debugBlackHoleObjects = 0;
+    debugGravityTilt = 'sensor';
+    _debugFeedingTrials = false;
+    _debugReports.clear();
+    _debugMaxCombo = 1;
+    _accumulator = _checkpoint = _uiClock = 0;
+    _syncMotion();
+  }
+
+  bool _endRun({required bool voluntary}) {
+    if (!canPlayRun) return false;
+    meta = meta.end(voluntary: voluntary);
+    _metaFloor = meta;
+    _clearRun();
+    save();
+    notifyListeners();
+    return true;
+  }
+
+  bool continueToPrestigeShop() {
+    if (meta.phase != PrestigePhase.defeat || !prestigeReady) return false;
+    meta = meta.openShop();
+    _metaFloor = meta;
+    save();
+    notifyListeners();
+    return true;
+  }
+
+  bool beginNewRun() {
+    if (meta.phase != PrestigePhase.shop || !prestigeReady) return false;
+    meta = meta.newRun();
+    _metaFloor = meta;
+    _clearRun();
+    save();
+    notifyListeners();
+    return true;
+  }
+
   final progress = Progress();
   late FeedingProgress feeding;
   bool _debugFeedingTrials = false;
@@ -132,6 +214,7 @@ class GameSession extends ChangeNotifier {
   String? _lastSaved;
   Future<void> _writes = Future.value();
   String? _pendingSave;
+  int _pendingMetaRevision = 0;
   bool _saving = false;
   bool _disposed = false;
   String? _debugBaseline;
@@ -145,12 +228,58 @@ class GameSession extends ChangeNotifier {
   DayPhase get phase => cycle?.phase ?? DayPhase.night;
 
   Future<void> load() async {
+    var recoveredPrestige = false;
+    if (store is PrestigeStore) {
+      final checkpoints = await (store as PrestigeStore)
+          .loadPrestigeCandidates();
+      if (checkpoints.isNotEmpty) {
+        final ranked = <({String raw, int revision})>[];
+        for (final raw in checkpoints) {
+          try {
+            final data = jsonDecode(raw) as Map<String, dynamic>;
+            if (data['version'] != 10) {
+              throw const FormatException('Checkpoint incompatible');
+            }
+            final state = MetaProgress.fromJson(
+              data['meta'] as Map<String, dynamic>,
+            );
+            ranked.add((raw: raw, revision: state.revision));
+          } on Object {
+            /* A second current copy may recover a torn checkpoint. */
+          }
+        }
+        ranked.sort((a, b) => b.revision.compareTo(a.revision));
+        for (final checkpoint in ranked.where(
+          (c) => c.revision == ranked.first.revision,
+        )) {
+          try {
+            restore(checkpoint.raw);
+            _durableMetaRevision = meta.revision;
+            recoveredPrestige = true;
+            break;
+          } on Object {
+            /* Try the other complete copy; never revive an old run. */
+          }
+        }
+        if (!recoveredPrestige) {
+          throw const FormatException(
+            'El checkpoint de prestigio no se puede leer. No se ha recuperado una partida antigua.',
+          );
+        }
+      }
+    }
     final candidates = await store.loadCandidates();
-    if (candidates.isEmpty) return;
+    if (candidates.isEmpty) {
+      if (recoveredPrestige) {
+        recoveryMessage = 'Prestigio recuperado desde su checkpoint.';
+      }
+      return;
+    }
     for (var i = 0; i < candidates.length; i++) {
       try {
         restore(candidates[i]);
         _lastSaved = candidates[i];
+        if (meta.revision > _durableMetaRevision) await save();
         if (i > 0) {
           recoveryMessage = 'Partida recuperada desde la copia de seguridad.';
         }
@@ -159,13 +288,18 @@ class GameSession extends ChangeNotifier {
         // Try the previous complete snapshot before offering an explicit reset.
       }
     }
+    if (recoveredPrestige) {
+      recoveryMessage =
+          'Prestigio recuperado: la partida anterior ya había terminado.';
+      return;
+    }
     throw const FormatException(
       'El guardado y su copia no se pueden leer. No se han sobrescrito.',
     );
   }
 
   void startDay() {
-    if (running || debugFeedingFailed) return;
+    if (running || debugFeedingFailed || !canPlayRun || !prestigeReady) return;
     feeding.beginDay(progress.day);
     _retiredRunLevels.clear();
     final settings = catalog.settings(levels);
@@ -304,8 +438,12 @@ class GameSession extends ChangeNotifier {
     paused = false;
     _syncMotion();
     _accumulator = 0;
-    save();
-    notifyListeners();
+    if (quotaDefeatEnabled && feeding.missed) {
+      _endRun(voluntary: false);
+    } else {
+      save();
+      notifyListeners();
+    }
   }
 
   void touch(Vec position, {double? time}) {
@@ -426,7 +564,7 @@ class GameSession extends ChangeNotifier {
 
   /// Debug play is temporary: purchases and days never reach the real save.
   bool enterDebug() {
-    if (debugEnabled || running) return false;
+    if (debugEnabled || running || !canPlayRun || !prestigeReady) return false;
     final baseline = snapshot();
     save();
     _debugBaseline = baseline;
@@ -441,8 +579,14 @@ class GameSession extends ChangeNotifier {
     final baseline = _debugBaseline;
     if (baseline == null) return;
     board?.blackHole.finishDay();
-    restore(baseline);
+    _allowPrestigeRollback = true;
+    try {
+      restore(baseline);
+    } finally {
+      _allowPrestigeRollback = false;
+    }
     _debugBaseline = null;
+    debugPrestigeRules = false;
     _debugRewardLimit = null;
     rewardVisuals.debugLimit = null;
     _debugFeedingTrials = false;
@@ -462,8 +606,15 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool debugPurchase(String id, int targetLevel) {
-    if (!debugEnabled || running) return false;
+  bool debugPurchase(
+    String id,
+    int targetLevel, {
+    bool confirmPrestige = false,
+  }) {
+    if (!debugEnabled || running || !canPlayRun) return false;
+    if (id == 'prestige') {
+      return targetLevel == 1 && confirmPrestige && _endRun(voluntary: true);
+    }
     final definition = catalog.definitions.where((d) => d.id == id).firstOrNull;
     if (definition == null ||
         targetLevel < 1 ||
@@ -492,10 +643,11 @@ class GameSession extends ChangeNotifier {
   }
 
   bool debugBuyAll() {
-    if (!debugEnabled || running) return false;
+    if (!debugEnabled || running || !canPlayRun) return false;
     _applyDebugLevels({
       for (final definition in catalog.definitions)
-        definition.id: definition.levels.length,
+        if (definition.id != 'prestige')
+          definition.id: definition.levels.length,
     });
     return true;
   }
@@ -524,7 +676,7 @@ class GameSession extends ChangeNotifier {
   int get feedingInitialQuota => catalog.base['feeding_quota_initial']!.toInt();
   int get feedingQuotaStep => catalog.base['feeding_quota_step']!.toInt();
   void debugConfigureFeeding({required bool quotas, int? target}) {
-    if (!debugEnabled || running) return;
+    if (!debugEnabled || running || !canPlayRun) return;
     final amount = target ?? feedingInitialQuota;
     if (amount < 1 || amount > 1000000) return;
     _debugFeedingTrials = quotas;
@@ -545,13 +697,13 @@ class GameSession extends ChangeNotifier {
   }
 
   void debugAddCoins() {
-    if (!debugEnabled || running) return;
+    if (!debugEnabled || running || !canPlayRun) return;
     economy.balance += 1000;
     notifyListeners();
   }
 
   void debugReset() {
-    if (!debugEnabled || running) return;
+    if (!debugEnabled || running || !canPlayRun) return;
     _debugReports.clear();
     _debugFeedingTrials = false;
     feeding = FeedingProgress(
@@ -578,6 +730,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String? purchaseBlock(UpgradeDefinition definition) {
+    if (!canPlayRun || !prestigeReady) return 'Partida no disponible';
     if (running) return 'Disponible durante la noche';
     final level = levels[definition.id] ?? 0;
     if (level >= definition.levels.length) return 'Completado';
@@ -598,10 +751,12 @@ class GameSession extends ChangeNotifier {
     return null;
   }
 
-  bool purchase(UpgradeDefinition definition) {
+  bool purchase(UpgradeDefinition definition, {bool confirmPrestige = false}) {
     if (purchaseBlock(definition) != null) return false;
+    if (definition.id == 'prestige' && !confirmPrestige) return false;
     final level = levels[definition.id] ?? 0;
     if (!economy.spend(definition.levels[level].cost)) return false;
+    if (definition.id == 'prestige') return _endRun(voluntary: true);
     levels[definition.id] = level + 1;
     if (definition.id == 'bat') selectedTool = BallTool.bat;
     if (definition.id == 'broom') selectedTool = BallTool.broom;
@@ -612,7 +767,8 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 9,
+    'version': 10,
+    'meta': meta.toJson(),
     'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
     'launcherPose': {
@@ -655,8 +811,36 @@ class GameSession extends ChangeNotifier {
         json['version'] != 6 &&
         json['version'] != 7 &&
         json['version'] != 8 &&
-        json['version'] != 9) {
+        json['version'] != 9 &&
+        json['version'] != 10) {
       throw const FormatException('Versión de guardado no compatible');
+    }
+    if ((json['version'] as int) >= 10 &&
+        json['meta'] is! Map<String, dynamic>) {
+      throw const FormatException('Falta la metaprogresión');
+    }
+    final restoredMeta = (json['version'] as int) >= 10
+        ? MetaProgress.fromJson(json['meta'] as Map<String, dynamic>)
+        : MetaProgress();
+    final floor = _metaFloor;
+    if (!_allowPrestigeRollback &&
+        floor != null &&
+        (restoredMeta.revision < floor.revision ||
+            (restoredMeta.revision == floor.revision &&
+                jsonEncode(restoredMeta.toJson()) !=
+                    jsonEncode(floor.toJson())))) {
+      throw const FormatException(
+        'Este guardado pertenece a una partida o metaprogresión anterior',
+      );
+    }
+    if (restoredMeta.phase != PrestigePhase.playing &&
+        (json['run'] != null ||
+            json['day'] != 1 ||
+            json['balance'] != 0 ||
+            json['record'] != 0 ||
+            json['last'] != null ||
+            (json['levels'] as Map).isNotEmpty)) {
+      throw const FormatException('Partida activa después del prestigio');
     }
     final day = json['day'] as int,
         balance = json['balance'] as int,
@@ -667,6 +851,9 @@ class GameSession extends ChangeNotifier {
     final savedLevels = (json['levels'] as Map<String, dynamic>).map(
       (k, v) => MapEntry(k, v as int),
     );
+    if ((savedLevels['prestige'] ?? 0) > 0) {
+      throw const FormatException('Prestigio comprado sin reiniciar');
+    }
     // Old paddle purchases become width upgrades and retain access to the broom.
     if (legacy && (savedLevels['paddle'] ?? 0) > 0) savedLevels['broom'] = 1;
     final oldProgress = (json['version'] as int) < 4;
@@ -685,7 +872,11 @@ class GameSession extends ChangeNotifier {
       grandfathered: grandfathered,
       previousTree: previousTree,
       legacy: oldProgress,
-      balanceVersion: (json['version'] as int) < 9 ? 14 : 15,
+      balanceVersion: (json['version'] as int) < 9
+          ? 14
+          : json['version'] == 9
+          ? 15
+          : 16,
       retiredRemoved: (json['version'] as int) >= 9,
     );
     var restoredTool = legacy
@@ -734,7 +925,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 15)) {
+          (balanceVersion < 1 || balanceVersion > 16)) {
         throw const FormatException('Versión de balance inválida');
       }
       final runRetired = run['retiredLevels'] == null
@@ -897,6 +1088,15 @@ class GameSession extends ChangeNotifier {
         quotaStep: feedingQuotaStep,
       );
     }
+    if (restoredMeta.phase != PrestigePhase.playing &&
+        (restoredFeeding.points != 0 ||
+            restoredFeeding.completedDays != 0 ||
+            restoredFeeding.period != 1 ||
+            restoredFeeding.startDay != 1)) {
+      throw const FormatException(
+        'Alimentación retenida después de prestigiar',
+      );
+    }
     // Commit only after validating every module; a failed load leaves no partial state.
     final savedEventRandom = json['eventRandom'] ?? _eventRandomState;
     if (savedEventRandom is! int ||
@@ -929,6 +1129,8 @@ class GameSession extends ChangeNotifier {
     final savedSound = json['sound'] as bool;
     final savedHaptics = json['haptics'] as bool? ?? true;
     final savedVisualFeedback = json['visualFeedback'] as bool? ?? false;
+    meta = restoredMeta;
+    _metaFloor = restoredMeta;
     progress.day = day;
     progress.record = record;
     progress.last = last;
@@ -1004,6 +1206,7 @@ class GameSession extends ChangeNotifier {
   Future<void> save() {
     if (debugEnabled) return _writes;
     _pendingSave = snapshot();
+    _pendingMetaRevision = meta.revision;
     if (!_saving) {
       _saving = true;
       _writes = _drainSaves();
@@ -1016,9 +1219,18 @@ class GameSession extends ChangeNotifier {
     // Every later snapshot includes all previously registered capture rewards.
     while (_pendingSave != null) {
       final data = _pendingSave!;
+      final metaRevision = _pendingMetaRevision;
       _pendingSave = null;
       final previousError = saveError;
       try {
+        if (metaRevision > _durableMetaRevision) {
+          if (store is! PrestigeStore) {
+            throw StateError('Guardado de prestigio no disponible');
+          }
+          await (store as PrestigeStore).savePrestige(data);
+          _durableMetaRevision = metaRevision;
+          if (!_disposed) notifyListeners();
+        }
         await store.save(data, previous: _lastSaved);
         _lastSaved = data;
         saveError = null;

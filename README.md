@@ -1,5 +1,10 @@
 # Feed the Hole
 
+**S03 · 0.14.0+22:** [Prestigio y metaprogresión](docs/s03-prestigio-metaprogresion.md).
+Derrota por cuota también en normal, tienda y reinicio; nodo grande girado 45° con
+confirmación. Datos permanentes protegidos contra copias normales antiguas.
+P01 y P02 aún deben aportar estrellas, catálogo y efectos; balance provisional.
+
 **C01 · 0.13.0+21:** [Cobro automático](docs/c01-cobro-automatico.md), monedas decorativas
 y cierre directo sin recogida. Compras retiradas sin reembolso, según autorización
 del usuario. Pool y presupuestos provisionales; medición Android físico pendiente.
@@ -36,7 +41,8 @@ persistente. Desbloqueo y parámetros provisionales; disponible en DEBUG.
 **S01 (0.12.0+20):** [Alimentación y cuotas](docs/s01-alimentacion-cuotas.md).
 Todas las capturas cuentan con racha y doradas, también Captura total, sin
 necesidad de recoger monedas. Anillo y períodos de cinco jornadas; cuotas
-provisionales visibles en juego normal, sin derrota hasta BAL01/S03.
+provisionales en juego normal; S03 activa derrota al incumplir por autorización
+expresa del usuario. Cantidades definitivas pendientes de BAL01.
 DEBUG permite simular el fallo sin alterar la partida real.
 
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
@@ -66,9 +72,9 @@ python3 -m http.server 8123 --directory build/web
 - Monedas decorativas en pool: salida del hoyo tras ~1 s y vuelo curvo al monedero. Cobro completo sin tocar, agrupar u omitir animaciones no cambia los ingresos. Cierre liquida pendientes.
 - Día inicial de **15 segundos de producción, sin fase final de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso completo se banca una sola vez al cierre.
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 1 segundo; las compras revelan nuevos caminos.
-- 22 tipos y 59 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
+- 23 tipos y 60 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja bolas y Prestigio voluntario con confirmación.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
-- Guardado JSON v9 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
+- Guardado JSON v10 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano y opción de silenciar los sonidos del sistema.
 
 La tabla `docs/balance.csv` se empaqueta como recurso y se valida al cargar: es la fuente editable del balance actual. Las jornadas antiguas conservan su configuración hasta terminar; el siguiente día usa el balance nuevo. La noche descarta también cualquier bola agarrada.

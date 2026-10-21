@@ -24,7 +24,7 @@ void capture(GameSession session) {
 void main() {
   final catalog = testCatalog();
   test('balance source includes tool and coin unlocks with prerequisites', () {
-    expect(catalog.definitions.length, 22);
+    expect(catalog.definitions.length, 23);
     final levels = {for (final d in catalog.definitions) d.id: d.levels.length};
     final max = catalog.settings(levels);
     expect(max['production_duration'], 30);
@@ -81,7 +81,8 @@ void main() {
     expect(board.coins, isEmpty);
   });
   test('ten complete cycles bank once, discard pending and begin clean', () {
-    final session = GameSession(catalog, MemoryStore());
+    final session = GameSession(catalog, MemoryStore())
+      ..levels.addAll({'hand': 1, 'reward': 1});
     for (var day = 1; day <= 10; day++) {
       session.startDay();
       expect(session.board!.coins, isEmpty);
@@ -97,14 +98,14 @@ void main() {
       expect(session.running, isFalse);
       expect(session.board, isNull);
       expect(jsonDecode(session.snapshot())['run'], isNull);
-      expect(session.economy.balance, day * 2);
+      expect(session.economy.balance, day * 4);
       expect(session.progress.last!.lost, 0);
-      expect(session.progress.last!.income, 2);
+      expect(session.progress.last!.income, 4);
       session.finishDay();
-      expect(session.economy.balance, day * 2);
+      expect(session.economy.balance, day * 4);
     }
     expect(session.progress.day, 11);
-    expect(session.progress.record, 2);
+    expect(session.progress.record, 4);
   });
   test(
     'purchases enforce phase, funds, prerequisite and level cap atomically',

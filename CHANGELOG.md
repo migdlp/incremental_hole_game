@@ -2,6 +2,18 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.14.0+22 — S03: prestigio y metaprogresión
+
+- Incumplir cuota termina la partida en normal; DERROTA sencilla, tienda y nueva
+  partida. Autorización expresa para usar todavía las cuotas provisionales.
+- Nodo Prestigio visible desde el inicio, grande y girado 45°, con confirmación y
+  reinicio inmediato. Coste, posición y requisitos de prueba pendientes de BAL01.
+- Reset de partida separado de estrellas, compras y descubrimientos permanentes;
+  datos P01 pendientes conservados sin cobrar ni descartar. Sin catálogo P02 inventado.
+- JSON v10 / balance v16 con v15 congelado. Checkpoint independiente con dos copias
+  actuales, revisiones monotónicas y recuperación sin revivir partidas terminadas.
+- Pruebas DEBUG aisladas; Comprar todo excluye la acción para evitar reinicios accidentales.
+
 ## 0.13.0+21 — C01: cobro automático
 
 - Recompensa completa garantizada al capturar; monedas decorativas salen del hoyo

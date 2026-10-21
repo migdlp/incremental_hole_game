@@ -1,5 +1,13 @@
 # Modo de depuración
 
+## S03 · Probar derrota y prestigio
+
+Activar **Probar derrota y prestigio**. Simular cinco jornadas sin capturas desde
+Alimentación y cuotas abre DERROTA; Continuar → tienda → Nueva partida. El nodo
+Prestigio también puede comprarse gratis en el mapa completo, siempre con
+confirmación. Salir de DEBUG restaura toda la partida y metaprogresión reales,
+sin checkpoint temporal persistido. [Guía](s03-prestigio-metaprogresion.md).
+
 ## C01 · Monedas automáticas y rendimiento
 
 Tienda → DEBUG → Monedas automáticas · rendimiento. Elegir adaptativo, sin
@@ -29,7 +37,7 @@ Cambiar de vista no compra ni elimina mejoras. Si una ficha seleccionada deja de
 
 ## Herramientas del panel
 
-- **Comprar todo:** adquiere gratuitamente todos los niveles de todas las ramas.
+- **Comprar todo:** adquiere gratuitamente todos los niveles de las ramas jugables; excluye la acción Prestigio.
 - **Añadir 1000 monedas de prueba:** permite inspeccionar qué nodos estarían disponibles para un jugador con saldo suficiente.
 - **Reiniciar prueba desde cero:** vacía las mejoras y el saldo de prueba; vuelve al día 1. No borra la partida normal.
 - **Volver al árbol:** cierra el panel conservando la prueba.

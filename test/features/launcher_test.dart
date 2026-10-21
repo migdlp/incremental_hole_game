@@ -48,7 +48,7 @@ void main() {
     'launcher is an independent generation branch with its own rate and fixed power',
     () {
       final tree = SkillTree(catalog);
-      expect(tree.nodes, hasLength(59));
+      expect(tree.nodes, hasLength(60));
       expect(tree.byId('launcher:1').parents, ['generator:2']);
       expect(tree.byId('launcher_rate:1').parents, ['launcher:1']);
       final normalInterval = catalog.settings(owned)['spawn_interval'];
@@ -579,7 +579,7 @@ void main() {
     expect(s.board!.launcher.unlocked, isFalse);
     s.finishDay();
     s.startDay();
-    expect(s.board!.settings.balanceVersion, 15);
+    expect(s.board!.settings.balanceVersion, 16);
     s.dispose();
   });
 

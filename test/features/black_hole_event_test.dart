@@ -393,7 +393,7 @@ void main() {
       s.finishDay();
       s.startDay();
       expect(s.board!.blackHole.enabled, isTrue);
-      expect(s.board!.settings.balanceVersion, 15);
+      expect(s.board!.settings.balanceVersion, 16);
       s.dispose();
     },
   );

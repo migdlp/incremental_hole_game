@@ -5,6 +5,7 @@ import 'app/game_session.dart';
 import 'features/motion/android_motion_input.dart';
 import 'features/upgrades/domain/catalog.dart';
 import 'persistence/store_factory.dart';
+import 'persistence/save_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,7 @@ class _BootstrapState extends State<Bootstrap> {
   Future<void> _load({bool fresh = false}) async {
     setState(() {
       error = null;
+      canReset = false;
     });
     try {
       final catalog = UpgradeCatalog.fromCsv(
@@ -44,11 +46,20 @@ class _BootstrapState extends State<Bootstrap> {
         if (!fresh) {
           await next.load();
         } else {
+          if (store is PrestigeStore &&
+              (await (store as PrestigeStore).loadPrestigeCandidates())
+                  .isNotEmpty) {
+            throw const FormatException(
+              'Hay datos permanentes de prestigio. No se ha creado un perfil vacío sobre ellos.',
+            );
+          }
           await next.save();
         }
       } on FormatException {
         next.dispose();
-        canReset = true;
+        canReset =
+            store is! PrestigeStore ||
+            (await (store as PrestigeStore).loadPrestigeCandidates()).isEmpty;
         rethrow;
       }
       if (!mounted) {

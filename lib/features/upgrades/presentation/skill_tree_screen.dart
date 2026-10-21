@@ -31,6 +31,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   int? activePointer;
   Offset? origin;
   bool moved = false;
+  bool _prestigeDialogOpen = false;
+  bool _closingPrestigeRoute = false;
   final pointers = <int>{};
   Size? viewport;
   bool initialized = false;
@@ -52,6 +54,12 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 
   void _sessionChanged() {
     final session = widget.session;
+    if (!session.canPlayRun && !_closingPrestigeRoute) {
+      _closingPrestigeRoute = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+      });
+    }
     final changedMode =
         _wasDebugEnabled != session.debugEnabled ||
         _wasFullTree != session.debugFullTree;
@@ -82,6 +90,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 
   bool _canBuy(SkillNode node) {
     final session = widget.session;
+    if (!session.canPlayRun || !session.prestigeReady) return false;
     if (_debugBuying) return !session.running && !node.owned(session.levels);
     return !node.owned(session.levels) &&
         (session.levels[node.definition.id] ?? 0) == node.level - 1 &&
@@ -94,12 +103,55 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     holding = null;
   }
 
-  void _holdStatus(AnimationStatus status) {
+  void _holdStatus(AnimationStatus status) async {
     if (status != AnimationStatus.completed) return;
     final node = holding;
     holding = null;
     hold.reset();
     if (node == null || !_canBuy(node)) return;
+    if (node.definition.id == 'prestige') {
+      if (_prestigeDialogOpen) return;
+      _prestigeDialogOpen = true;
+      final session = widget.session;
+      final revision = session.meta.revision, runId = session.meta.runId;
+      final wasDebug = session.debugEnabled;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('¿Reiniciar la partida?'),
+          content: const Text(
+            'Comprar Prestigio termina esta partida inmediatamente. Se reinician las monedas y las mejoras normales. Conservas tus estrellas y mejoras permanentes.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              key: const ValueKey('prestige-confirm'),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Reiniciar y prestigiar'),
+            ),
+          ],
+        ),
+      );
+      _prestigeDialogOpen = false;
+      if (!mounted ||
+          confirmed != true ||
+          session.meta.revision != revision ||
+          session.meta.runId != runId ||
+          session.debugEnabled != wasDebug ||
+          !_canBuy(node)) {
+        return;
+      }
+      final ended = _debugBuying
+          ? session.debugPurchase('prestige', 1, confirmPrestige: true)
+          : session.purchase(node.definition, confirmPrestige: true);
+      if (ended && mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+      return;
+    }
     final purchased = _debugBuying
         ? widget.session.debugPurchase(node.definition.id, node.level)
         : widget.session.purchase(node.definition);
@@ -289,8 +341,16 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                                     for (final node in visible)
                                       Positioned(
                                         key: ValueKey('position-${node.id}'),
-                                        left: node.x - 32,
-                                        top: node.y - 32,
+                                        left:
+                                            node.x -
+                                            (node.definition.id == 'prestige'
+                                                ? 40
+                                                : 32),
+                                        top:
+                                            node.y -
+                                            (node.definition.id == 'prestige'
+                                                ? 40
+                                                : 32),
                                         child: TweenAnimationBuilder<double>(
                                           tween: Tween(begin: 0, end: 1),
                                           duration: const Duration(
@@ -327,7 +387,11 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                   width: double.infinity,
                   child: FilledButton.icon(
                     key: const ValueKey('tree-start-day'),
-                    onPressed: session.running || session.debugFeedingFailed
+                    onPressed:
+                        session.running ||
+                            session.debugFeedingFailed ||
+                            !session.canPlayRun ||
+                            !session.prestigeReady
                         ? null
                         : () {
                             _cancel();
@@ -588,6 +652,17 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                       ),
                     ],
                   ),
+                  SwitchListTile(
+                    key: const ValueKey('debug-prestige-rules'),
+                    title: const Text('Probar derrota y prestigio'),
+                    subtitle: const Text(
+                      'El fallo de cuota termina solo la partida de prueba.',
+                    ),
+                    value: session.debugPrestigeRules,
+                    onChanged: session.running
+                        ? null
+                        : session.debugSetPrestigeRules,
+                  ),
                   ExpansionTile(
                     key: const ValueKey('debug-feeding-tools'),
                     title: const Text('Alimentación y cuotas'),
@@ -643,7 +718,11 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                       ),
                       TextButton(
                         key: const ValueKey('debug-feeding-empty-day'),
-                        onPressed: session.running || session.debugFeedingFailed
+                        onPressed:
+                            session.running ||
+                                session.debugFeedingFailed ||
+                                !session.canPlayRun ||
+                                !session.prestigeReady
                             ? null
                             : session.debugSimulateEmptyDay,
                         child: const Text('Simular jornada sin capturas'),
@@ -666,7 +745,50 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     );
   }
 
+  Widget _prestigeNode(SkillNode node) {
+    final affordable = _canBuy(node);
+    return Semantics(
+      button: true,
+      label: 'Prestigio. Reinicia la partida tras confirmación.',
+      onTap: () => setState(() => selected = node),
+      child: Listener(
+        key: ValueKey('node-${node.id}'),
+        onPointerDown: (e) => _down(e, node),
+        onPointerMove: _move,
+        onPointerUp: (e) => _up(e, node),
+        onPointerCancel: (e) => _up(e, node, cancel: true),
+        child: SizedBox(
+          width: 80,
+          height: 80,
+          child: Center(
+            child: Transform.rotate(
+              key: const ValueKey('prestige-diamond'),
+              angle: math.pi / 4,
+              child: Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: _gold.withValues(alpha: .16),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: affordable ? Colors.white : _gold,
+                    width: 2,
+                  ),
+                ),
+                child: Transform.rotate(
+                  angle: -math.pi / 4,
+                  child: const Icon(Icons.auto_awesome, color: _gold, size: 30),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _node(SkillNode node) {
+    if (node.definition.id == 'prestige') return _prestigeNode(node);
     final owned = node.owned(widget.session.levels);
     final affordable = _canBuy(node);
     final isSelected = selected?.id == node.id;
@@ -830,7 +952,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               if (!owned && !affordable)
                 Flexible(
                   child: Text(
-                    !tree.unlocked(node, widget.session.levels)
+                    !tree.unlocked(node, widget.session.levels) &&
+                            node.definition.id != 'prestige'
                         ? 'Completa la mejora anterior'
                         : widget.session.purchaseBlock(node.definition) ?? '',
                     textAlign: TextAlign.right,
@@ -930,6 +1053,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 }
 
 Color _typeColor(SkillNode node) => switch (node.definition.id) {
+  'prestige' => const Color(0xffeab308),
   'launcher' ||
   'launcher_rate' ||
   'generator' ||
@@ -949,6 +1073,7 @@ Color _typeColor(SkillNode node) => switch (node.definition.id) {
 };
 
 const _icons = {
+  'prestige': Icons.auto_awesome,
   'hand': Icons.back_hand_outlined,
   'hand_grip': Icons.front_hand_outlined,
   'walls': Icons.compare_arrows,
@@ -978,6 +1103,8 @@ const _icons = {
 };
 
 String _description(SkillNode node) => switch (node.definition.id) {
+  'prestige' =>
+    'Termina esta partida y abre Prestigio. Reinicia monedas y mejoras normales; conserva estrellas y mejoras permanentes',
   'hand' =>
     'Lleva hasta ${node.upgrade.value.toInt()} bolas: agarra una y acerca la mano a otras para atraerlas',
   'walls' => 'Aumenta la potencia del rebote de las cuatro paredes',
@@ -1014,6 +1141,12 @@ String _description(SkillNode node) => switch (node.definition.id) {
 };
 
 TextSpan _summary(SkillNode node) {
+  if (node.definition.id == 'prestige') {
+    return const TextSpan(
+      text:
+          'Reinicia esta partida y abre la tienda de prestigio. Se pedirá confirmación.',
+    );
+  }
   final value = node.upgrade.value;
   String number(double n) =>
       n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(2);
@@ -1086,6 +1219,7 @@ String _value(SkillNode node, double value) {
   return switch (node.definition.unit) {
     'multiplier' => '×${number(value == 0 ? 1 : value)}',
     'unlock' => value > 0 ? 'Desbloqueada' : 'Sin desbloquear',
+    'action' => value > 0 ? 'Nueva partida' : 'Partida actual',
     'seconds' => '${number(value)} s',
     'coins' => '${number(value)} monedas/bola',
     'balls_per_spawn' => '${number(value)} bolas/emisión',

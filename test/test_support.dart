@@ -5,10 +5,19 @@ import 'package:incremental_hole_game/persistence/save_store.dart';
 UpgradeCatalog testCatalog() =>
     UpgradeCatalog.fromCsv(File('docs/balance.csv').readAsStringSync());
 
-class MemoryStore implements SaveStore {
+class MemoryStore implements SaveStore, PrestigeStore {
   List<String> candidates = [];
   List<String> writes = [];
   bool fail = false;
+  List<String> prestigeCandidates = [];
+  @override
+  Future<List<String>> loadPrestigeCandidates() async => prestigeCandidates;
+  @override
+  Future<void> savePrestige(String contents) async {
+    if (fail) throw const FileSystemException('Disk unavailable');
+    prestigeCandidates = [contents, contents];
+  }
+
   @override
   Future<List<String>> loadCandidates() async => candidates;
   @override

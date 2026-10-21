@@ -5,6 +5,7 @@ import 'balance_v6.dart';
 import 'balance_v7.dart';
 import 'balance_v8.dart';
 import 'balance_v9.dart';
+import 'balance_v10.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -29,7 +30,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 10});
+  DaySettings(this.values, {this.balanceVersion = 11});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -79,7 +80,11 @@ class UpgradeCatalog {
         throw const FormatException('Fila de balance inválida');
       }
       final value = double.parse(cells[5]);
-      if (!value.isFinite || value <= 0) {
+      if (!value.isFinite ||
+          (value <= 0 &&
+              !(cells[0] == 'base' &&
+                  cells[4] == 'gravity_probability' &&
+                  value == 0))) {
         throw const FormatException('Efecto inválido');
       }
       if (cells[0] == 'base') {
@@ -147,8 +152,18 @@ class UpgradeCatalog {
       'bat_manual_gain',
       'bat_move_speed',
       'bat_angular_speed',
+      'gravity_probability',
+      'gravity_duration',
+      'gravity_object_speed',
+      'gravity_acceleration',
+      'gravity_response',
+      'gravity_ball_damping',
+      'gravity_tool_damping',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
+    }
+    if (base['gravity_probability']! > 1 || base['gravity_duration']! > 10) {
+      throw const FormatException('Límites de Gravedad inválidos');
     }
     return UpgradeCatalog._(base, definitions);
   }
@@ -160,10 +175,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 10}) {
-    final values = balanceVersion <= 9 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 9) {
-      final historicalCsv = balanceVersion == 9
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 11}) {
+    final values = balanceVersion <= 10 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 10) {
+      final historicalCsv = balanceVersion == 10
+          ? balanceV10Csv
+          : balanceVersion == 9
           ? balanceV9Csv
           : balanceVersion == 8
           ? balanceV8Csv
@@ -223,7 +240,7 @@ class UpgradeCatalog {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 10,
+    int balanceVersion = 11,
   }) {
     if (previousTree.isNotEmpty) {
       validateLevels(

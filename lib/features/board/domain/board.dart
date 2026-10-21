@@ -7,6 +7,7 @@ import 'bat_impact.dart';
 import 'coin_denomination.dart';
 import 'capture_combo.dart';
 import 'special_abilities.dart';
+import 'gravity_event.dart';
 import 'wall_impact.dart';
 import '../../upgrades/domain/catalog.dart';
 
@@ -54,6 +55,9 @@ class Board {
     this.randomState = 42,
     this.tool = BallTool.hand,
     bool? combosEnabled,
+    this.gravitySupported = false,
+    bool forceGravity = false,
+    int? gravitySeed,
   }) : specials = SpecialAbilities(settings),
        combo = CaptureCombo(
          enabled:
@@ -61,6 +65,12 @@ class Board {
              (settings.balanceVersion < 8 || settings['combo_unlocked'] > 0),
        ) {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
+    gravity = GravityEvent(
+      settings,
+      seed: gravitySeed ?? randomState,
+      available: gravitySupported,
+      force: forceGravity,
+    );
   }
   static const width = 360.0, height = 560.0;
   static const hole = Vec(180, 50);
@@ -68,6 +78,13 @@ class Board {
   final DaySettings settings;
   final CaptureCombo combo;
   final SpecialAbilities specials;
+  late GravityEvent gravity;
+  bool gravitySupported;
+  Vec gravityTilt = Vec.zero;
+  Vec broomGravityVelocity = Vec.zero, batGravityVelocity = Vec.zero;
+  bool _gravityTap = false;
+  bool get gravityObjectVisible =>
+      gravitySupported && !coinOnly && gravity.hasObject;
   final _captureAllIds = <int>{};
   final wallImpacts = <WallImpact>[];
   static const maximumWallImpacts = 32;
@@ -123,7 +140,7 @@ class Board {
   // Only five denomination counters are queued if the visible-object cap fills.
   final _queuedCoins = <int, int>{};
   Map<int, int>? collectedCoins = <int, int>{};
-  bool get canCollectCoins => _heldBalls.isEmpty && !holdingBat;
+  bool get canCollectCoins => _heldBalls.isEmpty && !holdingBat && !_gravityTap;
   final robot = Robot();
   Vec? paddle, target;
   late Vec broomPosition;
@@ -208,6 +225,8 @@ class Board {
   void enterClosing() {
     releasePointer(cancel: true);
     coinOnly = true;
+    gravity.finish();
+    broomGravityVelocity = batGravityVelocity = Vec.zero;
     combo.end();
   }
 
@@ -273,6 +292,14 @@ class Board {
   int releasePointer({bool cancel = false, double? time}) {
     var collected = 0;
     final velocity = cancel ? Vec.zero : _releaseVelocity(time ?? _clock);
+    if (_gravityTap &&
+        !cancel &&
+        !_dragged &&
+        target != null &&
+        gravityObjectVisible &&
+        gravity.contains(target!)) {
+      gravity.hit(available: gravitySupported);
+    }
     for (final ball in _heldBalls.keys) {
       ball.velocity = cancel
           ? Vec.zero
@@ -287,6 +314,7 @@ class Board {
     _manualBall = null;
     _slippedBalls.clear();
     _toolGrip = null;
+    _gravityTap = false;
     paddle = null;
     target = null;
     _downPoint = null;
@@ -338,6 +366,11 @@ class Board {
     _heldDuringGesture = false;
     _samples.clear();
     _sample(paddle!, time ?? _clock);
+    _gravityTap = gravityObjectVisible && gravity.contains(paddle!);
+    if (_gravityTap) {
+      _heldDuringGesture = true;
+      return 0;
+    }
     final onCoin = coins.any(
       (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
     );
@@ -365,6 +398,8 @@ class Board {
         grabBat ? batAngle : toolAngle,
         paddle!,
       );
+      if (grabBat) batGravityVelocity = Vec.zero;
+      if (grabBroom) broomGravityVelocity = Vec.zero;
       _heldDuringGesture = true;
     }
     if (!coinOnly && !holdingPhysicalTool && !onCoin) {
@@ -557,16 +592,30 @@ class Board {
     final steps = math.max(1, (dt / (1 / 240)).ceil());
     final step = dt / steps;
     for (var i = 0; i < steps; i++) {
+      final gravityImpulse = gravity.advance(
+        step,
+        producing: producing,
+        available: gravitySupported,
+        tilt: gravityTilt,
+      );
       _moveTool(step);
-      final friction = math.exp(-1.6 * step);
+      _moveGravityTools(step, gravityImpulse);
+      final friction = math.exp(
+        -1.6 * step -
+            settings['gravity_ball_damping'] *
+                (gravitySupported ? gravity.lastActiveTime : 0),
+      );
       for (final ball in balls) {
         if (_heldBalls.containsKey(ball)) continue;
+        ball.velocity = ball.velocity + gravityImpulse;
         final toHole = hole - ball.position;
         if (toHole.length < settings['hole_capture_radius'] + 15) {
           ball.velocity = ball.velocity + toHole.unit * (220 * step);
         }
         ball.velocity = ball.velocity.limit(maximumSpeed) * friction;
-        if (ball.velocity.length < 1) ball.velocity = Vec.zero;
+        if (ball.velocity.length < 1 && gravityImpulse.length == 0) {
+          ball.velocity = Vec.zero;
+        }
         final previous = ball.position;
         ball.position = ball.position + ball.velocity * step;
         _bounceWalls(ball);
@@ -592,6 +641,55 @@ class Board {
       goldenCaptured: goldenCaptures,
       rewards: rewards,
     );
+  }
+
+  void _moveGravityTools(double dt, Vec impulse) {
+    if (settings.balanceVersion < 11) return;
+    final damping = math.exp(-settings['gravity_tool_damping'] * dt);
+    ({Vec center, Vec velocity}) freeMotion(
+      Vec center,
+      Vec velocity,
+      Vec Function(Vec) bound,
+    ) {
+      velocity = (velocity + impulse).limit(maximumSpeed) * damping;
+      if (velocity.length < .01) velocity = Vec.zero;
+      final next = center + velocity * dt;
+      final position = bound(next);
+      return (
+        center: position,
+        velocity: Vec(
+          position.x != next.x ? -velocity.x * .35 : velocity.x,
+          position.y != next.y ? -velocity.y * .35 : velocity.y,
+        ),
+      );
+    }
+
+    if (broomUnlocked &&
+        !holdingBroom &&
+        (impulse.length > 0 || broomGravityVelocity.length > 0)) {
+      final before = broomPosition;
+      final motion = freeMotion(
+        before,
+        broomGravityVelocity,
+        (p) => p.inside(broomHalfWidth + broomThickness),
+      );
+      broomPosition = motion.center;
+      broomGravityVelocity = motion.velocity;
+      _contactBroom((broomPosition - before) * (1 / dt), 0);
+    }
+    if (batUnlocked &&
+        !holdingBat &&
+        (impulse.length > 0 || batGravityVelocity.length > 0)) {
+      final before = batPosition;
+      final motion = freeMotion(
+        before,
+        batGravityVelocity,
+        (p) => _boundBat(p, batAngle),
+      );
+      batPosition = motion.center;
+      batGravityVelocity = motion.velocity;
+      _batVelocity = (batPosition - before) * (1 / dt);
+    }
   }
 
   void _moveTool(double dt) {
@@ -862,6 +960,11 @@ class Board {
       'captureAllIds': _captureAllIds.toList(),
     },
     'spawnClock': spawnClock,
+    if (settings.balanceVersion >= 11) ...{
+      'gravity': gravity.toJson(),
+      'broomGravityVelocity': broomGravityVelocity.toJson(),
+      'batGravityVelocity': batGravityVelocity.toJson(),
+    },
     'broomPosition': broomPosition.toJson(),
     'broomAngle': toolAngle,
     if (settings.balanceVersion >= 10) ...{
@@ -925,6 +1028,21 @@ class Board {
       final bounded = board._boundBat(board.batPosition, board.batAngle);
       if ((bounded - board.batPosition).length > .0001) {
         throw const FormatException('Invalid bat position');
+      }
+    }
+    if (settings.balanceVersion >= 11) {
+      final savedGravity = json['gravity'];
+      if (savedGravity is! Map<String, dynamic>) {
+        throw const FormatException('Falta el estado de Gravedad');
+      }
+      board.gravity = GravityEvent.fromJson(settings, savedGravity);
+      board.broomGravityVelocity = Vec.fromJson(json['broomGravityVelocity']);
+      board.batGravityVelocity = Vec.fromJson(json['batGravityVelocity']);
+      if (board.broomGravityVelocity.length > board.maximumSpeed + 1e-6 ||
+          board.batGravityVelocity.length > board.maximumSpeed + 1e-6 ||
+          (!board.broomUnlocked && board.broomGravityVelocity.length > 0) ||
+          (!board.batUnlocked && board.batGravityVelocity.length > 0)) {
+        throw const FormatException('Velocidad de herramienta inválida');
       }
     }
     final margin = board.broomHalfWidth + broomThickness;

@@ -2,7 +2,18 @@
 
 Referencia de `0.2.2+4`: cadencia inicial de 1,5 bolas/s y resultados en un pop-up sobre el juego detenido. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
 
-## Ampliación vigente · M02
+## Ampliación vigente · E01
+
+`MotionSensorBridge` prueba sensores Android con lecturas reales y remite gravedad
+(o acelerómetro filtrado) por canales de plataforma. `AndroidMotionInput` valida,
+remapea ejes y anula lecturas obsoletas. La sesión activa el muestreo solo en
+producción visible y sin pausa. `GravityEvent` gestiona el único sorteo, objeto,
+daño y duración con RNG propio; `Board` integra su fuerza en bolas y herramientas
+libres. Los agarres y monedas conservan su control. El evento se guarda sin
+reactivarlo y se limpia al recoger; DEBUG permite forzar/simular con aislamiento.
+[Contrato, parámetros abiertos y verificación E01](e01-gravedad.md).
+
+## Ampliación M02
 
 El bate comparte `TwoPointGrip` con la escoba. `Board._contactBat` calcula velocidad
 superficial de traslación y giro, aproximación normal, restitución constante y

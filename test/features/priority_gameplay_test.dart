@@ -103,6 +103,7 @@ void main() {
       Ball(board.nextId++, const Vec(100, 250), const Vec(50, 0)),
     );
     session.cycle!.remaining = 2;
+    board.enterClosing();
     final restored = GameSession(catalog, MemoryStore())
       ..restore(session.snapshot());
     final ball = restored.board!.balls.single;

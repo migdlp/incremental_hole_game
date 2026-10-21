@@ -39,6 +39,21 @@ Destellos sujetos a Feedback visual; clic sujeto a Sonidos del sistema y nueva
 preferencia Vibración, activada inicialmente. Impactos agrupados y limitados a
 una respuesta cada 120 ms. [Física, guardado y pruebas](m02-bate-beisbol.md).
 
+## Gravedad · E01
+
+Código **0.9.0+17**, pendiente de entrega APK. Evento aleatorio desde la primera
+jornada compatible: probabilidad configurable 5 %, un objeto móvil durante
+producción y 3–6 pulsaciones para romperlo. Activa inclinación del teléfono hasta
+10 s o hasta recogida, con anuncio breve. Sensores Android comprobados mediante
+lecturas reales; sin hardware compatible no aparece en juego normal.
+
+Mueve bolas y escoba/bate libres, con fuerza gradual y límite técnico existente.
+No afecta agarres ni monedas. Pausa/segundo plano congelan el tiempo; guardar y
+cargar conserva estado y duración sin repetir activación. DEBUG → Gravedad permite
+forzar y simular inclinaciones sin escribir progreso normal. No añade compras ni
+nuevas bolas o herramientas. Física y aspecto provisionales; daño por bolas y
+reglas de futuros eventos simultáneos siguen abiertos. [Detalle E01](e01-gravedad.md).
+
 ## Mano, escoba y robot
 
 - Mano base de una bola. Mano I cuesta **13** y permite dos; los cinco niveles alcanzan 2/3/4/5/6 bolas.
@@ -132,7 +147,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v7** y balance vigente **v10** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–9 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
+Guardado JSON **v7** y balance vigente **v11** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–10 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, prestigio ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app/game_app.dart';
 import 'app/game_session.dart';
+import 'features/motion/android_motion_input.dart';
 import 'features/upgrades/domain/catalog.dart';
 import 'persistence/store_factory.dart';
 
@@ -36,7 +37,9 @@ class _BootstrapState extends State<Bootstrap> {
         await rootBundle.loadString('docs/balance.csv'),
       );
       final store = await createSaveStore();
-      final next = GameSession(catalog, store);
+      final motion = AndroidMotionInput();
+      await motion.initialize();
+      final next = GameSession(catalog, store, motion: motion);
       try {
         if (!fresh) {
           await next.load();

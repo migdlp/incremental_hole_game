@@ -395,6 +395,57 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     'Reinicia la prueba para ver cómo empieza una partida.',
                   ),
                   const SizedBox(height: 12),
+                  ExpansionTile(
+                    key: const ValueKey('debug-gravity-tools'),
+                    title: const Text('Gravedad'),
+                    tilePadding: EdgeInsets.zero,
+                    children: [
+                      InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Inclinación de prueba',
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            key: const ValueKey('debug-gravity-tilt'),
+                            value: session.debugGravityTilt,
+                            isExpanded: true,
+                            items: GameSession.gravityDebugTilts.entries
+                                .map(
+                                  (entry) => DropdownMenuItem(
+                                    value: entry.key,
+                                    child: Text(
+                                      entry.value,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                session.debugSetGravityTilt(value);
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      SwitchListTile(
+                        key: const ValueKey('debug-force-gravity'),
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
+                          'Forzar Gravedad en la próxima jornada',
+                        ),
+                        subtitle: Text(
+                          session.gravityAvailable
+                              ? 'Un objeto, desde el inicio de la prueba.'
+                              : 'Sin sensor compatible: elige una inclinación simulada para probar.',
+                        ),
+                        value: session.debugForceGravity,
+                        onChanged: session.running || !session.gravityAvailable
+                            ? null
+                            : session.debugSetForceGravity,
+                      ),
+                    ],
+                  ),
                   if (session.debugReports.isNotEmpty) ...[
                     const Text('Última jornada de prueba'),
                     SelectableText(

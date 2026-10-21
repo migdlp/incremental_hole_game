@@ -227,7 +227,7 @@ void main() {
     restored.resume();
     restored.finishDay();
     restored.startDay();
-    expect(restored.board!.settings.balanceVersion, 10);
+    expect(restored.board!.settings.balanceVersion, 11);
     expect(restored.board!.wallRestitution, .4);
     await session.pendingWrites;
     await restored.pendingWrites;

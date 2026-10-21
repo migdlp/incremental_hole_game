@@ -147,6 +147,79 @@ class GardenGame extends FlameGame {
     }
   }
 
+  void _renderGravity(Canvas canvas, Board board) {
+    final event = board.gravity;
+    if (board.gravityObjectVisible) {
+      final p = offset(event.position);
+      final flash = (event.damageFlash / .18).clamp(0.0, 1.0);
+      canvas.drawCircle(p, 24 + flash * 4, paint(const Color(0x3038bdf8)));
+      canvas.drawCircle(
+        p + const Offset(0, 3),
+        20,
+        paint(const Color(0x40644c2d)),
+      );
+      canvas.drawCircle(
+        p,
+        19,
+        paint(flash > .2 ? const Color(0xffc4f1fc) : const Color(0xff337eaa)),
+      );
+      canvas.drawCircle(p, 18, paint(const Color(0xff91e8f4), stroke: 2));
+      canvas.drawOval(
+        Rect.fromCenter(center: p, width: 30, height: 12),
+        paint(const Color(0xffc7f7fc), stroke: 1.5),
+      );
+      canvas.drawOval(
+        Rect.fromCenter(center: p, width: 12, height: 30),
+        paint(const Color(0xffc7f7fc), stroke: 1.5),
+      );
+      canvas.drawCircle(p, 5, paint(const Color(0xffe7fbff)));
+      if (event.hits > 0) {
+        final cracks = Path()
+          ..moveTo(p.dx - 2, p.dy - 18)
+          ..lineTo(p.dx + 3, p.dy - 9)
+          ..lineTo(p.dx - 3, p.dy - 2)
+          ..lineTo(p.dx + 4, p.dy + 7);
+        if (event.hits * 2 >= event.hitsRequired) {
+          cracks
+            ..moveTo(p.dx - 3, p.dy - 2)
+            ..lineTo(p.dx - 11, p.dy + 4)
+            ..lineTo(p.dx - 16, p.dy + 11)
+            ..moveTo(p.dx + 3, p.dy - 9)
+            ..lineTo(p.dx + 14, p.dy - 13);
+        }
+        canvas.drawPath(cracks, paint(const Color(0xff183349), stroke: 2));
+      }
+    }
+    if (event.announcement > 0 && !board.coinOnly) {
+      final intensity = event.announcement.clamp(0.0, 1.0);
+      canvas.drawRect(
+        const Rect.fromLTWH(0, 0, 360, 560),
+        paint(Color.fromRGBO(145, 232, 244, .2 * intensity)),
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTWH(20, 230, 320, 66),
+          const Radius.circular(12),
+        ),
+        paint(Color.fromRGBO(17, 28, 46, .9 * intensity)),
+      );
+      label(
+        canvas,
+        'HABILIDAD ESPECIAL:',
+        const Offset(180, 250),
+        fontSize: 15,
+        color: Color.fromRGBO(231, 251, 255, intensity),
+      );
+      label(
+        canvas,
+        'GRAVEDAD',
+        const Offset(180, 276),
+        fontSize: 22,
+        color: Color.fromRGBO(145, 232, 244, intensity),
+      );
+    }
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -495,6 +568,7 @@ class GardenGame extends FlameGame {
         ),
       );
     }
+    _renderGravity(canvas, board);
     canvas.restore();
   }
 }

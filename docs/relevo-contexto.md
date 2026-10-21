@@ -37,7 +37,7 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v7 / balance v10, con balances anteriores congelados para jornadas
+el otro agarre. Guardado v7 / balance v11, con balances anteriores congelados para jornadas
 antiguas. Verificación CI de la entrega: 183 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
@@ -58,6 +58,19 @@ respetan ajustes, con respuesta agrupada. JSON v7, balance v10 con v9 congelado.
 Precios 60/120/240, Mano I y potencia ×1/×1,35/×1,70 son **provisionales**.
 [Estado M02 y guía de prueba](m02-bate-beisbol.md). No implementar otras piezas
 ni nuevas bolas como parte de esta tarea.
+
+## E01 · Gravedad en código
+
+Prototipo 0.9.0+17, pendiente de APK. 5 % por jornada compatible, máximo un objeto,
+3–6 pulsaciones y hasta 10 s de producción inclinando el móvil. Sensor Android
+probado mediante lectura real (gravedad, o acelerómetro filtrado); sin sensores no
+aparece en juego normal. Bolas y escoba/bate libres reciben fuerza gradual;
+agarres y monedas no. Se conservan estado y tiempo al pausar/restaurar, sin nuevo
+sorteo ni activación; cierre limpia todo. RNG separado del emisor de bolas.
+JSON v7 / balance v11 con v10 congelado. DEBUG → Gravedad permite forzar y simular
+sin alterar guardado real. Apariencia y física provisionales; discutir daño por
+bolas, otros eventos simultáneos y balance futuro antes de cerrar esas reglas.
+[Implementación y protocolo de prueba](e01-gravedad.md).
 
 ## Próximas mejoras y decisiones abiertas
 

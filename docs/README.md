@@ -8,6 +8,8 @@ Referencias de relevo actualizadas el **21/10/2026** para el último APK **0.8.0
 
 [M02 — bate de béisbol, controles y física configurable](m02-bate-beisbol.md).
 
+[E01 — Gravedad: sensores, evento temporal y pruebas](e01-gravedad.md).
+
 ## Empieza por tu tarea
 
 | Quiero… | Leer |

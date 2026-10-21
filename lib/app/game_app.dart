@@ -77,7 +77,7 @@ class _SessionScreenState extends State<SessionScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) widget.session.pause();
+    widget.session.setBackgrounded(state != AppLifecycleState.resumed);
   }
 
   @override

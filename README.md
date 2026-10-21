@@ -17,6 +17,10 @@ La entrega incluye [M01 · Paredes rebotadoras](docs/m01-paredes-rebotadoras.md)
 **M02 incluido (0.8.0+16):** bate independiente, tres potencias, gestos de uno/dos
 dedos, impulso por movimiento y giro, y feedback configurable. Balance provisional. [Cómo probarlo en DEBUG](docs/m02-bate-beisbol.md).
 
+**E01 en código (0.9.0+17):** evento Gravedad por inclinación del teléfono, objeto
+aleatorio rompible con 3–6 toques, duración limitada y prueba forzada desde DEBUG.
+Pendiente de entrega APK y validación física. [Sensores y pruebas](docs/e01-gravedad.md).
+
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 
 ## Ejecutar

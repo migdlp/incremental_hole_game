@@ -25,6 +25,13 @@ base,bat_restitution,0,0,bat_restitution,0.4,multiplier,,0.4
 base,bat_manual_gain,0,0,bat_manual_gain,1.1,multiplier,,
 base,bat_move_speed,0,0,bat_move_speed,900,logical_units_per_second,,
 base,bat_angular_speed,0,0,bat_angular_speed,3,radians_per_second,,
+base,gravity_probability,0,0,gravity_probability,0.05,probability,,1
+base,gravity_duration,0,0,gravity_duration,10,seconds,,10
+base,gravity_object_speed,0,0,gravity_object_speed,8,logical_units_per_second,,
+base,gravity_acceleration,0,0,gravity_acceleration,180,logical_units_per_second_squared,,
+base,gravity_response,0,0,gravity_response,6,per_second,,
+base,gravity_ball_damping,0,0,gravity_ball_damping,0.15,per_second,,
+base,gravity_tool_damping,0,0,gravity_tool_damping,2.4,per_second,,
 upgrade,hand,1,13,hand_capacity,2,balls,,
 upgrade,hand,2,30,hand_capacity,3,balls,,
 upgrade,hand,3,50,hand_capacity,4,balls,,

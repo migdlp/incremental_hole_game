@@ -153,3 +153,12 @@ del árbol y parámetros físicos provisionales del CSV; no ampliar tamaño, vel
 ni capacidad por nivel. Comprobar comodidad, sonido/háptica y sinergia con paredes.
 [Estado y pruebas M02](m02-bate-beisbol.md). No incluye las demás herramientas
 ni cierra las decisiones abiertas de CF-20/CF-24.
+
+## Experimentación pendiente E01
+
+Gravedad queda implementada como prototipo: probar en Android físico fuerza,
+respuesta, amortiguación, aspecto y feedback de daño. Siguen sin decidirse daño
+por choques con bolas, reglas de otros eventos aleatorios simultáneos y balance
+del catálogo futuro. Probabilidad inicial 5 % y máximo 10 s de producción; no
+ampliar duración ni convertir estas hipótesis en reglas definitivas.
+[Estado y prueba E01](e01-gravedad.md).

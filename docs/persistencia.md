@@ -1,6 +1,20 @@
 # Referencia de guardado y recuperación
 
-## Contrato vigente · M02, 0.8.0+16
+## Contrato vigente · E01, 0.9.0+17
+
+JSON v7, balance v11. `eventRandom` guarda el RNG de eventos independiente del
+emisor de bolas; si falta en datos anteriores se inicializa sin borrar progreso.
+La jornada v11 guarda `board.gravity` y las velocidades libres de escoba/bate.
+Se conservan sorteo pendiente, objeto/daño, tiempo restante, anuncio y fuerza
+filtrada: cargar no repite ni el sorteo ni la activación. Los tiempos se validan
+contra la fase/tiempo de la jornada antes de modificar la sesión. Reaparece pausada.
+`balance_v10.dart` congela v10; las jornadas 1–10 conservan su configuración hasta
+terminar. La siguiente usa el balance vigente. DEBUG no escribe simulaciones ni
+semillas de prueba en el guardado real. [Campos y comportamiento E01](e01-gravedad.md).
+
+Las secciones siguientes conservan los contratos anteriores.
+
+## Contrato M02, 0.8.0+16
 
 JSON **v7**, balance **v10**. `levels.bat` conserva las tres compras; los tableros
 v10 añaden `batPosition` y `batAngle`. Se validan pose y configuración antes de

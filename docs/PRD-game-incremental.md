@@ -4,6 +4,15 @@ Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y 
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
 
+## Evento funcional vigente · E01
+
+[Gravedad](e01-gravedad.md) aparece aleatoriamente desde la primera jornada
+compatible, sin compra: 5 % inicial, un objeto y 3–6 toques para activarlo hasta
+10 s de producción mediante inclinación. Afecta bolas y herramientas libres,
+no agarres ni monedas. Estado temporal persistente dentro de la jornada, sin
+extenderla; DEBUG aislado. Fuerza/aspecto son provisionales; daño por bolas y
+composición de futuros eventos siguen abiertos.
+
 ## Extensiones funcionales vigentes · M01 y M02
 
 [Paredes rebotadoras](m01-paredes-rebotadoras.md) y [Bate de béisbol](m02-bate-beisbol.md)

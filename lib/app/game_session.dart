@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import '../core/vec.dart';
+import '../features/motion/motion_input.dart';
 import '../features/board/domain/board.dart';
 import '../features/board/domain/debug_day_report.dart';
 import '../features/board/domain/special_abilities.dart';
@@ -13,7 +14,59 @@ import '../features/upgrades/domain/catalog.dart';
 import '../persistence/save_store.dart';
 
 class GameSession extends ChangeNotifier {
-  GameSession(this.catalog, this.store);
+  GameSession(
+    this.catalog,
+    this.store, {
+    this.motion = const NoMotionInput(),
+    int? eventSeed,
+  }) : _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000);
+  final MotionInput motion;
+  int _eventRandomState;
+  bool _backgrounded = false;
+  bool debugForceGravity = false;
+  String debugGravityTilt = 'sensor';
+  static const gravityDebugTilts = {
+    'sensor': 'Sensor real',
+    'flat': 'Simular: reposo',
+    'left': 'Simular: izquierda',
+    'right': 'Simular: derecha',
+    'up': 'Simular: arriba',
+    'down': 'Simular: abajo',
+  };
+  Vec? get _debugTilt => !debugEnabled
+      ? null
+      : switch (debugGravityTilt) {
+          'flat' => Vec.zero,
+          'left' => const Vec(-.7, 0),
+          'right' => const Vec(.7, 0),
+          'up' => const Vec(0, -.7),
+          'down' => const Vec(0, .7),
+          _ => null,
+        };
+  bool get gravityAvailable => _debugTilt != null || motion.available;
+  void debugSetGravityTilt(String value) {
+    if (!debugEnabled || !gravityDebugTilts.containsKey(value)) return;
+    debugGravityTilt = value;
+    if (!gravityAvailable) debugForceGravity = false;
+    notifyListeners();
+  }
+
+  void debugSetForceGravity(bool value) {
+    if (!debugEnabled || running || (value && !gravityAvailable)) return;
+    debugForceGravity = value;
+    notifyListeners();
+  }
+
+  void setBackgrounded(bool value) {
+    _backgrounded = value;
+    if (value) pause();
+    _syncMotion();
+  }
+
+  void _syncMotion() => motion.setActive(
+    running && !paused && !_backgrounded && phase == DayPhase.production,
+  );
+
   final UpgradeCatalog catalog;
   final SaveStore store;
   final economy = Economy();
@@ -67,11 +120,16 @@ class GameSession extends ChangeNotifier {
   void startDay() {
     if (running) return;
     final settings = catalog.settings(levels);
+    _eventRandomState = (1664525 * _eventRandomState + 1013904223) & 0xffffffff;
     board = Board(
       settings,
       randomState: progress.day * 7919,
       tool: selectedTool,
+      gravitySupported: gravityAvailable,
+      gravitySeed: _eventRandomState,
+      forceGravity: debugEnabled && debugForceGravity,
     );
+    debugForceGravity = false;
     cycle = DayCycle(
       production: settings['production_duration'],
       closing: settings['closing_duration'],
@@ -81,6 +139,7 @@ class GameSession extends ChangeNotifier {
     paused = false;
     _accumulator = 0;
     _checkpoint = 0;
+    _syncMotion();
     save();
     notifyListeners();
   }
@@ -116,6 +175,8 @@ class GameSession extends ChangeNotifier {
 
   void _step(double dt, bool producing) {
     if (dt <= 0) return;
+    board!.gravitySupported = gravityAvailable;
+    board!.gravityTilt = _debugTilt ?? motion.tilt;
     final events = board!.update(dt, producing: producing);
     if (debugEnabled) {
       _debugMaxCombo = math.max(_debugMaxCombo, board!.combo.multiplier);
@@ -128,6 +189,7 @@ class GameSession extends ChangeNotifier {
     cycle!.advance(dt);
     if (producing && cycle!.phase == DayPhase.closing) {
       board!.enterClosing();
+      _syncMotion();
     }
     if (cycle!.phase == DayPhase.night) finishDay();
   }
@@ -164,13 +226,15 @@ class GameSession extends ChangeNotifier {
     board = null;
     cycle = null;
     paused = false;
+    _syncMotion();
     _accumulator = 0;
     save();
     notifyListeners();
   }
 
   void touch(Vec position, {double? time}) {
-    if (!running || paused) return;
+    if (!running || paused || _backgrounded) return;
+    board!.gravitySupported = gravityAvailable;
     economy.collect(board!.touch(position, time: time));
     notifyListeners();
   }
@@ -184,9 +248,17 @@ class GameSession extends ChangeNotifier {
   }
 
   void release({bool cancel = false, double? time}) {
-    final collected = board?.releasePointer(cancel: cancel, time: time) ?? 0;
+    final before = board?.gravity.revision;
+    final collected =
+        board?.releasePointer(
+          cancel: cancel || paused || _backgrounded,
+          time: time,
+        ) ??
+        0;
     economy.collect(collected);
-    if (collected > 0) notifyListeners();
+    final hit = before != board?.gravity.revision;
+    if (hit) save();
+    if (collected > 0 || hit) notifyListeners();
   }
 
   bool grabSecondBroomPoint(Vec position) =>
@@ -226,6 +298,7 @@ class GameSession extends ChangeNotifier {
   void pause() {
     if (!running || paused) return;
     paused = true;
+    _syncMotion();
     _accumulator = 0;
     release(cancel: true);
     save();
@@ -233,7 +306,9 @@ class GameSession extends ChangeNotifier {
   }
 
   void resume() {
+    if (_backgrounded) return;
     paused = false;
+    _syncMotion();
     _accumulator = 0;
     notifyListeners();
   }
@@ -285,6 +360,9 @@ class GameSession extends ChangeNotifier {
     if (baseline == null) return;
     restore(baseline);
     _debugBaseline = null;
+    debugForceGravity = false;
+    debugGravityTilt = 'sensor';
+    _syncMotion();
     _debugReports.clear();
     _debugFullTree = true;
     _checkpoint = _uiClock = 0;
@@ -363,6 +441,8 @@ class GameSession extends ChangeNotifier {
   void debugReset() {
     if (!debugEnabled || running) return;
     _debugReports.clear();
+    debugForceGravity = false;
+    debugGravityTilt = 'sensor';
     levels.clear();
     _grandfathered.clear();
     _previousTree.clear();
@@ -412,6 +492,7 @@ class GameSession extends ChangeNotifier {
 
   String snapshot() => jsonEncode({
     'version': 7,
+    'eventRandom': _eventRandomState,
     'grandfathered': _grandfathered,
     'previousTree': _previousTree,
     'tool': selectedTool.name,
@@ -521,7 +602,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 10)) {
+          (balanceVersion < 1 || balanceVersion > 11)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -566,6 +647,20 @@ class GameSession extends ChangeNotifier {
           restoredBoard.combo.enabled != (settings['combo_unlocked'] > 0)) {
         throw const FormatException('Racha sin desbloquear');
       }
+      if (balanceVersion >= 11) {
+        final elapsed = math.min(
+          settings['production_duration'],
+          settings['production_duration'] +
+              settings['closing_duration'] -
+              remaining,
+        );
+        if ((restoredBoard.gravity.elapsed - elapsed).abs() > 1e-6 ||
+            (restoredCycle.phase == DayPhase.closing &&
+                (restoredBoard.gravity.hasObject ||
+                    restoredBoard.gravity.active))) {
+          throw const FormatException('Tiempo de Gravedad incoherente');
+        }
+      }
       restoredBoard.tool = restoredTool;
       if (restoredCycle.phase == DayPhase.closing) {
         restoredBoard.enterClosing();
@@ -589,6 +684,12 @@ class GameSession extends ChangeNotifier {
       }
     }
     // Commit only after validating every module; a failed load leaves no partial state.
+    final savedEventRandom = json['eventRandom'] ?? _eventRandomState;
+    if (savedEventRandom is! int ||
+        savedEventRandom < 0 ||
+        savedEventRandom > 0xffffffff) {
+      throw const FormatException('Estado aleatorio de eventos inválido');
+    }
     final savedSound = json['sound'] as bool;
     final savedHaptics = json['haptics'] as bool? ?? true;
     final savedVisualFeedback = json['visualFeedback'] as bool? ?? false;
@@ -613,12 +714,15 @@ class GameSession extends ChangeNotifier {
           'Partida actualizada: conservas saldo y mejoras. '
           'Las monedas se recogen pulsando; el barrido se compra aparte.';
     }
+    _eventRandomState = savedEventRandom;
     board = restoredBoard;
+    board?.gravitySupported = gravityAvailable;
     cycle = restoredCycle;
     sound = savedSound;
     haptics = savedHaptics;
     visualFeedback = savedVisualFeedback;
     paused = running;
+    _syncMotion();
     _accumulator = 0;
   }
 
@@ -645,6 +749,7 @@ class GameSession extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    motion.dispose();
     super.dispose();
   }
 }

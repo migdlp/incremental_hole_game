@@ -2,6 +2,18 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.9.0+17 — E01: Gravedad
+
+- Evento aleatorio de producción, 5 % por jornada compatible, un objeto como
+  máximo y 3–6 toques para activar hasta 10 s de gravedad por inclinación.
+- Sensor de gravedad Android con acelerómetro filtrado alternativo y comprobación
+  real de lecturas. Muestreo suspendido en pausa, segundo plano y recogida.
+- Fuerza gradual en bolas y herramientas libres, agarres y monedas protegidos;
+  anuncio de activación, daño visible y límites físicos conservados.
+- Estado del evento y velocidades libres guardados, RNG separado de las bolas,
+  balance v11 con v10 congelado y forzado/simulación temporal desde DEBUG.
+- Física/aspecto provisionales; daño por bolas y otros eventos simultáneos siguen abiertos.
+
 ## 0.8.0+16 — M02: Bate de béisbol
 
 - Bate físico independiente, desbloqueable con tres niveles de potencia activa;

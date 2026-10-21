@@ -70,3 +70,13 @@ de la escoba. Un dedo traslada y dos giran. Tras terminar la jornada, comprar II
 o III para comparar fuerza; reiniciar prueba permite volver a I. Comprar todo
 activa III y las paredes máximas. Salir descarta las compras y jornadas de prueba.
 [Parámetros provisionales y casos de prueba](m02-bate-beisbol.md).
+
+## Probar E01 · Gravedad
+
+En Tienda → DEBUG, desplegar **Gravedad**. Elegir Sensor real y activar **Forzar
+Gravedad en la próxima jornada** para probar el teléfono. Sin sensor compatible,
+elegir una inclinación simulada habilita esa prueba solo en DEBUG. Al comenzar
+aparece un objeto: romperlo con 3–6 toques para activar el efecto. Comprar escoba
+y bate permite probar también sus movimientos libres y sus agarres.
+El forzado se consume al comenzar; salir o reiniciar descarta la configuración.
+[Casos de prueba, guardado y parámetros provisionales](e01-gravedad.md).

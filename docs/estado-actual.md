@@ -24,6 +24,21 @@ Las cuatro paredes rebotan desde el inicio (×0,40). La mejora permanente tiene 
 
 Las compras se conservan al reiniciar y se aplican desde la jornada siguiente. Requisito Mano I y costes 40/100/220, multiplicadores y límite son **provisionales de prueba**, no balance aprobado. [Detalle de implementación y pruebas](m01-paredes-rebotadoras.md).
 
+## Bate de béisbol · M02
+
+Código de prototipo **0.8.0+16**, pendiente de entrega APK. Bate I desbloquea un
+objeto físico independiente de la escoba; II–III solo aumentan el impulso activo.
+Un dedo traslada, dos trasladan/giran y soltar conserva la pose. Se comparte
+control de dos puntos con la escoba. El impulso usa velocidad relativa y giro;
+rebote pasivo constante y límite final 380 u/s. No repite bonificación en contacto
+continuo, no afecta monedas ni activa especiales directamente. Recogida congela
+el bate. Se guardan compras y pose de la jornada; DEBUG no altera el progreso real.
+
+Precios 60/120/240, Mano I y potencias ×1/×1,35/×1,70 son **provisionales de prueba**.
+Destellos sujetos a Feedback visual; clic sujeto a Sonidos del sistema y nueva
+preferencia Vibración, activada inicialmente. Impactos agrupados y limitados a
+una respuesta cada 120 ms. [Física, guardado y pruebas](m02-bate-beisbol.md).
+
 ## Mano, escoba y robot
 
 - Mano base de una bola. Mano I cuesta **13** y permite dos; los cinco niveles alcanzan 2/3/4/5/6 bolas.
@@ -71,7 +86,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 
 ## Árbol e interfaz
 
-**62 nodos en 23 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
+**65 nodos en 24 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
 
 - Pantalla independiente, sin título, botón visible de atrás ni botones de zoom. Navegación con arrastre y pellizco.
 - Descubrimiento progresivo: comprados y siguientes nodos accesibles. La partida nueva comienza mostrando Mano I.
@@ -83,7 +98,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 
 Acceso directo: botón **DEBUG**, arriba a la izquierda del árbol. Un toque abre el panel; el saldo ya no requiere ni reconoce una pulsación mantenida para entrar.
 
-- Vista completa: encuadra los 62 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
+- Vista completa: encuadra los 65 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
 - Vista del jugador: descubrimiento y compras normales usando saldo y mejoras de prueba. Ambas vistas comparten esa configuración; para ver el principio hay que reiniciar la prueba desde cero.
 - Añadir 1000 monedas de prueba, reiniciar, jugar jornadas de prueba y salir.
 - La prueba es temporal: no sobrescribe el progreso normal. Salir o reabrir recupera la partida real. Durante una jornada de prueba se muestra DEBUG y un botón de salida.
@@ -117,7 +132,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v7** y balance vigente **v9** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–8 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
+Guardado JSON **v7** y balance vigente **v10** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–9 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, prestigio ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

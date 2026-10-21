@@ -24,7 +24,7 @@ void capture(GameSession session) {
 void main() {
   final catalog = testCatalog();
   test('balance source includes tool and coin unlocks with prerequisites', () {
-    expect(catalog.definitions.length, 23);
+    expect(catalog.definitions.length, 24);
     final levels = {for (final d in catalog.definitions) d.id: d.levels.length};
     final max = catalog.settings(levels);
     expect(max['production_duration'], 30);

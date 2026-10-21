@@ -1,5 +1,21 @@
 # Referencia de guardado y recuperación
 
+## Contrato vigente · M02, 0.8.0+16
+
+JSON **v7**, balance **v10**. `levels.bat` conserva las tres compras; los tableros
+v10 añaden `batPosition` y `batAngle`. Se validan pose y configuración antes de
+restaurar; no se recuperan dedos activos. La jornada reaparece pausada. Las poses
+se reinician al comenzar otra jornada, como ocurre con la escoba.
+
+`haptics` es un booleano opcional de preferencias: falta significa `true`.
+Se conservan `sound`, `visualFeedback`, archivos, saldo, compras y migraciones.
+`balance_v9.dart` congela la economía anterior: una jornada guardada de balances
+1–9 termina con su configuración original y la siguiente usa v10. Impactos,
+contactos y enfriamiento de audio/háptica son transitorios. DEBUG no escribe
+compras ni jornadas de prueba. [Detalle M02](m02-bate-beisbol.md).
+
+Las secciones siguientes conservan contratos y evidencias anteriores.
+
 ## Sesión de depuración temporal
 
 El modo de depuración no cambia el esquema JSON. Al entrar entre jornadas, `GameSession.enterDebug()` captura el progreso normal y encola su guardado antes de activar el modo. Mientras está activo, `save()` no encola escrituras de las pruebas. La cola anterior continúa escribiendo únicamente instantáneas normales. Las compras, reinicios y jornadas de prueba se descartan al salir mediante restauración de la instantánea inicial. Una nueva instancia de la aplicación inicia el modo desactivado y carga el guardado normal. Ver [uso del modo de depuración](modo-debug.md).

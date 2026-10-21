@@ -28,6 +28,7 @@ class SkillTree {
       'double_spawn': line(-2, 0, 0, 0, 1),
       'reward': line(5, 2, 0, -1, 5),
       'walls': line(5, 4, 0, 1, 3),
+      'bat': [...line(2, 6, 0, 1, 2), ...line(3, 7, 0, 0, 1)],
       'combo': line(6, 2, 0, 0, 1),
       'capture_all': line(7, 3, 0, 0, 1),
       'capture_recharge': line(8, 3, 1, 0, 2),

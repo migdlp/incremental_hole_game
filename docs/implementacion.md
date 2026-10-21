@@ -2,6 +2,17 @@
 
 Referencia de `0.2.2+4`: cadencia inicial de 1,5 bolas/s y resultados en un pop-up sobre el juego detenido. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
 
+## Ampliación vigente · M02
+
+El bate comparte `TwoPointGrip` con la escoba. `Board._contactBat` calcula velocidad
+superficial de traslación y giro, aproximación normal, restitución constante y
+bonificación manual según nivel. La física usa los subpasos del tablero y el
+límite de velocidad de M01. No hay física, cobro ni activación especial de monedas
+por contacto con el bate. `BatFeedback` agrupa contactos del frame y limita audio
+sistema/háptica respetando preferencias; `GardenGame` dibuja bate y destellos sin
+avanzar física al renderizar. Balance v10, JSON v7; v9 congelado para jornadas
+anteriores. [Contrato y pruebas M02](m02-bate-beisbol.md).
+
 ## Contexto y límites
 
 Una aplicación Flutter, un paquete Dart y una partida local. Flutter presenta menús y HUD; Flame aporta bucle y lienzo del tablero. La física y las reglas de juego son Dart puro. No hay servidor ni sincronización entre dispositivos.

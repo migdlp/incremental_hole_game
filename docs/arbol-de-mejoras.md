@@ -1,12 +1,12 @@
 # Árbol de mejoras progresivo
 
-Código posterior a **0.6.0+13**, 20/10/2026; el APK enlazado en estado actual aún no incluye estos cambios. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
+Código **0.8.0+16**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
 **Debug:** pulsar el botón DEBUG, arriba a la izquierda, para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
 ## Mapa actual
 
-Veintidós tipos y **62 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las seis ramas iniciales se pueden desarrollar conjuntamente.
+Veinticuatro tipos y **65 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las nueve ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
 🟣 MANO I · 13 monedas · 2 bolas
@@ -19,6 +19,10 @@ Veintidós tipos y **62 nodos**, uno por nivel comprable. Cada nivel requiere el
 │     ├─ Generador III → IV → V
 │     │  └─ 🟢 DOBLE EMISIÓN (+ Anchura III)
 │     └─ 🟠 DÍA MÁS LARGO I → II → III → IV → V
+│
+├─ 🟣 PAREDES REBOTADORAS I → II → III
+│
+├─ 🟣 BATE DE BÉISBOL I → II → III
 │
 ├─ 🟡 VALOR I → II → III → IV → V
 │
@@ -63,8 +67,8 @@ Los nodos comprados muestran su icono y color de tipo, con marca de compra. Los 
 
 ## Recorrido e interacción
 
-1. El pop-up de estadísticas tiene un solo botón: «Ir al árbol de mejoras», que abre su pantalla independiente.
-2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Racha, Barrido, Área I, Fuerza I y Mano II.
+1. El pop-up de estadísticas tiene un solo botón: «Tienda», que abre su pantalla independiente.
+2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Racha, Barrido, Área I, Fuerza I, Paredes I, Bate I y Mano II.
 3. Pulsar un nodo consulta su efecto y coste; mantener pulsado un segundo en el botón de compra de la ficha compra una sola vez. El nodo solo consulta, incluso al mantenerlo pulsado.
 4. Soltar antes, arrastrar, añadir otro dedo o pasar a segundo plano cancela la compra sin gastar.
 5. «Comenzar día» está fijo en la pantalla del árbol: cancela cualquier compra incompleta, inicia directamente la jornada y cierra esa pantalla. Atrás puede volver al resumen, que no permite empezar el día. La bienvenida de una partida nueva conserva su inicio directo.
@@ -97,3 +101,10 @@ Generador I. El CSV define los costes, recargas y mejoras. La recarga de Captura
 total baja de 12 a 10/8 s; Aceleración pasa de ×2 a ×3, dura 4 → 5/6 s y carga en
 10 → 8/6 s. Estas cifras son provisionales para probar. No cambian saldo ni
 compras anteriores. Las jornadas antiguas se completan con su configuración.
+
+## M02 · Bate
+
+Bate I desbloquea un objeto independiente de la escoba. II y III solo aumentan
+la potencia adicional del golpe manual, sin cambiar tamaño, movimiento ni rebote
+pasivo. Rama de Control tras Mano I, con precios provisionales 60/120/240 y
+potencias ×1/×1,35/×1,70. [Controles, física y pruebas](m02-bate-beisbol.md).

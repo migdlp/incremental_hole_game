@@ -738,6 +738,7 @@ const _icons = {
   'hand': Icons.back_hand_outlined,
   'hand_grip': Icons.front_hand_outlined,
   'walls': Icons.compare_arrows,
+  'bat': Icons.sports_baseball_outlined,
   'broom': Icons.cleaning_services_outlined,
   'paddle': Icons.swap_horiz,
   'broom_v': Icons.call_merge,
@@ -766,6 +767,7 @@ String _description(SkillNode node) => switch (node.definition.id) {
   'walls' => 'Aumenta la potencia del rebote de las cuatro paredes',
   'hand_grip' =>
     'Atrae y sujeta más rápido las bolas adicionales mientras llevas una bola',
+  'bat' => 'Golpea bolas con un bate: un dedo traslada y dos giran',
   'broom' => 'Desbloquea la escoba para empujar grupos de bolas',
   'paddle' => 'Aumenta la anchura de la escoba',
   'broom_v' => 'Reúne las bolas con una escoba en V',
@@ -799,6 +801,13 @@ TextSpan _summary(SkillNode node) {
       n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(2);
   final (before, amount, after) = switch (node.definition.id) {
     'hand' => ('La mano agarra ', number(value), ' bolas.'),
+    'bat' => (
+      node.level == 1
+          ? 'Desbloquea el bate: golpe manual '
+          : 'Golpe manual del bate ',
+      '×${number(value)}',
+      '.',
+    ),
     'walls' => ('Rebote de paredes ', '×${number(value)}', '.'),
     'hand_grip' => ('Fuerza de agarre ', '×${number(value)}', '.'),
     'paddle' => ('La escoba abarca ', number(value * 4), ' u.'),

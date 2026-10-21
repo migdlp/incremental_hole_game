@@ -58,7 +58,7 @@ void main() {
         isTrue,
       );
       catalog.validateLevels(session.levels);
-      expect(session.selectedTool, BallTool.vee);
+      expect(session.selectedTool, BallTool.bat);
       session.startDay();
       expect(session.board!.handCapacity, 6);
       expect(session.board!.settings['robot_count'], 1);
@@ -98,7 +98,7 @@ void main() {
       session.setDebugFullTree(false);
       expect(session.debugEnabled, isTrue);
       expect(session.debugFullTree, isFalse);
-      expect(tree.visible(session.levels).length, 62);
+      expect(tree.visible(session.levels).length, 65);
       session.debugReset();
       expect(tree.visible(session.levels).map((n) => n.id), ['hand:1']);
       expect(session.economy.balance, 0);
@@ -107,7 +107,7 @@ void main() {
       expect(session.economy.balance, 1000);
       session.purchase(catalog.definitions.firstWhere((d) => d.id == 'hand'));
       expect(session.economy.balance, 987);
-      expect(tree.visible(session.levels).length, 9);
+      expect(tree.visible(session.levels).length, 10);
       session.setDebugFullTree(true);
       expect(session.levels, {'hand': 1});
       session.exitDebug();
@@ -168,7 +168,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('node-robot_speed:5')), findsOneWidget);
       final tree = SkillTree(catalog);
-      expect(tree.nodes, hasLength(62));
+      expect(tree.nodes, hasLength(65));
       for (final node in tree.nodes) {
         final position = find.byKey(ValueKey('position-${node.id}'));
         expect(position, findsOneWidget, reason: 'Falta el nodo ${node.id}');

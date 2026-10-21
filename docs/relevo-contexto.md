@@ -20,7 +20,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 - Solo monedas de **1/10/50/100/500**, mismo tamaño, color propio y sin valor escrito. UI con icono, sin prefijo dólar. Resumen por denominaciones, sin antigua barra verde.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
 - Racha comprable tras Mano I por 40: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
-- Árbol de 62 nodos y 23 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
+- Árbol de 65 nodos y 24 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → Tienda → Comenzar día. No mostrar números de día al jugador.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
@@ -37,7 +37,7 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v7 / balance v9, con balances anteriores congelados para jornadas
+el otro agarre. Guardado v7 / balance v10, con balances anteriores congelados para jornadas
 antiguas. Verificación local y CI: 164 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
@@ -46,6 +46,18 @@ sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequ
 Cuatro paredes con rebote base ×0,40 y mejora permanente I/II/III ×1,10/1,35/1,60; velocidad máxima 380 u/s. Línea elástica y ondas al impactar, sin cambiar monedas ni congelación final. Compras persistentes, aplicadas desde la jornada siguiente; jornadas v8 conservadas. Para probar: Tienda → DEBUG → comprar Paredes rebotadoras con requisitos → Comenzar día de prueba.
 
 Multiplicadores, límite y costes 40/100/220 con Mano I son **provisionales**, pendientes de validación de balance. [Implementación y pruebas](m01-paredes-rebotadoras.md). Sigue pendiente la compatibilidad de firma con APK anteriores descrita en [G01](g01-feed-the-hole.md); la pipeline estándar verifica la firma de esta APK, sin acreditar actualización sobre la anterior. No desinstalar para resolverlo si se quiere conservar su progreso.
+
+## M02 · prototipo en código
+
+Código 0.8.0+16, pendiente de APK. Bate físico aparte de la escoba, tres niveles de
+potencia activa y control de uno/dos dedos compartido. Velocidad relativa y giro,
+rebote pasivo constante, contacto persistente sin bonificaciones repetidas y cap
+380 u/s. Monedas y activación de especiales conservadas. Compra y pose persistentes,
+recogida congelada y DEBUG aislado. Nueva preferencia Vibración; destellos y sonido
+respetan ajustes, con respuesta agrupada. JSON v7, balance v10 con v9 congelado.
+Precios 60/120/240, Mano I y potencia ×1/×1,35/×1,70 son **provisionales**.
+[Estado M02 y guía de prueba](m02-bate-beisbol.md). No implementar otras piezas
+ni nuevas bolas como parte de esta tarea.
 
 ## Próximas mejoras y decisiones abiertas
 

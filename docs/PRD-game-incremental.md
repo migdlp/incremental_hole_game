@@ -4,6 +4,16 @@ Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y 
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
 
+## Extensiones funcionales vigentes · M01 y M02
+
+[Paredes rebotadoras](m01-paredes-rebotadoras.md) y [Bate de béisbol](m02-bate-beisbol.md)
+son mejoras permanentes del árbol. El bate es independiente de la escoba y usa
+uno/dos dedos para trasladar/girar; sus tres niveles solo aumentan potencia activa.
+Impulso por movimiento y rotación, rebote pasivo constante y límite técnico
+compartido. Sin interacción con monedas ni activaciones especiales adicionales.
+No se incluyen otras mecánicas de pinball dentro de M02. Precios, dependencias y
+valores físicos de prototipo siguen pendientes de balance y prueba en móvil.
+
 ## Identidad comercial — G01
 
 El nombre comercial y visible es **Feed the Hole**. Se aplica al nombre Android,

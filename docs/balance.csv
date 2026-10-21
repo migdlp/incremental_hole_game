@@ -19,6 +19,12 @@ base,boost_duration,0,0,boost_duration,4,seconds,,6
 base,boost_multiplier,0,0,boost_multiplier,2,multiplier,,3
 base,wall_restitution,0,0,wall_restitution,0.40,multiplier,,1.60
 base,ball_speed_limit,0,0,ball_speed_limit,380,logical_units_per_second,,380
+base,bat_half_length,0,0,bat_half_length,36,logical_units,,36
+base,bat_thickness,0,0,bat_thickness,6,logical_units,,6
+base,bat_restitution,0,0,bat_restitution,0.4,multiplier,,0.4
+base,bat_manual_gain,0,0,bat_manual_gain,1.1,multiplier,,
+base,bat_move_speed,0,0,bat_move_speed,900,logical_units_per_second,,
+base,bat_angular_speed,0,0,bat_angular_speed,3,radians_per_second,,
 upgrade,hand,1,13,hand_capacity,2,balls,,
 upgrade,hand,2,30,hand_capacity,3,balls,,
 upgrade,hand,3,50,hand_capacity,4,balls,,
@@ -81,3 +87,6 @@ upgrade,boost_recharge,2,240,boost_cooldown,6,seconds,boost:1,10
 upgrade,walls,1,40,wall_restitution,1.10,multiplier,hand:1,1.60
 upgrade,walls,2,100,wall_restitution,1.35,multiplier,hand:1,1.60
 upgrade,walls,3,220,wall_restitution,1.60,multiplier,hand:1,1.60
+upgrade,bat,1,60,bat_power,1,multiplier,hand:1,1.7
+upgrade,bat,2,120,bat_power,1.35,multiplier,hand:1,1.7
+upgrade,bat,3,240,bat_power,1.7,multiplier,hand:1,1.7

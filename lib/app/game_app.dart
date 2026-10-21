@@ -439,6 +439,13 @@ class _SettingsOptions extends StatelessWidget {
         onChanged: session.setSound,
       ),
       SwitchListTile(
+        key: const ValueKey('haptics-setting'),
+        contentPadding: EdgeInsets.zero,
+        title: const Text('Vibración'),
+        value: session.haptics,
+        onChanged: session.setHaptics,
+      ),
+      SwitchListTile(
         key: const ValueKey('visual-feedback-setting'),
         contentPadding: EdgeInsets.zero,
         title: const Text('Feedback visual'),

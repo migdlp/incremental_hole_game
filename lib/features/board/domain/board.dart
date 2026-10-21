@@ -2,6 +2,8 @@ import 'dart:math' as math;
 import '../../../core/vec.dart';
 import '../../automation/domain/robot.dart';
 import 'tool.dart';
+import 'two_point_grip.dart';
+import 'bat_impact.dart';
 import 'coin_denomination.dart';
 import 'capture_combo.dart';
 import 'special_abilities.dart';
@@ -121,57 +123,74 @@ class Board {
   // Only five denomination counters are queued if the visible-object cap fills.
   final _queuedCoins = <int, int>{};
   Map<int, int>? collectedCoins = <int, int>{};
-  bool get canCollectCoins => _heldBalls.isEmpty;
+  bool get canCollectCoins => _heldBalls.isEmpty && !holdingBat;
   final robot = Robot();
   Vec? paddle, target;
   late Vec broomPosition;
-  Vec _broomGrabOffset = Vec.zero;
-  bool holdingBroom = false;
-  Vec? _secondBroomTarget;
-  Vec _broomPivotOffset = Vec.zero;
-  double _broomReferenceAngle = 0, _broomReferenceToolAngle = 0;
-  bool get hasSecondBroomPoint => _secondBroomTarget != null;
+  TwoPointGrip? _toolGrip;
+  bool get holdingBroom => _toolGrip != null && tool != BallTool.bat;
+  bool get holdingBat => _toolGrip != null && tool == BallTool.bat;
+  bool get holdingPhysicalTool => _toolGrip != null;
+  bool get hasSecondBroomPoint => _toolGrip?.second != null;
   List<Vec> get broomHandles =>
       segments.isEmpty ? const [] : [segments.first.a, segments.last.b];
+  Vec batPosition = const Vec(80, 300);
+  double batAngle = 0;
+  bool get batUnlocked => settings['bat_power'] > 0;
+  double get batHalfLength => settings['bat_half_length'];
+  double get batThickness => settings['bat_thickness'];
+  ToolSegment get batSegment {
+    final axis = Vec(math.cos(batAngle), math.sin(batAngle)) * batHalfLength;
+    return ToolSegment(batPosition - axis, batPosition + axis);
+  }
 
+  List<Vec> get batHandles => [batSegment.a, batSegment.b];
+  final batImpacts = <BatImpact>[];
+  final _batContacts = <int>{};
+  int batImpactSerial = 0;
+  double lastBatImpactStrength = 0;
+  Vec _batVelocity = Vec.zero;
+  double _batRotation = 0;
+
+  Vec get _grippedCenter => holdingBat ? batPosition : broomPosition;
+  double get _grippedAngle => holdingBat ? batAngle : toolAngle;
   bool _onBroom(Vec point, double tolerance) =>
       segments.any(
         (segment) => (segment.closest(point) - point).length <= tolerance,
       ) ||
       broomHandles.any((handle) => (handle - point).length <= 22);
+  bool _onBat(Vec point, double tolerance) =>
+      batUnlocked && (batSegment.closest(point) - point).length <= tolerance;
 
+  // Keep the established input entry points; both tools use TwoPointGrip.
   bool grabSecondBroomPoint(Vec point) {
     if (coinOnly ||
-        !holdingBroom ||
+        !holdingPhysicalTool ||
         target == null ||
         hasSecondBroomPoint ||
-        !_onBroom(point, 22) ||
+        !(holdingBat ? _onBat(point, 22) : _onBroom(point, 22)) ||
         (point - target!).length < 18) {
       return false;
     }
-    _secondBroomTarget = point.inside(0);
-    final axis = point - target!;
-    _broomReferenceAngle = math.atan2(axis.y, axis.x);
-    _broomReferenceToolAngle = toolAngle;
-    _broomPivotOffset = broomPosition - (target! + point) * .5;
+    _toolGrip!.addSecond(point, target!, _grippedCenter, _grippedAngle);
     return true;
   }
 
   void dragSecondBroomPoint(Vec point) {
-    if (hasSecondBroomPoint) _secondBroomTarget = point.inside(0);
+    if (hasSecondBroomPoint) _toolGrip!.second = point.inside(0);
   }
 
   void releaseSecondBroomPoint() {
-    _secondBroomTarget = null;
-    if (target != null) _broomGrabOffset = broomPosition - target!;
-    _desiredAngle = toolAngle;
+    if (_toolGrip != null && target != null) {
+      _toolGrip!.releaseSecond(target!, _grippedCenter, _grippedAngle);
+    }
   }
 
   void promoteSecondBroomPoint() {
-    final point = _secondBroomTarget;
+    final point = _toolGrip?.second;
     if (point == null) return;
     paddle = target = point;
-    _downPoint = _directionAnchor = point;
+    _downPoint = point;
     _samples.clear();
     releaseSecondBroomPoint();
   }
@@ -202,11 +221,11 @@ class Board {
   double get gripStrength => math.max(1, settings['hand_grip_strength']);
   bool get broomUnlocked => settings['broom_unlocked'] > 0;
   Vec _grabOffset = Vec.zero;
-  Vec? _downPoint, _directionAnchor;
+  Vec? _downPoint;
   bool _dragged = false, _heldDuringGesture = false;
   double _clock = 0;
   final _samples = <({double time, Vec point})>[];
-  double toolAngle = math.pi / 2, _desiredAngle = math.pi / 2;
+  double toolAngle = math.pi / 2;
   static const broomThickness = 3.5;
   double get broomHalfWidth => settings['paddle_radius'] * 2;
   bool get sweepEnabled => settings['coin_sweep'] > 0;
@@ -218,6 +237,7 @@ class Board {
     BallTool.hand => true,
     BallTool.broom => broomUnlocked,
     BallTool.vee => settings['v_unlocked'] > 0,
+    BallTool.bat => batUnlocked,
   };
 
   void selectTool(BallTool value) {
@@ -260,12 +280,10 @@ class Board {
     _heldBalls.clear();
     _manualBall = null;
     _slippedBalls.clear();
-    holdingBroom = false;
-    _secondBroomTarget = null;
+    _toolGrip = null;
     paddle = null;
     target = null;
     _downPoint = null;
-    _directionAnchor = null;
     _samples.clear();
     return collected;
   }
@@ -310,29 +328,40 @@ class Board {
     paddle = point.inside(0);
     target = paddle;
     _downPoint = paddle;
-    _directionAnchor = paddle;
     _dragged = false;
     _heldDuringGesture = false;
     _samples.clear();
     _sample(paddle!, time ?? _clock);
-    _desiredAngle = toolAngle;
     final onCoin = coins.any(
       (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
     );
     final handle =
         broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
-    holdingBroom =
+    final grabBat =
+        !coinOnly &&
+        _onBat(paddle!, batThickness + 8) &&
+        (tool == BallTool.bat || !_onBroom(paddle!, 12));
+    final grabBroom =
         !coinOnly &&
         broomUnlocked &&
+        !grabBat &&
         !onCoin &&
         (_onBroom(paddle!, 12) ||
             segmentDistance(paddle!, broomPosition, handle) <= 12);
-    tool = holdingBroom ? broomTool : BallTool.hand;
-    if (holdingBroom) {
-      _broomGrabOffset = broomPosition - paddle!;
+    tool = grabBat
+        ? BallTool.bat
+        : grabBroom
+        ? broomTool
+        : BallTool.hand;
+    if (grabBat || grabBroom) {
+      _toolGrip = TwoPointGrip(
+        grabBat ? batPosition : broomPosition,
+        grabBat ? batAngle : toolAngle,
+        paddle!,
+      );
       _heldDuringGesture = true;
     }
-    if (!coinOnly && !holdingBroom && !onCoin) {
+    if (!coinOnly && !holdingPhysicalTool && !onCoin) {
       Ball? nearest;
       var distance = radius + 12;
       for (final ball in balls) {
@@ -357,11 +386,6 @@ class Board {
     if (target == null) return 0;
     final destination = point.inside(0);
     if ((destination - _downPoint!).length > 8) _dragged = true;
-    final direction = destination - _directionAnchor!;
-    if (direction.length >= 3 && !holdingBroom) {
-      _desiredAngle = math.atan2(direction.y, direction.x);
-      _directionAnchor = destination;
-    }
     final amount = sweepEnabled ? _collect(target!, destination) : 0;
     target = destination;
     // Closing still tracks the coin-collection cursor, not physical objects.
@@ -436,6 +460,10 @@ class Board {
 
   BoardEvents update(double dt, {required bool producing}) {
     var collected = 0;
+    for (final impact in batImpacts) {
+      impact.age += dt;
+    }
+    batImpacts.removeWhere((impact) => impact.age >= BatImpact.lifetime);
     for (final impact in wallImpacts) {
       impact.age += dt;
     }
@@ -544,6 +572,7 @@ class Board {
       captureBalls();
       _collide();
       _contactBroom(Vec.zero, 0);
+      _contactBat();
       captureBalls();
       sweptCaptures.clear();
     }
@@ -560,10 +589,12 @@ class Board {
   }
 
   void _moveTool(double dt) {
+    _batVelocity = Vec.zero;
+    _batRotation = 0;
     if (paddle == null || target == null) return;
     final start = paddle!;
     paddle = start + (target! - start).limit(900 * dt);
-    if (_heldBalls.isNotEmpty && !holdingBroom) {
+    if (_heldBalls.isNotEmpty && !holdingPhysicalTool) {
       // The first grip is manual. Only an existing grip can attract neighbours.
       while (_heldBalls.length < handCapacity) {
         Ball? nearest;
@@ -619,36 +650,79 @@ class Board {
         _slippedBalls.add(ball);
       }
     }
-    if (!holdingBroom) return;
-    final previousBroom = broomPosition;
-    var desiredCenter = target! + _broomGrabOffset;
-    final second = _secondBroomTarget;
-    if (second != null) {
-      final axis = second - target!;
-      if (axis.length >= 18) {
-        _desiredAngle =
-            _broomReferenceToolAngle +
-            math.atan2(axis.y, axis.x) -
-            _broomReferenceAngle;
+    if (!holdingPhysicalTool) return;
+    final pose = _toolGrip!.move(
+      target!,
+      _grippedCenter,
+      _grippedAngle,
+      dt,
+      margin: holdingBat
+          ? batHalfLength + batThickness
+          : broomHalfWidth + broomThickness,
+      speed: holdingBat ? settings['bat_move_speed'] : 900,
+      angularSpeed: holdingBat ? settings['bat_angular_speed'] : 3,
+      symmetric: holdingBroom && broomTool == BallTool.broom,
+    );
+    if (holdingBat) {
+      batPosition = pose.center;
+      batAngle = pose.angle;
+      _batVelocity = pose.velocity;
+      _batRotation = pose.angularVelocity;
+    } else {
+      broomPosition = pose.center;
+      toolAngle = pose.angle;
+      _contactBroom(pose.velocity, pose.angularVelocity);
+    }
+  }
+
+  void _contactBat() {
+    if (!batUnlocked) return;
+    final segment = batSegment;
+    final touching = <int>{};
+    for (final ball in balls) {
+      if (_heldBalls.containsKey(ball)) continue;
+      final contact = segment.closest(ball.position);
+      final delta = ball.position - contact;
+      final reach = radius + batThickness;
+      if (delta.length > reach + .75) continue;
+      touching.add(ball.id);
+      if (delta.length >= reach) continue;
+      final arm = contact - batPosition;
+      final surface = _batVelocity + Vec(-arm.y, arm.x) * _batRotation;
+      // At an exact overlap use the approach direction, never an arbitrary boost.
+      final normal = delta.length > .0001
+          ? delta.unit
+          : (surface - ball.velocity).length > .0001
+          ? (surface - ball.velocity).unit
+          : Vec(-math.sin(batAngle), math.cos(batAngle));
+      final surfaceNormal = surface.x * normal.x + surface.y * normal.y;
+      final closing =
+          surfaceNormal -
+          (ball.velocity.x * normal.x + ball.velocity.y * normal.y);
+      ball.position = (ball.position + normal * (reach - delta.length + .01))
+          .inside(radius);
+      if (closing <= .001) continue;
+      final newImpact = !_batContacts.contains(ball.id);
+      final bonus = newImpact
+          ? math.max(0.0, surfaceNormal) *
+                settings['bat_manual_gain'] *
+                settings['bat_power']
+          : 0.0;
+      final impulse =
+          closing * (newImpact ? 1 + settings['bat_restitution'] : 1) + bonus;
+      ball.velocity = (ball.velocity + normal * impulse).limit(maximumSpeed);
+      _bounceWalls(ball);
+      if (newImpact && closing >= 8) {
+        final strength = (impulse / maximumSpeed).clamp(0.0, 1.0);
+        if (batImpacts.length >= 24) batImpacts.removeAt(0);
+        batImpacts.add(BatImpact(contact, strength));
+        batImpactSerial++;
+        lastBatImpactStrength = strength;
       }
-      final rotation = _desiredAngle - _broomReferenceToolAngle;
-      final c = math.cos(rotation), s = math.sin(rotation);
-      final rotatedOffset = Vec(
-        _broomPivotOffset.x * c - _broomPivotOffset.y * s,
-        _broomPivotOffset.x * s + _broomPivotOffset.y * c,
-      );
-      desiredCenter = (target! + second) * .5 + rotatedOffset;
     }
-    final goal = desiredCenter.inside(broomHalfWidth + broomThickness);
-    broomPosition = previousBroom + (goal - previousBroom).limit(900 * dt);
-    var angle = (_desiredAngle - toolAngle + math.pi) % (2 * math.pi) - math.pi;
-    if (broomTool == BallTool.broom) {
-      if (angle > math.pi / 2) angle -= math.pi;
-      if (angle < -math.pi / 2) angle += math.pi;
-    }
-    final turn = angle.clamp(-3 * dt, 3 * dt);
-    toolAngle = (toolAngle + turn) % (2 * math.pi);
-    _contactBroom((broomPosition - previousBroom) * (1 / dt), turn / dt);
+    _batContacts
+      ..clear()
+      ..addAll(touching);
   }
 
   Vec _nextGripOffset() {
@@ -782,6 +856,10 @@ class Board {
     'spawnClock': spawnClock,
     'broomPosition': broomPosition.toJson(),
     'broomAngle': toolAngle,
+    if (settings.balanceVersion >= 10) ...{
+      'batPosition': batPosition.toJson(),
+      'batAngle': batAngle,
+    },
     'balls': balls
         .map(
           (b) => _heldBalls.containsKey(b)
@@ -827,7 +905,21 @@ class Board {
       if (angle is! num || !angle.isFinite) {
         throw const FormatException('Invalid broom angle');
       }
-      board.toolAngle = board._desiredAngle = angle.toDouble() % (2 * math.pi);
+      board.toolAngle = angle.toDouble() % (2 * math.pi);
+    }
+    if (settings.balanceVersion >= 10) {
+      board.batPosition = Vec.fromJson(json['batPosition']);
+      final angle = json['batAngle'];
+      if (angle is! num || !angle.isFinite) {
+        throw const FormatException('Invalid bat angle');
+      }
+      board.batAngle = angle.toDouble() % (2 * math.pi);
+      final bounded = board.batPosition.inside(
+        board.batHalfLength + board.batThickness,
+      );
+      if ((bounded - board.batPosition).length > .0001) {
+        throw const FormatException('Invalid bat position');
+      }
     }
     final margin = board.broomHalfWidth + broomThickness;
     final boundedBroom = board.broomPosition.inside(margin);

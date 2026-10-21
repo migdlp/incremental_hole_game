@@ -2,6 +2,17 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.8.0+16 — M02: Bate de béisbol
+
+- Bate físico independiente, desbloqueable con tres niveles de potencia activa;
+  costes y parámetros configurables y provisionales.
+- Control rígido de uno/dos dedos compartido con la escoba. Impulso por velocidad
+  relativa y giro, rebote pasivo constante, contactos persistentes sin bonificación
+  repetida y límite final de velocidad compartido con paredes.
+- Feedback visual opcional, clic de impacto y vibración breve con preferencia
+  persistente y agrupación de impactos.
+- Pose y compras guardadas; balance v10 con v9 congelado. DEBUG aislado del progreso.
+
 ## 0.7.0+15 — M01: Paredes rebotadoras
 
 - Tres niveles de potencia de rebote, automáticos y persistentes, configurables

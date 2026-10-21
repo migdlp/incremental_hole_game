@@ -144,3 +144,12 @@ un diseño abierto. Solo quedan probar precios, dependencias exactas y calibraci
 final: ×0,40/×1,10/×1,35/×1,60 y 380 u/s son provisionales. Para comprar en pruebas
 se usan 40/100/220 y Mano I, también provisionales. M01 no completa los flippers,
 bumpers ni otras piezas de CF-20. [Estado M01](m01-paredes-rebotadoras.md).
+
+## Calibración pendiente M02
+
+Bate de béisbol implementado como prototipo con tres niveles, control de dos
+puntos e impulso por traslado/giro. Quedan validar en móvil precios, dependencia
+del árbol y parámetros físicos provisionales del CSV; no ampliar tamaño, velocidad
+ni capacidad por nivel. Comprobar comodidad, sonido/háptica y sinergia con paredes.
+[Estado y pruebas M02](m02-bate-beisbol.md). No incluye las demás herramientas
+ni cierra las decisiones abiertas de CF-20/CF-24.

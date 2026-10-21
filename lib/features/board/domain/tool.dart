@@ -4,7 +4,8 @@ import '../../../core/vec.dart';
 enum BallTool {
   hand('Mano'),
   broom('Escoba'),
-  vee('Escoba en V');
+  vee('Escoba en V'),
+  bat('Bate');
 
   const BallTool(this.label);
   final String label;
@@ -35,7 +36,7 @@ List<ToolSegment> broomSegments(
 ) {
   final forward = Vec(math.cos(angle), math.sin(angle));
   final side = Vec(-forward.y, forward.x);
-  if (tool == BallTool.hand) return const [];
+  if (tool == BallTool.hand || tool == BallTool.bat) return const [];
   if (tool == BallTool.broom) {
     return [ToolSegment(center - side * halfWidth, center + side * halfWidth)];
   }

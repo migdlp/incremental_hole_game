@@ -26,6 +26,7 @@ class GameSession extends ChangeNotifier {
   DayCycle? cycle;
   bool paused = false;
   bool sound = true;
+  bool haptics = true;
   bool visualFeedback = false;
   String? saveError;
   String? recoveryMessage;
@@ -210,6 +211,7 @@ class GameSession extends ChangeNotifier {
       BallTool.hand => true,
       BallTool.broom => settings['broom_unlocked'] > 0,
       BallTool.vee => settings['v_unlocked'] > 0,
+      BallTool.bat => settings['bat_power'] > 0,
     };
   }
 
@@ -250,6 +252,12 @@ class GameSession extends ChangeNotifier {
 
   void setSound(bool value) {
     sound = value;
+    save();
+    notifyListeners();
+  }
+
+  void setHaptics(bool value) {
+    haptics = value;
     save();
     notifyListeners();
   }
@@ -333,7 +341,9 @@ class GameSession extends ChangeNotifier {
       grandfathered: _grandfathered,
       previousTree: _previousTree,
     );
-    if ((next['broom_v'] ?? 0) > (levels['broom_v'] ?? 0)) {
+    if ((next['bat'] ?? 0) > (levels['bat'] ?? 0)) {
+      selectedTool = BallTool.bat;
+    } else if ((next['broom_v'] ?? 0) > (levels['broom_v'] ?? 0)) {
       selectedTool = BallTool.vee;
     } else if ((next['broom'] ?? 0) > (levels['broom'] ?? 0)) {
       selectedTool = BallTool.broom;
@@ -392,6 +402,7 @@ class GameSession extends ChangeNotifier {
     final level = levels[definition.id] ?? 0;
     if (!economy.spend(definition.levels[level].cost)) return false;
     levels[definition.id] = level + 1;
+    if (definition.id == 'bat') selectedTool = BallTool.bat;
     if (definition.id == 'broom') selectedTool = BallTool.broom;
     if (definition.id == 'broom_v') selectedTool = BallTool.vee;
     save();
@@ -409,6 +420,7 @@ class GameSession extends ChangeNotifier {
     'record': progress.record,
     'levels': levels,
     'sound': sound,
+    'haptics': haptics,
     'visualFeedback': visualFeedback,
     'last': progress.last?.toJson(),
     'run': !running
@@ -474,6 +486,9 @@ class GameSession extends ChangeNotifier {
         expectedSettings['broom_unlocked'] == 0) {
       restoredTool = BallTool.hand;
     }
+    if (restoredTool == BallTool.bat && expectedSettings['bat_power'] == 0) {
+      throw const FormatException('Bate sin desbloquear');
+    }
     if (restoredTool == BallTool.vee && expectedSettings['v_unlocked'] == 0) {
       throw const FormatException('Herramienta sin desbloquear');
     }
@@ -506,7 +521,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 9)) {
+          (balanceVersion < 1 || balanceVersion > 10)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -575,6 +590,7 @@ class GameSession extends ChangeNotifier {
     }
     // Commit only after validating every module; a failed load leaves no partial state.
     final savedSound = json['sound'] as bool;
+    final savedHaptics = json['haptics'] as bool? ?? true;
     final savedVisualFeedback = json['visualFeedback'] as bool? ?? false;
     progress.day = day;
     progress.record = record;
@@ -600,6 +616,7 @@ class GameSession extends ChangeNotifier {
     board = restoredBoard;
     cycle = restoredCycle;
     sound = savedSound;
+    haptics = savedHaptics;
     visualFeedback = savedVisualFeedback;
     paused = running;
     _accumulator = 0;

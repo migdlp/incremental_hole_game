@@ -8,6 +8,8 @@ import '../domain/board.dart';
 import '../domain/wall_impact.dart';
 import '../domain/coin_denomination.dart';
 import 'coin_painter.dart';
+import 'bat_feedback.dart';
+import '../domain/bat_impact.dart';
 
 class GardenGame extends FlameGame {
   GardenGame(this.session, {this.wallEffectsEnabled = true})
@@ -29,6 +31,7 @@ class GardenGame extends FlameGame {
     if (session.running && !session.paused) {
       resumeEngine();
     } else {
+      _batFeedback.suppress(_displayBoard);
       pauseEngine();
     }
   }
@@ -42,6 +45,7 @@ class GardenGame extends FlameGame {
   final GameSession session;
   bool wallEffectsEnabled;
   double _time = 0;
+  final _batFeedback = BatFeedback();
   final _labels = <String, TextPainter>{};
   double get scale => math.min(size.x / Board.width, size.y / Board.height);
   Offset get origin => Offset(
@@ -64,6 +68,14 @@ class GardenGame extends FlameGame {
     _displayBoard = session.board!;
     super.update(dt);
     session.tick(dt);
+    if (session.running && !session.paused) {
+      _batFeedback.update(
+        dt,
+        session.board!,
+        sound: session.sound,
+        haptics: session.haptics,
+      );
+    }
     if (session.running && !session.paused && !session.board!.coinOnly) {
       _time += dt;
     }
@@ -311,7 +323,7 @@ class GardenGame extends FlameGame {
           paint(const Color(0x50247d73), stroke: 1),
         );
       }
-      if (!board.holdingBroom) {
+      if (!board.holdingPhysicalTool) {
         final ball = board.heldBall;
         final center = ball == null ? p : offset(ball.position);
         canvas.drawCircle(
@@ -383,6 +395,88 @@ class GardenGame extends FlameGame {
         offset(point - direction * 21),
         paint(const Color(0xff756347), stroke: 4)..strokeCap = StrokeCap.round,
       );
+    }
+    if (board.batUnlocked) {
+      canvas.save();
+      canvas.translate(board.batPosition.x, board.batPosition.y);
+      canvas.rotate(board.batAngle);
+      final length = board.batHalfLength;
+      final thickness = board.batThickness;
+      // Narrow wrapped handle, tapered wooden barrel, rounded striking end.
+      final body = Path()
+        ..moveTo(-length, -thickness * .38)
+        ..lineTo(-length * .4, -thickness * .38)
+        ..cubicTo(
+          0,
+          -thickness * .45,
+          0,
+          -thickness,
+          length - thickness,
+          -thickness,
+        )
+        ..quadraticBezierTo(length, -thickness, length, 0)
+        ..quadraticBezierTo(length, thickness, length - thickness, thickness)
+        ..cubicTo(
+          0,
+          thickness,
+          0,
+          thickness * .45,
+          -length * .4,
+          thickness * .38,
+        )
+        ..lineTo(-length, thickness * .38)
+        ..close();
+      canvas.drawPath(
+        body.shift(const Offset(0, 3)),
+        paint(const Color(0x40644c2d)),
+      );
+      canvas.drawPath(body, paint(const Color(0xffc58c51)));
+      canvas.drawPath(body, paint(const Color(0xff67472e), stroke: 1));
+      canvas.drawLine(
+        Offset(-length, 0),
+        Offset(-length * .45, 0),
+        paint(const Color(0xff26344a), stroke: thickness * .9)
+          ..strokeCap = StrokeCap.round,
+      );
+      for (var x = -length + 3; x < -length * .45; x += 4) {
+        canvas.drawLine(
+          Offset(x, -thickness * .4),
+          Offset(x + 2, thickness * .4),
+          paint(const Color(0xffb9c1c9), stroke: 1),
+        );
+      }
+      canvas.drawLine(
+        Offset(-length, -thickness * .65),
+        Offset(-length, thickness * .65),
+        paint(const Color(0xff67472e), stroke: 3)..strokeCap = StrokeCap.round,
+      );
+      canvas.drawLine(
+        Offset(2, -thickness * .4),
+        Offset(length - thickness, -thickness * .4),
+        paint(const Color(0xfff2cb91), stroke: 1.5)
+          ..strokeCap = StrokeCap.round,
+      );
+      if (session.visualFeedback && board.holdingBat) {
+        for (final x in [-length, length]) {
+          canvas.drawCircle(
+            Offset(x, 0),
+            8,
+            paint(const Color(0xff247d73), stroke: 2),
+          );
+        }
+      }
+      canvas.restore();
+      if (session.visualFeedback) {
+        for (final impact in board.batImpacts) {
+          final progress = (impact.age / BatImpact.lifetime).clamp(0.0, 1.0);
+          final color = Color.fromRGBO(255, 244, 192, 1 - progress);
+          canvas.drawCircle(
+            offset(impact.position),
+            3 + progress * (5 + 6 * impact.intensity),
+            paint(color, stroke: 2),
+          );
+        }
+      }
     }
     if (board.coinOnly) {
       canvas.drawRect(bounds, paint(const Color(0xa6000000)));

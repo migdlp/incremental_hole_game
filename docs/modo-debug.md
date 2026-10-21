@@ -12,7 +12,7 @@ El botón está siempre visible en el árbol. El saldo de monedas ya no activa e
 
 ## Ver el árbol completo o la vista del jugador
 
-- **Vista del jugador desactivada:** muestra los 62 nodos y sus conexiones. Al entrar o volver a esta vista, el mapa se encuadra completo; puedes acercarte y arrastrarlo para inspeccionar las ramas. Cualquier nodo pendiente se puede comprar gratis desde su ficha, manteniendo el botón un segundo. Se adquieren también sus niveles anteriores y requisitos, incluidos los cruces entre ramas, para que la configuración sea válida al jugar.
+- **Vista del jugador desactivada:** muestra los 65 nodos y sus conexiones. Al entrar o volver a esta vista, el mapa se encuadra completo; puedes acercarte y arrastrarlo para inspeccionar las ramas. Cualquier nodo pendiente se puede comprar gratis desde su ficha, manteniendo el botón un segundo. Se adquieren también sus niveles anteriores y requisitos, incluidos los cruces entre ramas, para que la configuración sea válida al jugar.
 - **Vista del jugador activada:** usa exactamente el descubrimiento normal: nodos comprados y siguientes nodos accesibles. Conserva precios, requisitos y colores/estados de disponibilidad normales. Las compras realizadas en esta vista descuentan el saldo de prueba, como en una partida normal.
 
 Las dos vistas comparten las mismas compras de prueba. Si compras todo, la vista del jugador mostrará todo porque ya lo tienes adquirido. Para comprobar el inicio, pulsa «Reiniciar prueba desde cero» y activa «Vista del jugador».
@@ -61,3 +61,12 @@ ambos para trasladarla y girarla. Soltar cualquiera mantiene el otro agarre; con
 un solo dedo se traslada sin giro automático. Probar también escoba en V, pausa,
 recogida final y salida de debug. Las nuevas reglas todavía requieren validación
 en un móvil físico.
+
+## Probar M02 · Bate de béisbol
+
+En vista completa, seleccionar Bate de béisbol I y mantener su compra un segundo.
+Se adquieren sus requisitos y aparece en la jornada de prueba como objeto aparte
+de la escoba. Un dedo traslada y dos giran. Tras terminar la jornada, comprar II
+o III para comparar fuerza; reiniciar prueba permite volver a I. Comprar todo
+activa III y las paredes máximas. Salir descarta las compras y jornadas de prueba.
+[Parámetros provisionales y casos de prueba](m02-bate-beisbol.md).

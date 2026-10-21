@@ -6,6 +6,8 @@ Referencias de relevo actualizadas el **20/10/2026** para el último APK **0.6.0
 
 [M01 — paredes rebotadoras, balance provisional y pruebas](m01-paredes-rebotadoras.md).
 
+[M02 — bate de béisbol, controles y física configurable](m02-bate-beisbol.md).
+
 ## Empieza por tu tarea
 
 | Quiero… | Leer |

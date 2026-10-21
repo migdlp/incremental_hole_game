@@ -1,5 +1,7 @@
 # Documentación de Feed the Hole
 
+- [P01 · Estrellas, burbujas físicas, persistencia y parámetros DEBUG](p01-estrellas-burbujas.md).
+
 - [S03 · Derrota, prestigio, checkpoints y dependencias P01/P02/BAL01](s03-prestigio-metaprogresion.md).
 
 - [C01 · Cobro automático, persistencia, DEBUG y medición pendiente](c01-cobro-automatico.md).

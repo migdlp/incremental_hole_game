@@ -579,7 +579,7 @@ void main() {
     expect(s.board!.launcher.unlocked, isFalse);
     s.finishDay();
     s.startDay();
-    expect(s.board!.settings.balanceVersion, 16);
+    expect(s.board!.settings.balanceVersion, 17);
     s.dispose();
   });
 

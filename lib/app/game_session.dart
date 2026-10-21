@@ -14,6 +14,8 @@ import '../features/rewards/domain/reward_delivery.dart';
 import '../features/rewards/domain/reward_frame_metrics.dart';
 import '../features/progression/domain/progress.dart';
 import '../features/prestige/domain/meta_progress.dart';
+import '../features/prestige/domain/star_rewards.dart';
+import '../features/prestige/domain/star_bubbles.dart';
 import '../features/feeding/domain/feeding_progress.dart';
 import '../features/upgrades/domain/catalog.dart';
 import '../persistence/save_store.dart';
@@ -109,6 +111,43 @@ class GameSession extends ChangeNotifier {
     rewardVisuals.debugLimit = value;
     notifyListeners();
   }
+
+  StarConfig? _debugStars;
+  StarConfig get starConfig => _debugStars ?? StarConfig(catalog.base);
+  bool debugBubbleGravity = false, debugBubbleBlackHole = false;
+  void debugSetStarParameter(String key, double value) {
+    if (!debugEnabled || running || !StarConfig.ranges.containsKey(key)) return;
+    _debugStars = starConfig.changed(key, value);
+    notifyListeners();
+  }
+
+  void debugSetBubbleInteractions({bool? gravity, bool? blackHole}) {
+    if (!debugEnabled) return;
+    debugBubbleGravity = gravity ?? debugBubbleGravity;
+    debugBubbleBlackHole = blackHole ?? debugBubbleBlackHole;
+    board?.bubbleGravity = debugBubbleGravity;
+    board?.bubbleBlackHole = debugBubbleBlackHole;
+    notifyListeners();
+  }
+
+  void debugAwardStarBubbles() {
+    if (!debugEnabled || !canPlayRun) return;
+    _changeStars(meta.starLedger.award(meta.starLedger.quota + 1, starConfig));
+    board?.starBubbles?.populate(0);
+    notifyListeners();
+  }
+
+  void _changeStars(StarLedger ledger, {int paid = 0}) {
+    meta = meta.withStars(ledger, paid: paid);
+    _metaFloor = meta;
+    board?.starBubbles?.sync(ledger);
+  }
+
+  StarBubbles _newBubbles(Board board) => StarBubbles(
+    starConfig,
+    ballRadius: board.radius,
+    maximumSpeed: board.maximumSpeed,
+  )..sync(meta.starLedger);
 
   MetaProgress meta = MetaProgress();
   MetaProgress? _metaFloor;
@@ -237,7 +276,7 @@ class GameSession extends ChangeNotifier {
         for (final raw in checkpoints) {
           try {
             final data = jsonDecode(raw) as Map<String, dynamic>;
-            if (data['version'] != 10) {
+            if (data['version'] != 10 && data['version'] != 11) {
               throw const FormatException('Checkpoint incompatible');
             }
             final state = MetaProgress.fromJson(
@@ -323,6 +362,9 @@ class GameSession extends ChangeNotifier {
     rewards = _newRewards();
     rewardVisuals = _newVisuals();
     board!.enableAutomaticCoins();
+    board!.starBubbles = _newBubbles(board!)..populate(0);
+    board!.bubbleGravity = debugEnabled && debugBubbleGravity;
+    board!.bubbleBlackHole = debugEnabled && debugBubbleBlackHole;
     _debugMaxCombo = 1;
     paused = false;
     _accumulator = 0;
@@ -335,6 +377,7 @@ class GameSession extends ChangeNotifier {
   void tick(double dt) {
     if (!running || paused || !dt.isFinite) return;
     final generatedBefore = economy.generated;
+    final metaBefore = meta.revision;
     rewardVisuals.observeFrame(dt);
     _accumulator += dt.clamp(0.0, .1);
     while (_accumulator + 1e-9 >= 1 / 60 && running) {
@@ -351,7 +394,10 @@ class GameSession extends ChangeNotifier {
         _step(math.min(1 / 60 - step, cycle!.remaining), false);
       }
     }
-    if (running && economy.generated != generatedBefore) save();
+    if (running &&
+        (economy.generated != generatedBefore || meta.revision != metaBefore)) {
+      save();
+    }
     _uiClock += dt.clamp(0.0, .1);
     _checkpoint += dt.clamp(0.0, .1);
     if (_checkpoint >= 5) {
@@ -368,6 +414,7 @@ class GameSession extends ChangeNotifier {
     if (dt <= 0) return;
     board!.gravitySupported = gravityAvailable;
     board!.gravityTilt = _debugTilt ?? motion.tilt;
+    board!.starBubbles ??= _newBubbles(board!);
     final events = board!.update(dt, producing: producing);
     if (debugEnabled) {
       _debugMaxCombo = math.max(_debugMaxCombo, board!.combo.multiplier);
@@ -377,6 +424,18 @@ class GameSession extends ChangeNotifier {
       normal: events.normalFood,
       instant: events.instantFood,
     );
+    if (feeding.met && feeding.period > meta.starLedger.quota) {
+      _changeStars(
+        meta.starLedger.award(feeding.period, board!.starBubbles!.config),
+      );
+      board!.starBubbles?.populate(0);
+    }
+    final bubbles = board!.starBubbles;
+    if (bubbles != null && bubbles.broken.isNotEmpty) {
+      final transaction = meta.starLedger.redeem(bubbles.broken);
+      _changeStars(transaction.ledger, paid: transaction.paid);
+      bubbles.broken.clear();
+    }
     economy.collect(events.collected);
     for (final value in events.rewards) {
       economy.generated += value;
@@ -587,6 +646,8 @@ class GameSession extends ChangeNotifier {
     }
     _debugBaseline = null;
     debugPrestigeRules = false;
+    _debugStars = null;
+    debugBubbleGravity = debugBubbleBlackHole = false;
     _debugRewardLimit = null;
     rewardVisuals.debugLimit = null;
     _debugFeedingTrials = false;
@@ -680,6 +741,12 @@ class GameSession extends ChangeNotifier {
     final amount = target ?? feedingInitialQuota;
     if (amount < 1 || amount > 1000000) return;
     _debugFeedingTrials = quotas;
+    _changeStars(
+      StarLedger(
+        nextId: meta.starLedger.nextId,
+        pending: meta.starLedger.pending,
+      ),
+    );
     feeding = FeedingProgress(
       startDay: progress.day,
       target: quotas ? amount : null,
@@ -704,6 +771,7 @@ class GameSession extends ChangeNotifier {
 
   void debugReset() {
     if (!debugEnabled || running || !canPlayRun) return;
+    _changeStars(const StarLedger());
     _debugReports.clear();
     _debugFeedingTrials = false;
     feeding = FeedingProgress(
@@ -767,7 +835,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 10,
+    'version': 11,
     'meta': meta.toJson(),
     'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
@@ -797,6 +865,7 @@ class GameSession extends ChangeNotifier {
             'settings': board!.settings.toJson(),
             'balanceVersion': board!.settings.balanceVersion,
             'board': board!.toJson(),
+            'starBubbles': (board!.starBubbles ?? _newBubbles(board!)).toJson(),
           },
   });
 
@@ -812,12 +881,17 @@ class GameSession extends ChangeNotifier {
         json['version'] != 7 &&
         json['version'] != 8 &&
         json['version'] != 9 &&
-        json['version'] != 10) {
+        json['version'] != 10 &&
+        json['version'] != 11) {
       throw const FormatException('Versión de guardado no compatible');
     }
     if ((json['version'] as int) >= 10 &&
         json['meta'] is! Map<String, dynamic>) {
       throw const FormatException('Falta la metaprogresión');
+    }
+    if ((json['version'] as int) >= 11 &&
+        json['meta']['starLedger'] is! Map<String, dynamic>) {
+      throw const FormatException('Falta el registro de estrellas');
     }
     final restoredMeta = (json['version'] as int) >= 10
         ? MetaProgress.fromJson(json['meta'] as Map<String, dynamic>)
@@ -876,7 +950,9 @@ class GameSession extends ChangeNotifier {
           ? 14
           : json['version'] == 9
           ? 15
-          : 16,
+          : json['version'] == 10
+          ? 16
+          : 17,
       retiredRemoved: (json['version'] as int) >= 9,
     );
     var restoredTool = legacy
@@ -925,7 +1001,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 16)) {
+          (balanceVersion < 1 || balanceVersion > 17)) {
         throw const FormatException('Versión de balance inválida');
       }
       final runRetired = run['retiredLevels'] == null
@@ -1096,6 +1172,26 @@ class GameSession extends ChangeNotifier {
       throw const FormatException(
         'Alimentación retenida después de prestigiar',
       );
+    }
+    if (restoredBoard != null) {
+      final savedBubbles = run!['starBubbles'];
+      if ((json['version'] as int) >= 11) {
+        if (savedBubbles is! Map<String, dynamic>) {
+          throw const FormatException('Faltan burbujas de prestigio');
+        }
+        restoredBoard.starBubbles = StarBubbles.restore(
+          savedBubbles,
+          restoredMeta.starLedger,
+          ballRadius: restoredBoard.radius,
+          maximumSpeed: restoredBoard.maximumSpeed,
+        );
+      } else {
+        restoredBoard.starBubbles = StarBubbles(
+          StarConfig(catalog.base),
+          ballRadius: restoredBoard.radius,
+          maximumSpeed: restoredBoard.maximumSpeed,
+        )..sync(restoredMeta.starLedger);
+      }
     }
     // Commit only after validating every module; a failed load leaves no partial state.
     final savedEventRandom = json['eventRandom'] ?? _eventRandomState;

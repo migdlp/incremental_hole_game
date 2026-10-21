@@ -87,11 +87,7 @@ void main() {
       expect(s.levels, isEmpty);
       expect(s.meta.stars, 37);
       expect(s.meta.upgrades, {'future-p02-record': 2});
-      expect(s.meta.pendingStarObjects, [
-        {
-          'uninterpreted-p01': {'value': 7, 'damage': 2},
-        },
-      ]);
+      expect(s.meta.pendingStarObjects, isEmpty);
       expect(s.meta.discoveries, ['future-secret']);
       expect(s.meta.extensions, {
         'future': {'persistent': true},
@@ -105,7 +101,7 @@ void main() {
     },
   );
   test(
-    'complete or exceed quota early and continue the same five-day period without a prestige reward',
+    'complete quota early and continue the five-day period without auto-crediting stars',
     () async {
       final s = session();
       s.startDay();
@@ -113,6 +109,7 @@ void main() {
         Ball(s.board!.nextId++, Board.hole, Vec.zero, golden: true),
       );
       s.tick(1 / 60);
+      await s.pendingWrites;
       s.finishDay();
       for (var i = 0; i < 4; i++) {
         s.startDay();
@@ -150,7 +147,7 @@ void main() {
       expect(s.meta.runId, 2);
       expect(s.meta.stars, 37);
       expect(s.meta.upgrades.length, 1);
-      expect(s.meta.pendingStarObjects.length, 1);
+      expect(s.meta.pendingStarObjects, isEmpty);
       expect(s.progress.day, 1);
       expect(s.feeding.points, 0);
       s.startDay();

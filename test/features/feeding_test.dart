@@ -320,7 +320,7 @@ void main() {
 
   test(
     'night saves and restored fifth-day completion do not grant a second period',
-    () {
+    () async {
       final s = session();
       s.enterDebug();
       s.debugConfigureFeeding(quotas: true, target: 1);
@@ -334,6 +334,7 @@ void main() {
       expect(restored.feeding.period, 1);
       expect(restored.feeding.completedDays, 5);
       expect(restored.feeding.points, 1);
+      await restored.save();
       restored.startDay();
       expect(restored.feeding.period, 2);
       expect(restored.feeding.target, 11);
@@ -361,7 +362,7 @@ void main() {
   test(
     'v7 interrupted days finish unchanged; feeding starts on the next full day',
     () {
-      final s = session(levels: {'hand': 1})..economy.balance = 200;
+      var s = session(levels: {'hand': 1})..economy.balance = 200;
       s.startDay();
       capture(s, golden: true);
       final old = jsonDecode(s.snapshot()) as Map<String, dynamic>;
@@ -382,7 +383,8 @@ void main() {
           'landing': 0.0,
         },
       ];
-      s.restore(jsonEncode(old));
+      s.dispose();
+      s = session()..restore(jsonEncode(old));
       expect(s.board!.settings.balanceVersion, 13);
       expect(s.feeding.startDay, 2);
       expect(s.feeding.points, 0);
@@ -392,7 +394,7 @@ void main() {
       s.finishDay();
       expect(s.feeding.completedDays, 0);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 16);
+      expect(s.board!.settings.balanceVersion, 17);
       capture(s, golden: true);
       expect(s.feeding.points, 10);
       expect(s.economy.balance, 211);

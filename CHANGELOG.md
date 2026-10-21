@@ -2,6 +2,19 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.15.0+23 — P01: estrellas y burbujas físicas
+
+- Recompensa de cuota única con burbujas flotantes, categorías y valores provisionales.
+- Agarre/lanzamiento y colisiones con bolas, paredes y herramientas; rotura por
+  impacto relativo fuerte, efecto y vuelo al contador de prestigio.
+- Cobro permanente en la rotura, independiente de animaciones y protegido frente
+  a restauraciones antiguas. Pendientes reaparecen entre jornadas y se pierden
+  al morir o prestigiar, conforme a la decisión P01 que sustituye S03 provisional.
+- JSON v11 / balance v17 con v16 congelado; límites de cuerpos y pool visual separados
+  de premios. DEBUG ajusta parámetros y fuerza recompensas sin alterar la partida.
+- Gravedad y succión son experimentos DEBUG pendientes de decisión final.
+  BAL01, P02 y rendimiento en Android físico continúan pendientes.
+
 ## 0.14.0+22 — S03: prestigio y metaprogresión
 
 - Incumplir cuota termina la partida en normal; DERROTA sencilla, tienda y nueva

@@ -36,7 +36,7 @@ void main() {
 
   test(
     'streak must be purchased; owned streak and money survive reopening',
-    () {
+    () async {
       final session = GameSession(catalog, MemoryStore())..startDay();
       for (var i = 0; i < 10; i++) {
         capture(session);
@@ -44,6 +44,7 @@ void main() {
       expect(session.board!.combo.enabled, isFalse);
       expect(session.economy.generated, 10);
       session.finishDay();
+      await session.pendingWrites;
       final combo = catalog.definitions.firstWhere((d) => d.id == 'combo');
       session.economy.balance = 1000;
       expect(session.purchase(combo), isFalse);
@@ -83,7 +84,7 @@ void main() {
       expect(session.board!.combo.enabled, isTrue);
       session.finishDay();
       session.startDay();
-      expect(session.board!.settings.balanceVersion, 16);
+      expect(session.board!.settings.balanceVersion, 17);
       expect(session.board!.combo.enabled, isFalse);
       expect(session.levels, isEmpty);
     },

@@ -1,6 +1,21 @@
 # PRD — Feed the Hole
 
-## S03 · Prestigio y derrota (0.14.0+22)
+## P01 · Estrellas y burbujas físicas (0.15.0+23)
+
+Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
+o herramientas permite romperlas y cobrar estrellas permanentes. Un premio por
+cuota y un cobro por identidad, separados del vuelo visual. Pendientes reaparecen
+entre jornadas, con un límite de cuerpos activos que no elimina recompensas.
+**Al morir o prestigiar se pierden las pendientes; las cobradas se conservan.**
+Esta regla P01 sustituye la conservación opaca provisional descrita en la entrega
+S03 inferior. No se convierten pendientes en saldo automáticamente.
+
+JSON v11 / balance v17 con v16 congelado. DEBUG permite forzar premios y ajustar
+todos los parámetros provisionales. Gravedad/succión se comparan mediante
+interruptores experimentales en DEBUG; su integración final sigue abierta.
+P02 y BAL01 continúan pendientes. [Contrato y pruebas](p01-estrellas-burbujas.md).
+
+## Entrega anterior S03 · Prestigio y derrota (0.14.0+22)
 
 **Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
 provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
@@ -19,7 +34,7 @@ Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
 una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
 [Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
 
-S03 sustituye la regla anterior de cuotas sin derrota; P01, P02 y BAL01 continúan pendientes.
+S03 sustituyó las cuotas sin derrota. P01 ya añade burbujas; P02 y BAL01 siguen pendientes.
 
 ## C01 · Cobro automático vigente (0.13.0+21)
 
@@ -50,7 +65,7 @@ Cada captura alimenta con toda su recompensa, incluidos racha y dorada ×10.
 **Captura total sigue la misma regla**, por decisión expresa del usuario.
 No hace falta recoger las monedas y alimentar no descuenta dinero.
 Anillo alrededor del hoyo y resumen entre jornadas; períodos de cinco jornadas,
-sin premios ni cierre anticipado al cumplir. Al empezar el siguiente período
+sin cierre anticipado al cumplir; P01 añade las burbujas de estrellas. Al empezar el siguiente período
 se reinicia la alimentación y aumenta la cuota.
 
 El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
@@ -59,7 +74,7 @@ para probar, pendientes de BAL01, no balance definitivo. S03 activa ahora la der
 expresa del usuario; los valores continúan provisionales hasta BAL01.
 DEBUG permite simular un fallo reversible sin modificar la partida real.
 JSON v8 / balance v14, con v13 congelado y sin inventar capturas históricas.
-S03 aporta ya derrota/reinicio; S02, P01, P02 y BAL01 siguen pendientes.
+S03 aporta ya derrota/reinicio; S02, P02 y BAL01 siguen pendientes; P01 aporta burbujas de estrellas.
 
 ## Extensión funcional vigente · M03
 

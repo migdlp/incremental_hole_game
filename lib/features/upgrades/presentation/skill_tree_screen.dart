@@ -1,4 +1,5 @@
 import '../../feeding/presentation/feeding_summary.dart';
+import '../../prestige/domain/star_rewards.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -597,6 +598,62 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                                   },
                           ),
                         ),
+                      ),
+                    ],
+                  ),
+                  ExpansionTile(
+                    key: const ValueKey('debug-star-tools'),
+                    title: const Text('Estrellas y burbujas · P01'),
+                    tilePadding: EdgeInsets.zero,
+                    children: [
+                      const Text(
+                        'Parámetros provisionales BAL01. Ajustarlos antes de comenzar la prueba. Interacciones especiales experimentales.',
+                      ),
+                      Text(
+                        '${session.meta.stars} estrellas · ${session.meta.starLedger.pending.length} burbujas pendientes',
+                      ),
+                      TextButton.icon(
+                        key: const ValueKey('debug-star-award'),
+                        onPressed: session.debugAwardStarBubbles,
+                        icon: const Icon(Icons.bubble_chart),
+                        label: const Text('Añadir recompensa de prueba'),
+                      ),
+                      for (final entry in StarConfig.ranges.entries)
+                        TextFormField(
+                          key: ValueKey('debug-${entry.key}'),
+                          initialValue: '${session.starConfig[entry.key]}',
+                          enabled: !session.running,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: entry.key,
+                            helperText: '${entry.value.$1}–${entry.value.$2}',
+                          ),
+                          onChanged: (raw) {
+                            final n = double.tryParse(raw);
+                            if (n == null ||
+                                !n.isFinite ||
+                                n < entry.value.$1 ||
+                                n > entry.value.$2 ||
+                                (StarConfig.integers.contains(entry.key) &&
+                                    n != n.roundToDouble())) {
+                              return;
+                            }
+                            session.debugSetStarParameter(entry.key, n);
+                          },
+                        ),
+                      SwitchListTile(
+                        title: const Text('Experimento: Gravedad en burbujas'),
+                        value: session.debugBubbleGravity,
+                        onChanged: (v) =>
+                            session.debugSetBubbleInteractions(gravity: v),
+                      ),
+                      SwitchListTile(
+                        title: const Text('Experimento: succión en burbujas'),
+                        value: session.debugBubbleBlackHole,
+                        onChanged: (v) =>
+                            session.debugSetBubbleInteractions(blackHole: v),
                       ),
                     ],
                   ),

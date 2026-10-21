@@ -80,33 +80,37 @@ void main() {
     expect(collected, 7);
     expect(board.coins, isEmpty);
   });
-  test('ten complete cycles bank once, discard pending and begin clean', () {
-    final session = GameSession(catalog, MemoryStore())
-      ..levels.addAll({'hand': 1, 'reward': 1});
-    for (var day = 1; day <= 10; day++) {
-      session.startDay();
-      expect(session.board!.coins, isEmpty);
-      expect(session.board!.balls, isEmpty);
-      capture(session);
-      advance(session, .3);
-      advance(session, 2);
-      session.board!.balls.add(
-        Ball(session.board!.nextId++, const Vec(40, 450), Vec.zero),
-      );
-      capture(session);
-      advance(session, 66);
-      expect(session.running, isFalse);
-      expect(session.board, isNull);
-      expect(jsonDecode(session.snapshot())['run'], isNull);
-      expect(session.economy.balance, day * 4);
-      expect(session.progress.last!.lost, 0);
-      expect(session.progress.last!.income, 4);
-      session.finishDay();
-      expect(session.economy.balance, day * 4);
-    }
-    expect(session.progress.day, 11);
-    expect(session.progress.record, 4);
-  });
+  test(
+    'ten complete cycles bank once, discard pending and begin clean',
+    () async {
+      final session = GameSession(catalog, MemoryStore())
+        ..levels.addAll({'hand': 1, 'reward': 1});
+      for (var day = 1; day <= 10; day++) {
+        session.startDay();
+        expect(session.board!.coins, isEmpty);
+        expect(session.board!.balls, isEmpty);
+        capture(session);
+        advance(session, .3);
+        advance(session, 2);
+        session.board!.balls.add(
+          Ball(session.board!.nextId++, const Vec(40, 450), Vec.zero),
+        );
+        capture(session);
+        advance(session, 66);
+        expect(session.running, isFalse);
+        expect(session.board, isNull);
+        expect(jsonDecode(session.snapshot())['run'], isNull);
+        expect(session.economy.balance, day * 4);
+        expect(session.progress.last!.lost, 0);
+        expect(session.progress.last!.income, 4);
+        session.finishDay();
+        expect(session.economy.balance, day * 4);
+        await session.pendingWrites;
+      }
+      expect(session.progress.day, 11);
+      expect(session.progress.record, 4);
+    },
+  );
   test(
     'purchases enforce phase, funds, prerequisite and level cap atomically',
     () {

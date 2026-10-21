@@ -63,40 +63,44 @@ void main() {
     expect(combo.bonusUnits, 1);
   });
 
-  test('golden and purchased values multiply the current capture only', () {
-    final session = GameSession(catalog, MemoryStore())
-      ..levels.addAll({'hand': 1, 'reward': 2, 'combo': 1})
-      ..startDay();
-    var expectedUnits = 0;
-    for (var i = 1; i <= 12; i++) {
-      final golden = i == 5 || i == 10;
-      expectedUnits +=
-          (golden ? 10 : 1) *
-          (i < 5
-              ? 1
-              : i < 10
-              ? 2
-              : 3);
-      capture(session, golden: golden);
-      expect(session.economy.generated, expectedUnits * 3);
-      expect(session.economy.collected, 0);
-      expect(session.economy.balance, 0);
-      expect(session.rewards.outstanding, expectedUnits * 3);
-    }
-    expect(
-      session.board!.coins.every(
-        (c) => CoinDenomination.values.any((d) => d.amount == c.value),
-      ),
-      isTrue,
-    );
-    session.finishDay();
-    expect(session.economy.balance, expectedUnits * 3);
-    expect(session.progress.last!.generated, expectedUnits * 3);
-    session.startDay();
-    expect(session.board!.combo.streak, 0);
-    capture(session);
-    expect(session.economy.generated, 3);
-  });
+  test(
+    'golden and purchased values multiply the current capture only',
+    () async {
+      final session = GameSession(catalog, MemoryStore())
+        ..levels.addAll({'hand': 1, 'reward': 2, 'combo': 1})
+        ..startDay();
+      var expectedUnits = 0;
+      for (var i = 1; i <= 12; i++) {
+        final golden = i == 5 || i == 10;
+        expectedUnits +=
+            (golden ? 10 : 1) *
+            (i < 5
+                ? 1
+                : i < 10
+                ? 2
+                : 3);
+        capture(session, golden: golden);
+        expect(session.economy.generated, expectedUnits * 3);
+        expect(session.economy.collected, 0);
+        expect(session.economy.balance, 0);
+        expect(session.rewards.outstanding, expectedUnits * 3);
+      }
+      expect(
+        session.board!.coins.every(
+          (c) => CoinDenomination.values.any((d) => d.amount == c.value),
+        ),
+        isTrue,
+      );
+      session.finishDay();
+      expect(session.economy.balance, expectedUnits * 3);
+      expect(session.progress.last!.generated, expectedUnits * 3);
+      await session.pendingWrites;
+      session.startDay();
+      expect(session.board!.combo.streak, 0);
+      capture(session);
+      expect(session.economy.generated, 3);
+    },
+  );
 
   test(
     'same-step normal and golden captures keep their order at threshold',

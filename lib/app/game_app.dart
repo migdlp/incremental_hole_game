@@ -165,6 +165,8 @@ class _DayScreenState extends State<DayScreen> {
   late final GardenGame game = GardenGame(widget.session);
   int? pointer, secondPointer;
   final _walletKey = GlobalKey();
+  final _prestigeKey = GlobalKey();
+  int _lastStars = 0;
   final _boardKey = GlobalKey();
   int lastIncome = 0;
   void _frameTimings(List<FrameTiming> timings) {
@@ -176,6 +178,15 @@ class _DayScreenState extends State<DayScreen> {
   void _syncWallet() {
     final wallet = _walletKey.currentContext?.findRenderObject();
     final board = _boardKey.currentContext?.findRenderObject();
+    final prestige = _prestigeKey.currentContext?.findRenderObject();
+    if (prestige is RenderBox && board is RenderBox && game.size.x > 0) {
+      final point = game.boardPoint(
+        board.globalToLocal(
+          prestige.localToGlobal(prestige.size.center(Offset.zero)),
+        ),
+      );
+      if (point != null) game.prestigeTarget = Offset(point.x, point.y);
+    }
     if (wallet is RenderBox && board is RenderBox && game.size.x > 0) {
       final local = board.globalToLocal(
         wallet.localToGlobal(wallet.size.center(Offset.zero)),
@@ -189,6 +200,7 @@ class _DayScreenState extends State<DayScreen> {
   @override
   void initState() {
     super.initState();
+    _lastStars = widget.session.meta.stars;
     widget.session.addListener(_changes);
     SchedulerBinding.instance.addTimingsCallback(_frameTimings);
   }
@@ -203,6 +215,13 @@ class _DayScreenState extends State<DayScreen> {
       unawaited(SystemSound.play(SystemSoundType.click));
       lastSound = DateTime.now();
     }
+    if (widget.session.meta.stars > _lastStars &&
+        widget.session.sound &&
+        DateTime.now().difference(lastSound).inMilliseconds > 150) {
+      unawaited(SystemSound.play(SystemSoundType.click));
+      lastSound = DateTime.now();
+    }
+    _lastStars = widget.session.meta.stars;
     lastIncome = widget.session.economy.collected;
   }
 
@@ -391,6 +410,32 @@ class _DayScreenState extends State<DayScreen> {
                             ],
                           ),
                         ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 57,
+                    right: 23,
+                    child: IgnorePointer(
+                      child: Row(
+                        key: const ValueKey('gameplay-stars'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            key: _prestigeKey,
+                            color: const Color(0xffb4770b),
+                            size: 21,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${session.meta.stars}',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

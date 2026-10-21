@@ -55,6 +55,7 @@ class GardenGame extends FlameGame {
     super.onRemove();
   }
 
+  Offset prestigeTarget = const Offset(307, 65);
   Offset walletTarget = const Offset(310, 28);
   final Paint _rewardPaint = Paint();
   final GameSession session;
@@ -379,6 +380,106 @@ class GardenGame extends FlameGame {
     }
   }
 
+  static final Path _starShape = () {
+    final path = Path();
+    for (var i = 0; i < 10; i++) {
+      final angle = -math.pi / 2 + i * math.pi / 5;
+      final radius = i.isEven ? 1.0 : .45;
+      final p = Offset(math.cos(angle) * radius, math.sin(angle) * radius);
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+      } else {
+        path.lineTo(p.dx, p.dy);
+      }
+    }
+    return path..close();
+  }();
+  void _star(Canvas canvas, Offset point, double size, Color color) {
+    canvas.save();
+    canvas.translate(point.dx, point.dy);
+    canvas.scale(size);
+    _rewardPaint
+      ..style = PaintingStyle.fill
+      ..color = color;
+    canvas.drawPath(_starShape, _rewardPaint);
+    canvas.restore();
+  }
+
+  void _renderStarBubbles(Canvas canvas, Board board) {
+    final system = board.starBubbles;
+    if (system == null || board.coinOnly) return;
+    Color categoryColor(int category) => HSLColor.fromAHSL(
+      1,
+      (system.config['star_color'] + category * 100) % 360,
+      .7,
+      .55,
+    ).toColor();
+    for (final b in system.bodies) {
+      final p = offset(b.position), radius = system.radius(b);
+      _rewardPaint
+        ..style = PaintingStyle.fill
+        ..color = const Color(0x3066cbe8);
+      canvas.drawCircle(p, radius, _rewardPaint);
+      _rewardPaint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.3
+        ..color = const Color(0xdde9fcff);
+      canvas.drawCircle(p, radius, _rewardPaint);
+      _rewardPaint
+        ..color = const Color(0x90ffffff)
+        ..strokeWidth = 2;
+      canvas.drawArc(
+        Rect.fromCircle(center: p, radius: radius * .8),
+        -2.8,
+        1,
+        false,
+        _rewardPaint,
+      );
+      _star(canvas, p, radius * .53, categoryColor(b.reward.category));
+    }
+  }
+
+  void _renderStarFlights(Canvas canvas, Board board) {
+    final system = board.starBubbles;
+    if (system == null || board.coinOnly) return;
+    for (final flight in system.flights) {
+      if (!flight.active) continue;
+      final start = offset(flight.start);
+      if (flight.age < .22) {
+        final t = flight.age / .22;
+        _rewardPaint
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.4
+          ..color = Color.fromRGBO(232, 252, 255, 1 - t);
+        canvas.drawCircle(start, 12 + 15 * t, _rewardPaint);
+        for (var i = 0; i < 4; i++) {
+          final dir = Offset(i.isEven ? 1 : -1, i < 2 ? 1 : -1);
+          canvas.drawLine(
+            start + dir * (8 + t * 12),
+            start + dir * (11 + t * 18),
+            _rewardPaint,
+          );
+        }
+      }
+      final t = ((flight.age - .08) / .77).clamp(0.0, 1.0);
+      final ease = t * t * (3 - 2 * t);
+      final p =
+          Offset.lerp(start, prestigeTarget, ease)! +
+          Offset(24 * t * (1 - t), -55 * t * (1 - t));
+      _star(
+        canvas,
+        p,
+        7 * (1 - .3 * t),
+        HSLColor.fromAHSL(
+          1,
+          (system.config['star_color'] + flight.category * 100) % 360,
+          .7,
+          .55,
+        ).toColor(),
+      );
+    }
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -520,6 +621,7 @@ class GardenGame extends FlameGame {
         paint(ball.golden ? const Color(0xfffff4b0) : const Color(0xff97a2ad)),
       );
     }
+    _renderStarBubbles(canvas, board);
     if (board.settings['robot_count'] > 0) {
       final p = offset(board.robot.position);
       canvas.drawCircle(
@@ -756,6 +858,7 @@ class GardenGame extends FlameGame {
       _rewardPaint.style = PaintingStyle.fill;
     }
     _renderGravity(canvas, board);
+    _renderStarFlights(canvas, board);
     _renderEventAnnouncements(canvas, board);
     canvas.restore();
   }

@@ -1,6 +1,21 @@
 # Relevo de contexto — Feed the Hole
 
-## S03 · Prestigio y derrota (0.14.0+22)
+## P01 · Estrellas y burbujas físicas (0.15.0+23)
+
+Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
+o herramientas permite romperlas y cobrar estrellas permanentes. Un premio por
+cuota y un cobro por identidad, separados del vuelo visual. Pendientes reaparecen
+entre jornadas, con un límite de cuerpos activos que no elimina recompensas.
+**Al morir o prestigiar se pierden las pendientes; las cobradas se conservan.**
+Esta regla P01 sustituye la conservación opaca provisional descrita en la entrega
+S03 inferior. No se convierten pendientes en saldo automáticamente.
+
+JSON v11 / balance v17 con v16 congelado. DEBUG permite forzar premios y ajustar
+todos los parámetros provisionales. Gravedad/succión se comparan mediante
+interruptores experimentales en DEBUG; su integración final sigue abierta.
+P02 y BAL01 continúan pendientes. [Contrato y pruebas](p01-estrellas-burbujas.md).
+
+## Entrega anterior S03 · Prestigio y derrota (0.14.0+22)
 
 **Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
 provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
@@ -19,7 +34,7 @@ Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
 una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
 [Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
 
-S03 sustituye la regla anterior de cuotas sin derrota; P01, P02 y BAL01 continúan pendientes.
+S03 sustituyó las cuotas sin derrota. P01 ya añade burbujas; P02 y BAL01 siguen pendientes.
 
 ## C01 · Cobro automático vigente (0.13.0+21)
 
@@ -77,7 +92,7 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v10 / balance v16, con balances anteriores congelados para jornadas
+el otro agarre. Guardado v11 / balance v17, con balances anteriores congelados para jornadas
 antiguas. Verificación CI de la entrega: 321 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
@@ -105,7 +120,7 @@ Cada captura alimenta con toda su recompensa, incluidos racha y dorada ×10.
 **Captura total sigue la misma regla**, por decisión expresa del usuario.
 No hace falta recoger las monedas y alimentar no descuenta dinero.
 Anillo alrededor del hoyo y resumen entre jornadas; períodos de cinco jornadas,
-sin premios ni cierre anticipado al cumplir. Al empezar el siguiente período
+sin cierre anticipado al cumplir; P01 añade las burbujas de estrellas. Al empezar el siguiente período
 se reinicia la alimentación y aumenta la cuota.
 
 El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
@@ -214,7 +229,7 @@ credenciales; `046ebb0` está publicado.
 - Distinguir siempre implementación vigente, dirección de diseño y reglas pendientes. Leer este documento no es una orden de implementar todo el brainstorm.
 - Atender la siguiente petición concreta del usuario. Ante una decisión expresamente abierta, proponer reglas y discutirla antes de fijarla.
 - Usar `balance.csv` para cifras/requisitos. Respetar compras y guardados; no borrar progreso para adaptar la economía.
-- Mantener física y participación manual: las máquinas ayudan, no convierten el juego en totalmente pasivo. El dinero sigue pasando por captura y recogida.
+- Mantener física y participación manual: las máquinas ayudan, no convierten el juego en totalmente pasivo. El dinero normal se cobra automáticamente tras capturar; las estrellas exigen romper burbujas.
 - Al terminar una tarea, quitarla de cambios futuros y actualizar estado/contexto. No acumular listas de cambios ya hechos entre los pendientes.
 - Documentos históricos pueden contener tiempos, versiones y reglas reemplazados. Las referencias vigentes son estado actual, cambios futuros, CSV y código.
 

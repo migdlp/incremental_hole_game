@@ -1,5 +1,15 @@
 # Modo de depuración
 
+## P01 · Burbujas físicas y estrellas
+
+Tienda → DEBUG → **Estrellas y burbujas · P01**. Añadir recompensa de prueba,
+ajustar parámetros entre jornadas y comenzar día. Agarrar una burbuja y lanzarla
+contra una pared; rozarla o tocarla no la rompe. El contador de estrellas está
+dentro del tablero. Pendientes reaparecen al día siguiente y se pierden si la
+partida de prueba termina. Dos interruptores comparan Gravedad y succión de
+forma experimental. Salir restaura estrellas y pendientes reales sin escribir
+el ensayo. [Parámetros, pruebas y medición](p01-estrellas-burbujas.md).
+
 ## S03 · Probar derrota y prestigio
 
 Activar **Probar derrota y prestigio**. Simular cinco jornadas sin capturas desde

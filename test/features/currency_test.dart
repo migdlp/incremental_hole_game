@@ -205,7 +205,7 @@ void main() {
       s.finishDay();
       expect(s.economy.balance, 101);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 16);
+      expect(s.board!.settings.balanceVersion, 17);
     },
   );
   test(

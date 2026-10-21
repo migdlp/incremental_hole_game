@@ -14,9 +14,9 @@ Actualizado el **21/10/2026**, contrastado con el último APK **0.14.0+22**, a p
 
 Combinar un incremental con físicas arcade y una fábrica sencilla y configurable. El jugador empieza manipulando bolas con el dedo y progresa hacia grupos, bolas especiales y mecanismos que puede coordinar.
 
-La automatización puede agrupar, empujar, orientar y preparar bolas, pero la participación manual debe seguir mejorando claramente el resultado. Los cuatro ejes son generar más bolas, capturar un porcentaje mayor, conseguir bolas de mayor tier/valor y recoger eficazmente las monedas.
+La automatización puede agrupar, empujar, orientar y preparar bolas, pero la participación manual debe seguir mejorando claramente el resultado. Los cuatro ejes son generar más bolas, capturar un porcentaje mayor, conseguir bolas de mayor tier/valor y aprovechar las recompensas y romper burbujas de estrellas.
 
-Inicio: capturas individuales y mejora de capacidad. Fase temprana: transporte y lanzamiento de grupos y descubrimiento de combos. Juego medio propuesto: tiers, potenciación y sinergias físicas. Juego avanzado propuesto: configurar mecanismos mientras se sigue apuntando y activando manualmente. Las elecciones de habilidades siguen abiertas. S03 implementa la infraestructura de prestigio; P01, P02 y BAL01 deben definir su contenido y balance.
+Inicio: capturas individuales y mejora de capacidad. Fase temprana: transporte y lanzamiento de grupos y descubrimiento de combos. Juego medio propuesto: tiers, potenciación y sinergias físicas. Juego avanzado propuesto: configurar mecanismos mientras se sigue apuntando y activando manualmente. Las elecciones de habilidades siguen abiertas. S03 implementa la infraestructura de prestigio; P01 aporta burbujas de estrellas; P02 y BAL01 deben definir catálogo y balance.
 
 ## CF-16 · Sustituir Valor I–V por tiers individuales
 
@@ -24,7 +24,7 @@ Inicio: capturas individuales y mejora de capacidad. Fase temprana: transporte y
 
 - Definir la tabla de tiers y cómo se identifica cada uno en móvil.
 - Rediseñar la rama Valor I–V y sus conexiones, costes y efectos. No sustituir las compras existentes sin acordar cómo migrarlas.
-- Mantener las monedas físicas de 1/10/50/100/500 y representar recompensas mediante combinaciones de esas denominaciones.
+- Mantener el cobro automático C01 y sus monedas decorativas; los cinco colores de denominación son presentación y no determinan ingresos.
 - La dorada multiplica ×10 el valor de **su propio tier**. La probabilidad actual del 1 % es la referencia hasta revisar balance.
 - Una bola del tier máximo no puede ser dorada; el generador tampoco podrá emitir esa combinación.
 - **Decisión expresamente abierta:** qué pasa cuando una bola ya dorada intenta evolucionar al tier máximo. Opciones por debatir: impedir la evolución, quitar el estado dorado u otra regla. No elegir una sin discutirla.
@@ -95,7 +95,7 @@ Otras candidatas, todavía sin reglas ni precios:
 - Cañones con almacenamiento limitado que requieran apuntar y disparar manualmente.
 - Generadores por ráfagas activados por el jugador.
 
-Definir por mecanismo su control, colocación, capacidad, límites, requisitos, interacción con otras piezas y comportamiento al pausar/restaurar. No conceder dinero por activarlo: la recompensa sigue pasando por captura y recogida de monedas.
+Definir por mecanismo su control, colocación, capacidad, límites, requisitos, interacción con otras piezas y comportamiento al pausar/restaurar. No conceder dinero por activarlo: la recompensa monetaria sigue registrándose al capturar y cobrándose automáticamente.
 
 ## CF-22 · Bola duplicadora
 
@@ -128,10 +128,10 @@ Definir gesto, límites, feedback y relación con los controles existentes. Evit
 - Probar controles, legibilidad, guardado e interrupciones en un Android físico.
 - Medir ingresos, pérdidas y jornadas entre compras antes de ajustar precios y ritmo. `balance.csv` sigue siendo la fuente vigente de costes y requisitos.
 - Respetar inicialmente las 200 bolas y evitar cadenas infinitas de duplicación o potenciación.
-- Evaluar el volumen de monedas físicas cuando se combinen tier, dorada y combo. Actualmente hay 1000 monedas visibles y una reserva por denominación; la reserva no se cobra sola y se pierde si no llega a recogerse.
+- Evaluar el presupuesto de monedas decorativas C01 y burbujas físicas P01 bajo carga; nunca perder recompensas por limitar sus representaciones.
 - Mantener inicialmente las cinco denominaciones, su tamaño uniforme y la identificación por color.
-- Conservar la separación entre captura, generación de monedas y dinero recogido. No crear ingresos directos por activar mecanismos sin una regla económica definida.
-- Mantener clara la diferencia entre el agarre de bolas y el imán de monedas; la mano ocupada bloquea todo cobro y atracción de monedas.
+- Conservar la separación entre captura, recompensa garantizada y presentación visual de C01. No crear ingresos directos por activar mecanismos sin una regla económica definida.
+- Mantener agarres exclusivos de bolas, herramientas y burbujas. No reintroducir recogida manual ni el imán de monedas retirados por C01.
 
 ## Cómo continuar
 
@@ -184,9 +184,9 @@ ni mejoras de potencia.
 
 S03 ya activa derrota, reinicio y tienda con cuotas provisionales también en normal,
 autorizado expresamente por el usuario. Quedan BAL01 (cantidades, recompensas y
-coste/posición/requisitos del nodo), P01 (estrellas y burbujas), P02 (catálogo y
+coste/posición/requisitos del nodo), P01 (calibración de estrellas/burbujas e interacciones experimentales), P02 (catálogo y
 efectos permanentes, narrativa y secretos) y S02 (personalidad). No inventar esos
-contenidos. Los datos P01 pendientes se conservan sin convertir ni descartar.
+contenidos. P01 ya define que las burbujas pendientes se conservan entre jornadas y se pierden al terminar la partida, sin convertirse en saldo.
 
 ## Validación pendiente C01
 
@@ -196,3 +196,12 @@ Escoba ancha II. Pendiente elegir Android de referencia y medir CPU, raster/GPU,
 frames, memoria y asignaciones con capturas masivas. No cerrar presupuesto
 visual ni parámetros de trayectorias sin medir. Rediseño de la rama libre y
 revisión de balance por eliminar pérdidas corresponden a tareas separadas.
+
+## Calibración pendiente P01
+
+[Estrellas y burbujas](p01-estrellas-burbujas.md) implementadas como prototipo.
+Quedan BAL01 (denominaciones, categorías, distribución, tamaño/colores y fuerzas),
+la decisión de interacción con Gravedad/Agujero negro y medición física en Android
+para fijar el límite de cuerpos, umbral de rotura y reintroducción. DEBUG permite
+comparar ambas interacciones sin fijarlas en normal. Pendientes sobreviven entre
+jornadas y se pierden al morir/prestigiar por requisito aprobado. P02 sigue aparte.

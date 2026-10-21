@@ -1,9 +1,24 @@
 # Feed the Hole
 
+## P01 · Estrellas y burbujas físicas (0.15.0+23)
+
+Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
+o herramientas permite romperlas y cobrar estrellas permanentes. Un premio por
+cuota y un cobro por identidad, separados del vuelo visual. Pendientes reaparecen
+entre jornadas, con un límite de cuerpos activos que no elimina recompensas.
+**Al morir o prestigiar se pierden las pendientes; las cobradas se conservan.**
+Esta regla P01 sustituye la conservación opaca provisional descrita en la entrega
+S03 inferior. No se convierten pendientes en saldo automáticamente.
+
+JSON v11 / balance v17 con v16 congelado. DEBUG permite forzar premios y ajustar
+todos los parámetros provisionales. Gravedad/succión se comparan mediante
+interruptores experimentales en DEBUG; su integración final sigue abierta.
+P02 y BAL01 continúan pendientes. [Contrato y pruebas](docs/p01-estrellas-burbujas.md).
+
 **S03 · 0.14.0+22:** [Prestigio y metaprogresión](docs/s03-prestigio-metaprogresion.md).
 Derrota por cuota también en normal, tienda y reinicio; nodo grande girado 45° con
 confirmación. Datos permanentes protegidos contra copias normales antiguas.
-P01 y P02 aún deben aportar estrellas, catálogo y efectos; balance provisional.
+P01 ya aporta estrellas; P02 debe aportar catálogo y efectos. Balance provisional.
 
 **C01 · 0.13.0+21:** [Cobro automático](docs/c01-cobro-automatico.md), monedas decorativas
 y cierre directo sin recogida. Compras retiradas sin reembolso, según autorización
@@ -74,7 +89,7 @@ python3 -m http.server 8123 --directory build/web
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 1 segundo; las compras revelan nuevos caminos.
 - 23 tipos y 60 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja bolas y Prestigio voluntario con confirmación.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
-- Guardado JSON v10 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
+- Guardado JSON v11 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano y opción de silenciar los sonidos del sistema.
 
 La tabla `docs/balance.csv` se empaqueta como recurso y se valida al cargar: es la fuente editable del balance actual. Las jornadas antiguas conservan su configuración hasta terminar; el siguiente día usa el balance nuevo. La noche descarta también cualquier bola agarrada.

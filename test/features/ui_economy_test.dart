@@ -172,7 +172,7 @@ void main() {
         ..restore(session.snapshot());
       reopened.finishDay();
       reopened.startDay();
-      expect(reopened.board!.settings.balanceVersion, 16);
+      expect(reopened.board!.settings.balanceVersion, 17);
       expect(reopened.board!.settings['ball_value'], 13);
       expect(reopened.board!.settings['magnet_radius'], 0);
       expect(reopened.levels.containsKey('collection'), isFalse);

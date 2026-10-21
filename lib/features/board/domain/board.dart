@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../../prestige/domain/star_bubbles.dart';
 import '../../../core/vec.dart';
 import '../../automation/domain/robot.dart';
 import 'tool.dart';
@@ -96,6 +97,12 @@ class Board {
   static const hole = Vec(180, 50);
   static const generator = Vec(180, 480);
   final DaySettings settings;
+  StarBubbles? starBubbles;
+  Vec _broomVelocity = Vec.zero;
+  double _broomRotation = 0;
+  // Experimental interactions stay separate from ordinary-ball ability rules.
+  bool bubbleGravity = false, bubbleBlackHole = false;
+
   final CaptureCombo combo;
   final SpecialAbilities specials;
   late GravityEvent gravity;
@@ -178,6 +185,7 @@ class Board {
   Map<int, int>? collectedCoins = <int, int>{};
   bool get canCollectCoins =>
       !automaticCoins &&
+      starBubbles?.held == null &&
       _heldBalls.isEmpty &&
       !holdingBat &&
       !holdingLauncher &&
@@ -374,6 +382,7 @@ class Board {
     if (!cancel && !_dragged && !_heldDuringGesture && _downPoint != null) {
       collected = _collect(_downPoint!, _downPoint!);
     }
+    starBubbles?.release(velocity);
     _heldBalls.clear();
     _manualBall = null;
     _slippedBalls.clear();
@@ -492,6 +501,13 @@ class Board {
       if (grabBat) batGravityVelocity = Vec.zero;
       if (grabBroom) broomGravityVelocity = Vec.zero;
       _heldDuringGesture = true;
+    }
+    if (!coinOnly &&
+        !holdingPhysicalTool &&
+        !onCoin &&
+        (starBubbles?.grab(paddle!) ?? false)) {
+      _heldDuringGesture = true;
+      return 0;
     }
     if (!coinOnly && !holdingPhysicalTool && !onCoin) {
       Ball? nearest;
@@ -618,6 +634,12 @@ class Board {
           final spawn =
               center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
           if (balls.length < settings['ball_limit'] &&
+              !(starBubbles?.bodies.any(
+                    (b) =>
+                        (b.position - spawn).length <
+                        radius + starBubbles!.radius(b),
+                  ) ??
+                  false) &&
               launcher.contact(spawn, radius) == null &&
               balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
             spawned++;
@@ -647,6 +669,8 @@ class Board {
       }
     }
     if (coinOnly) return BoardEvents(0, collected);
+    starBubbles?.advanceVisuals(dt);
+    if (producing) starBubbles?.populate(dt);
     combo.advance(dt);
     if (settings['robot_count'] > 0) {
       final goal = robot.direction(dt, [
@@ -742,6 +766,7 @@ class Board {
       _contactBroom(Vec.zero, 0);
       _contactBat();
       _contactLauncher(step);
+      _stepBubbles(step, gravityImpulse);
       captureBalls();
       sweptCaptures.clear();
     }
@@ -793,7 +818,8 @@ class Board {
       );
       broomPosition = motion.center;
       broomGravityVelocity = motion.velocity;
-      _contactBroom((broomPosition - before) * (1 / dt), 0);
+      _broomVelocity = (broomPosition - before) * (1 / dt);
+      _contactBroom(_broomVelocity, 0);
     }
     if (batUnlocked &&
         !holdingBat &&
@@ -811,6 +837,8 @@ class Board {
   }
 
   void _moveTool(double dt) {
+    _broomVelocity = Vec.zero;
+    _broomRotation = 0;
     _batVelocity = Vec.zero;
     _batRotation = 0;
     _launcherVelocity = Vec.zero;
@@ -912,6 +940,8 @@ class Board {
     } else {
       broomPosition = pose.center;
       toolAngle = pose.angle;
+      _broomVelocity = pose.velocity;
+      _broomRotation = pose.angularVelocity;
       _contactBroom(pose.velocity, pose.angularVelocity);
     }
   }
@@ -951,6 +981,14 @@ class Board {
                       radius + batThickness ||
                   segmentDistance(batSegment.b, launcher.muzzle, exit) <
                       radius + batThickness))) {
+        continue;
+      }
+      if (starBubbles?.bodies.any(
+            (b) =>
+                segmentDistance(b.position, launcher.muzzle, exit) <
+                radius + starBubbles!.radius(b),
+          ) ??
+          false) {
         continue;
       }
       final blockers = balls
@@ -1071,6 +1109,163 @@ class Board {
     _batContacts
       ..clear()
       ..addAll(touching);
+  }
+
+  void _stepBubbles(double dt, Vec gravityImpulse) {
+    final system = starBubbles;
+    if (system == null) return;
+    if (system.held != null && target != null) system.moveHeld(target!, dt);
+    // Fixed physical cap bounds these loops; no per-frame reward queue growth.
+    for (var i = system.bodies.length - 1; i >= 0; i--) {
+      final b = system.bodies[i];
+      var impulse = bubbleGravity ? gravityImpulse : Vec.zero;
+      if (bubbleBlackHole && blackHole.lastActiveTime > 0 && b != system.held) {
+        final toHole = hole - b.position;
+        impulse =
+            impulse +
+            toHole.unit *
+                blackHole.accelerationAt(toHole.length) *
+                blackHole.lastActiveTime;
+      }
+      system.integrate(b, dt, impulse);
+    }
+    // Use precomputed tool poses and surface velocities, including rotation.
+    bool toolContact(StarBubble b, Vec point, Vec surface, double thickness) {
+      final delta = b.position - point;
+      final reach = system.radius(b) + thickness;
+      if (delta.length >= reach) return false;
+      final relative = surface - b.velocity;
+      final normal = delta.length > .0001 ? delta.unit : relative.unit;
+      final closing = relative.x * normal.x + relative.y * normal.y;
+      if (closing > 0 && system.impact(b, normal, closing, point)) return true;
+      b.position = (b.position + normal * (reach - delta.length + .01)).inside(
+        system.radius(b),
+      );
+      if (closing > 0) {
+        b.velocity =
+            (b.velocity +
+                    normal *
+                        (closing * (1 + system.config['star_restitution'])))
+                .limit(maximumSpeed);
+      }
+      return false;
+    }
+
+    for (var i = system.bodies.length - 1; i >= 0; i--) {
+      final b = system.bodies[i];
+      var popped = false;
+      for (final segment in segments) {
+        final point = segment.closest(b.position);
+        final arm = point - broomPosition;
+        if (toolContact(
+          b,
+          point,
+          _broomVelocity + Vec(-arm.y, arm.x) * _broomRotation,
+          broomThickness,
+        )) {
+          popped = true;
+          break;
+        }
+      }
+      if (popped) continue;
+      if (batUnlocked) {
+        final point = batSegment.closest(b.position);
+        final arm = point - batPosition;
+        if (toolContact(
+          b,
+          point,
+          _batVelocity + Vec(-arm.y, arm.x) * _batRotation,
+          batThickness,
+        )) {
+          continue;
+        }
+      }
+      final contact = launcher.contact(b.position, system.radius(b));
+      if (contact != null) {
+        final arm = contact.point - launcher.position;
+        final surface = holdingLauncher
+            ? _launcherVelocity + Vec(-arm.y, arm.x) * _launcherRotation
+            : launcher.velocity;
+        final relative = surface - b.velocity;
+        final closing =
+            relative.x * contact.normal.x + relative.y * contact.normal.y;
+        if (closing > 0 &&
+            system.impact(b, contact.normal, closing, contact.point)) {
+          continue;
+        }
+        b.position = (b.position + contact.normal * (contact.depth + .01))
+            .inside(system.radius(b));
+        if (closing > 0) {
+          b.velocity =
+              (b.velocity +
+                      contact.normal *
+                          closing *
+                          (1 + system.config['star_restitution']))
+                  .limit(maximumSpeed);
+        }
+      }
+      for (final ball in balls) {
+        final delta = b.position - ball.position;
+        final overlap = system.radius(b) + radius - delta.length;
+        if (overlap <= 0) continue;
+        final n = delta.unit;
+        final heldBubble = b == system.held,
+            heldBall = _heldBalls.containsKey(ball);
+        if (heldBubble && heldBall) continue;
+        if (!heldBubble) {
+          b.position = (b.position + n * (overlap * (heldBall ? 1 : .7) + .01))
+              .inside(system.radius(b));
+        }
+        if (!heldBall) {
+          ball.position =
+              (ball.position - n * (overlap * (heldBubble ? 1 : .3) + .01))
+                  .inside(radius);
+        }
+        final relative = ball.velocity - b.velocity;
+        final closing = math.max(0.0, relative.x * n.x + relative.y * n.y);
+        if (!heldBubble) {
+          b.velocity = (b.velocity + n * closing * (heldBall ? 1.4 : 1.05))
+              .limit(maximumSpeed);
+        }
+        if (!heldBall) {
+          ball.velocity =
+              (ball.velocity - n * closing * (heldBubble ? 1.4 : .45)).limit(
+                maximumSpeed,
+              );
+        }
+      }
+    }
+    for (var i = 0; i < system.bodies.length; i++) {
+      final a = system.bodies[i];
+      for (var j = i + 1; j < system.bodies.length; j++) {
+        final b = system.bodies[j];
+        final delta = b.position - a.position;
+        final overlap = system.radius(a) + system.radius(b) - delta.length;
+        if (overlap <= 0) continue;
+        final n = delta.unit;
+        final ah = a == system.held, bh = b == system.held;
+        if (!ah) {
+          a.position = (a.position - n * (overlap * (bh ? 1 : .5) + .01))
+              .inside(system.radius(a));
+        }
+        if (!bh) {
+          b.position = (b.position + n * (overlap * (ah ? 1 : .5) + .01))
+              .inside(system.radius(b));
+        }
+        final relative = a.velocity - b.velocity;
+        final speed = math.max(0.0, relative.x * n.x + relative.y * n.y);
+        if (!ah) {
+          a.velocity = (a.velocity - n * speed * (bh ? 1.5 : .75)).limit(
+            maximumSpeed,
+          );
+        }
+        if (!bh) {
+          b.velocity = (b.velocity + n * speed * (ah ? 1.5 : .75)).limit(
+            maximumSpeed,
+          );
+        }
+      }
+    }
   }
 
   Vec _nextGripOffset() {

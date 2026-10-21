@@ -1,4 +1,5 @@
 import 'legacy_balance.dart';
+import '../../prestige/domain/star_rewards.dart';
 import 'balance_v4.dart';
 import 'balance_v5.dart';
 import 'balance_v6.dart';
@@ -11,6 +12,7 @@ import 'balance_v12.dart';
 import 'balance_v13.dart';
 import 'balance_v14.dart';
 import 'balance_v15.dart';
+import 'balance_v16.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -35,7 +37,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 16});
+  DaySettings(this.values, {this.balanceVersion = 17});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -234,6 +236,7 @@ class UpgradeCatalog {
         throw const FormatException('Cuota de prueba no entera');
       }
     }
+    StarConfig(base);
     return UpgradeCatalog._(base, definitions);
   }
 
@@ -244,10 +247,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 16}) {
-    final values = balanceVersion <= 15 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 15) {
-      final historicalCsv = balanceVersion == 15
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 17}) {
+    final values = balanceVersion <= 16 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 16) {
+      final historicalCsv = balanceVersion == 16
+          ? balanceV16Csv
+          : balanceVersion == 15
           ? balanceV15Csv
           : balanceVersion == 14
           ? balanceV14Csv
@@ -336,7 +341,7 @@ class UpgradeCatalog {
     bool legacy = false,
     bool retiredRemoved = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 16,
+    int balanceVersion = 17,
   }) {
     bool met(UpgradeLevel level) => level.requirements.every(
       (requirement) =>

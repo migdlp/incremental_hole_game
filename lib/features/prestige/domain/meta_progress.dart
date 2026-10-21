@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'star_rewards.dart';
 
 enum PrestigePhase { playing, defeat, shop }
 
-/// Permanent data and run lifecycle. No P01 awards or P02 effects are invented.
+/// Permanent data and run lifecycle. P01 entitlements; P02 catalogue remains separate.
 class MetaProgress {
   MetaProgress({
     this.revision = 0,
@@ -13,6 +14,7 @@ class MetaProgress {
     this.upgrades = const {},
     this.discoveries = const [],
     this.pendingStarObjects = const [],
+    this.starLedger = const StarLedger(),
     this.extensions = const {},
     this.firstDefeatSeen = false,
     this.endCause,
@@ -21,7 +23,8 @@ class MetaProgress {
   final PrestigePhase phase;
   final Map<String, int> upgrades;
   final List<String> discoveries;
-  // Opaque future P01 state: preserve unchanged; never award or discard it.
+  final StarLedger starLedger;
+  // Legacy opaque extension: retained in active saves, discarded on run end.
   final List<dynamic> pendingStarObjects;
   final Map<String, dynamic> extensions;
   final bool firstDefeatSeen;
@@ -39,11 +42,27 @@ class MetaProgress {
     stars: stars,
     upgrades: upgrades,
     discoveries: discoveries,
-    pendingStarObjects: pendingStarObjects,
+    pendingStarObjects: const [],
+    starLedger: const StarLedger(),
     extensions: extensions,
     firstDefeatSeen: firstDefeatSeen || cause == 'quota',
     endCause: newRun ? null : cause ?? endCause,
   );
+  MetaProgress withStars(StarLedger ledger, {int paid = 0}) => MetaProgress(
+    revision: revision + 1,
+    runId: runId,
+    lastEndedRun: lastEndedRun,
+    phase: phase,
+    stars: stars + paid,
+    upgrades: upgrades,
+    discoveries: discoveries,
+    pendingStarObjects: pendingStarObjects,
+    starLedger: ledger,
+    extensions: extensions,
+    firstDefeatSeen: firstDefeatSeen,
+    endCause: endCause,
+  );
+
   MetaProgress end({required bool voluntary}) {
     if (phase != PrestigePhase.playing || lastEndedRun >= runId) {
       throw StateError('Esta partida ya terminó');
@@ -72,6 +91,7 @@ class MetaProgress {
     'lastEndedRun': lastEndedRun,
     'phase': phase.name,
     'stars': stars,
+    'starLedger': starLedger.toJson(),
     'upgrades': upgrades,
     'discoveries': discoveries,
     'pendingStarObjects': pendingStarObjects,
@@ -121,6 +141,9 @@ class MetaProgress {
       lastEndedRun: integer('lastEndedRun'),
       phase: phase,
       stars: integer('stars'),
+      starLedger: json['starLedger'] == null
+          ? const StarLedger()
+          : StarLedger.fromJson(json['starLedger'] as Map<String, dynamic>),
       upgrades: Map.unmodifiable(upgrades.cast<String, int>()),
       discoveries: List.unmodifiable(discoveries.cast<String>()),
       pendingStarObjects: List.unmodifiable(clone['pending']),
@@ -128,7 +151,9 @@ class MetaProgress {
       firstDefeatSeen: json['firstDefeatSeen'] as bool,
       endCause: json['endCause'] as String?,
     );
-    if (state.lastEndedRun !=
+    if ((phase != PrestigePhase.playing &&
+            state.starLedger.pending.isNotEmpty) ||
+        state.lastEndedRun !=
             state.runId - (phase == PrestigePhase.playing ? 1 : 0) ||
         (phase == PrestigePhase.playing
             ? state.endCause != null

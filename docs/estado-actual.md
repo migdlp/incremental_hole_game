@@ -1,6 +1,6 @@
 # Estado actual de Feed the Hole
 
-Actualizado: **21/10/2026**. Referencia de APK entregado: **0.7.0+15**. La revisión `c74545a` añade M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **21/10/2026**. Referencia de APK entregado: **0.8.0+16**. La revisión `e9e9620` incluye M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -26,7 +26,7 @@ Las compras se conservan al reiniciar y se aplican desde la jornada siguiente. R
 
 ## Bate de béisbol · M02
 
-Código de prototipo **0.8.0+16**, pendiente de entrega APK. Bate I desbloquea un
+Prototipo **0.8.0+16**, incluido en el APK enlazado abajo. Bate I desbloquea un
 objeto físico independiente de la escoba; II–III solo aumentan el impulso activo.
 Un dedo traslada, dos trasladan/giran y soltar conserva la pose. Se comparte
 control de dos puntos con la escoba. El impulso usa velocidad relativa y giro;
@@ -107,18 +107,18 @@ Acceso directo: botón **DEBUG**, arriba a la izquierda del árbol. Un toque abr
 **Incluido en el último APK:** el panel debug muestra el informe
 de la última jornada y permite copiar los últimos 20: emisiones efectivas,
 capturas, doradas, pico de combo y monedas generadas/cobradas/perdidas. Estos
-datos son temporales y se descartan al reiniciar la prueba o salir. Incluido en el APK de la revisión `4d815d9` enlazado abajo. Las nuevas bolas aún no se
+datos son temporales y se descartan al reiniciar la prueba o salir. Incluido desde la revisión `4d815d9` y conservado en el último APK. Las nuevas bolas aún no se
 han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
-**[Descargar APK 0.7.0+15 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001/artifacts/12333480990)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
+**[Descargar APK 0.8.0+16 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892/artifacts/12336244410)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001): formato, análisis, **164 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `c74545a`. Incluye M01 Paredes rebotadoras. Incluye Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892): formato, análisis, **183 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `e9e9620`. Incluye M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
 
-Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 62 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
+Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 65 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 
-La revisión entregada pasa 164 pruebas automáticas, además de análisis sin avisos.
+La revisión entregada pasa 183 pruebas automáticas, además de análisis sin avisos.
 Incluyen compra y persistencia de Racha, cargas/activaciones de especiales,
 compatibilidad con jornadas anteriores, eventos reales de dos dedos y pantalla
 de 320 × 568 con texto al 150 %. La pausa permite desplazar su panel si el

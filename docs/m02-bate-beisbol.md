@@ -125,5 +125,13 @@ poder actualizar cualquier APK anterior conservando sus datos.
 
 Verificación local de esta implementación: **181 pruebas** superadas; las 19 de
 M02 y las cinco de control de escoba pasan tras la revisión de bordes/contacto. `flutter analyze` sin
-avisos, formato correcto y revisión de la imagen del tablero. Entrega Android
-pendiente de la pipeline manual; enlazar su ejecución al completarse.
+avisos, formato correcto y revisión de la imagen del tablero.
+
+## Entrega Android verificada
+
+APK **0.8.0+16**, fuente `e9e9620`, publicada en `build/apk-0.6.0+13`.
+[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892): **183 pruebas**, formato, análisis, compilación
+Android y firma correctos. [Descargar APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892/artifacts/12336244410).
+El ZIP contiene `feed-the-hole-debug.apk`. Sin prueba en Android físico y sin
+acreditar compatibilidad de firma con APK anteriores; no desinstalar la anterior
+para resolver un conflicto si se quiere conservar su progreso.

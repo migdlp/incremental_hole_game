@@ -2,6 +2,25 @@
 
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
+## M02 · 0.8.0+16 · 21/10/2026
+
+Fuente compilada `e9e9620`, rama `build/apk-0.6.0+13`.
+[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892):
+**183 pruebas**, formato y análisis sin avisos, compilación Android y firma v2
+correctas. Nombre Feed the Hole, paquete `com.migdlp.incremental_hole_game`,
+versionCode 16. [APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892/artifacts/12336244410).
+
+19 pruebas específicas del bate: gestos, potencia, velocidad relativa/giro,
+contactos continuos y primer golpe desde reposo, bordes, monedas, persistencia,
+compatibilidad v9, DEBUG, feedback y estrés con 200 bolas. Las cinco pruebas de
+control de escoba pasan tras extraer el controlador compartido. Revisada una
+imagen del tablero; no hay prueba en Android físico ni medición de FPS del móvil.
+
+Valores de fuerza/precios/dependencia provisionales; [contrato M02](m02-bate-beisbol.md).
+La pipeline habitual omitió la comparación de firma con APK anteriores. Sigue
+pendiente la compatibilidad descrita en G01; no se acredita conservación de datos
+al actualizar cualquier APK instalada. No se cambian paquete ni guardado.
+
 ## CF-09 a CF-15 — 19 de octubre de 2026 · 0.5.0+10
 
 - 116 pruebas correctas; formato y análisis sin incidencias con Flutter 3.35.7 / Dart 3.9.2.

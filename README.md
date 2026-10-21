@@ -6,17 +6,16 @@ entrega no acredita actualización conservando su progreso. No desinstalar la
 instalación anterior para resolver el conflicto de firma.
 [Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.7.0+15, revisión `c74545a`**, 21/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.8.0+16, revisión `e9e9620`**, 21/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
-**[Descargar APK 0.7.0+15 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001/artifacts/12333480990)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001): formato, análisis, **164 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
+**[Descargar APK 0.8.0+16 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892/artifacts/12336244410)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892): formato, análisis, **183 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
 
-La última entrega añade [M01 · Paredes rebotadoras](docs/m01-paredes-rebotadoras.md): tres niveles permanentes, ondas elásticas y límite de velocidad, con balance provisional. Conserva **interfaz de juego simplificada, una sola barra de tiempo, saldo y pausa dentro del tablero y feedback visual opcional apagado por defecto**, además de racha comprable, especiales y escoba de dos dedos. La interfaz usa «Tienda» y «Comenzar día», sin mostrar números de día. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
+La entrega incluye [M01 · Paredes rebotadoras](docs/m01-paredes-rebotadoras.md): tres niveles permanentes, ondas elásticas y límite de velocidad, con balance provisional. Conserva **interfaz de juego simplificada, una sola barra de tiempo, saldo y pausa dentro del tablero y feedback visual opcional apagado por defecto**, además de racha comprable, especiales y escoba de dos dedos. La interfaz usa «Tienda» y «Comenzar día», sin mostrar números de día. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 
-**M02 en código (0.8.0+16):** bate independiente, tres potencias, gestos de uno/dos
-dedos, impulso por movimiento y giro, y feedback configurable. Balance provisional;
-pendiente de entrega APK. [Cómo probarlo en DEBUG](docs/m02-bate-beisbol.md).
+**M02 incluido (0.8.0+16):** bate independiente, tres potencias, gestos de uno/dos
+dedos, impulso por movimiento y giro, y feedback configurable. Balance provisional. [Cómo probarlo en DEBUG](docs/m02-bate-beisbol.md).
 
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 
@@ -66,7 +65,7 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 
-La entrega vigente pasa **164 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
+La entrega vigente pasa **183 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
 
 La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisis y pruebas, compila el APK de depuración y lo guarda como artefacto descargable junto con su SHA-256. Se activa en **Actions → Flutter - APK manual → Run workflow**; no se dispara con cada push.
 

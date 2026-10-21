@@ -1,6 +1,6 @@
 # Relevo de contexto — Feed the Hole
 
-**Actualizado: 21/10/2026 · Último APK entregado: 0.7.0+15, revisión `c74545a`.**
+**Actualizado: 21/10/2026 · Último APK entregado: 0.8.0+16, revisión `e9e9620`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
 
@@ -38,7 +38,7 @@ con carga automática durante producción y mejoras de recarga, potencia y durac
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
 el otro agarre. Guardado v7 / balance v10, con balances anteriores congelados para jornadas
-antiguas. Verificación local y CI: 164 pruebas y análisis
+antiguas. Verificación CI de la entrega: 183 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
 ## M01 implementado en la última entrega
@@ -47,9 +47,9 @@ Cuatro paredes con rebote base ×0,40 y mejora permanente I/II/III ×1,10/1,35/1
 
 Multiplicadores, límite y costes 40/100/220 con Mano I son **provisionales**, pendientes de validación de balance. [Implementación y pruebas](m01-paredes-rebotadoras.md). Sigue pendiente la compatibilidad de firma con APK anteriores descrita en [G01](g01-feed-the-hole.md); la pipeline estándar verifica la firma de esta APK, sin acreditar actualización sobre la anterior. No desinstalar para resolverlo si se quiere conservar su progreso.
 
-## M02 · prototipo en código
+## M02 · prototipo entregado
 
-Código 0.8.0+16, pendiente de APK. Bate físico aparte de la escoba, tres niveles de
+APK 0.8.0+16 entregado por la pipeline habitual. Bate físico aparte de la escoba, tres niveles de
 potencia activa y control de uno/dos dedos compartido. Velocidad relativa y giro,
 rebote pasivo constante, contacto persistente sin bonificaciones repetidas y cap
 380 u/s. Monedas y activación de especiales conservadas. Compra y pose persistentes,
@@ -87,9 +87,9 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 
 ## Última entrega y comprobaciones
 
-[Descargar APK 0.7.0+15 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001/artifacts/12333480990). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
+[Descargar APK 0.8.0+16 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892/artifacts/12336244410). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
-164 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+183 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
 
 ## Acceso a GitHub desde Codex Cloud (20/10/2026)
 
@@ -133,8 +133,8 @@ Continúa el proyecto Feed the Hole del repo
 migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
-no reconstruir el historial de commits. El último APK es 0.6.0+13:
-agujero arriba, generador abajo, ciclo 15+5, racha comprable, especiales, escoba de dos dedos y debug por botón.
+no reconstruir el historial de commits. El último APK es 0.8.0+16:
+agujero arriba, generador abajo, ciclo 15+5, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
 No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi
 siguiente petición concreta.

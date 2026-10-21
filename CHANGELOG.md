@@ -2,6 +2,17 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.11.0+19 — M03: Generador lanzador
+
+- Segundo generador orientable con frecuencia propia, potencia fija y compra
+  independiente en Producción; valores configurables y provisionales.
+- Control de uno/dos dedos y franja inferior que limita cuerpo y cañón completos.
+  Sigue disparando agarrado, sin retroceso; línea roja al alcanzar el límite.
+- Contactos físicos con presión acumulada y resistencia a tres bolas, desplazamiento
+  lento sin giro; obstrucciones y límite global sin emisiones superpuestas ni ráfagas.
+- Pose persistente entre jornadas/reinicios y reloj/RNG guardados. Pausa y recogida
+  congelan; DEBUG aislado. JSON v7 / balance v13 con v12 congelado, 69 nodos/26 tipos.
+
 ## 0.10.0+18 — E02: Agujero negro
 
 - Apariciones periódicas independientes, varios objetos simultáneos sin sensores,

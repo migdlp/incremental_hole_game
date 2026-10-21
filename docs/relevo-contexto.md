@@ -59,6 +59,17 @@ Precios 60/120/240, Mano I y potencia ×1/×1,35/×1,70 son **provisionales**.
 [Estado M02 y guía de prueba](m02-bate-beisbol.md). No implementar otras piezas
 ni nuevas bolas como parte de esta tarea.
 
+## M03 · Generador lanzador
+
+Prototipo 0.11.0+19: nuevo emisor de Producción, independiente del principal,
+frecuencia propia y potencia fija. Un/dos dedos, disparo agarrado, franja inferior
+completa y línea roja. Presión vectorial de contactos, tres esfuerzos máximos
+insuficientes, desplazamiento lento sin giro/recoil; obstrucciones consumen
+intento sin bolas superpuestas ni ráfagas. Pose entre días/reinicios, reloj/RNG
+guardados y DEBUG aislado. JSON v7 / balance v13 con v12 congelado, 69 nodos y
+26 tipos. Generador II, costes, 280 u/s, intervalos y resistencia son **provisionales**.
+No añadir otros cañones, bolas ni mejoras de fuerza. [Guía y valores](m03-generador-lanzador.md).
+
 ## E02 · Agujero negro
 
 Prototipo 0.10.0+18: comprobaciones independientes 5 % cada 3 s, varios objetos

@@ -2,6 +2,16 @@
 
 Referencia de `0.2.2+4`: cadencia inicial de 1,5 bolas/s y resultados en un pop-up sobre el juego detenido. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
 
+## Ampliación vigente · M03
+
+`Launcher` concentra geometría, límites dependientes de orientación, RNG, reloj,
+pose y presión filtrada. `Board` reutiliza `TwoPointGrip`, resuelve contactos
+con bolas, suma presión vectorial saturada y emite solo si la salida está libre.
+El umbral supera tres esfuerzos máximos; masa/amortiguación limitan desplazamiento,
+sin torque ni retroceso. `GameSession.launcherPose` conserva pose entre jornadas;
+el tablero guarda reloj/RNG para reanudar sin repetir. JSON v7 / balance v13 con
+v12 congelado. Render y audio independientes de simulación. [Contrato M03](m03-generador-lanzador.md).
+
 ## Ampliación vigente · E02
 
 `BlackHoleEvent` separa sorteos periódicos del frame y del RNG de emisión/E01.

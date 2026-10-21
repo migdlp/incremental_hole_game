@@ -24,6 +24,8 @@ class SkillTree {
       'hand': [...line(5, 3, 0, 0, 1), ...line(6, 4, 1, 1, 4)],
       'hand_grip': [...line(6, 3, 0, 0, 1), ...line(7, 2, 1, -1, 4)],
       'generator': line(4, 2, -1, -1, 5),
+      'launcher': line(3, -1, 0, 0, 1),
+      'launcher_rate': line(2, -2, 1, 0, 3),
       'duration': line(2, 1, -1, 0, 5),
       'double_spawn': line(-2, 0, 0, 0, 1),
       'reward': line(5, 2, 0, -1, 5),

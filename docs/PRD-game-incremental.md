@@ -4,6 +4,15 @@ Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y 
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
 
+## Extensión funcional vigente · M03
+
+[Generador lanzador](m03-generador-lanzador.md): segundo productor físico,
+frecuencia independiente y potencia fija. Control de uno/dos dedos, franja
+inferior del 25 %, pose persistente, sin retroceso; solo suficiente presión
+de contactos lo desplaza lentamente y nunca lo gira. Emisiones obstruidas
+consumen intento sin superponer ni acumular. Pausa/recogida congelan; DEBUG
+aislado. Precios, requisitos y parámetros provisionales para experimentar.
+
 ## Evento funcional vigente · E02
 
 [Agujero negro](e02-agujero-negro.md): sorteos periódicos independientes, varios

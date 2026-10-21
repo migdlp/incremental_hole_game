@@ -7,6 +7,7 @@ import 'balance_v8.dart';
 import 'balance_v9.dart';
 import 'balance_v10.dart';
 import 'balance_v11.dart';
+import 'balance_v12.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -31,7 +32,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 12});
+  DaySettings(this.values, {this.balanceVersion = 13});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -59,6 +60,8 @@ class UpgradeCatalog {
     'attraction': ['Alcance del imán', 'Recolección'],
     'double_spawn': ['Doble emisión', 'Producción'],
     'generator': ['Generador rápido', 'Producción'],
+    'launcher': ['Generador lanzador', 'Producción'],
+    'launcher_rate': ['Frecuencia del lanzador', 'Producción'],
     'reward': ['Mayor recompensa', 'Valor'],
     'duration': ['Día más largo', 'Tiempo'],
     'robot': ['Robot ayudante', 'Automatización'],
@@ -161,6 +164,22 @@ class UpgradeCatalog {
       'gravity_response',
       'gravity_ball_damping',
       'gravity_tool_damping',
+      'launcher_interval',
+      'launcher_speed',
+      'launcher_body_radius',
+      'launcher_barrel_length',
+      'launcher_barrel_radius',
+      'launcher_pressure_threshold',
+      'launcher_contact_pressure_limit',
+      'launcher_pressure_stiffness',
+      'launcher_pressure_response',
+      'launcher_mass',
+      'launcher_damping',
+      'launcher_pressure_speed',
+      'launcher_restitution',
+      'launcher_obstruction_force',
+      'launcher_move_speed',
+      'launcher_angular_speed',
       'black_hole_probability',
       'black_hole_interval',
       'black_hole_duration',
@@ -180,6 +199,25 @@ class UpgradeCatalog {
         base['black_hole_radius']! <= base['hole_capture_radius']! + 15) {
       throw const FormatException('Límites de Agujero negro inválidos');
     }
+    if (base['launcher_pressure_threshold']! <=
+            3 * base['launcher_contact_pressure_limit']! ||
+        base['launcher_speed']! > base['ball_speed_limit']! ||
+        base['launcher_interval']! < .25 ||
+        base['launcher_body_radius']! * 2 >= 140 ||
+        2 *
+                (base['launcher_barrel_length']! +
+                    base['launcher_barrel_radius']!) >=
+            140) {
+      throw const FormatException('Límites del lanzador inválidos');
+    }
+    var previousLauncherInterval = base['launcher_interval']!;
+    for (final level
+        in definitions.firstWhere((d) => d.id == 'launcher_rate').levels) {
+      if (level.value < .25 || level.value >= previousLauncherInterval) {
+        throw const FormatException('Frecuencia del lanzador inválida');
+      }
+      previousLauncherInterval = level.value;
+    }
     return UpgradeCatalog._(base, definitions);
   }
 
@@ -190,10 +228,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 12}) {
-    final values = balanceVersion <= 11 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 11) {
-      final historicalCsv = balanceVersion == 11
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 13}) {
+    final values = balanceVersion <= 12 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 12) {
+      final historicalCsv = balanceVersion == 12
+          ? balanceV12Csv
+          : balanceVersion == 11
           ? balanceV11Csv
           : balanceVersion == 10
           ? balanceV10Csv
@@ -257,7 +297,7 @@ class UpgradeCatalog {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 12,
+    int balanceVersion = 13,
   }) {
     if (previousTree.isNotEmpty) {
       validateLevels(

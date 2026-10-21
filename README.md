@@ -25,6 +25,10 @@ Pendiente de validación física. [Sensores y pruebas](docs/e01-gravedad.md).
 5 % por comprobación periódica, varios objetos rompibles y succión ampliada hasta
 10 s sin ampliar captura. DEBUG permite forzar 1–3 objetos. Parámetros provisionales.
 
+**M03 en preparación (0.11.0+19):** [Generador lanzador](docs/m03-generador-lanzador.md),
+segundo emisor orientable, frecuencia independiente, presión física y pose
+persistente. Desbloqueo y parámetros provisionales; disponible en DEBUG.
+
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 
 ## Ejecutar

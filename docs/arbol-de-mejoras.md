@@ -1,12 +1,20 @@
 # Árbol de mejoras progresivo
 
-Código **0.8.0+16**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
+Código **0.11.0+19**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
 **Debug:** pulsar el botón DEBUG, arriba a la izquierda, para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
+## Ampliación M03 · prototipo
+
+El catálogo vigente pasa a **69 nodos y 26 tipos**. Rama independiente de
+Producción: Generador II → Generador lanzador (120) → Frecuencia I/II/III
+(100/180/300), intervalos 2,4/1,8/1,2/0,8 s. Sin mejoras de potencia. Requisito,
+precios y niveles son provisionales, pendientes de balance; CSV como fuente
+configurable. [Comportamiento y pruebas](m03-generador-lanzador.md).
+
 ## Mapa actual
 
-Veinticuatro tipos y **65 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las nueve ramas iniciales se pueden desarrollar conjuntamente.
+Veintiséis tipos y **69 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las nueve ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
 🟣 MANO I · 13 monedas · 2 bolas
@@ -16,6 +24,7 @@ Veinticuatro tipos y **65 nodos**, uno por nivel comprable. Cada nivel requiere 
 ├─ 🟢 GENERADOR I
 │  ├─ ACELERACIÓN · 100 → POTENCIA / DURACIÓN I–II / RECARGA I–II
 │  └─ Generador II
+│     ├─ 🟢 GENERADOR LANZADOR → FRECUENCIA I → II → III
 │     ├─ Generador III → IV → V
 │     │  └─ 🟢 DOBLE EMISIÓN (+ Anchura III)
 │     └─ 🟠 DÍA MÁS LARGO I → II → III → IV → V

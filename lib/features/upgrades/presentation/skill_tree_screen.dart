@@ -807,6 +807,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 }
 
 Color _typeColor(SkillNode node) => switch (node.definition.id) {
+  'launcher' ||
+  'launcher_rate' ||
   'generator' ||
   'double_spawn' ||
   'boost' ||
@@ -837,6 +839,8 @@ const _icons = {
   'attraction': Icons.radar,
   'double_spawn': Icons.filter_2_outlined,
   'generator': Icons.speed,
+  'launcher': Icons.rocket_launch_outlined,
+  'launcher_rate': Icons.av_timer,
   'reward': Icons.toll_outlined,
   'combo': Icons.local_fire_department_outlined,
   'capture_all': Icons.blur_circular,
@@ -866,6 +870,8 @@ String _description(SkillNode node) => switch (node.definition.id) {
   'attraction' => 'Amplía el alcance del imán de monedas',
   'double_spawn' => 'Emite dos bolas a la vez sin cambiar la cadencia',
   'generator' => 'El generador lanza bolas más rápido',
+  'launcher' => 'Un segundo generador orientable en la zona inferior',
+  'launcher_rate' => 'Reduce el intervalo entre disparos del lanzador',
   'reward' => 'Obtén más monedas por cada bola',
   'combo' => 'Encadena capturas para multiplicar sus monedas',
   'capture_all' =>
@@ -902,6 +908,8 @@ TextSpan _summary(SkillNode node) {
     'paddle' => ('La escoba abarca ', number(value * 4), ' u.'),
     'collection' => ('Recoge monedas a ', number(value), ' u de distancia.'),
     'magnet' || 'attraction' => ('El imán alcanza ', number(value), ' u.'),
+    'launcher' => ('', 'Desbloquea el lanzador', ' independiente.'),
+    'launcher_rate' => ('Dispara cada ', number(value), ' s.'),
     'generator' => ('Genera ', number(1 / value), ' bolas/s.'),
     'reward' => ('Cada bola da ', number(value), '.'),
     'combo' => ('', 'Desbloquea la racha', ' de capturas.'),

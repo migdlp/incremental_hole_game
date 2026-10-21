@@ -1,6 +1,15 @@
 # Referencia de guardado y recuperación
 
-## Contrato vigente · E02, 0.10.0+18
+## Contrato vigente · M03, 0.11.0+19
+
+JSON v7 / balance v13. Campo opcional raíz `launcherPose` para posición/ángulo
+entre jornadas; guardados anteriores usan pose inicial. Tablero v13 guarda
+`launcher`: pose, reloj parcial, presión/velocidad, RNG, intentos/disparos y flash.
+Restauración valida antes de aplicar, abre pausado y no repite disparo/sonido.
+Balance v12 congelado para jornadas antiguas; compras y saldo conservados. DEBUG
+restaura también pose y no guarda sus experimentos. [Detalle M03](m03-generador-lanzador.md).
+
+## Ampliación E02, 0.10.0+18
 
 JSON v7 / balance v12. `board.blackHole` conserva RNG, comprobaciones,
 identidades, objetos/daño, activaciones y tiempos. Guardar/restaurar no repite

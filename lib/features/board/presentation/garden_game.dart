@@ -10,6 +10,7 @@ import '../domain/coin_denomination.dart';
 import 'coin_painter.dart';
 import 'bat_feedback.dart';
 import 'black_hole_feedback.dart';
+import 'launcher_feedback.dart';
 import '../domain/black_hole_event.dart';
 import '../domain/bat_impact.dart';
 
@@ -30,6 +31,11 @@ class GardenGame extends FlameGame {
 
   void _syncEngine() {
     if (session.board != null) _displayBoard = session.board!;
+    _launcherFeedback.sync(
+      _displayBoard,
+      sound: session.sound,
+      playing: session.running && !session.paused,
+    );
     _blackHoleFeedback.sync(
       _displayBoard,
       sound: session.sound,
@@ -54,6 +60,7 @@ class GardenGame extends FlameGame {
   double _time = 0;
   final _batFeedback = BatFeedback();
   final _blackHoleFeedback = BlackHoleFeedback();
+  final _launcherFeedback = LauncherFeedback();
   final _labels = <String, TextPainter>{};
   double get scale => math.min(size.x / Board.width, size.y / Board.height);
   Offset get origin => Offset(
@@ -76,6 +83,11 @@ class GardenGame extends FlameGame {
     _displayBoard = session.board!;
     super.update(dt);
     session.tick(dt);
+    _launcherFeedback.sync(
+      _displayBoard,
+      sound: session.sound,
+      playing: session.running && !session.paused,
+    );
     if (session.running && !session.paused) {
       _batFeedback.update(
         dt,
@@ -306,6 +318,69 @@ class GardenGame extends FlameGame {
     }
   }
 
+  void _renderLauncher(Canvas canvas, Board board) {
+    final launcher = board.launcher;
+    if (!launcher.unlocked) return;
+    if (launcher.boundaryFlash > 0) {
+      canvas.drawLine(
+        const Offset(0, 420),
+        const Offset(360, 420),
+        paint(const Color(0xffdc2626), stroke: 2),
+      );
+      canvas.drawRect(
+        const Rect.fromLTWH(2, 420, 356, 138),
+        paint(const Color(0xffdc2626), stroke: 2),
+      );
+    }
+    final center = offset(launcher.position), muzzle = offset(launcher.muzzle);
+    canvas.drawCircle(
+      center + const Offset(0, 4),
+      launcher.bodyRadius + 3,
+      paint(const Color(0x40644c2d)),
+    );
+    canvas.drawLine(
+      center,
+      muzzle,
+      paint(const Color(0xff172333), stroke: launcher.barrelRadius * 2 + 3),
+    );
+    canvas.drawLine(
+      center,
+      muzzle,
+      paint(const Color(0xff71858a), stroke: launcher.barrelRadius * 2),
+    );
+    canvas.drawCircle(
+      center,
+      launcher.bodyRadius,
+      paint(const Color(0xff344b50)),
+    );
+    canvas.drawCircle(
+      center,
+      launcher.bodyRadius - 4,
+      paint(const Color(0xff7b9692)),
+    );
+    canvas.drawCircle(center, 5, paint(const Color(0xff25383d)));
+    canvas.drawLine(
+      muzzle - offset(launcher.axis) * 3,
+      muzzle + offset(launcher.axis) * 2,
+      paint(const Color(0xff111c2e), stroke: launcher.barrelRadius * 2),
+    );
+    if (launcher.flash > 0) {
+      final intensity = launcher.flash / .15;
+      final tip = muzzle + offset(launcher.axis) * (launcher.barrelRadius + 5);
+      canvas.drawCircle(
+        tip,
+        8 * intensity + 3,
+        paint(Color.fromRGBO(255, 213, 125, intensity * .8)),
+      );
+      canvas.drawCircle(tip, 3 * intensity, paint(const Color(0xfffff1ce)));
+    }
+    if (board.holdingLauncher) {
+      for (final handle in launcher.handles) {
+        canvas.drawCircle(offset(handle), 5, paint(const Color(0xffdcebe7)));
+      }
+    }
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -411,6 +486,7 @@ class GardenGame extends FlameGame {
       ),
       paint(const Color(0xff697583)),
     );
+    _renderLauncher(canvas, board);
     for (final ball in board.balls) {
       final p = offset(ball.position);
       canvas.drawCircle(

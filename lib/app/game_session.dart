@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../core/vec.dart';
 import '../features/motion/motion_input.dart';
 import '../features/board/domain/board.dart';
+import '../features/board/domain/launcher.dart';
 import '../features/board/domain/debug_day_report.dart';
 import '../features/board/domain/special_abilities.dart';
 import '../features/board/domain/tool.dart';
@@ -82,6 +83,8 @@ class GameSession extends ChangeNotifier {
   final _grandfathered = <String, int>{};
   final _previousTree = <String, int>{};
   BallTool selectedTool = BallTool.hand;
+  Vec _launcherPosition = const Vec(285, 510);
+  double _launcherAngle = math.pi * 1.75;
   Board? board;
   DayCycle? cycle;
   bool paused = false;
@@ -135,6 +138,8 @@ class GameSession extends ChangeNotifier {
       gravitySupported: gravityAvailable,
       gravitySeed: _eventRandomState,
       blackHoleSeed: _eventRandomState,
+      launcherPosition: _launcherPosition,
+      launcherAngle: _launcherAngle,
       forcedBlackHoles: debugEnabled ? debugBlackHoleObjects : 0,
       forceGravity: debugEnabled && debugForceGravity,
     );
@@ -232,6 +237,8 @@ class GameSession extends ChangeNotifier {
     );
     release(cancel: true);
     economy.bank();
+    _launcherPosition = board!.launcher.position;
+    _launcherAngle = board!.launcher.angle;
     board!.blackHole.finishDay();
     progress.finish(result);
     board = null;
@@ -261,6 +268,8 @@ class GameSession extends ChangeNotifier {
   void release({bool cancel = false, double? time}) {
     final before = board?.gravity.revision;
     final beforeBlackHole = board?.blackHole.revision;
+    final saveLauncherPose =
+        board?.holdingLauncher == true && !cancel && !paused && !_backgrounded;
     final collected =
         board?.releasePointer(
           cancel: cancel || paused || _backgrounded,
@@ -271,8 +280,8 @@ class GameSession extends ChangeNotifier {
     final hit =
         before != board?.gravity.revision ||
         beforeBlackHole != board?.blackHole.revision;
-    if (hit) save();
-    if (collected > 0 || hit) notifyListeners();
+    if (hit || saveLauncherPose) save();
+    if (collected > 0 || hit || saveLauncherPose) notifyListeners();
   }
 
   bool grabSecondBroomPoint(Vec position) =>
@@ -460,6 +469,8 @@ class GameSession extends ChangeNotifier {
     debugForceGravity = false;
     debugGravityTilt = 'sensor';
     debugBlackHoleObjects = 0;
+    _launcherPosition = const Vec(285, 510);
+    _launcherAngle = math.pi * 1.75;
     levels.clear();
     _grandfathered.clear();
     _previousTree.clear();
@@ -510,6 +521,10 @@ class GameSession extends ChangeNotifier {
   String snapshot() => jsonEncode({
     'version': 7,
     'eventRandom': _eventRandomState,
+    'launcherPose': {
+      'position': (board?.launcher.position ?? _launcherPosition).toJson(),
+      'angle': board?.launcher.angle ?? _launcherAngle,
+    },
     'grandfathered': _grandfathered,
     'previousTree': _previousTree,
     'tool': selectedTool.name,
@@ -619,7 +634,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 12)) {
+          (balanceVersion < 1 || balanceVersion > 13)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -720,6 +735,28 @@ class GameSession extends ChangeNotifier {
         savedEventRandom > 0xffffffff) {
       throw const FormatException('Estado aleatorio de eventos inválido');
     }
+    final pose = json['launcherPose'];
+    if (pose != null && pose is! Map<String, dynamic>) {
+      throw const FormatException('Pose del lanzador inválida');
+    }
+    final savedPosition = pose == null
+        ? const Vec(285, 510)
+        : Vec.fromJson(pose['position']);
+    final savedAngle = pose == null ? math.pi * 1.75 : pose['angle'];
+    if (savedAngle is! num ||
+        !savedAngle.isFinite ||
+        savedAngle < 0 ||
+        savedAngle >= math.pi * 2) {
+      throw const FormatException('Orientación del lanzador inválida');
+    }
+    final savedLauncher = Launcher(
+      catalog.settings(savedLevels),
+      position: savedPosition,
+      angle: savedAngle.toDouble(),
+    );
+    if ((savedPosition - savedLauncher.position).length > 1e-6) {
+      throw const FormatException('Posición del lanzador inválida');
+    }
     final savedSound = json['sound'] as bool;
     final savedHaptics = json['haptics'] as bool? ?? true;
     final savedVisualFeedback = json['visualFeedback'] as bool? ?? false;
@@ -744,6 +781,8 @@ class GameSession extends ChangeNotifier {
           'Partida actualizada: conservas saldo y mejoras. '
           'Las monedas se recogen pulsando; el barrido se compra aparte.';
     }
+    _launcherPosition = savedLauncher.position;
+    _launcherAngle = savedLauncher.angle;
     _eventRandomState = savedEventRandom;
     board = restoredBoard;
     board?.gravitySupported = gravityAvailable;

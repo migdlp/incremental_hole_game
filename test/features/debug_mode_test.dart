@@ -98,7 +98,7 @@ void main() {
       session.setDebugFullTree(false);
       expect(session.debugEnabled, isTrue);
       expect(session.debugFullTree, isFalse);
-      expect(tree.visible(session.levels).length, 65);
+      expect(tree.visible(session.levels).length, 69);
       session.debugReset();
       expect(tree.visible(session.levels).map((n) => n.id), ['hand:1']);
       expect(session.economy.balance, 0);
@@ -168,7 +168,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('node-robot_speed:5')), findsOneWidget);
       final tree = SkillTree(catalog);
-      expect(tree.nodes, hasLength(65));
+      expect(tree.nodes, hasLength(69));
       for (final node in tree.nodes) {
         final position = find.byKey(ValueKey('position-${node.id}'));
         expect(position, findsOneWidget, reason: 'Falta el nodo ${node.id}');

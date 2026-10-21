@@ -9,6 +9,7 @@ import 'capture_combo.dart';
 import 'special_abilities.dart';
 import 'gravity_event.dart';
 import 'black_hole_event.dart';
+import 'launcher.dart';
 import 'wall_impact.dart';
 import '../../upgrades/domain/catalog.dart';
 
@@ -61,6 +62,8 @@ class Board {
     int? gravitySeed,
     int? blackHoleSeed,
     int forcedBlackHoles = 0,
+    Vec? launcherPosition,
+    double? launcherAngle,
   }) : specials = SpecialAbilities(settings),
        combo = CaptureCombo(
          enabled:
@@ -79,6 +82,12 @@ class Board {
       seed: blackHoleSeed ?? randomState,
       forcedObjects: forcedBlackHoles,
     );
+    launcher = Launcher(
+      settings,
+      position: launcherPosition,
+      angle: launcherAngle,
+      seed: randomState,
+    );
   }
   static const width = 360.0, height = 560.0;
   static const hole = Vec(180, 50);
@@ -88,6 +97,11 @@ class Board {
   final SpecialAbilities specials;
   late GravityEvent gravity;
   late BlackHoleEvent blackHole;
+  late Launcher launcher;
+  bool _holdingLauncher = false;
+  bool get holdingLauncher => _toolGrip != null && _holdingLauncher;
+  Vec _launcherVelocity = Vec.zero;
+  double _launcherRotation = 0;
   int? _blackHoleTap;
   bool gravitySupported;
   Vec gravityTilt = Vec.zero;
@@ -153,14 +167,17 @@ class Board {
   bool get canCollectCoins =>
       _heldBalls.isEmpty &&
       !holdingBat &&
+      !holdingLauncher &&
       !_gravityTap &&
       _blackHoleTap == null;
   final robot = Robot();
   Vec? paddle, target;
   late Vec broomPosition;
   TwoPointGrip? _toolGrip;
-  bool get holdingBroom => _toolGrip != null && tool != BallTool.bat;
-  bool get holdingBat => _toolGrip != null && tool == BallTool.bat;
+  bool get holdingBroom =>
+      _toolGrip != null && !_holdingLauncher && tool != BallTool.bat;
+  bool get holdingBat =>
+      _toolGrip != null && !_holdingLauncher && tool == BallTool.bat;
   bool get holdingPhysicalTool => _toolGrip != null;
   bool get hasSecondBroomPoint => _toolGrip?.second != null;
   List<Vec> get broomHandles =>
@@ -189,8 +206,16 @@ class Board {
   Vec _batVelocity = Vec.zero;
   double _batRotation = 0;
 
-  Vec get _grippedCenter => holdingBat ? batPosition : broomPosition;
-  double get _grippedAngle => holdingBat ? batAngle : toolAngle;
+  Vec get _grippedCenter => holdingLauncher
+      ? launcher.position
+      : holdingBat
+      ? batPosition
+      : broomPosition;
+  double get _grippedAngle => holdingLauncher
+      ? launcher.angle
+      : holdingBat
+      ? batAngle
+      : toolAngle;
   bool _onBroom(Vec point, double tolerance) =>
       segments.any(
         (segment) => (segment.closest(point) - point).length <= tolerance,
@@ -205,7 +230,11 @@ class Board {
         !holdingPhysicalTool ||
         target == null ||
         hasSecondBroomPoint ||
-        !(holdingBat ? _onBat(point, 22) : _onBroom(point, 22)) ||
+        !(holdingLauncher
+            ? launcher.contains(point, extra: 22)
+            : holdingBat
+            ? _onBat(point, 22)
+            : _onBroom(point, 22)) ||
         (point - target!).length < 18) {
       return false;
     }
@@ -241,6 +270,7 @@ class Board {
     coinOnly = true;
     gravity.finish();
     blackHole.endProduction();
+    launcher.freeze();
     broomGravityVelocity = batGravityVelocity = Vec.zero;
     combo.end();
   }
@@ -334,6 +364,7 @@ class Board {
     _manualBall = null;
     _slippedBalls.clear();
     _toolGrip = null;
+    _holdingLauncher = false;
     _gravityTap = false;
     _blackHoleTap = null;
     paddle = null;
@@ -403,15 +434,18 @@ class Board {
     final onCoin = coins.any(
       (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
     );
+    final grabLauncher = !coinOnly && !onCoin && launcher.contains(paddle!);
     final handle =
         broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
     final grabBat =
         !coinOnly &&
+        !grabLauncher &&
         _onBat(paddle!, batThickness + 8) &&
         (tool == BallTool.bat || !_onBroom(paddle!, 12));
     final grabBroom =
         !coinOnly &&
         broomUnlocked &&
+        !grabLauncher &&
         !grabBat &&
         !onCoin &&
         (_onBroom(paddle!, 12) ||
@@ -421,12 +455,22 @@ class Board {
         : grabBroom
         ? broomTool
         : BallTool.hand;
-    if (grabBat || grabBroom) {
+    if (grabLauncher || grabBat || grabBroom) {
+      _holdingLauncher = grabLauncher;
       _toolGrip = TwoPointGrip(
-        grabBat ? batPosition : broomPosition,
-        grabBat ? batAngle : toolAngle,
+        grabLauncher
+            ? launcher.position
+            : grabBat
+            ? batPosition
+            : broomPosition,
+        grabLauncher
+            ? launcher.angle
+            : grabBat
+            ? batAngle
+            : toolAngle,
         paddle!,
       );
+      if (grabLauncher) launcher.freeze();
       if (grabBat) batGravityVelocity = Vec.zero;
       if (grabBroom) broomGravityVelocity = Vec.zero;
       _heldDuringGesture = true;
@@ -554,6 +598,7 @@ class Board {
           final spawn =
               center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
           if (balls.length < settings['ball_limit'] &&
+              launcher.contact(spawn, radius) == null &&
               balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
             spawned++;
             balls.add(
@@ -629,6 +674,7 @@ class Board {
       );
       blackHole.advance(step, producing: producing);
       _moveTool(step);
+      _advanceLauncher(step, producing: producing);
       _moveGravityTools(step, gravityImpulse);
       final friction = math.exp(
         -1.6 * step -
@@ -669,6 +715,7 @@ class Board {
       _collide();
       _contactBroom(Vec.zero, 0);
       _contactBat();
+      _contactLauncher(step);
       captureBalls();
       sweptCaptures.clear();
     }
@@ -736,6 +783,8 @@ class Board {
   void _moveTool(double dt) {
     _batVelocity = Vec.zero;
     _batRotation = 0;
+    _launcherVelocity = Vec.zero;
+    _launcherRotation = 0;
     if (paddle == null || target == null) return;
     final start = paddle!;
     paddle = start + (target! - start).limit(900 * dt);
@@ -796,6 +845,22 @@ class Board {
       }
     }
     if (!holdingPhysicalTool) return;
+    if (holdingLauncher) {
+      final desired = _toolGrip!.move(
+        target!,
+        launcher.position,
+        launcher.angle,
+        dt,
+        margin: 0,
+        speed: settings['launcher_move_speed'],
+        angularSpeed: settings['launcher_angular_speed'],
+      );
+      final previous = launcher.position;
+      launcher.move(desired.center, desired.angle);
+      _launcherVelocity = (launcher.position - previous) * (1 / dt);
+      _launcherRotation = desired.angularVelocity;
+      return;
+    }
     final pose = _toolGrip!.move(
       target!,
       _grippedCenter,
@@ -819,6 +884,112 @@ class Board {
       toolAngle = pose.angle;
       _contactBroom(pose.velocity, pose.angularVelocity);
     }
+  }
+
+  void _advanceLauncher(double dt, {required bool producing}) {
+    if (!launcher.unlocked) return;
+    launcher.flash = math.max(0.0, launcher.flash - dt);
+    launcher.boundaryFlash = math.max(0.0, launcher.boundaryFlash - dt);
+    if (!producing) return;
+    launcher.clock += dt;
+    while (launcher.clock + 1e-9 >= launcher.interval) {
+      launcher.clock = math.max(0.0, launcher.clock - launcher.interval);
+      launcher.attempts++;
+      if (balls.length >= settings['ball_limit']) continue;
+      final exit =
+          launcher.muzzle +
+          launcher.axis * (launcher.barrelRadius + radius + .5);
+      if ((exit - exit.inside(radius)).length > 1e-6 ||
+          launcher.contact(exit, radius) != null ||
+          segments.any(
+            (s) =>
+                (s.closest(exit) - exit).length < radius + broomThickness ||
+                (s.closest(launcher.muzzle) - launcher.muzzle).length <
+                    radius + broomThickness ||
+                segmentDistance(s.a, launcher.muzzle, exit) <
+                    radius + broomThickness ||
+                segmentDistance(s.b, launcher.muzzle, exit) <
+                    radius + broomThickness,
+          ) ||
+          (batUnlocked &&
+              ((batSegment.closest(exit) - exit).length <
+                      radius + batThickness ||
+                  (batSegment.closest(launcher.muzzle) - launcher.muzzle)
+                          .length <
+                      radius + batThickness ||
+                  segmentDistance(batSegment.a, launcher.muzzle, exit) <
+                      radius + batThickness ||
+                  segmentDistance(batSegment.b, launcher.muzzle, exit) <
+                      radius + batThickness))) {
+        continue;
+      }
+      final blockers = balls
+          .where(
+            (b) =>
+                segmentDistance(b.position, launcher.muzzle, exit) <
+                radius * 2 + .1,
+          )
+          .toList();
+      if (blockers.isNotEmpty) {
+        for (final ball in blockers) {
+          if (!_heldBalls.containsKey(ball)) {
+            ball.velocity =
+                (ball.velocity +
+                        launcher.axis * settings['launcher_obstruction_force'])
+                    .limit(maximumSpeed);
+          }
+        }
+        continue; // Consume the attempt; never queue a delayed volley.
+      }
+      balls.add(
+        Ball(
+          nextId++,
+          exit,
+          launcher.axis * math.min(maximumSpeed, launcher.speed),
+          golden: launcher.random() < .01,
+        ),
+      );
+      spawned++;
+      launcher.shots++;
+      launcher.flash = .15;
+    }
+  }
+
+  void _contactLauncher(double dt) {
+    if (!launcher.unlocked) return;
+    var pressure = Vec.zero;
+    for (final ball in balls) {
+      if (_heldBalls.containsKey(ball)) continue;
+      final contact = launcher.contact(ball.position, radius);
+      if (contact == null) continue;
+      final arm = contact.point - launcher.position;
+      final surface = holdingLauncher
+          ? _launcherVelocity + Vec(-arm.y, arm.x) * _launcherRotation
+          : launcher.velocity;
+      final relative = surface - ball.velocity;
+      final closing = math.max(
+        0.0,
+        relative.x * contact.normal.x + relative.y * contact.normal.y,
+      );
+      // Saturation models finite transmitted stress and guarantees <=3 impacts
+      // cannot defeat static resistance, regardless of their incoming speed.
+      final stress = math.min(
+        settings['launcher_contact_pressure_limit'],
+        contact.depth * settings['launcher_pressure_stiffness'] + closing,
+      );
+      pressure = pressure - contact.normal * stress;
+      ball.position = (ball.position + contact.normal * (contact.depth + .01))
+          .inside(radius);
+      if (closing > 0) {
+        ball.velocity =
+            (ball.velocity +
+                    contact.normal *
+                        (closing * (1 + settings['launcher_restitution'])))
+                .limit(maximumSpeed);
+      }
+      _bounceWalls(ball);
+    }
+    launcher.applyPressure(pressure, dt, held: holdingLauncher);
   }
 
   void _contactBat() {
@@ -1002,6 +1173,7 @@ class Board {
     },
     'spawnClock': spawnClock,
     if (settings.balanceVersion >= 12) 'blackHole': blackHole.toJson(),
+    if (settings.balanceVersion >= 13) 'launcher': launcher.toJson(),
     if (settings.balanceVersion >= 11) ...{
       'gravity': gravity.toJson(),
       'broomGravityVelocity': broomGravityVelocity.toJson(),
@@ -1093,6 +1265,13 @@ class Board {
         throw const FormatException('Falta Agujero negro');
       }
       board.blackHole = BlackHoleEvent.fromJson(settings, saved);
+    }
+    if (settings.balanceVersion >= 13) {
+      final saved = json['launcher'];
+      if (saved is! Map<String, dynamic>) {
+        throw const FormatException('Falta el lanzador');
+      }
+      board.launcher = Launcher.fromJson(settings, saved);
     }
     final margin = board.broomHalfWidth + broomThickness;
     final boundedBroom = board.broomPosition.inside(margin);

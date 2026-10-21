@@ -88,3 +88,11 @@ prueba, volver a la tienda y comenzar día de prueba. No requiere sensores.
 Romperlos con 3–6 toques; otra activación reinicia 10 s sin sumar fuerza.
 Comprobar pausa y desaparición total al empezar recogida. Salir de depuración
 restaura la partida real. [Guía detallada y balance provisional](e02-agujero-negro.md).
+
+## Probar M03 · Generador lanzador
+
+Tienda → DEBUG, volver a la tienda y comprar Generador lanzador o su frecuencia
+en mapa completo (se incluyen requisitos de prueba). Comenzar día; un dedo mueve,
+dos giran, también mientras dispara. La franja inferior limita cuerpo y cañón,
+con línea roja. Probar paredes, salida bloqueada, pausa y pose en jornada siguiente.
+Salir de depuración recupera progreso y pose reales. [Guía física y balance](m03-generador-lanzador.md).

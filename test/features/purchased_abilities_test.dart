@@ -82,7 +82,7 @@ void main() {
       expect(session.board!.combo.enabled, isTrue);
       session.finishDay();
       session.startDay();
-      expect(session.board!.settings.balanceVersion, 12);
+      expect(session.board!.settings.balanceVersion, 13);
       expect(session.board!.combo.enabled, isFalse);
       expect(session.levels, isEmpty);
     },

@@ -170,3 +170,12 @@ calibrar intervalo de sorteos, radio, aceleración/curva, velocidad de deriva y
 feedback visual/sonoro final. Probar control y rendimiento en Android físico.
 La retirada de objetos al comenzar recogida ya está decidida por el usuario.
 No convertir estos valores de prueba ni reglas para futuros eventos en balance aprobado.
+
+## Experimentación pendiente M03
+
+[Generador lanzador](m03-generador-lanzador.md) implementado para prototipo.
+Quedan por validar requisito/precio, número/niveles/costes de frecuencia, intervalo,
+velocidad fija, geometría, esfuerzo máximo transmitido, umbral de presión, masa
+y amortiguación. Probar bloqueo, tacto y acumulación real en Android físico.
+No son balance aprobado; no ampliar a múltiples cañones, nuevas bolas, retroceso
+ni mejoras de potencia.

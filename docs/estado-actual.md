@@ -39,6 +39,17 @@ Destellos sujetos a Feedback visual; clic sujeto a Sonidos del sistema y nueva
 preferencia Vibración, activada inicialmente. Impactos agrupados y limitados a
 una respuesta cada 120 ms. [Física, guardado y pruebas](m02-bate-beisbol.md).
 
+## Generador lanzador · M03
+
+Prototipo **0.11.0+19**: segundo emisor independiente, desbloqueable en rama de
+Producción, con frecuencia propia y potencia fija. Se traslada con un dedo y gira
+con dos; cuerpo/cañón completos limitados al 25 % inferior. Sigue disparando
+agarrado, sin retroceso. Tres bolas no lo mueven; suficiente presión real de
+contactos puede desplazarlo lentamente sin girarlo. Salida bloqueada descarta el
+intento sin superposición ni ráfaga posterior. Pose entre jornadas/reinicios,
+reloj/RNG en jornada, pausa/recogida congelados y DEBUG aislado. Desbloqueo tras
+Generador II, costes y física **provisionales**. [Contrato y pruebas](m03-generador-lanzador.md).
+
 ## Agujero negro · E02
 
 Prototipo **0.10.0+18**: 5 % independiente cada 3 s de producción, sin sensores;

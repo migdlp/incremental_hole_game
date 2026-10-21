@@ -56,10 +56,10 @@ void main() {
       final weak = grip(0), strong = grip(5);
       advance(weak, 240);
       advance(strong, 240);
-      weak.drag(const Vec(200, 250));
-      strong.drag(const Vec(200, 250));
-      advance(weak, 48);
-      advance(strong, 48);
+      weak.drag(const Vec(250, 250));
+      strong.drag(const Vec(250, 250));
+      advance(weak, 72);
+      advance(strong, 72);
       expect(weak.heldBalls, hasLength(1));
       expect(strong.heldBalls, hasLength(2));
       strong.enterClosing();

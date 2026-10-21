@@ -28,7 +28,7 @@ void main() {
     final second = addBall(board, const Vec(155, 200));
     board.touch(const Vec(100, 200), time: 0);
     board.drag(const Vec(150, 200), time: .1);
-    simulate(board, .1);
+    simulate(board, .2); // enough travel time at the shared 380 u/s cap
     expect(board.heldBall, same(first));
     expect(
       second.position.x,

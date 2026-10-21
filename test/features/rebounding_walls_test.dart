@@ -116,6 +116,23 @@ void main() {
   });
 
   test(
+    'manual grip also respects the configured travel and velocity limit',
+    () {
+      final b = board(3);
+      final item = ball(b, const Vec(60, 260), Vec.zero);
+      b.touch(item.position, time: 0);
+      b.drag(const Vec(340, 260), time: .01);
+      final before = item.position;
+      b.update(1 / 60, producing: false);
+      expect(
+        (item.position - before).length,
+        lessThanOrEqualTo(380 / 60 + .00001),
+      );
+      expect(item.velocity.length, lessThanOrEqualTo(380.00001));
+    },
+  );
+
+  test(
     'fast normal and golden balls are captured along the path after a rebound',
     () {
       for (final golden in [false, true]) {

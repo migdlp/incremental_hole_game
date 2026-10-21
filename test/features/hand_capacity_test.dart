@@ -236,7 +236,8 @@ void main() {
         board.update(1 / hz, producing: false);
       }
       expect(board.heldBalls, hasLength(2));
-      board.drag(const Vec(350, 250));
+      // Reverse direction to stress the grip while respecting the speed cap.
+      board.drag(const Vec(20, 250));
       for (var i = 0; i < hz ~/ 2; i++) {
         board.update(1 / hz, producing: false);
       }

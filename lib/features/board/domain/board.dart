@@ -584,7 +584,7 @@ class Board {
       if (_manualBall case final Ball ball) {
         final goal = (target! + _grabOffset).inside(radius);
         final previous = ball.position;
-        ball.position = previous + (goal - previous).limit(700 * dt);
+        ball.position = previous + (goal - previous).limit(maximumSpeed * dt);
         ball.velocity = ((ball.position - previous) * (1 / dt)).limit(
           maximumSpeed,
         );

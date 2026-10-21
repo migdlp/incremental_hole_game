@@ -395,6 +395,56 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     'Reinicia la prueba para ver cómo empieza una partida.',
                   ),
                   const SizedBox(height: 12),
+                  if (session.debugReports.isNotEmpty) ...[
+                    const Text('Última jornada de prueba'),
+                    SelectableText(
+                      session.debugReports.last.summary,
+                      key: const ValueKey('debug-day-report'),
+                    ),
+                    TextButton.icon(
+                      key: const ValueKey('debug-copy-reports'),
+                      onPressed: () => Clipboard.setData(
+                        ClipboardData(
+                          text: session.debugReports
+                              .map((report) => report.summary)
+                              .join('\n\n'),
+                        ),
+                      ),
+                      icon: const Icon(Icons.copy),
+                      label: const Text('Copiar jornadas de prueba'),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  FilledButton(
+                    key: const ValueKey('debug-buy-all'),
+                    onPressed: session.running
+                        ? null
+                        : () => session.debugBuyAll(),
+                    child: const Text('Comprar todo'),
+                  ),
+                  TextButton(
+                    key: const ValueKey('debug-add-coins'),
+                    onPressed: session.running ? null : session.debugAddCoins,
+                    child: const Text('Añadir 1000 monedas de prueba'),
+                  ),
+                  TextButton(
+                    key: const ValueKey('debug-reset'),
+                    onPressed: session.running ? null : session.debugReset,
+                    child: const Text('Reiniciar prueba desde cero'),
+                  ),
+                  TextButton(
+                    key: const ValueKey('debug-close-tools'),
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: const Text('Volver a la tienda'),
+                  ),
+                  OutlinedButton(
+                    key: const ValueKey('debug-exit'),
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      session.exitDebug();
+                    },
+                    child: const Text('Salir de depuración'),
+                  ),
                   ExpansionTile(
                     key: const ValueKey('debug-gravity-tools'),
                     title: const Text('Gravedad'),
@@ -446,55 +496,43 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                       ),
                     ],
                   ),
-                  if (session.debugReports.isNotEmpty) ...[
-                    const Text('Última jornada de prueba'),
-                    SelectableText(
-                      session.debugReports.last.summary,
-                      key: const ValueKey('debug-day-report'),
-                    ),
-                    TextButton.icon(
-                      key: const ValueKey('debug-copy-reports'),
-                      onPressed: () => Clipboard.setData(
-                        ClipboardData(
-                          text: session.debugReports
-                              .map((report) => report.summary)
-                              .join('\n\n'),
+                  ExpansionTile(
+                    key: const ValueKey('debug-black-hole-tools'),
+                    tilePadding: EdgeInsets.zero,
+                    title: const Text('Agujero negro'),
+                    children: [
+                      InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Objetos al comenzar la próxima prueba',
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<int>(
+                            key: const ValueKey('debug-black-hole-count'),
+                            value: session.debugBlackHoleObjects,
+                            isExpanded: true,
+                            items: [
+                              for (var count = 0; count <= 3; count++)
+                                DropdownMenuItem(
+                                  value: count,
+                                  child: Text(
+                                    count == 0
+                                        ? 'Solo apariciones aleatorias'
+                                        : '$count objeto${count == 1 ? '' : 's'} de prueba',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                            ],
+                            onChanged: session.running
+                                ? null
+                                : (count) {
+                                    if (count != null) {
+                                      session.debugSetBlackHoleObjects(count);
+                                    }
+                                  },
+                          ),
                         ),
                       ),
-                      icon: const Icon(Icons.copy),
-                      label: const Text('Copiar jornadas de prueba'),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  FilledButton(
-                    key: const ValueKey('debug-buy-all'),
-                    onPressed: session.running
-                        ? null
-                        : () => session.debugBuyAll(),
-                    child: const Text('Comprar todo'),
-                  ),
-                  TextButton(
-                    key: const ValueKey('debug-add-coins'),
-                    onPressed: session.running ? null : session.debugAddCoins,
-                    child: const Text('Añadir 1000 monedas de prueba'),
-                  ),
-                  TextButton(
-                    key: const ValueKey('debug-reset'),
-                    onPressed: session.running ? null : session.debugReset,
-                    child: const Text('Reiniciar prueba desde cero'),
-                  ),
-                  TextButton(
-                    key: const ValueKey('debug-close-tools'),
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                    child: const Text('Volver a la tienda'),
-                  ),
-                  OutlinedButton(
-                    key: const ValueKey('debug-exit'),
-                    onPressed: () {
-                      Navigator.of(sheetContext).pop();
-                      session.exitDebug();
-                    },
-                    child: const Text('Salir de depuración'),
+                    ],
                   ),
                 ],
               ),

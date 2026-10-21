@@ -6,6 +6,7 @@ import 'balance_v7.dart';
 import 'balance_v8.dart';
 import 'balance_v9.dart';
 import 'balance_v10.dart';
+import 'balance_v11.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -30,7 +31,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 11});
+  DaySettings(this.values, {this.balanceVersion = 12});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -83,7 +84,8 @@ class UpgradeCatalog {
       if (!value.isFinite ||
           (value <= 0 &&
               !(cells[0] == 'base' &&
-                  cells[4] == 'gravity_probability' &&
+                  (cells[4] == 'gravity_probability' ||
+                      cells[4] == 'black_hole_probability') &&
                   value == 0))) {
         throw const FormatException('Efecto inválido');
       }
@@ -159,11 +161,24 @@ class UpgradeCatalog {
       'gravity_response',
       'gravity_ball_damping',
       'gravity_tool_damping',
+      'black_hole_probability',
+      'black_hole_interval',
+      'black_hole_duration',
+      'black_hole_radius',
+      'black_hole_acceleration',
+      'black_hole_curve',
+      'black_hole_object_speed',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }
     if (base['gravity_probability']! > 1 || base['gravity_duration']! > 10) {
       throw const FormatException('Límites de Gravedad inválidos');
+    }
+    if (base['black_hole_probability']! > 1 ||
+        base['black_hole_interval']! < .25 ||
+        base['black_hole_duration']! > 10 ||
+        base['black_hole_radius']! <= base['hole_capture_radius']! + 15) {
+      throw const FormatException('Límites de Agujero negro inválidos');
     }
     return UpgradeCatalog._(base, definitions);
   }
@@ -175,10 +190,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 11}) {
-    final values = balanceVersion <= 10 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 10) {
-      final historicalCsv = balanceVersion == 10
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 12}) {
+    final values = balanceVersion <= 11 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 11) {
+      final historicalCsv = balanceVersion == 11
+          ? balanceV11Csv
+          : balanceVersion == 10
           ? balanceV10Csv
           : balanceVersion == 9
           ? balanceV9Csv
@@ -240,7 +257,7 @@ class UpgradeCatalog {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 11,
+    int balanceVersion = 12,
   }) {
     if (previousTree.isNotEmpty) {
       validateLevels(

@@ -9,6 +9,8 @@ import '../domain/wall_impact.dart';
 import '../domain/coin_denomination.dart';
 import 'coin_painter.dart';
 import 'bat_feedback.dart';
+import 'black_hole_feedback.dart';
+import '../domain/black_hole_event.dart';
 import '../domain/bat_impact.dart';
 
 class GardenGame extends FlameGame {
@@ -28,6 +30,11 @@ class GardenGame extends FlameGame {
 
   void _syncEngine() {
     if (session.board != null) _displayBoard = session.board!;
+    _blackHoleFeedback.sync(
+      _displayBoard,
+      sound: session.sound,
+      playing: session.running && !session.paused,
+    );
     if (session.running && !session.paused) {
       resumeEngine();
     } else {
@@ -46,6 +53,7 @@ class GardenGame extends FlameGame {
   bool wallEffectsEnabled;
   double _time = 0;
   final _batFeedback = BatFeedback();
+  final _blackHoleFeedback = BlackHoleFeedback();
   final _labels = <String, TextPainter>{};
   double get scale => math.min(size.x / Board.width, size.y / Board.height);
   Offset get origin => Offset(
@@ -190,15 +198,33 @@ class GardenGame extends FlameGame {
         canvas.drawPath(cracks, paint(const Color(0xff183349), stroke: 2));
       }
     }
-    if (event.announcement > 0 && !board.coinOnly) {
-      final intensity = event.announcement.clamp(0.0, 1.0);
-      canvas.drawRect(
-        const Rect.fromLTWH(0, 0, 360, 560),
-        paint(Color.fromRGBO(145, 232, 244, .2 * intensity)),
-      );
+  }
+
+  void _renderEventAnnouncements(Canvas canvas, Board board) {
+    if (board.coinOnly) return;
+    final notices = [
+      if (board.gravity.announcement > 0)
+        ('GRAVEDAD', board.gravity.announcement, const Color(0xff91e8f4)),
+      if (board.blackHole.announcement > 0)
+        (
+          'AGUJERO NEGRO',
+          board.blackHole.announcement,
+          const Color(0xffc4b5fd),
+        ),
+    ];
+    if (notices.isEmpty) return;
+    final opacity = notices.map((n) => n.$2).reduce(math.max).clamp(0.0, 1.0);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 360, 560),
+      paint(Color.fromRGBO(145, 195, 244, .16 * opacity)),
+    );
+    for (var i = 0; i < notices.length; i++) {
+      final notice = notices[i];
+      final y = notices.length == 1 ? 230.0 : 192.0 + i * 76;
+      final intensity = notice.$2.clamp(0.0, 1.0);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          const Rect.fromLTWH(20, 230, 320, 66),
+          Rect.fromLTWH(20, y, 320, 66),
           const Radius.circular(12),
         ),
         paint(Color.fromRGBO(17, 28, 46, .9 * intensity)),
@@ -206,16 +232,76 @@ class GardenGame extends FlameGame {
       label(
         canvas,
         'HABILIDAD ESPECIAL:',
-        const Offset(180, 250),
+        Offset(180, y + 20),
         fontSize: 15,
         color: Color.fromRGBO(231, 251, 255, intensity),
       );
       label(
         canvas,
-        'GRAVEDAD',
-        const Offset(180, 276),
+        notice.$1,
+        Offset(180, y + 46),
         fontSize: 22,
-        color: Color.fromRGBO(145, 232, 244, intensity),
+        color: notice.$3.withValues(alpha: intensity),
+      );
+    }
+  }
+
+  void _renderBlackHoleSuction(Canvas canvas, Board board) {
+    final effect = board.blackHole;
+    if (!effect.active || board.coinOnly) return;
+    for (var i = 0; i < 3; i++) {
+      final phase = (effect.elapsed * .7 + i / 3) % 1;
+      final radius = 30 + (effect.reach - 30) * (1 - phase);
+      canvas.drawCircle(
+        offset(Board.hole),
+        radius,
+        paint(
+          Color.fromRGBO(116, 81, 165, .14 * math.sin(phase * math.pi)),
+          stroke: 1.5,
+        ),
+      );
+    }
+  }
+
+  void _renderBlackHoleObjects(Canvas canvas, Board board) {
+    for (final object in board.blackHole.objects) {
+      final p = offset(object.position);
+      final damage = object.damageFlash / .18;
+      canvas.drawCircle(p, 23 + damage * 3, paint(const Color(0x407c3aed)));
+      canvas.drawOval(
+        Rect.fromCenter(center: p, width: 42, height: 19),
+        paint(const Color(0xffa78bfa), stroke: 2),
+      );
+      canvas.drawCircle(p, 17, paint(const Color(0xff1c1434)));
+      canvas.drawCircle(
+        p,
+        16,
+        paint(
+          damage > .2 ? const Color(0xffddd6fe) : const Color(0xff7c3aed),
+          stroke: 2,
+        ),
+      );
+      canvas.drawCircle(p, 11, paint(const Color(0xff080a14)));
+      if (object.hits > 0) {
+        final cracks = Path()
+          ..moveTo(p.dx - 1, p.dy - 17)
+          ..lineTo(p.dx + 4, p.dy - 7)
+          ..lineTo(p.dx - 3, p.dy + 1)
+          ..lineTo(p.dx + 3, p.dy + 14);
+        if (object.hits * 2 >= object.hitsRequired) {
+          cracks
+            ..moveTo(p.dx - 3, p.dy + 1)
+            ..lineTo(p.dx - 14, p.dy + 9);
+        }
+        canvas.drawPath(cracks, paint(const Color(0xffc4b5fd), stroke: 2));
+      }
+    }
+    for (final impact in board.blackHole.impacts) {
+      final progress = (impact.age / BlackHoleImpact.lifetime).clamp(0.0, 1.0);
+      canvas.drawCircle(
+        offset(impact.position),
+        20 + 10 * progress,
+        paint(Color.fromRGBO(167, 139, 250, .6 * (1 - progress)), stroke: 2),
       );
     }
   }
@@ -283,6 +369,7 @@ class GardenGame extends FlameGame {
       radius + 14 + pulse * 3,
       paint(const Color(0x15247d73), stroke: 2),
     );
+    _renderBlackHoleSuction(canvas, board);
     final generator = offset(Board.generator);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -551,6 +638,7 @@ class GardenGame extends FlameGame {
         }
       }
     }
+    _renderBlackHoleObjects(canvas, board);
     if (board.coinOnly) {
       canvas.drawRect(bounds, paint(const Color(0xa6000000)));
     }
@@ -569,6 +657,7 @@ class GardenGame extends FlameGame {
       );
     }
     _renderGravity(canvas, board);
+    _renderEventAnnouncements(canvas, board);
     canvas.restore();
   }
 }

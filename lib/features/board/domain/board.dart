@@ -8,6 +8,7 @@ import 'coin_denomination.dart';
 import 'capture_combo.dart';
 import 'special_abilities.dart';
 import 'gravity_event.dart';
+import 'black_hole_event.dart';
 import 'wall_impact.dart';
 import '../../upgrades/domain/catalog.dart';
 
@@ -58,6 +59,8 @@ class Board {
     this.gravitySupported = false,
     bool forceGravity = false,
     int? gravitySeed,
+    int? blackHoleSeed,
+    int forcedBlackHoles = 0,
   }) : specials = SpecialAbilities(settings),
        combo = CaptureCombo(
          enabled:
@@ -71,6 +74,11 @@ class Board {
       available: gravitySupported,
       force: forceGravity,
     );
+    blackHole = BlackHoleEvent(
+      settings,
+      seed: blackHoleSeed ?? randomState,
+      forcedObjects: forcedBlackHoles,
+    );
   }
   static const width = 360.0, height = 560.0;
   static const hole = Vec(180, 50);
@@ -79,6 +87,8 @@ class Board {
   final CaptureCombo combo;
   final SpecialAbilities specials;
   late GravityEvent gravity;
+  late BlackHoleEvent blackHole;
+  int? _blackHoleTap;
   bool gravitySupported;
   Vec gravityTilt = Vec.zero;
   Vec broomGravityVelocity = Vec.zero, batGravityVelocity = Vec.zero;
@@ -140,7 +150,11 @@ class Board {
   // Only five denomination counters are queued if the visible-object cap fills.
   final _queuedCoins = <int, int>{};
   Map<int, int>? collectedCoins = <int, int>{};
-  bool get canCollectCoins => _heldBalls.isEmpty && !holdingBat && !_gravityTap;
+  bool get canCollectCoins =>
+      _heldBalls.isEmpty &&
+      !holdingBat &&
+      !_gravityTap &&
+      _blackHoleTap == null;
   final robot = Robot();
   Vec? paddle, target;
   late Vec broomPosition;
@@ -226,6 +240,7 @@ class Board {
     releasePointer(cancel: true);
     coinOnly = true;
     gravity.finish();
+    blackHole.endProduction();
     broomGravityVelocity = batGravityVelocity = Vec.zero;
     combo.end();
   }
@@ -300,6 +315,11 @@ class Board {
         gravity.contains(target!)) {
       gravity.hit(available: gravitySupported);
     }
+    final tapped = _blackHoleTap;
+    if (tapped != null && !cancel && !_dragged && !coinOnly && target != null) {
+      final object = blackHole.objects.where((o) => o.id == tapped).firstOrNull;
+      if (object != null && object.contains(target!)) blackHole.hit(tapped);
+    }
     for (final ball in _heldBalls.keys) {
       ball.velocity = cancel
           ? Vec.zero
@@ -315,6 +335,7 @@ class Board {
     _slippedBalls.clear();
     _toolGrip = null;
     _gravityTap = false;
+    _blackHoleTap = null;
     paddle = null;
     target = null;
     _downPoint = null;
@@ -366,8 +387,16 @@ class Board {
     _heldDuringGesture = false;
     _samples.clear();
     _sample(paddle!, time ?? _clock);
+    _blackHoleTap = null;
     _gravityTap = gravityObjectVisible && gravity.contains(paddle!);
     if (_gravityTap) {
+      _heldDuringGesture = true;
+      return 0;
+    }
+    _blackHoleTap = !coinOnly && !blackHole.ended
+        ? blackHole.objectAt(paddle!)?.id
+        : null;
+    if (_blackHoleTap != null) {
       _heldDuringGesture = true;
       return 0;
     }
@@ -598,6 +627,7 @@ class Board {
         available: gravitySupported,
         tilt: gravityTilt,
       );
+      blackHole.advance(step, producing: producing);
       _moveTool(step);
       _moveGravityTools(step, gravityImpulse);
       final friction = math.exp(
@@ -609,11 +639,22 @@ class Board {
         if (_heldBalls.containsKey(ball)) continue;
         ball.velocity = ball.velocity + gravityImpulse;
         final toHole = hole - ball.position;
-        if (toHole.length < settings['hole_capture_radius'] + 15) {
-          ball.velocity = ball.velocity + toHole.unit * (220 * step);
+        final baseAttraction =
+            toHole.length < settings['hole_capture_radius'] + 15 ? 220.0 : 0.0;
+        final expandedAttraction = blackHole.lastActiveTime > 0
+            ? blackHole.accelerationAt(toHole.length)
+            : 0.0;
+        final suctionImpulse =
+            baseAttraction * step +
+            math.max(0.0, expandedAttraction - baseAttraction) *
+                blackHole.lastActiveTime;
+        if (suctionImpulse > 0) {
+          ball.velocity = ball.velocity + toHole.unit * suctionImpulse;
         }
         ball.velocity = ball.velocity.limit(maximumSpeed) * friction;
-        if (ball.velocity.length < 1 && gravityImpulse.length == 0) {
+        if (ball.velocity.length < 1 &&
+            gravityImpulse.length == 0 &&
+            expandedAttraction <= baseAttraction) {
           ball.velocity = Vec.zero;
         }
         final previous = ball.position;
@@ -960,6 +1001,7 @@ class Board {
       'captureAllIds': _captureAllIds.toList(),
     },
     'spawnClock': spawnClock,
+    if (settings.balanceVersion >= 12) 'blackHole': blackHole.toJson(),
     if (settings.balanceVersion >= 11) ...{
       'gravity': gravity.toJson(),
       'broomGravityVelocity': broomGravityVelocity.toJson(),
@@ -1044,6 +1086,13 @@ class Board {
           (!board.batUnlocked && board.batGravityVelocity.length > 0)) {
         throw const FormatException('Velocidad de herramienta inválida');
       }
+    }
+    if (settings.balanceVersion >= 12) {
+      final saved = json['blackHole'];
+      if (saved is! Map<String, dynamic>) {
+        throw const FormatException('Falta Agujero negro');
+      }
+      board.blackHole = BlackHoleEvent.fromJson(settings, saved);
     }
     final margin = board.broomHalfWidth + broomThickness;
     final boundedBroom = board.broomPosition.inside(margin);

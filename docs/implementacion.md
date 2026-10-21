@@ -2,6 +2,16 @@
 
 Referencia de `0.2.2+4`: cadencia inicial de 1,5 bolas/s y resultados en un pop-up sobre el juego detenido. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
 
+## Ampliación vigente · E02
+
+`BlackHoleEvent` separa sorteos periódicos del frame y del RNG de emisión/E01.
+Gestiona varios objetos, daño y un único temporizador reiniciable. `Board` integra
+atracción gradual solo en bolas libres, sin cambiar captura ni fuerzas de monedas
+o herramientas. `GardenGame` dibuja succión bajo ellas y consume el sonido una
+vez por activación nueva. Recogida limpia todos los objetos/efectos. JSON v7,
+balance v12 con v11 congelado; DEBUG permite 1–3 apariciones iniciales temporales.
+[Contrato y calibración E02](e02-agujero-negro.md).
+
 ## Ampliación vigente · E01
 
 `MotionSensorBridge` prueba sensores Android con lecturas reales y remite gravedad

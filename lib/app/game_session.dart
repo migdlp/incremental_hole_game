@@ -24,6 +24,13 @@ class GameSession extends ChangeNotifier {
   int _eventRandomState;
   bool _backgrounded = false;
   bool debugForceGravity = false;
+  int debugBlackHoleObjects = 0;
+  void debugSetBlackHoleObjects(int count) {
+    if (!debugEnabled || running || count < 0 || count > 3) return;
+    debugBlackHoleObjects = count;
+    notifyListeners();
+  }
+
   String debugGravityTilt = 'sensor';
   static const gravityDebugTilts = {
     'sensor': 'Sensor real',
@@ -127,9 +134,12 @@ class GameSession extends ChangeNotifier {
       tool: selectedTool,
       gravitySupported: gravityAvailable,
       gravitySeed: _eventRandomState,
+      blackHoleSeed: _eventRandomState,
+      forcedBlackHoles: debugEnabled ? debugBlackHoleObjects : 0,
       forceGravity: debugEnabled && debugForceGravity,
     );
     debugForceGravity = false;
+    debugBlackHoleObjects = 0;
     cycle = DayCycle(
       production: settings['production_duration'],
       closing: settings['closing_duration'],
@@ -222,6 +232,7 @@ class GameSession extends ChangeNotifier {
     );
     release(cancel: true);
     economy.bank();
+    board!.blackHole.finishDay();
     progress.finish(result);
     board = null;
     cycle = null;
@@ -249,6 +260,7 @@ class GameSession extends ChangeNotifier {
 
   void release({bool cancel = false, double? time}) {
     final before = board?.gravity.revision;
+    final beforeBlackHole = board?.blackHole.revision;
     final collected =
         board?.releasePointer(
           cancel: cancel || paused || _backgrounded,
@@ -256,7 +268,9 @@ class GameSession extends ChangeNotifier {
         ) ??
         0;
     economy.collect(collected);
-    final hit = before != board?.gravity.revision;
+    final hit =
+        before != board?.gravity.revision ||
+        beforeBlackHole != board?.blackHole.revision;
     if (hit) save();
     if (collected > 0 || hit) notifyListeners();
   }
@@ -358,10 +372,12 @@ class GameSession extends ChangeNotifier {
   void exitDebug() {
     final baseline = _debugBaseline;
     if (baseline == null) return;
+    board?.blackHole.finishDay();
     restore(baseline);
     _debugBaseline = null;
     debugForceGravity = false;
     debugGravityTilt = 'sensor';
+    debugBlackHoleObjects = 0;
     _syncMotion();
     _debugReports.clear();
     _debugFullTree = true;
@@ -443,6 +459,7 @@ class GameSession extends ChangeNotifier {
     _debugReports.clear();
     debugForceGravity = false;
     debugGravityTilt = 'sensor';
+    debugBlackHoleObjects = 0;
     levels.clear();
     _grandfathered.clear();
     _previousTree.clear();
@@ -602,7 +619,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 11)) {
+          (balanceVersion < 1 || balanceVersion > 12)) {
         throw const FormatException('Versión de balance inválida');
       }
       final settings = catalog.settings(
@@ -659,6 +676,19 @@ class GameSession extends ChangeNotifier {
                 (restoredBoard.gravity.hasObject ||
                     restoredBoard.gravity.active))) {
           throw const FormatException('Tiempo de Gravedad incoherente');
+        }
+      }
+      if (balanceVersion >= 12) {
+        final event = restoredBoard.blackHole;
+        final elapsed = math.min(
+          settings['production_duration'],
+          settings['production_duration'] +
+              settings['closing_duration'] -
+              remaining,
+        );
+        if ((event.elapsed - elapsed).abs() > 1e-6 ||
+            event.ended != (restoredCycle.phase == DayPhase.closing)) {
+          throw const FormatException('Tiempo de Agujero negro incoherente');
         }
       }
       restoredBoard.tool = restoredTool;

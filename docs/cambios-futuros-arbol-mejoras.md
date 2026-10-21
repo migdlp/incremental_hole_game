@@ -162,3 +162,11 @@ por choques con bolas, reglas de otros eventos aleatorios simultáneos y balance
 del catálogo futuro. Probabilidad inicial 5 % y máximo 10 s de producción; no
 ampliar duración ni convertir estas hipótesis en reglas definitivas.
 [Estado y prueba E01](e01-gravedad.md).
+
+## Experimentación pendiente E02
+
+[Agujero negro](e02-agujero-negro.md) implementado como prototipo. Quedan por
+calibrar intervalo de sorteos, radio, aceleración/curva, velocidad de deriva y
+feedback visual/sonoro final. Probar control y rendimiento en Android físico.
+La retirada de objetos al comenzar recogida ya está decidida por el usuario.
+No convertir estos valores de prueba ni reglas para futuros eventos en balance aprobado.

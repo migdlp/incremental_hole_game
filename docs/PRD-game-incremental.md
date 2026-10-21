@@ -4,6 +4,14 @@ Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y 
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
 
+## Evento funcional vigente · E02
+
+[Agujero negro](e02-agujero-negro.md): sorteos periódicos independientes, varios
+objetos sin sensores y 3–6 toques. Amplía atracción sobre bolas libres durante
+hasta 10 s, sin ampliar captura ni afectar monedas/herramientas. Otra activación
+restablece duración sin acumular fuerza. Recogida retira objetos y efecto; pausa
+y restauración conservan el estado. DEBUG aislado; parámetros y estética provisionales.
+
 ## Evento funcional vigente · E01
 
 [Gravedad](e01-gravedad.md) aparece aleatoriamente desde la primera jornada

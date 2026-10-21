@@ -55,3 +55,5 @@ El PRD define lo que se quiere construir; [implementación](implementacion.md) y
 - **Fuera de alcance:** el PRD lo excluye de este MVP; no es una tarea pendiente de esta entrega.
 
 La estructura adapta [Diátaxis](https://diataxis.fr/) a este repositorio: recorrido inicial, guías para tareas, referencia y explicación. Los criterios y las fuentes consultadas están en la [guía de documentación](guia-documentacion.md).
+
+- [E02 · Agujero negro: prototipo y guía de prueba](e02-agujero-negro.md).

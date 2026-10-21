@@ -21,6 +21,10 @@ dedos, impulso por movimiento y giro, y feedback configurable. Balance provision
 aleatorio rompible con 3–6 toques, duración limitada y prueba forzada desde DEBUG.
 Pendiente de validación física. [Sensores y pruebas](docs/e01-gravedad.md).
 
+**E02 en esta versión (0.10.0+18):** [Agujero negro](docs/e02-agujero-negro.md),
+5 % por comprobación periódica, varios objetos rompibles y succión ampliada hasta
+10 s sin ampliar captura. DEBUG permite forzar 1–3 objetos. Parámetros provisionales.
+
 El último código entregado está en `build/apk-0.6.0+13`; no asumir que está integrado en `main`. Los antecedentes de entregas se conservan en el [historial](CHANGELOG.md).
 
 ## Ejecutar

@@ -32,6 +32,13 @@ base,gravity_acceleration,0,0,gravity_acceleration,180,logical_units_per_second_
 base,gravity_response,0,0,gravity_response,6,per_second,,
 base,gravity_ball_damping,0,0,gravity_ball_damping,0.15,per_second,,
 base,gravity_tool_damping,0,0,gravity_tool_damping,2.4,per_second,,
+base,black_hole_probability,0,0,black_hole_probability,0.05,probability,,1
+base,black_hole_interval,0,0,black_hole_interval,3,seconds,,
+base,black_hole_duration,0,0,black_hole_duration,10,seconds,,10
+base,black_hole_radius,0,0,black_hole_radius,180,logical_units,,
+base,black_hole_acceleration,0,0,black_hole_acceleration,420,logical_units_per_second_squared,,
+base,black_hole_curve,0,0,black_hole_curve,2,exponent,,
+base,black_hole_object_speed,0,0,black_hole_object_speed,8,logical_units_per_second,,
 upgrade,hand,1,13,hand_capacity,2,balls,,
 upgrade,hand,2,30,hand_capacity,3,balls,,
 upgrade,hand,3,50,hand_capacity,4,balls,,

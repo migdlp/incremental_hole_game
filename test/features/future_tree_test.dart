@@ -169,7 +169,7 @@ void main() {
           isFalse,
         ); // next purchase follows the new map
         reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 11);
+        expect(reopened.board!.settings.balanceVersion, 12);
         expect(reopened.board!.settings['production_duration'], 21);
         expect(reopened.levels.containsKey('hand'), isFalse);
         expect(reopened.levels.containsKey('sweep'), isFalse);

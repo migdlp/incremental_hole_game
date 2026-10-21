@@ -59,6 +59,17 @@ Precios 60/120/240, Mano I y potencia ×1/×1,35/×1,70 son **provisionales**.
 [Estado M02 y guía de prueba](m02-bate-beisbol.md). No implementar otras piezas
 ni nuevas bolas como parte de esta tarea.
 
+## E02 · Agujero negro
+
+Prototipo 0.10.0+18: comprobaciones independientes 5 % cada 3 s, varios objetos
+sin sensores, 3–6 pulsaciones y succión ampliada sobre bolas libres. Captura,
+monedas y herramientas conservadas. Duración hasta 10 s, otra activación
+restablece tiempo sin acumular potencia. **Usuario decidió retirar también los
+objetos sin romper al terminar producción**, como Gravedad. Pausa/restore sin
+repetir activación, JSON v7 / balance v12 con v11 congelado. DEBUG fuerza 1–3
+objetos temporales. Intervalo/radio/fuerza/curva/deriva/audio/estética siguen
+provisionales. [Guía, parámetros y pruebas](e02-agujero-negro.md).
+
 ## E01 · Gravedad entregada
 
 APK 0.9.0+17 generado por la pipeline habitual. 5 % por jornada compatible, máximo un objeto,

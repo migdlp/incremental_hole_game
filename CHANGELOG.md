@@ -2,6 +2,17 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.10.0+18 — E02: Agujero negro
+
+- Apariciones periódicas independientes, varios objetos simultáneos sin sensores,
+  3–6 toques y succión ampliada hasta 10 s sin cambiar captura ni recompensas.
+- Activación repetida restablece tiempo sin acumular radio/potencia; ondas bajo
+  bolas/herramientas, daño progresivo y sonido sujeto a ajustes.
+- Pausa/restauración conservan objetos y efecto sin duplicar activaciones.
+  Recogida elimina ambos; monedas, herramientas y agarres protegidos.
+- DEBUG fuerza 1–3 objetos sin sobrescribir la partida; JSON v7 / balance v12,
+  v11 congelado. Parámetros físicos, intervalo y presentación provisionales.
+
 ## 0.9.0+17 — E01: Gravedad
 
 - Evento aleatorio de producción, 5 % por jornada compatible, un objeto como

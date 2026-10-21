@@ -80,3 +80,11 @@ aparece un objeto: romperlo con 3–6 toques para activar el efecto. Comprar esc
 y bate permite probar también sus movimientos libres y sus agarres.
 El forzado se consume al comenzar; salir o reiniciar descarta la configuración.
 [Casos de prueba, guardado y parámetros provisionales](e01-gravedad.md).
+
+## Probar E02 · Agujero negro
+
+En Tienda → DEBUG → **Agujero negro**, elegir 1–3 objetos al comenzar la próxima
+prueba, volver a la tienda y comenzar día de prueba. No requiere sensores.
+Romperlos con 3–6 toques; otra activación reinicia 10 s sin sumar fuerza.
+Comprobar pausa y desaparición total al empezar recogida. Salir de depuración
+restaura la partida real. [Guía detallada y balance provisional](e02-agujero-negro.md).

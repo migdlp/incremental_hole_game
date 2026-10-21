@@ -39,6 +39,17 @@ Destellos sujetos a Feedback visual; clic sujeto a Sonidos del sistema y nueva
 preferencia Vibración, activada inicialmente. Impactos agrupados y limitados a
 una respuesta cada 120 ms. [Física, guardado y pruebas](m02-bate-beisbol.md).
 
+## Agujero negro · E02
+
+Prototipo **0.10.0+18**: 5 % independiente cada 3 s de producción, sin sensores;
+pueden coexistir varios objetos. Necesitan 3–6 toques. Succión ampliada hasta 10 s
+solo en bolas libres, sin cambiar captura, monedas ni herramientas. Otra
+activación restablece 10 s sin acumular radio/potencia. Pausa y restauración
+conservan objetos, daños y duración. Recogida retira todos los objetos y el
+efecto, por decisión del usuario. DEBUG → Agujero negro fuerza 1–3 objetos
+temporales. Parámetros, estética y sonido finales pendientes de pruebas.
+[Contrato y guía E02](e02-agujero-negro.md).
+
 ## Gravedad · E01
 
 Prototipo **0.9.0+17**, incluido en el APK enlazado abajo. Evento aleatorio desde la primera

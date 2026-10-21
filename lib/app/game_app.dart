@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 import '../features/board/presentation/garden_game.dart';
 import '../features/board/presentation/coin_icon.dart';
 import '../features/board/presentation/streak_indicator.dart';
 import '../features/board/presentation/special_ability_bar.dart';
-import '../features/board/domain/coin_denomination.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/feeding/presentation/feeding_summary.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
@@ -162,12 +162,33 @@ class DayScreen extends StatefulWidget {
 class _DayScreenState extends State<DayScreen> {
   late final GardenGame game = GardenGame(widget.session);
   int? pointer, secondPointer;
+  final _walletKey = GlobalKey();
+  final _boardKey = GlobalKey();
   int lastIncome = 0;
+  void _frameTimings(List<FrameTiming> timings) {
+    if (widget.session.debugEnabled) {
+      widget.session.rewardFrameMetrics.add(timings);
+    }
+  }
+
+  void _syncWallet() {
+    final wallet = _walletKey.currentContext?.findRenderObject();
+    final board = _boardKey.currentContext?.findRenderObject();
+    if (wallet is RenderBox && board is RenderBox && game.size.x > 0) {
+      final local = board.globalToLocal(
+        wallet.localToGlobal(wallet.size.center(Offset.zero)),
+      );
+      final point = game.boardPoint(local);
+      if (point != null) game.walletTarget = Offset(point.x, point.y);
+    }
+  }
+
   DateTime lastSound = DateTime(2000);
   @override
   void initState() {
     super.initState();
     widget.session.addListener(_changes);
+    SchedulerBinding.instance.addTimingsCallback(_frameTimings);
   }
 
   void _changes() {
@@ -186,12 +207,16 @@ class _DayScreenState extends State<DayScreen> {
   @override
   void dispose() {
     widget.session.removeListener(_changes);
+    SchedulerBinding.instance.removeTimingsCallback(_frameTimings);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final session = widget.session;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncWallet();
+    });
     final closing = session.phase == DayPhase.closing;
     final cycle = session.cycle;
     final seconds = cycle == null
@@ -244,6 +269,7 @@ class _DayScreenState extends State<DayScreen> {
                 children: [
                   Positioned.fill(
                     child: Listener(
+                      key: _boardKey,
                       onPointerDown: (event) {
                         if (session.paused) return;
                         final point = game.boardPoint(event.localPosition);
@@ -332,30 +358,36 @@ class _DayScreenState extends State<DayScreen> {
                     top: 15,
                     right: 16,
                     child: IgnorePointer(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xeef1e5cd),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          key: const ValueKey('gameplay-balance'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const CoinIcon(),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${session.economy.balance + (session.running ? session.economy.collected : 0)}',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
+                      child: AnimatedScale(
+                        scale: session.rewardVisuals.receiptPulse > 0
+                            ? 1.06
+                            : 1,
+                        duration: const Duration(milliseconds: 120),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xeef1e5cd),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            key: const ValueKey('gameplay-balance'),
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CoinIcon(key: _walletKey),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${session.economy.balance + (session.running ? session.economy.collected : 0)}',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -649,8 +681,8 @@ class NightScreen extends StatelessWidget {
               Expanded(
                 child: _metric(
                   const CoinIcon(),
-                  '${result.lost}',
-                  'Sin recoger',
+                  '${result.generated}',
+                  'Recompensas',
                   result.lost == 0
                       ? const Color(0xff8fc7ba)
                       : const Color(0xffffbb7c),
@@ -658,49 +690,11 @@ class NightScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Monedas recogidas',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
+          const SizedBox(height: 16),
+          const Text(
+            'Cobro automático',
+            style: TextStyle(color: Color(0xffb5bdc9), fontSize: 12),
           ),
-          const SizedBox(height: 8),
-          if (result.collectedCoins == null)
-            const Text(
-              'Detalle no disponible para esta jornada anterior.',
-              style: TextStyle(color: Color(0xffb5bdc9), fontSize: 12),
-            )
-          else if (result.collectedCoins!.values.every((count) => count == 0))
-            const Text(
-              'Sin monedas recogidas',
-              style: TextStyle(color: Color(0xffb5bdc9), fontSize: 12),
-            )
-          else
-            for (final denomination in CoinDenomination.values.reversed)
-              if ((result.collectedCoins![denomination.amount] ?? 0) > 0)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Semantics(
-                    key: ValueKey('collected-coin-${denomination.amount}'),
-                    label:
-                        '${result.collectedCoins![denomination.amount]} monedas de ${denomination.amount}',
-                    excludeSemantics: true,
-                    child: Row(
-                      children: [
-                        CoinIcon(denomination: denomination),
-                        const SizedBox(width: 8),
-                        Text('${denomination.amount}'),
-                        const Spacer(),
-                        Text(
-                          '× ${result.collectedCoins![denomination.amount]}',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
         ],
       ),
     );

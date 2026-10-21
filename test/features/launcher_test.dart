@@ -48,7 +48,7 @@ void main() {
     'launcher is an independent generation branch with its own rate and fixed power',
     () {
       final tree = SkillTree(catalog);
-      expect(tree.nodes, hasLength(69));
+      expect(tree.nodes, hasLength(59));
       expect(tree.byId('launcher:1').parents, ['generator:2']);
       expect(tree.byId('launcher_rate:1').parents, ['launcher:1']);
       final normalInterval = catalog.settings(owned)['spawn_interval'];
@@ -491,9 +491,10 @@ void main() {
       s.setBackgrounded(false);
       s.resume();
       tick(s, 12.6);
-      final frozen = jsonEncode(s.board!.launcher.toJson());
+      expect(s.running, isFalse);
+      final pose = s.snapshot();
       tick(s, 1);
-      expect(jsonEncode(s.board!.launcher.toJson()), frozen);
+      expect(s.snapshot(), pose);
       s.dispose();
     },
   );
@@ -568,6 +569,7 @@ void main() {
     final data = jsonDecode(s.snapshot()) as Map<String, dynamic>;
     data['version'] = 7;
     data.remove('feeding');
+    data['run']['remaining'] += 5;
     data['run']['balanceVersion'] = 12;
     data['run']['settings'] = catalog.settings({}, balanceVersion: 12).toJson();
     (data['run']['board'] as Map).remove('launcher');
@@ -577,7 +579,7 @@ void main() {
     expect(s.board!.launcher.unlocked, isFalse);
     s.finishDay();
     s.startDay();
-    expect(s.board!.settings.balanceVersion, 14);
+    expect(s.board!.settings.balanceVersion, 15);
     s.dispose();
   });
 

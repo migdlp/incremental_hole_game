@@ -50,9 +50,9 @@ void main() {
       expect(s.economy.balance, 500);
       capture(s, golden: true);
       expect(s.feeding.points, 33);
-      expect(s.board!.pending, 33);
+      expect(s.rewards.outstanding, 33);
       s.finishDay(); // Uncollected coins are lost, feeding stays.
-      expect(s.economy.balance, 500);
+      expect(s.economy.balance, 533);
       expect(s.feeding.points, 33);
       expect(s.feeding.completedDays, 1);
       s.dispose();
@@ -169,7 +169,7 @@ void main() {
       expect(s.feeding.due, isTrue);
       expect(s.feeding.met, isTrue);
       expect(s.feeding.period, 1);
-      expect(s.economy.balance, 300);
+      expect(s.economy.balance, 301);
       s.startDay();
       expect(s.feeding.period, 2);
       expect(s.feeding.points, 0);
@@ -284,15 +284,16 @@ void main() {
     s.dispose();
   });
 
-  test('closing neither captures frozen balls nor adds feeding', () {
+  test('finished production cannot add captures or feeding', () {
     final s = session()..startDay();
+    final b = s.board!;
     tick(s, 15.1);
     final before = s.feeding.points;
-    final b = s.board!;
     b.balls.add(Ball(b.nextId++, Board.hole, Vec.zero, golden: true));
     tick(s, 1);
+    expect(s.board, isNull);
     expect(s.feeding.points, before);
-    expect(s.feeding.completedDays, 0);
+    expect(s.feeding.completedDays, 1);
     s.dispose();
   });
 
@@ -368,11 +369,21 @@ void main() {
       final old = jsonDecode(s.snapshot()) as Map<String, dynamic>;
       old['version'] = 7;
       old.remove('feeding');
+      old['run']['remaining'] += 5;
       old['run']['balanceVersion'] = 13;
       old['run']['settings'] = catalog.settings({
         'hand': 1,
       }, balanceVersion: 13).toJson();
       (old['run']['board'] as Map).remove('feeding');
+      (old['run']['board'] as Map).remove('automaticCoins');
+      old['run']['board']['coins'] = [
+        {
+          'id': old['run']['board']['nextId']++,
+          'p': [120.0, 250.0],
+          'value': 10,
+          'landing': 0.0,
+        },
+      ];
       s.restore(jsonEncode(old));
       expect(s.board!.settings.balanceVersion, 13);
       expect(s.feeding.startDay, 2);
@@ -383,10 +394,10 @@ void main() {
       s.finishDay();
       expect(s.feeding.completedDays, 0);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 14);
+      expect(s.board!.settings.balanceVersion, 15);
       capture(s, golden: true);
       expect(s.feeding.points, 10);
-      expect(s.economy.balance, 200);
+      expect(s.economy.balance, 211);
       expect(s.levels, {'hand': 1});
       s.dispose();
     },
@@ -409,7 +420,7 @@ void main() {
       expect(s.feeding.startDay, 8);
       expect(s.feeding.points, 0);
       expect(s.feeding.period, 1);
-      expect(s.economy.balance, 200);
+      expect(s.economy.balance, 207);
       expect(s.levels, {'hand': 1});
       s.dispose();
     },

@@ -1,5 +1,9 @@
 # S01 — Sistema de alimentación y cuotas
 
+**Actualización C01:** alimentación y cuotas conservadas; el dinero se cobra
+automáticamente y no hay fase de recogida. JSON vigente v9 / balance v15. Los
+detalles v8 de esta entrega describen su contrato histórico. [C01](c01-cobro-automatico.md).
+
 Estado: prototipo jugable 0.12.0+20. Pendientes BAL01, S03 y validación física.
 
 ## Reglas confirmadas por el usuario

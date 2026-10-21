@@ -1,12 +1,16 @@
 # Feed the Hole
 
+**C01 · 0.13.0+21:** [Cobro automático](docs/c01-cobro-automatico.md), monedas decorativas
+y cierre directo sin recogida. Compras retiradas sin reembolso, según autorización
+del usuario. Pool y presupuestos provisionales; medición Android físico pendiente.
+
 **G01:** Feed the Hole `0.6.0+14` ya está disponible mediante la pipeline habitual.
 La comprobación previa detectó una firma distinta de la APK anterior; esta
 entrega no acredita actualización conservando su progreso. No desinstalar la
 instalación anterior para resolver el conflicto de firma.
 [Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.12.0+20, revisión `8eaff28`**, 21/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, cobra automáticamente sus recompensas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.12.0+20, revisión `8eaff28`**, 21/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
@@ -59,12 +63,12 @@ python3 -m http.server 8123 --directory build/web
 
 - Tablero lógico 360 × 560, generador, fricción, colisiones y captura por el hoyo. Agarre individual inicial, capacidad mejorable a 2/3/4/5/6 bolas y lanzamiento manual según la velocidad final del gesto e inercia propia para las bolas adicionales. Solo una mano que ya lleva una bola atrae las cercanas, con peso y retraso; un tirón fuerte puede soltarlas. Cada bola emitida tiene un 1 % de probabilidad de ser dorada y valer ×10; con el valor base genera $10.
 - Escoba física disponible solo tras comprarla, perpendicular al arrastre, giro suavizado, anchura mejorable y escoba en V; selector de herramientas compradas.
-- Monedas de $1/$10/$50/$100/$500 con colores propios, sin cifras ni símbolos sobre sus caras; una bola genera $1 de base. Monedas individuales, aterrizaje, área manual mejorable sin imán y barrido opcional. No se fusionan; la reserva por denominaciones conserva el valor si se llena el límite visible. No se recogen ni atraen mientras se lleva una bola.
-- Día inicial de **20 segundos en total: 15 de producción y 5 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
+- Monedas decorativas en pool: salida del hoyo tras ~1 s y vuelo curvo al monedero. Cobro completo sin tocar, agrupar u omitir animaciones no cambia los ingresos. Cierre liquida pendientes.
+- Día inicial de **15 segundos de producción, sin fase final de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso completo se banca una sola vez al cierre.
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 1 segundo; las compras revelan nuevos caminos.
-- 26 tipos y 69 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
+- 22 tipos y 59 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
-- Guardado JSON v8 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
+- Guardado JSON v9 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano y opción de silenciar los sonidos del sistema.
 
 La tabla `docs/balance.csv` se empaqueta como recurso y se valida al cargar: es la fuente editable del balance actual. Las jornadas antiguas conservan su configuración hasta terminar; el siguiente día usa el balance nuevo. La noche descarta también cualquier bola agarrada.

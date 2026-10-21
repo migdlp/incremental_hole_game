@@ -9,6 +9,7 @@ import 'balance_v10.dart';
 import 'balance_v11.dart';
 import 'balance_v12.dart';
 import 'balance_v13.dart';
+import 'balance_v14.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -33,7 +34,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 14});
+  DaySettings(this.values, {this.balanceVersion = 15});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -55,10 +56,6 @@ class UpgradeCatalog {
     'broom': ['Escoba recta', 'Control'],
     'paddle': ['Escoba más ancha', 'Control'],
     'broom_v': ['Escoba en V', 'Control'],
-    'sweep': ['Recogida por barrido', 'Recolección'],
-    'collection': ['Área de recogida', 'Recolección'],
-    'magnet': ['Imán', 'Recolección'],
-    'attraction': ['Alcance del imán', 'Recolección'],
     'double_spawn': ['Doble emisión', 'Producción'],
     'generator': ['Generador rápido', 'Producción'],
     'launcher': ['Generador lanzador', 'Producción'],
@@ -89,7 +86,8 @@ class UpgradeCatalog {
           (value <= 0 &&
               !(cells[0] == 'base' &&
                   (cells[4] == 'gravity_probability' ||
-                      cells[4] == 'black_hole_probability') &&
+                      cells[4] == 'black_hole_probability' ||
+                      cells[4] == 'closing_duration') &&
                   value == 0))) {
         throw const FormatException('Efecto inválido');
       }
@@ -137,6 +135,9 @@ class UpgradeCatalog {
     }
     for (final key in [
       'production_duration',
+      'reward_delay',
+      'reward_visual_limit',
+      'reward_ledger_limit',
       'closing_duration',
       'spawn_interval',
       'ball_value',
@@ -221,7 +222,12 @@ class UpgradeCatalog {
       }
       previousLauncherInterval = level.value;
     }
-    for (final key in ['feeding_quota_initial', 'feeding_quota_step']) {
+    for (final key in [
+      'feeding_quota_initial',
+      'feeding_quota_step',
+      'reward_visual_limit',
+      'reward_ledger_limit',
+    ]) {
       if (base[key]! != base[key]!.roundToDouble()) {
         throw const FormatException('Cuota de prueba no entera');
       }
@@ -236,10 +242,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 14}) {
-    final values = balanceVersion <= 13 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 13) {
-      final historicalCsv = balanceVersion == 13
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 15}) {
+    final values = balanceVersion <= 14 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 14) {
+      final historicalCsv = balanceVersion == 14
+          ? balanceV14Csv
+          : balanceVersion == 13
           ? balanceV13Csv
           : balanceVersion == 12
           ? balanceV12Csv
@@ -302,18 +310,42 @@ class UpgradeCatalog {
     return DaySettings(values, balanceVersion: balanceVersion);
   }
 
+  static const retiredIds = {'sweep', 'collection', 'magnet', 'attraction'};
+  static UpgradeDefinition? retiredDefinition(String id) {
+    if (!retiredIds.contains(id)) return null;
+    final rows = balanceV14Csv
+        .trim()
+        .split('\n')
+        .skip(1)
+        .map((s) => s.split(','))
+        .where((r) => r[0] == 'upgrade' && r[1] == id)
+        .toList();
+    return UpgradeDefinition(id, id, '', rows.first[4], rows.first[6], [
+      for (final row in rows)
+        UpgradeLevel(int.parse(row[3]), double.parse(row[5]), row[7]),
+    ]);
+  }
+
   void validateLevels(
     Map<String, int> levels, {
     Map<String, int> grandfathered = const {},
     bool legacy = false,
+    bool retiredRemoved = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 14,
+    int balanceVersion = 15,
   }) {
+    bool met(UpgradeLevel level) => level.requirements.every(
+      (requirement) =>
+          (retiredRemoved &&
+              retiredIds.contains(requirement.split(':').first)) ||
+          requirementsMet(UpgradeLevel(0, 1, requirement), levels),
+    );
     if (previousTree.isNotEmpty) {
       validateLevels(
         previousTree,
         grandfathered: grandfathered,
         balanceVersion: 5,
+        retiredRemoved: retiredRemoved,
       );
       for (final entry in previousTree.entries) {
         if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
@@ -322,7 +354,11 @@ class UpgradeCatalog {
       }
     }
     if (!legacy && grandfathered.isNotEmpty) {
-      validateLevels(grandfathered, legacy: true);
+      validateLevels(
+        grandfathered,
+        legacy: true,
+        retiredRemoved: retiredRemoved,
+      );
     }
     for (final entry in grandfathered.entries) {
       if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
@@ -330,9 +366,11 @@ class UpgradeCatalog {
       }
     }
     for (final entry in levels.entries) {
-      final definition = definitions
-          .where((d) => d.id == entry.key)
-          .firstOrNull;
+      final definition =
+          definitions.where((d) => d.id == entry.key).firstOrNull ??
+          (balanceVersion <= 14 || legacy
+              ? retiredDefinition(entry.key)
+              : null);
       if (definition == null ||
           entry.value < 0 ||
           entry.value > definition.levels.length) {
@@ -353,8 +391,7 @@ class UpgradeCatalog {
             )
             .firstOrNull;
         if (entry.value > 0 &&
-            (row == null ||
-                !requirementsMet(UpgradeLevel(0, 1, row[7]), levels))) {
+            (row == null || !met(UpgradeLevel(0, 1, row[7])))) {
           throw const FormatException('Compra anterior inválida');
         }
       } else if (entry.value > (grandfathered[entry.key] ?? 0) &&
@@ -374,7 +411,7 @@ class UpgradeCatalog {
               );
           next = UpgradeLevel(0, 1, row[7]);
         }
-        if (!requirementsMet(next, levels)) {
+        if (!met(next)) {
           throw const FormatException('Requisito guardado incumplido');
         }
       }

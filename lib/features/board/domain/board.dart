@@ -164,10 +164,20 @@ class Board {
 
   final balls = <Ball>[];
   final coins = <Coin>[];
+  bool? _automaticCoins;
+  bool get automaticCoins => _automaticCoins ?? settings.balanceVersion >= 15;
+  void enableAutomaticCoins() {
+    _automaticCoins = true;
+    coins.clear();
+    _queuedCoins.clear();
+    collectedCoins = null;
+  }
+
   // Only five denomination counters are queued if the visible-object cap fills.
   final _queuedCoins = <int, int>{};
   Map<int, int>? collectedCoins = <int, int>{};
   bool get canCollectCoins =>
+      !automaticCoins &&
       _heldBalls.isEmpty &&
       !holdingBat &&
       !holdingLauncher &&
@@ -435,9 +445,9 @@ class Board {
       _heldDuringGesture = true;
       return 0;
     }
-    final onCoin = coins.any(
-      (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
-    );
+    final onCoin =
+        !automaticCoins &&
+        coins.any((c) => c.landing <= 0 && (c.position - paddle!).length <= 12);
     final handle =
         broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
     final grabBat =
@@ -542,6 +552,7 @@ class Board {
   }
 
   void releaseCoin(int value) {
+    if (automaticCoins) return;
     if (value <= 0) throw ArgumentError.value(value, 'value');
     for (final stack in CoinDenomination.split(value)) {
       _queuedCoins.update(
@@ -554,6 +565,7 @@ class Board {
   }
 
   void _flushCoins() {
+    if (automaticCoins) return;
     for (final denomination in CoinDenomination.values.reversed) {
       final value = denomination.amount;
       var count = _queuedCoins[value] ?? 0;
@@ -1180,6 +1192,7 @@ class Board {
   }
 
   Map<String, dynamic> toJson() => {
+    if (automaticCoins) 'automaticCoins': true,
     'random': randomState,
     'nextId': nextId,
     'captured': captured,
@@ -1415,6 +1428,12 @@ class Board {
       }
     }
     board._flushCoins();
+    if (json['automaticCoins'] == true || settings.balanceVersion >= 15) {
+      if (board.coins.isNotEmpty || board._queuedCoins.isNotEmpty) {
+        throw const FormatException('Monedas físicas en cobro automático');
+      }
+      board.enableAutomaticCoins();
+    }
     return board;
   }
 }

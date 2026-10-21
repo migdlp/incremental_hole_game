@@ -1,6 +1,9 @@
 kind,id,level,cost,effect,effect_value,unit,requires,cap
+base,reward_delay,0,0,reward_delay,1,seconds,,
+base,reward_visual_limit,0,0,reward_visual_limit,24,objects,,
+base,reward_ledger_limit,0,0,reward_ledger_limit,128,records,,
 base,production_duration,0,0,production_duration,15,seconds,,30
-base,closing_duration,0,0,closing_duration,5,seconds,,5
+base,closing_duration,0,0,closing_duration,0,seconds,,0
 base,spawn_interval,0,0,spawn_interval,0.6666666666666666,seconds,,
 base,ball_value,0,0,ball_value,1,coins,,13
 base,paddle_radius,0,0,paddle_radius,20,logical_units,,40
@@ -76,16 +79,6 @@ upgrade,reward,2,70,ball_value,3,coins,hand:1,13
 upgrade,reward,3,110,ball_value,5,coins,hand:1,13
 upgrade,reward,4,180,ball_value,8,coins,hand:1,13
 upgrade,reward,5,300,ball_value,13,coins,hand:1,13
-upgrade,sweep,1,25,coin_sweep,1,unlock,hand:1,1
-upgrade,collection,1,30,collection_radius,24,logical_units,hand:1,48
-upgrade,collection,2,50,collection_radius,30,logical_units,hand:1,48
-upgrade,collection,3,80,collection_radius,36,logical_units,hand:1,48
-upgrade,collection,4,130,collection_radius,42,logical_units,hand:1,48
-upgrade,collection,5,220,collection_radius,48,logical_units,hand:1,48
-upgrade,magnet,1,300,magnet_radius,65,logical_units,collection:3,65
-upgrade,attraction,1,80,magnet_radius,75,logical_units,magnet:1,95
-upgrade,attraction,2,130,magnet_radius,85,logical_units,magnet:1,95
-upgrade,attraction,3,220,magnet_radius,95,logical_units,magnet:1,95
 upgrade,broom,1,20,broom_unlocked,1,unlock,hand:2,1
 upgrade,paddle,1,40,paddle_radius,24,broom_width,broom:1,40
 upgrade,paddle,2,70,paddle_radius,28,broom_width,broom:1,40
@@ -98,7 +91,7 @@ upgrade,duration,2,130,production_duration,21,seconds,generator:2,30
 upgrade,duration,3,220,production_duration,24,seconds,generator:2,30
 upgrade,duration,4,360,production_duration,27,seconds,generator:2,30
 upgrade,duration,5,590,production_duration,30,seconds,generator:2,30
-upgrade,robot,1,300,robot_count,1,robots,paddle:2&sweep:1,1
+upgrade,robot,1,300,robot_count,1,robots,paddle:2,1
 upgrade,robot_speed,1,100,robot_speed,51.74999999999999,logical_units_per_second,robot:1,
 upgrade,robot_speed,2,170,robot_speed,59.51249999999999,logical_units_per_second,robot:1,
 upgrade,robot_speed,3,270,robot_speed,68.43937499999998,logical_units_per_second,robot:1,

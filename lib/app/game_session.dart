@@ -10,6 +10,8 @@ import '../features/board/domain/special_abilities.dart';
 import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/economy/domain/economy.dart';
+import '../features/rewards/domain/reward_delivery.dart';
+import '../features/rewards/domain/reward_frame_metrics.dart';
 import '../features/progression/domain/progress.dart';
 import '../features/feeding/domain/feeding_progress.dart';
 import '../features/upgrades/domain/catalog.dart';
@@ -85,6 +87,28 @@ class GameSession extends ChangeNotifier {
   final UpgradeCatalog catalog;
   final SaveStore store;
   final economy = Economy();
+  late RewardDelivery rewards = _newRewards();
+  final rewardFrameMetrics = RewardFrameMetrics();
+  int? _debugRewardLimit;
+  late RewardVisuals rewardVisuals = _newVisuals();
+  RewardDelivery _newRewards() => RewardDelivery(
+    delay: catalog.base['reward_delay']!,
+    capacity: catalog.base['reward_ledger_limit']!.toInt(),
+  );
+  RewardVisuals _newVisuals() => RewardVisuals(
+    catalog.base['reward_visual_limit']!.toInt(),
+    catalog.base['reward_delay']!,
+  )..debugLimit = _debugRewardLimit;
+  void debugSetRewardLimit(int? value) {
+    if (!debugEnabled ||
+        (value != null && (value < 0 || value > rewardVisuals.capacity))) {
+      return;
+    }
+    _debugRewardLimit = value;
+    rewardVisuals.debugLimit = value;
+    notifyListeners();
+  }
+
   final progress = Progress();
   late FeedingProgress feeding;
   bool _debugFeedingTrials = false;
@@ -92,6 +116,7 @@ class GameSession extends ChangeNotifier {
   final levels = <String, int>{};
   final _grandfathered = <String, int>{};
   final _previousTree = <String, int>{};
+  final _retiredRunLevels = <String, int>{};
   BallTool selectedTool = BallTool.hand;
   Vec _launcherPosition = const Vec(285, 510);
   double _launcherAngle = math.pi * 1.75;
@@ -106,6 +131,8 @@ class GameSession extends ChangeNotifier {
   double _accumulator = 0, _uiClock = 0, _checkpoint = 0;
   String? _lastSaved;
   Future<void> _writes = Future.value();
+  String? _pendingSave;
+  bool _saving = false;
   bool _disposed = false;
   String? _debugBaseline;
   bool _debugFullTree = true;
@@ -140,6 +167,7 @@ class GameSession extends ChangeNotifier {
   void startDay() {
     if (running || debugFeedingFailed) return;
     feeding.beginDay(progress.day);
+    _retiredRunLevels.clear();
     final settings = catalog.settings(levels);
     _eventRandomState = (1664525 * _eventRandomState + 1013904223) & 0xffffffff;
     board = Board(
@@ -156,11 +184,11 @@ class GameSession extends ChangeNotifier {
     );
     debugForceGravity = false;
     debugBlackHoleObjects = 0;
-    cycle = DayCycle(
-      production: settings['production_duration'],
-      closing: settings['closing_duration'],
-    );
+    cycle = DayCycle(production: settings['production_duration'], closing: 0);
     economy.begin();
+    rewards = _newRewards();
+    rewardVisuals = _newVisuals();
+    board!.enableAutomaticCoins();
     _debugMaxCombo = 1;
     paused = false;
     _accumulator = 0;
@@ -172,6 +200,8 @@ class GameSession extends ChangeNotifier {
 
   void tick(double dt) {
     if (!running || paused || !dt.isFinite) return;
+    final generatedBefore = economy.generated;
+    rewardVisuals.observeFrame(dt);
     _accumulator += dt.clamp(0.0, .1);
     while (_accumulator + 1e-9 >= 1 / 60 && running) {
       _accumulator -= 1 / 60;
@@ -187,6 +217,7 @@ class GameSession extends ChangeNotifier {
         _step(math.min(1 / 60 - step, cycle!.remaining), false);
       }
     }
+    if (running && economy.generated != generatedBefore) save();
     _uiClock += dt.clamp(0.0, .1);
     _checkpoint += dt.clamp(0.0, .1);
     if (_checkpoint >= 5) {
@@ -215,7 +246,14 @@ class GameSession extends ChangeNotifier {
     economy.collect(events.collected);
     for (final value in events.rewards) {
       economy.generated += value;
-      board!.releaseCoin(value);
+      final id = rewards.register(value);
+      rewardVisuals.add(id, value);
+    }
+    rewardVisuals.advance(dt);
+    final arrived = rewards.advance(dt);
+    if (arrived > 0) {
+      economy.collect(arrived);
+      rewardVisuals.receipt();
     }
     cycle!.advance(dt);
     if (producing && cycle!.phase == DayPhase.closing) {
@@ -227,6 +265,9 @@ class GameSession extends ChangeNotifier {
 
   void finishDay() {
     if (!running) return;
+    economy.collect(rewards.settle());
+    rewardVisuals.clear();
+    board!.enterClosing();
     if (debugEnabled) {
       _debugReports.add(
         DebugDayReport(
@@ -247,7 +288,7 @@ class GameSession extends ChangeNotifier {
       generated: economy.generated,
       captured: board!.captured,
       previousIncome: progress.last?.income,
-      collectedCoins: board!.collectedCoins == null
+      collectedCoins: board!.automaticCoins || board!.collectedCoins == null
           ? null
           : Map.unmodifiable(board!.collectedCoins!),
     );
@@ -402,6 +443,8 @@ class GameSession extends ChangeNotifier {
     board?.blackHole.finishDay();
     restore(baseline);
     _debugBaseline = null;
+    _debugRewardLimit = null;
+    rewardVisuals.debugLimit = null;
     _debugFeedingTrials = false;
     debugForceGravity = false;
     debugGravityTilt = 'sensor';
@@ -462,6 +505,7 @@ class GameSession extends ChangeNotifier {
       next,
       grandfathered: _grandfathered,
       previousTree: _previousTree,
+      retiredRemoved: true,
     );
     if ((next['bat'] ?? 0) > (levels['bat'] ?? 0)) {
       selectedTool = BallTool.bat;
@@ -568,7 +612,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 8,
+    'version': 9,
     'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
     'launcherPose': {
@@ -590,6 +634,8 @@ class GameSession extends ChangeNotifier {
         ? null
         : {
             'remaining': cycle!.remaining,
+            'rewards': rewards.toJson(),
+            'retiredLevels': _retiredRunLevels,
             'collected': economy.collected,
             'generated': economy.generated,
             'settings': board!.settings.toJson(),
@@ -608,7 +654,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 5 &&
         json['version'] != 6 &&
         json['version'] != 7 &&
-        json['version'] != 8) {
+        json['version'] != 8 &&
+        json['version'] != 9) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -638,6 +685,8 @@ class GameSession extends ChangeNotifier {
       grandfathered: grandfathered,
       previousTree: previousTree,
       legacy: oldProgress,
+      balanceVersion: (json['version'] as int) < 9 ? 14 : 15,
+      retiredRemoved: (json['version'] as int) >= 9,
     );
     var restoredTool = legacy
         ? ((savedLevels['broom'] ?? 0) > 0 ? BallTool.broom : BallTool.hand)
@@ -685,13 +734,28 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 14)) {
+          (balanceVersion < 1 || balanceVersion > 15)) {
         throw const FormatException('Versión de balance inválida');
       }
-      final settings = catalog.settings(
-        savedLevels,
-        balanceVersion: balanceVersion,
-      );
+      final runRetired = run['retiredLevels'] == null
+          ? <String, int>{}
+          : (run['retiredLevels'] as Map<String, dynamic>).map((id, value) {
+              final definition = UpgradeCatalog.retiredDefinition(id);
+              if (definition == null ||
+                  value is! int ||
+                  value < 0 ||
+                  value > definition.levels.length ||
+                  balanceVersion >= 15) {
+                throw const FormatException(
+                  'Archivo de compras retiradas inválido',
+                );
+              }
+              return MapEntry(id, value);
+            });
+      final settings = catalog.settings({
+        ...savedLevels,
+        ...runRetired,
+      }, balanceVersion: balanceVersion);
       if (!savedSettings.values.containsKey('hand_capacity') &&
           (savedLevels['hand'] ?? 0) == 0) {
         savedSettings.values['hand_capacity'] = 1;
@@ -709,12 +773,17 @@ class GameSession extends ChangeNotifier {
       if (!remaining.isFinite ||
           remaining <= 0 ||
           remaining >
-              settings['production_duration'] + settings['closing_duration']) {
+              settings['production_duration'] +
+                  ((json['version'] as int) >= 9
+                      ? 0
+                      : settings['closing_duration'])) {
         throw const FormatException('Tiempo inválido');
       }
       restoredCycle = DayCycle(
         production: settings['production_duration'],
-        closing: settings['closing_duration'],
+        closing: (json['version'] as int) >= 9
+            ? 0
+            : settings['closing_duration'],
         remaining: remaining,
       );
       final savedBoard = run['board'] as Map<String, dynamic>;
@@ -733,9 +802,7 @@ class GameSession extends ChangeNotifier {
       if (balanceVersion >= 11) {
         final elapsed = math.min(
           settings['production_duration'],
-          settings['production_duration'] +
-              settings['closing_duration'] -
-              remaining,
+          settings['production_duration'] + restoredCycle.closing - remaining,
         );
         if ((restoredBoard.gravity.elapsed - elapsed).abs() > 1e-6 ||
             (restoredCycle.phase == DayPhase.closing &&
@@ -748,9 +815,7 @@ class GameSession extends ChangeNotifier {
         final event = restoredBoard.blackHole;
         final elapsed = math.min(
           settings['production_duration'],
-          settings['production_duration'] +
-              settings['closing_duration'] -
-              remaining,
+          settings['production_duration'] + restoredCycle.closing - remaining,
         );
         if ((event.elapsed - elapsed).abs() > 1e-6 ||
             event.ended != (restoredCycle.phase == DayPhase.closing)) {
@@ -770,13 +835,35 @@ class GameSession extends ChangeNotifier {
                     (sum, e) => sum + e.key * e.value,
                   ) !=
                   collected) ||
-          generated != collected + restoredBoard.pending ||
+          ((json['version'] as int) < 9 &&
+              generated != collected + restoredBoard.pending) ||
           generated !=
               (restoredBoard.captured +
                       9 * restoredBoard.goldenCaptured +
                       restoredBoard.combo.bonusUnits) *
                   settings['ball_value'].toInt()) {
         throw const FormatException('Contabilidad inválida');
+      }
+    }
+    var restoredRewards = _newRewards();
+    if (run != null) {
+      if (collected > generated) throw const FormatException('Cobro inválido');
+      if ((json['version'] as int) >= 9) {
+        final ledger = run['rewards'];
+        if (ledger is! Map<String, dynamic> || !restoredBoard!.automaticCoins) {
+          throw const FormatException('Falta el registro de recompensas');
+        }
+        restoredRewards = RewardDelivery.fromJson(
+          ledger,
+          outstanding: generated - collected,
+          delay: catalog.base['reward_delay']!,
+          capacity: catalog.base['reward_ledger_limit']!.toInt(),
+        );
+      } else {
+        // Old visible coins and reserves are guaranteed too: settle the exact gap.
+        if (generated > collected) {
+          restoredRewards.register(generated - collected);
+        }
       }
     }
     final savedFeeding = json['feeding'];
@@ -848,20 +935,41 @@ class GameSession extends ChangeNotifier {
     economy.balance = balance;
     economy.collected = collected;
     economy.generated = generated;
+    _retiredRunLevels
+      ..clear()
+      ..addAll({
+        for (final entry in savedLevels.entries)
+          if (UpgradeCatalog.retiredIds.contains(entry.key))
+            entry.key: entry.value,
+      });
+    if (run?['retiredLevels'] != null) {
+      _retiredRunLevels.addAll(
+        (run!['retiredLevels'] as Map<String, dynamic>).cast<String, int>(),
+      );
+    }
     levels
       ..clear()
-      ..addAll(savedLevels);
+      ..addAll(
+        savedLevels
+          ..removeWhere((id, _) => UpgradeCatalog.retiredIds.contains(id)),
+      );
     _grandfathered
       ..clear()
-      ..addAll(grandfathered);
+      ..addAll(
+        grandfathered
+          ..removeWhere((id, _) => UpgradeCatalog.retiredIds.contains(id)),
+      );
     _previousTree
       ..clear()
-      ..addAll(previousTree);
+      ..addAll(
+        previousTree
+          ..removeWhere((id, _) => UpgradeCatalog.retiredIds.contains(id)),
+      );
     selectedTool = restoredTool;
     if (legacy) {
       recoveryMessage =
           'Partida actualizada: conservas saldo y mejoras. '
-          'Las monedas se recogen pulsando; el barrido se compra aparte.';
+          'Las recompensas ahora se cobran automáticamente.';
     }
     feeding = restoredFeeding;
     _launcherPosition = savedLauncher.position;
@@ -869,6 +977,20 @@ class GameSession extends ChangeNotifier {
     _eventRandomState = savedEventRandom;
     board = restoredBoard;
     board?.gravitySupported = gravityAvailable;
+    rewards = restoredRewards;
+    rewardVisuals = _newVisuals();
+    if (restoredBoard != null) {
+      restoredBoard.enableAutomaticCoins();
+      economy.collect(rewards.settle());
+    }
+    final wasClosing = restoredCycle?.phase == DayPhase.closing;
+    if (restoredCycle != null && (json['version'] as int) < 9 && !wasClosing) {
+      restoredCycle = DayCycle(
+        production: restoredCycle.production,
+        closing: 0,
+        remaining: restoredCycle.remaining - restoredCycle.closing,
+      );
+    }
     cycle = restoredCycle;
     sound = savedSound;
     haptics = savedHaptics;
@@ -876,12 +998,25 @@ class GameSession extends ChangeNotifier {
     paused = running;
     _syncMotion();
     _accumulator = 0;
+    if (wasClosing) finishDay();
   }
 
   Future<void> save() {
     if (debugEnabled) return _writes;
-    final data = snapshot();
-    _writes = _writes.then((_) async {
+    _pendingSave = snapshot();
+    if (!_saving) {
+      _saving = true;
+      _writes = _drainSaves();
+    }
+    return _writes;
+  }
+
+  Future<void> _drainSaves() async {
+    // One write in flight and at most one newer complete snapshot in memory.
+    // Every later snapshot includes all previously registered capture rewards.
+    while (_pendingSave != null) {
+      final data = _pendingSave!;
+      _pendingSave = null;
       final previousError = saveError;
       try {
         await store.save(data, previous: _lastSaved);
@@ -892,8 +1027,8 @@ class GameSession extends ChangeNotifier {
             'No se pudo guardar. Tu progreso sigue en memoria; vuelve a intentar guardar.';
       }
       if (!_disposed && previousError != saveError) notifyListeners();
-    });
-    return _writes;
+    }
+    _saving = false;
   }
 
   Future<void> get pendingWrites => _writes;

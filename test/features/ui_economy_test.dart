@@ -10,15 +10,16 @@ import 'package:incremental_hole_game/features/board/domain/coin_denomination.da
 import 'package:incremental_hole_game/features/board/presentation/coin_icon.dart';
 import 'package:incremental_hole_game/features/board/presentation/coin_painter.dart';
 import 'package:incremental_hole_game/features/upgrades/presentation/skill_tree_screen.dart';
+import 'package:incremental_hole_game/features/upgrades/domain/catalog.dart';
 import '../test_support.dart';
 
 void main() {
   final catalog = testCatalog();
 
   test(
-    'payouts split into physical denominations without merging nearby coins',
+    'historical v14 payouts split into physical denominations without merging nearby coins',
     () {
-      final board = Board(catalog.settings({}));
+      final board = Board(catalog.settings({}, balanceVersion: 14));
       for (final amount in [2, 4, 13, 661]) {
         board.releaseCoin(amount);
       }
@@ -38,11 +39,14 @@ void main() {
   );
 
   test(
-    'manual area precedes magnet and collects a group without sweep or magnet',
+    'historical v14 manual area precedes magnet and collects a group without sweep or magnet',
     () {
       Board board(int level) {
         final result = Board(
-          catalog.settings({'hand': 1, 'collection': level}),
+          catalog.settings({
+            'hand': 1,
+            'collection': level,
+          }, balanceVersion: 14),
         );
         for (final x in [100.0, 122.0, 140.0]) {
           result.coins.add(Coin(result.nextId++, Vec(x, 250), 1, landing: 0));
@@ -59,7 +63,7 @@ void main() {
       expect(upgraded.releasePointer(), 2);
       expect(upgraded.coins.single.position.x, 140);
       expect(upgraded.collectedCoins, {1: 2});
-      final magnet = catalog.definitions.firstWhere((d) => d.id == 'magnet');
+      final magnet = UpgradeCatalog.retiredDefinition('magnet')!;
       expect(
         catalog.requirementsMet(magnet.levels.first, {
           'hand': 1,
@@ -79,10 +83,15 @@ void main() {
   );
 
   test(
-    'holding a ball disables collection and attraction throughout the gesture',
+    'historical v14 holding a ball disables collection and attraction throughout the gesture',
     () {
       final board = Board(
-        catalog.settings({'hand': 1, 'sweep': 1, 'collection': 3, 'magnet': 1}),
+        catalog.settings({
+          'hand': 1,
+          'sweep': 1,
+          'collection': 3,
+          'magnet': 1,
+        }, balanceVersion: 14),
       );
       board.balls.add(Ball(board.nextId++, const Vec(80, 250), Vec.zero));
       final coin = Coin(board.nextId++, const Vec(130, 250), 10, landing: 0);
@@ -152,20 +161,21 @@ void main() {
       };
       final session = GameSession(catalog, MemoryStore())
         ..restore(jsonEncode(data));
-      expect(session.levels, owned);
-      expect(session.levels['collection'], 1);
+      expect(session.levels, {'hand': 1, 'reward': 5});
+      expect(session.levels.containsKey('collection'), isFalse);
       expect(session.board!.settings['ball_value'], 11);
-      expect(session.board!.pending, 11);
-      expect(session.board!.coins.map((c) => c.value).toSet(), {10, 1});
+      expect(session.rewards.outstanding, 0);
+      expect(session.economy.collected, 11);
+      expect(session.board!.coins, isEmpty);
       expect(session.board!.collectedCoins, isNull);
       final reopened = GameSession(catalog, MemoryStore())
         ..restore(session.snapshot());
       reopened.finishDay();
       reopened.startDay();
-      expect(reopened.board!.settings.balanceVersion, 14);
+      expect(reopened.board!.settings.balanceVersion, 15);
       expect(reopened.board!.settings['ball_value'], 13);
-      expect(reopened.board!.settings['magnet_radius'], 65);
-      expect(reopened.levels['collection'], 1);
+      expect(reopened.board!.settings['magnet_radius'], 0);
+      expect(reopened.levels.containsKey('collection'), isFalse);
       expect(
         GameSession(catalog, MemoryStore())..restore(reopened.snapshot()),
         isA<GameSession>(),
@@ -194,14 +204,14 @@ void main() {
   }
 
   test(
-    'exact collected denominations persist in the daily result and forged counts fail atomically',
+    'automatic full income persists and legacy forged denomination counts still fail atomically',
     () {
       final session = completedDay();
       expect(session.progress.last!.income, 55);
-      expect(session.progress.last!.collectedCoins, {50: 1, 1: 5});
+      expect(session.progress.last!.collectedCoins, isNull);
       final reopened = GameSession(catalog, MemoryStore())
         ..restore(session.snapshot());
-      expect(reopened.progress.last!.collectedCoins, {50: 1, 1: 5});
+      expect(reopened.progress.last!.collectedCoins, isNull);
       final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
       data['last']['collectedCoins'] = {'50': 2};
       expect(() => reopened.restore(jsonEncode(data)), throwsFormatException);
@@ -242,7 +252,7 @@ void main() {
   );
 
   testWidgets(
-    'summary removes its bar, sorts exact coin counts and money uses icons without dollar symbols',
+    'automatic summary has no collection bar or denomination counts and money uses icons',
     (tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1;
@@ -261,14 +271,8 @@ void main() {
         ),
         findsNothing,
       );
-      expect(
-        tester.getTopLeft(find.byKey(const ValueKey('collected-coin-50'))).dy,
-        lessThan(
-          tester.getTopLeft(find.byKey(const ValueKey('collected-coin-1'))).dy,
-        ),
-      );
-      expect(find.text('× 5'), findsOneWidget);
-      expect(find.text('× 1'), findsOneWidget);
+      expect(find.byKey(const ValueKey('collected-coin-50')), findsNothing);
+      expect(find.text('Cobro automático'), findsOneWidget);
       expect(find.byType(CoinIcon), findsWidgets);
       for (final widget in tester.widgetList<Text>(find.byType(Text))) {
         expect(
@@ -297,7 +301,7 @@ void main() {
   );
 
   testWidgets(
-    'one timer stays in place and changes color when collection begins',
+    'one production timer stays in place and closes directly without a collection phase',
     (tester) async {
       final session = GameSession(catalog, MemoryStore())
         ..startDay()
@@ -344,18 +348,20 @@ void main() {
       expect(find.text('Día'), findsNothing);
       expect(find.text('Recogida'), findsNothing);
       expect(find.textContaining('Agarra'), findsNothing);
-      session.cycle!.advance(15);
-      session.board!.enterClosing();
+      session.cycle!.advance(14);
       session.resume();
       session.pause();
       await tester.pump();
-      expect(find.text('5 s'), findsOneWidget);
+      expect(find.text('1 s'), findsOneWidget);
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
       expect(tester.element(timer), same(timerElement));
       expect(tester.getRect(timer), timerRect);
       final collectionTimer = tester.widget<LinearProgressIndicator>(timer);
-      expect(collectionTimer.value, 1);
-      expect(collectionTimer.color, isNot(productionColor));
+      expect(collectionTimer.value, closeTo(1 / 15, .001));
+      expect(collectionTimer.color, productionColor);
+      session.finishDay();
+      await tester.pump();
+      expect(session.running, isFalse);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await session.pendingWrites;

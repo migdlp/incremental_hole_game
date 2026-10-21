@@ -537,6 +537,58 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     ],
                   ),
                   ExpansionTile(
+                    key: const ValueKey('debug-reward-tools'),
+                    title: const Text('Monedas automáticas · rendimiento'),
+                    tilePadding: EdgeInsets.zero,
+                    children: [
+                      const Text(
+                        'Presupuesto visual provisional; no cambia los ingresos.',
+                      ),
+                      DropdownButtonFormField<int>(
+                        key: const ValueKey('debug-reward-limit'),
+                        initialValue: session.rewardVisuals.debugLimit ?? -1,
+                        items: [
+                          for (final n in {
+                            -1,
+                            0,
+                            8,
+                            16,
+                            session.rewardVisuals.capacity,
+                          })
+                            DropdownMenuItem(
+                              value: n,
+                              child: Text(
+                                n == -1
+                                    ? 'Adaptativo'
+                                    : n == 0
+                                    ? 'Sin animaciones'
+                                    : '$n monedas',
+                              ),
+                            ),
+                        ],
+                        onChanged: (n) {
+                          if (n != null) {
+                            session.debugSetRewardLimit(n < 0 ? null : n);
+                          }
+                        },
+                      ),
+                      Text(session.rewardFrameMetrics.report),
+                      TextButton.icon(
+                        icon: const Icon(Icons.copy),
+                        label: const Text('Copiar medición'),
+                        onPressed: () => Clipboard.setData(
+                          ClipboardData(
+                            text:
+                                '${session.rewardFrameMetrics.report}\nPresupuesto provisional ${session.rewardVisuals.limit}; pico ${session.rewardVisuals.peak}; agrupadas ${session.rewardVisuals.grouped}; omitidas ${session.rewardVisuals.omitted}.',
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'Última jornada: pico ${session.rewardVisuals.peak}, agrupadas ${session.rewardVisuals.grouped}, omitidas ${session.rewardVisuals.omitted}',
+                      ),
+                    ],
+                  ),
+                  ExpansionTile(
                     key: const ValueKey('debug-feeding-tools'),
                     title: const Text('Alimentación y cuotas'),
                     tilePadding: EdgeInsets.zero,

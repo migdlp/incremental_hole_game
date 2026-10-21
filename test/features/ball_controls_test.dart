@@ -193,7 +193,7 @@ void main() {
   });
 
   test('tap commits on release; drag starting on coin cannot collect free', () {
-    final board = Board(catalog.settings({}));
+    final board = Board(catalog.settings({}, balanceVersion: 14));
     board.coins.add(Coin(board.nextId++, const Vec(100, 250), 7, landing: 0));
     expect(board.touch(const Vec(100, 250)), 0);
     expect(board.drag(const Vec(200, 250)), 0);
@@ -239,14 +239,7 @@ void main() {
       session.selectTool(BallTool.vee);
       expect(session.selectedTool, BallTool.hand);
       session.economy.balance = 500;
-      for (final id in [
-        'hand',
-        'hand',
-        'broom',
-        'paddle',
-        'broom_v',
-        'sweep',
-      ]) {
+      for (final id in ['hand', 'hand', 'broom', 'paddle', 'broom_v']) {
         expect(
           session.purchase(catalog.definitions.firstWhere((d) => d.id == id)),
           isTrue,
@@ -258,7 +251,7 @@ void main() {
       expect(restored.selectedTool, BallTool.vee);
       restored.startDay();
       expect(restored.board!.tool, BallTool.vee);
-      expect(restored.board!.sweepEnabled, isTrue);
+      expect(restored.board!.sweepEnabled, isFalse);
       restored.selectTool(BallTool.hand);
       expect(restored.board!.tool, BallTool.hand);
     },
@@ -339,7 +332,7 @@ void main() {
       expect(restored.board!.settings['robot_count'], 1);
       expect(restored.board!.sweepEnabled, isFalse);
       expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 8);
+      expect(jsonDecode(restored.snapshot())['version'], 9);
     },
   );
 

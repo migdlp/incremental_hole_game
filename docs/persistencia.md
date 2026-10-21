@@ -1,5 +1,24 @@
 # Referencia de guardado y recuperación
 
+## C01 · Cobro automático vigente (0.13.0+21)
+
+Cada captura calcula una única recompensa completa (Valor, dorada y racha),
+alimenta inmediatamente y registra el importe garantizado. Tras aproximadamente
+1 s, una moneda decorativa salta del hoyo y vuela en curva al monedero; el saldo
+visible aumenta al recibirse. No hay colisiones, recogida manual ni fase final
+de recogida: producción base 15 s y cierre directo con liquidación íntegra.
+
+Barrido, Área, Imán y Atracción salen del catálogo activo. El usuario autorizó
+retirar sus compras **sin reembolso**; no se altera saldo ni otras mejoras.
+Robot conserva solo Escoba ancha II como requisito, confirmado por el usuario.
+JSON v9 / balance v15, con v14 congelado para física de jornadas antiguas.
+Registros económicos y pool visual independientes; agrupación u omisión visual
+no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
+[Implementación, DEBUG y medición pendiente](c01-cobro-automatico.md).
+
+Las referencias anteriores a recogida manual o fase final describen versiones
+históricas y quedan sustituidas por C01.
+
 ## Contrato vigente · S01, 0.12.0+20
 
 JSON v8 / balance v14. `feeding` guarda período, jornadas, puntos normales e

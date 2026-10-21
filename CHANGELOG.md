@@ -2,6 +2,18 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.13.0+21 — C01: cobro automático
+
+- Recompensa completa garantizada al capturar; monedas decorativas salen del hoyo
+  tras ~1 s y vuelan en curva al monedero. Pool, agrupación y calidad adaptativa.
+- Sin recogida manual ni fase final; cierre liquida todo, pausa congela y restaurar
+  abona pendientes sin duplicados. Alimentación y multiplicadores conservados.
+- Barrido, Área, Imán y Atracción retirados sin reembolso, autorizado por el usuario.
+  Robot conserva Escoba ancha II como único requisito. Catálogo 59 nodos/22 tipos.
+- JSON v9 / balance v15 con v14 congelado. Migración de monedas físicas y reservas.
+- DEBUG permite comparar presupuestos y copiar métricas. Rendimiento real de
+  Android y presupuesto definitivo pendientes de medición física.
+
 ## 0.12.0+20 — S01: prototipo de alimentación y cuotas
 
 - Alimentación con recompensa completa, incluidos combos, doradas y Captura total;

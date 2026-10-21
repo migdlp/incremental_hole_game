@@ -74,6 +74,7 @@ void main() {
       for (var i = 0; i < 5; i++) {
         capture(original);
       }
+      original.board!.releaseCoin(original.economy.generated);
       final old = jsonDecode(original.snapshot()) as Map<String, dynamic>;
       old['version'] = 6;
       final session = GameSession(catalog, MemoryStore())
@@ -82,7 +83,7 @@ void main() {
       expect(session.board!.combo.enabled, isTrue);
       session.finishDay();
       session.startDay();
-      expect(session.board!.settings.balanceVersion, 14);
+      expect(session.board!.settings.balanceVersion, 15);
       expect(session.board!.combo.enabled, isFalse);
       expect(session.levels, isEmpty);
     },
@@ -115,10 +116,10 @@ void main() {
     expect(active.board!.specials.boostRemaining, closeTo(3, 1e-8));
     active.resume();
     advance(active, 4);
-    expect(active.phase, DayPhase.closing);
-    final frozen = active.board!.specials.toJson();
+    expect(active.phase, DayPhase.night);
+    final frozen = active.snapshot();
     advance(active, 1);
-    expect(active.board!.specials.toJson(), frozen);
+    expect(active.snapshot(), frozen);
     expect(active.activateSpecial(SpecialAbility.captureAll), isFalse);
     active.finishDay();
     active.startDay();
@@ -186,7 +187,7 @@ void main() {
       expect(reopened.board!.balls, isEmpty);
       expect(reopened.board!.captured, 10);
       expect(reopened.economy.generated, 44);
-      expect(reopened.board!.pending, 44);
+      expect(reopened.rewards.outstanding, 44);
       expect(reopened.economy.collected, 0);
       final twice = GameSession(catalog, MemoryStore())
         ..restore(reopened.snapshot());

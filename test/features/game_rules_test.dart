@@ -24,7 +24,7 @@ void capture(GameSession session) {
 void main() {
   final catalog = testCatalog();
   test('balance source includes tool and coin unlocks with prerequisites', () {
-    expect(catalog.definitions.length, 26);
+    expect(catalog.definitions.length, 22);
     final levels = {for (final d in catalog.definitions) d.id: d.levels.length};
     final max = catalog.settings(levels);
     expect(max['production_duration'], 30);
@@ -52,16 +52,12 @@ void main() {
     expect(session.economy.balance, 0);
     advance(session, .3);
     expect(session.economy.generated, 1);
-    final coin = session.board!.coins.single;
-    session.touch(coin.position);
-    session.release();
-    session.touch(coin.position);
-    session.release();
+    advance(session, 2);
     expect(session.economy.collected, 1);
     expect(session.board!.pending, 0);
   });
   test('coin cap and queued denominations preserve every unit of value', () {
-    final settings = catalog.settings({});
+    final settings = catalog.settings({}, balanceVersion: 14);
     settings.values['coin_pile_limit'] = 2;
     final board = Board(settings);
     for (var i = 0; i < 1000; i++) {
@@ -73,7 +69,7 @@ void main() {
     expect(restored.pending, 5000);
   });
   test('fast pointer sweep collects between endpoints exactly once', () {
-    final board = Board(catalog.settings({'sweep': 1}));
+    final board = Board(catalog.settings({'sweep': 1}, balanceVersion: 14));
     board.coins.add(Coin(board.nextId++, const Vec(120, 300), 7, landing: 0));
     board.touch(const Vec(30, 300));
     var collected = board.drag(const Vec(240, 300));
@@ -92,8 +88,7 @@ void main() {
       expect(session.board!.balls, isEmpty);
       capture(session);
       advance(session, .3);
-      session.touch(session.board!.coins.single.position);
-      session.release();
+      advance(session, 2);
       session.board!.balls.add(
         Ball(session.board!.nextId++, const Vec(40, 450), Vec.zero),
       );
@@ -102,14 +97,14 @@ void main() {
       expect(session.running, isFalse);
       expect(session.board, isNull);
       expect(jsonDecode(session.snapshot())['run'], isNull);
-      expect(session.economy.balance, day);
-      expect(session.progress.last!.lost, 1);
-      expect(session.progress.last!.income, 1);
+      expect(session.economy.balance, day * 2);
+      expect(session.progress.last!.lost, 0);
+      expect(session.progress.last!.income, 2);
       session.finishDay();
-      expect(session.economy.balance, day);
+      expect(session.economy.balance, day * 2);
     }
     expect(session.progress.day, 11);
-    expect(session.progress.record, 1);
+    expect(session.progress.record, 2);
   });
   test(
     'purchases enforce phase, funds, prerequisite and level cap atomically',
@@ -120,19 +115,19 @@ void main() {
       session.economy.balance = 1000;
       expect(session.purchase(robot), isFalse);
       expect(session.economy.balance, 1000);
-      for (final id in ['hand', 'hand', 'broom', 'paddle', 'paddle', 'sweep']) {
+      for (final id in ['hand', 'hand', 'broom', 'paddle', 'paddle']) {
         expect(
           session.purchase(catalog.definitions.firstWhere((d) => d.id == id)),
           isTrue,
         );
       }
       expect(session.purchase(robot), isTrue);
-      expect(session.economy.balance, 502);
+      expect(session.economy.balance, 527);
       expect(session.purchase(robot), isFalse);
       session.startDay();
       expect(session.board!.settings['robot_count'], 1);
       expect(session.purchase(paddle), isFalse);
-      expect(session.economy.balance, 502);
+      expect(session.economy.balance, 527);
       session.finishDay();
       session.economy.balance = 0;
       expect(session.purchase(paddle), isFalse);
@@ -165,13 +160,13 @@ void main() {
         ..restore(session.snapshot());
       expect(restored.paused, isTrue);
       expect(restored.board!.paddle, isNull);
-      expect(restored.board!.pending, 1);
-      expect(restored.board!.coins.single.landing, greaterThan(0));
+      expect(restored.rewards.outstanding, 0);
+      expect(restored.economy.collected, 1);
+      expect(restored.board!.coins, isEmpty);
       expect(restored.board!.randomState, session.board!.randomState);
       restored.resume();
       advance(restored, .3);
-      restored.touch(restored.board!.coins.single.position);
-      restored.release();
+
       restored.finishDay();
       restored.finishDay();
       expect(restored.economy.balance, 1);
@@ -282,11 +277,13 @@ void main() {
         expect(events.collected, 0);
       }
       expect(captured, 1);
-      expect(board.pending, 2);
+      expect(board.pending, 0);
     },
   );
-  test('magnet works only with pointer held near the coin', () {
-    final board = Board(catalog.settings({'collection': 1, 'magnet': 1}));
+  test('historical magnet works only with pointer held near the coin', () {
+    final board = Board(
+      catalog.settings({'collection': 1, 'magnet': 1}, balanceVersion: 14),
+    );
     board.coins.add(Coin(board.nextId++, const Vec(140, 300), 2, landing: 0));
     for (var i = 0; i < 60; i++) {
       board.update(1 / 60, producing: false);

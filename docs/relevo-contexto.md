@@ -1,5 +1,24 @@
 # Relevo de contexto — Feed the Hole
 
+## C01 · Cobro automático vigente (0.13.0+21)
+
+Cada captura calcula una única recompensa completa (Valor, dorada y racha),
+alimenta inmediatamente y registra el importe garantizado. Tras aproximadamente
+1 s, una moneda decorativa salta del hoyo y vuela en curva al monedero; el saldo
+visible aumenta al recibirse. No hay colisiones, recogida manual ni fase final
+de recogida: producción base 15 s y cierre directo con liquidación íntegra.
+
+Barrido, Área, Imán y Atracción salen del catálogo activo. El usuario autorizó
+retirar sus compras **sin reembolso**; no se altera saldo ni otras mejoras.
+Robot conserva solo Escoba ancha II como requisito, confirmado por el usuario.
+JSON v9 / balance v15, con v14 congelado para física de jornadas antiguas.
+Registros económicos y pool visual independientes; agrupación u omisión visual
+no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
+[Implementación, DEBUG y medición pendiente](c01-cobro-automatico.md).
+
+Las referencias anteriores a recogida manual o fase final describen versiones
+históricas y quedan sustituidas por C01.
+
 **Actualizado: 21/10/2026 · Último APK entregado: 0.12.0+20, revisión `8eaff28`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
@@ -14,13 +33,13 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 
 - **Agujero arriba, generador abajo y emisión hacia arriba.** Último cambio solicitado; ya entregado en APK.
 - Ajuste posterior al APK de `046ebb0`: agujero en (180, 50), generador en (180, 480), sin leyenda del jardín en el tablero ni «Tu jardín te espera» en pausa. Se ha seguido la última indicación del usuario de subir el agujero y bajar el generador; comprobar las posiciones jugando en móvil.
-- **15 s de producción + 5 s de recogida final**; una sola barra que cambia de verde a naranja en el mismo sitio, con segundos pequeños encima a la derecha y sin nombres de fase. Durante recogida se congelan bolas, escoba y robot. No hay temporizador en compras.
+- **15 s de producción sin fase final de recogida**; una sola barra verde, con segundos pequeños encima a la derecha y sin nombres de fase. El cierre liquida automáticamente lo pendiente. No hay temporizador en compras.
 - Generación base 1,5 bolas/s; límite de 200 bolas. Mano base de una bola, capacidad mejorable hasta seis y fuerza de agarre mejorable. Escoba física desbloqueable, anchura/V y robot que empuja bolas.
-- Capturar produce monedas físicas. El dinero depende de recogerlas; pendientes y reserva se pierden al acabar. La mano ocupada bloquea cobro e imán de monedas.
-- Solo monedas de **1/10/50/100/500**, mismo tamaño, color propio y sin valor escrito. UI con icono, sin prefijo dólar. Resumen por denominaciones, sin antigua barra verde.
+- Capturar registra dinero garantizado y alimentación. Monedas decorativas al monedero tras ~1 s; sin recogida manual ni pérdidas. El control de bolas es independiente.
+- Monedas decorativas sin cifras, colores por rango; UI con icono, sin prefijo dólar. Resumen de cobro automático íntegro.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
 - Racha comprable tras Mano I por 40: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
-- Árbol de 69 nodos y 26 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Área manual precede a Imán, que cuesta 300 tras Área III.
+- Árbol de 59 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Barrido, Área, Imán y Atracción retirados sin reembolso; Robot solo requiere Escoba ancha II, confirmado por el usuario.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → Tienda → Comenzar día. No mostrar números de día al jugador.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
@@ -37,7 +56,7 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v8 / balance v14, con balances anteriores congelados para jornadas
+el otro agarre. Guardado v9 / balance v15, con balances anteriores congelados para jornadas
 antiguas. Verificación CI de la entrega: 285 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
@@ -186,7 +205,7 @@ migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
 no reconstruir el historial de commits. El último APK es 0.12.0+20:
-agujero arriba, generador abajo, ciclo 15+5, alimentación con racha y cuotas provisionales sin derrota real, generador lanzador, eventos Agujero negro y Gravedad por inclinación, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
+agujero arriba, generador abajo, producción de 15 s con cobro automático y sin recogida final, alimentación con racha y cuotas provisionales sin derrota real, generador lanzador, eventos Agujero negro y Gravedad por inclinación, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
 No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi
 siguiente petición concreta.

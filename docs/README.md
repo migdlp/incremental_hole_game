@@ -1,5 +1,7 @@
 # Documentación de Feed the Hole
 
+- [C01 · Cobro automático, persistencia, DEBUG y medición pendiente](c01-cobro-automatico.md).
+
 Referencias de relevo actualizadas el **21/10/2026** para el último APK **0.9.0+17**. Empieza por [relevo de contexto](relevo-contexto.md), [estado actual](estado-actual.md) y [cambios futuros](cambios-futuros-arbol-mejoras.md). Los planes y evidencias de entregas anteriores se conservan como historia; sus cifras pueden estar reemplazadas.
 
 [G01 — cambio de nombre a Feed the Hole y bloqueo de firma](g01-feed-the-hole.md).

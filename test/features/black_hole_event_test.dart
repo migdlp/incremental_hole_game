@@ -327,7 +327,8 @@ void main() {
       final positions = e.objects.map((o) => o.position.toJson()).toList();
       final restored = GameSession(catalog, MemoryStore())
         ..restore(s.snapshot());
-      expect(restored.board!.blackHole.toJson(), e.toJson());
+      expect(restored.board, isNull);
+      expect(restored.running, isFalse);
       final count = e.activations;
       expect(e.hit(2), isFalse);
       tick(s, 1);
@@ -377,6 +378,7 @@ void main() {
       final data = jsonDecode(s.snapshot()) as Map<String, dynamic>;
       data['version'] = 7;
       data.remove('feeding');
+      data['run']['remaining'] += 5;
       data['run']['balanceVersion'] = 11;
       data['run']['settings'] = catalog
           .settings({}, balanceVersion: 11)
@@ -391,7 +393,7 @@ void main() {
       s.finishDay();
       s.startDay();
       expect(s.board!.blackHole.enabled, isTrue);
-      expect(s.board!.settings.balanceVersion, 14);
+      expect(s.board!.settings.balanceVersion, 15);
       s.dispose();
     },
   );

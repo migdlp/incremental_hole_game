@@ -39,84 +39,51 @@ void main() {
     expect(board.segments.single.a.y, parked.a.y);
   });
 
-  test(
-    'production boundary cancels grip and freezes all non-coin activity',
-    () {
-      final session = GameSession(catalog, MemoryStore())
-        ..levels.addAll({'broom': 1, 'paddle': 1, 'robot': 1})
-        ..startDay();
-      final board = session.board!;
-      final ball = Ball(board.nextId++, const Vec(100, 250), Vec.zero);
-      board.balls.add(ball);
-      session.cycle!.remaining = 5 + 1 / 60;
-      session.touch(ball.position, time: 0);
-      session.drag(const Vec(140, 250), time: .01);
-      session.tick(1 / 60);
-      expect(session.phase, DayPhase.closing);
-      expect(board.heldBall, isNull);
-      expect(ball.velocity.length, 0);
-      final position = ball.position;
-      final robot = board.robot.position;
-      final spawn = board.spawnClock;
-      final captured = board.captured;
-      final generated = session.economy.generated;
-      session.touch(position);
-      session.drag(Board.hole);
-      frames(session, 60);
-      session.release();
-      expect(ball.position, position);
-      expect(board.robot.position, robot);
-      expect(board.spawnClock, spawn);
-      expect(board.captured, captured);
-      expect(session.economy.generated, generated);
-    },
-  );
-
-  test(
-    'closing coins land, collect and bank once after exactly five seconds',
-    () {
-      final session = GameSession(catalog, MemoryStore())..startDay();
-      final board = session.board!;
-      session.cycle!.remaining = 5 + 1 / 60;
-      board.captured = 1;
-      session.economy.generated = 2;
-      board.coins.add(Coin(board.nextId++, const Vec(90, 300), 2));
-      session.tick(1 / 60);
-      frames(session, 15);
-      session.touch(const Vec(90, 300));
-      session.release();
-      expect(session.economy.collected, 2);
-      frames(session, 284);
-      expect(session.running, isTrue);
-      frames(session, 1);
-      expect(session.running, isFalse);
-      expect(session.economy.balance, 2);
-      session.finishDay();
-      expect(session.economy.balance, 2);
-    },
-  );
-
-  test('closing reload remains frozen and paused without restoring grips', () {
-    final session = GameSession(catalog, MemoryStore())..startDay();
-    final board = session.board!;
-    board.balls.add(
-      Ball(board.nextId++, const Vec(100, 250), const Vec(50, 0)),
-    );
-    session.cycle!.remaining = 2;
-    board.enterClosing();
-    final restored = GameSession(catalog, MemoryStore())
-      ..restore(session.snapshot());
-    final ball = restored.board!.balls.single;
+  test('production end releases the hand and closes the board immediately', () {
+    final s = GameSession(catalog, MemoryStore())..startDay();
+    final b = s.board!;
+    final ball = Ball(b.nextId++, const Vec(100, 250), Vec.zero);
+    b.balls.add(ball);
+    s.touch(ball.position);
+    s.drag(const Vec(140, 250));
+    s.cycle!.remaining = 1 / 60;
+    s.tick(1 / 60);
+    expect(s.phase, DayPhase.night);
+    expect(s.board, isNull);
+    expect(b.heldBall, isNull);
+    expect(ball.velocity.length, 0);
     final position = ball.position;
-    frames(restored, 60);
-    expect(restored.cycle!.remaining, 2);
-    restored.resume();
-    restored.touch(position);
-    restored.drag(Board.hole);
-    frames(restored, 60);
+    frames(s, 60);
     expect(ball.position, position);
-    expect(restored.cycle!.remaining, closeTo(1, .0001));
-    expect(restored.board!.heldBall, isNull);
+  });
+
+  test('late rewards settle once at exact production end', () {
+    final s = GameSession(catalog, MemoryStore())..startDay();
+    final b = s.board!;
+    b.balls.add(Ball(b.nextId++, Board.hole, Vec.zero, golden: true));
+    s.cycle!.remaining = 2 / 60;
+    s.tick(1 / 60);
+    expect(s.economy.collected, 0);
+    expect(s.running, isTrue);
+    s.tick(1 / 60);
+    expect(s.running, isFalse);
+    expect(s.economy.balance, 10);
+    s.finishDay();
+    expect(s.economy.balance, 10);
+  });
+
+  test('paused rewards restore directly while balls resume normally', () {
+    final s = GameSession(catalog, MemoryStore())..startDay();
+    final b = s.board!;
+    b.balls.add(Ball(b.nextId++, const Vec(100, 250), const Vec(50, 0)));
+    final restored = GameSession(catalog, MemoryStore())..restore(s.snapshot());
+    final ball = restored.board!.balls.single;
+    final before = ball.position;
+    frames(restored, 60);
+    expect(ball.position, before);
+    restored.resume();
+    frames(restored, 60);
+    expect((ball.position - before).length, greaterThan(0));
   });
 
   test(
@@ -192,42 +159,28 @@ void main() {
     expect(board.broomPosition.y, 200);
   });
 
-  test(
-    'closing cancels a held broom and keeps sweeps available only when purchased',
-    () {
-      for (final sweep in [false, true]) {
-        final session = GameSession(catalog, MemoryStore())
-          ..levels.addAll({'broom': 1, if (sweep) 'sweep': 1})
-          ..startDay();
-        final board = session.board!;
-        session.cycle!.remaining = 5 + 1 / 60;
-        session.touch(board.broomPosition);
-        session.drag(const Vec(240, 200));
-        session.tick(1 / 60);
-        expect(board.holdingBroom, isFalse);
-        final position = board.broomPosition;
-        final angle = board.toolAngle;
-        session.touch(position);
-        session.drag(Board.hole);
-        frames(session, 10);
-        session.release();
-        expect(board.broomPosition, position);
-        expect(board.toolAngle, angle);
-        board.captured = 1;
-        session.economy.generated = 2;
-        board.coins.add(
-          Coin(board.nextId++, const Vec(100, 300), 2, landing: 0),
-        );
-        session.touch(const Vec(50, 300));
-        session.drag(const Vec(150, 300));
-        session.release();
-        expect(session.economy.collected, sweep ? 2 : 0);
-      }
-    },
-  );
+  test('production end releases broom and ignores subsequent gestures', () {
+    final s = GameSession(catalog, MemoryStore())
+      ..levels.addAll({'hand': 2, 'broom': 1})
+      ..startDay();
+    final b = s.board!;
+    s.touch(b.broomPosition);
+    s.drag(const Vec(240, 200));
+    s.cycle!.remaining = 1 / 60;
+    s.tick(1 / 60);
+    expect(b.holdingBroom, isFalse);
+    final position = b.broomPosition, angle = b.toolAngle;
+    s.touch(position);
+    s.drag(Board.hole);
+    frames(s, 60);
+    s.release();
+    expect(b.broomPosition, position);
+    expect(b.toolAngle, angle);
+    expect(s.running, isFalse);
+  });
 
   test(
-    'closing overlay dims scenery, balls and broom but leaves coins bright',
+    'legacy frozen board overlay dims scenery without physical coin presentation',
     () async {
       final session = GameSession(catalog, MemoryStore())
         ..levels.addAll({'hand': 2, 'broom': 1})
@@ -255,7 +208,7 @@ void main() {
       final closing = await pixels();
       List<int> color(List<int> image, int x, int y) =>
           image.sublist((y * 360 + x) * 4, (y * 360 + x) * 4 + 3);
-      expect(color(closing, 105, 297), color(day, 105, 297));
+      expect(color(closing, 105, 297), isNot(color(day, 105, 297)));
       for (final point in [
         const Vec(40, 250),
         const Vec(100, 200),
@@ -273,9 +226,11 @@ void main() {
     },
   );
   test(
-    'closing purchased magnet follows the finger without moving objects',
+    'historical closing purchased magnet follows the finger without moving objects',
     () {
-      final board = Board(catalog.settings({'collection': 1, 'magnet': 1}));
+      final board = Board(
+        catalog.settings({'collection': 1, 'magnet': 1}, balanceVersion: 14),
+      );
       final ball = Ball(board.nextId++, const Vec(200, 300), const Vec(40, 0));
       board.balls.add(ball);
       board.coins.add(Coin(board.nextId++, const Vec(240, 300), 2, landing: 0));

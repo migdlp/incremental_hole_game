@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
-import 'package:incremental_hole_game/features/board/domain/coin_denomination.dart';
 import 'package:incremental_hole_game/features/board/presentation/garden_game.dart';
 import '../test_support.dart';
 
@@ -62,15 +61,8 @@ void main() {
       expect(board.captured, 1);
       expect(board.goldenCaptured, 1);
       expect(session.economy.generated, 10);
-      final coin = board.coins.single;
-      expect(coin.value, 10);
-      final split = CoinDenomination.split(coin.value);
-      expect(split.single.denomination, CoinDenomination.ten);
-      expect(split.single.count, 1);
-      session.touch(coin.position);
-      session.release();
-      session.touch(coin.position);
-      session.release();
+      expect(session.rewards.outstanding, 10);
+      expect(board.coins, isEmpty);
       session.finishDay();
       session.finishDay();
       expect(session.economy.balance, 10);
@@ -94,7 +86,7 @@ void main() {
       expect(board.captured, 4);
       expect(board.goldenCaptured, 2);
       expect(session.economy.generated, (2 + 20) * 3);
-      expect(board.pending, 66);
+      expect(session.rewards.outstanding, 66);
       final restored = GameSession(catalog, MemoryStore())
         ..restore(session.snapshot());
       expect(restored.economy.generated, 66);

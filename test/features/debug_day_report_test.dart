@@ -27,9 +27,9 @@ void main() {
         session.tick(1 / 60);
       }
       expect(board.combo.multiplier, 1);
-      final coin = board.coins.first;
-      session.touch(coin.position);
-      session.release();
+      for (var i = 0; i < 180; i++) {
+        session.tick(1 / 60);
+      }
       final collected = session.economy.collected;
       expect(collected, greaterThan(0));
       final emitted = board.spawned;

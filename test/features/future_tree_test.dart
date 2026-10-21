@@ -18,7 +18,7 @@ void main() {
   test(
     'map has nine initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(69));
+      expect(tree.nodes, hasLength(59));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -29,8 +29,6 @@ void main() {
         {
           'generator:1',
           'reward:1',
-          'sweep:1',
-          'collection:1',
           'hand:2',
           'hand_grip:1',
           'combo:1',
@@ -42,10 +40,8 @@ void main() {
       expect(tree.byId('paddle:1').parents, ['broom:1']);
       expect(tree.byId('broom_v:1').parents, ['paddle:1']);
       expect(tree.byId('duration:1').parents, ['generator:2']);
-      expect(tree.byId('collection:1').parents, ['hand:1']);
-      expect(tree.byId('magnet:1').parents, ['collection:3']);
-      expect(tree.byId('attraction:1').parents, ['magnet:1']);
-      expect(tree.byId('robot:1').parents.toSet(), {'paddle:2', 'sweep:1'});
+      expect(tree.nodes.any((n) => n.definition.id == 'collection'), isFalse);
+      expect(tree.byId('robot:1').parents.toSet(), {'paddle:2'});
       expect(tree.byId('double_spawn:1').parents.toSet(), {
         'generator:3',
         'paddle:3',
@@ -54,7 +50,6 @@ void main() {
         'hand',
         'generator',
         'reward',
-        'collection',
         'paddle',
         'duration',
         'robot_speed',
@@ -73,11 +68,9 @@ void main() {
     for (final id in [
       'generator',
       'reward',
-      'sweep',
       'broom',
       'robot',
       'double_spawn',
-      'attraction',
     ]) {
       expect(buy(session, id), isFalse, reason: id);
     }
@@ -91,27 +84,18 @@ void main() {
     expect(buy(session, 'paddle'), isTrue);
     expect(buy(session, 'broom_v'), isTrue);
     expect(buy(session, 'paddle'), isTrue);
-    expect(buy(session, 'robot'), isFalse);
-    expect(buy(session, 'sweep'), isTrue);
     expect(buy(session, 'robot'), isTrue);
     expect(buy(session, 'generator'), isTrue);
     expect(buy(session, 'double_spawn'), isFalse);
     expect(buy(session, 'paddle'), isTrue);
     expect(buy(session, 'double_spawn'), isTrue);
-    for (var i = 0; i < 3; i++) {
-      expect(buy(session, 'collection'), isTrue);
-    }
-    expect(buy(session, 'magnet'), isTrue);
-    for (var i = 0; i < 3; i++) {
-      expect(buy(session, 'attraction'), isTrue);
-    }
     session.startDay();
     final restored = GameSession(catalog, MemoryStore())
       ..restore(session.snapshot());
     expect(restored.levels, session.levels);
     expect(restored.economy.balance, session.economy.balance);
     expect(restored.board!.settings['balls_per_spawn'], 2);
-    expect(restored.board!.settings['magnet_radius'], 95);
+    expect(restored.board!.settings['magnet_radius'], 0);
     expect(restored.board!.settings['production_duration'], 18);
   });
 
@@ -155,21 +139,31 @@ void main() {
         }
         final migrated = GameSession(catalog, MemoryStore())
           ..restore(jsonEncode(json));
-        expect(migrated.levels, owned);
+        expect(
+          migrated.levels,
+          Map.of(owned)
+            ..remove('collection')
+            ..remove('magnet'),
+        );
         expect(
           migrated.board!.settings['spawn_interval'],
           historical['spawn_interval'],
         );
         final reopened = GameSession(catalog, MemoryStore())
           ..restore(migrated.snapshot());
-        expect(reopened.levels, owned);
+        expect(
+          reopened.levels,
+          Map.of(owned)
+            ..remove('collection')
+            ..remove('magnet'),
+        );
         reopened.finishDay();
         expect(
           buy(reopened, 'generator'),
           isFalse,
         ); // next purchase follows the new map
         reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 14);
+        expect(reopened.board!.settings.balanceVersion, 15);
         expect(reopened.board!.settings['production_duration'], 21);
         expect(reopened.levels.containsKey('hand'), isFalse);
         expect(reopened.levels.containsKey('sweep'), isFalse);
@@ -226,7 +220,9 @@ void main() {
   );
 
   test('attraction increases coin reach only while the pointer is active', () {
-    final board = Board(catalog.settings({'magnet': 1, 'attraction': 3}));
+    final board = Board(
+      catalog.settings({'magnet': 1, 'attraction': 3}, balanceVersion: 14),
+    );
     final coin = Coin(board.nextId++, const Vec(190, 250), 2, landing: 0);
     board.coins.add(coin);
     board.update(.1, producing: false);
@@ -237,7 +233,7 @@ void main() {
       collected += board.update(1 / 60, producing: false).collected;
     }
     expect(collected, 2);
-    final locked = Board(catalog.settings({'magnet': 1}));
+    final locked = Board(catalog.settings({'magnet': 1}, balanceVersion: 14));
     final distant = Coin(locked.nextId++, const Vec(190, 250), 2, landing: 0);
     locked.coins.add(distant);
     locked.touch(const Vec(100, 250));

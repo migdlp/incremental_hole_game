@@ -55,9 +55,8 @@ void main() {
           game.origin +
           Offset(point.x, point.y) * game.scale;
       final board = session.board!;
-      board.captured = 1;
-      session.economy.generated = 2;
-      board.coins.add(Coin(board.nextId++, const Vec(100, 300), 2, landing: 0));
+      board.balls.add(Ball(board.nextId++, Board.hole, Vec.zero));
+      session.tick(1 / 60);
       final drag = await tester.createGesture();
       await drag.down(
         screen(const Vec(100, 300)),
@@ -69,10 +68,13 @@ void main() {
       );
       await drag.up(timeStamp: const Duration(milliseconds: 1200));
       expect(session.economy.collected, 0);
-      expect(board.pending, 2);
+      expect(session.rewards.outstanding, 1);
       await tester.tapAt(screen(const Vec(100, 300)));
-      expect(session.economy.collected, 2);
-      expect(board.pending, 0);
+      expect(session.economy.collected, 0);
+      for (var i = 0; i < 180; i++) {
+        session.tick(1 / 60);
+      }
+      expect(session.economy.collected, 1);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await session.pendingWrites;
@@ -205,7 +207,7 @@ void main() {
       session.tick(1 / 60);
     }
     await tester.pump();
-    expect(session.board!.coinOnly, isTrue);
+    expect(session.board!.coinOnly, isFalse);
     expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
     expect(find.text('5 s'), findsOneWidget);
     expect(tester.widget<Text>(find.text('5 s')).style!.color!.a, 1);

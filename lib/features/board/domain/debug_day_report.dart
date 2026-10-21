@@ -16,5 +16,5 @@ class DebugDayReport {
   String get summary =>
       'Día $day · emitidas $spawned · capturadas $captured '
       '(doradas $goldenCaptured) · combo máximo ×$maxCombo\n'
-      'Monedas: generadas $generated · cobradas $collected · perdidas $lost';
+      'Recompensas: generadas $generated · abonadas $collected';
 }

@@ -1,21 +1,40 @@
 # Estado actual de Feed the Hole
 
+## C01 · Cobro automático vigente (0.13.0+21)
+
+Cada captura calcula una única recompensa completa (Valor, dorada y racha),
+alimenta inmediatamente y registra el importe garantizado. Tras aproximadamente
+1 s, una moneda decorativa salta del hoyo y vuela en curva al monedero; el saldo
+visible aumenta al recibirse. No hay colisiones, recogida manual ni fase final
+de recogida: producción base 15 s y cierre directo con liquidación íntegra.
+
+Barrido, Área, Imán y Atracción salen del catálogo activo. El usuario autorizó
+retirar sus compras **sin reembolso**; no se altera saldo ni otras mejoras.
+Robot conserva solo Escoba ancha II como requisito, confirmado por el usuario.
+JSON v9 / balance v15, con v14 congelado para física de jornadas antiguas.
+Registros económicos y pool visual independientes; agrupación u omisión visual
+no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
+[Implementación, DEBUG y medición pendiente](c01-cobro-automatico.md).
+
+Las referencias anteriores a recogida manual o fase final describen versiones
+históricas y quedan sustituidas por C01.
+
 Actualizado: **21/10/2026**. Referencia de APK entregado: **0.12.0+20**. La revisión `8eaff28` incluye S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
-Juego incremental móvil con físicas arcade. El jugador manipula bolas para meterlas en un agujero, recoge las monedas físicas que producen y compra mejoras permanentes entre jornadas. La automatización debe ayudar a agrupar y dirigir bolas, manteniendo una ventaja clara para quien juega activamente.
+Juego incremental móvil con físicas arcade. El jugador manipula bolas para meterlas en un agujero, cobra automáticamente sus recompensas y compra mejoras permanentes entre jornadas. La automatización debe ayudar a agrupar y dirigir bolas, manteniendo una ventaja clara para quien juega activamente.
 
-Los cuatro ejes de progresión son generar más bolas, capturar una proporción mayor, aumentar el valor de las capturas y recoger mejor las monedas. El sistema de tiers individuales y la fábrica configurable son dirección futura, todavía no sistemas implementados.
+Los cuatro ejes de progresión son generar más bolas, capturar una proporción mayor, aumentar el valor de las capturas y aprovechar sus recompensas. El sistema de tiers individuales y la fábrica configurable son dirección futura, todavía no sistemas implementados.
 
 ## Jornada y tablero vigentes
 
 - Arena lógica de 360 × 560. **Agujero arriba** en (180, 50) y **generador abajo** en (180, 480), con salida y velocidad inicial de las bolas hacia arriba. Ajuste de posiciones en código posterior al APK del commit `046ebb0`; pendiente de comprobar en móvil. Se retira la leyenda del jardín del tablero y la frase «Tu jardín te espera» de la pausa.
-- Base de **15 s de producción y 5 s de recogida final**, con una sola barra en el mismo sitio: verde durante producción y naranja durante recogida; contador pequeño encima y alineado a la derecha, sin rótulos de fase. Las mejoras de duración dan 18/21/24/27/30 s de producción; la recogida permanece en 5 s.
+- Base de **15 s de producción sin fase final de recogida**, con una sola barra en el mismo sitio: verde durante producción; contador pequeño encima y alineado a la derecha, sin rótulos de fase. Las mejoras de duración dan 18/21/24/27/30 s de producción; cierre directo con liquidación completa.
 - Emisión inicial de **1,5 bolas/s**: primera bola tras aproximadamente ⅔ s. Generador y Doble emisión aumentan la producción.
-- Durante producción se controlan bolas y se recogen monedas. Durante recogida final se congelan bolas, escoba y robot; se permite cobrar monedas. La cabecera y el contador permanecen legibles sin oscurecer.
-- Al terminar, lo pendiente se pierde. El tablero siguiente empieza vacío y conserva saldo y mejoras.
-- Límite de **200 bolas**, **1000 monedas visibles** y reserva por denominación para monedas pendientes de emitir. La reserva no se cobra automáticamente.
+- Durante producción se controlan bolas y las recompensas vuelan automáticamente al monedero. Al terminar se liquidan todas las pendientes antes de resultados.
+- Al terminar, lo pendiente se cobra íntegramente. El tablero siguiente empieza vacío y conserva saldo y mejoras.
+- Límite de **200 bolas**; monedas solo decorativas con pool configurable y agrupación. Presupuesto inicial provisional 24, pendiente de medir en Android.
 - Pausa y segundo plano detienen la simulación. No hay ingresos por tiempo con el juego cerrado.
 
 ## Paredes rebotadoras · M01
@@ -105,15 +124,15 @@ reglas de futuros eventos simultáneos siguen abiertos. [Detalle E01](e01-graved
 
 ## Monedas, recompensa y combos
 
-- Capturar genera monedas físicas; recogerlas permite contabilizar el ingreso. La jornada se liquida una sola vez, sin cobrar automáticamente lo pendiente.
-- Bola normal base: **1**. La rama global Valor sigue vigente: **2/3/5/8/13** por captura normal, antes de dorada y combo.
-- Doradas: **1 %** de las emisiones; recompensa **×10** del valor normal vigente. Actualmente no hay tiers individuales.
-- Denominaciones únicas: **1 / 10 / 50 / 100 / 500**. Colores: dorado / verde esmeralda / azul / violeta / coral. Todas tienen las mismas dimensiones y no muestran cifras ni símbolos en su cara. La UI usa icono de moneda sin prefijo dólar.
-- Toque para cobrar; Barrido permite arrastrar. Área mejora la recogida manual sin exigir Barrido ni Imán. **Imán cuesta 300 y requiere Área III**; Atracción amplía su alcance.
-- Resumen diario con recuento por denominación, de mayor a menor. La antigua barra verde cobrado/generado está eliminada.
+- Cobro automático completo, independiente de animaciones, sin toque/barrido ni monedas físicas.
+- Valor global 1/2/3/5/8/13, dorada ×10 y racha conservados. Alimentación al capturar.
+- Salida visual tras aproximadamente 1 s, arco y vuelo al monedero; saldo visible al llegar.
+- Cierre liquida pendientes; pausa congela animaciones. Restaurar liquida sin duplicar.
+- Barrido, Área, Imán y Atracción retirados sin reembolso, autorizado por el usuario.
+- Resultados muestran ingreso íntegro, sin recuento de monedas físicas ni pérdidas por no recoger.
 - Racha comprable en el árbol (`combo`): requiere Mano I y cuesta **40**. Sin comprarla no hay racha ni multiplicadores. Una vez desbloqueada: ventana inclusiva de **1 s**; capturas 1–4 **×1**, 5–9 **×2**, desde la décima **×3**. La quinta y décima usan ya su nuevo multiplicador. No se modifican premios anteriores.
-- Se combinan Valor × dorada × combo. Toda recompensa sigue requiriendo recoger sus monedas. Todas las capturas, incluidas las asistidas, cuentan provisionalmente.
-- La racha termina al superar la ventana o entrar en recogida final. Pausar y restaurar no consumen tiempo. Un indicador muestra «Racha lista», contador desde la primera captura, multiplicador y barra de tiempo restante. No se explican los umbrales ni la fórmula en pantalla.
+- Se combinan Valor × dorada × combo. Toda recompensa se cobra automáticamente. Todas las capturas, incluidas las asistidas, cuentan provisionalmente.
+- La racha termina al superar la ventana o terminar producción. Pausar y restaurar no consumen tiempo. Un indicador muestra «Racha lista», contador desde la primera captura, multiplicador y barra de tiempo restante. No se explican los umbrales ni la fórmula en pantalla.
 
 ## Habilidades especiales comprables
 
@@ -140,7 +159,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 
 ## Árbol e interfaz
 
-**69 nodos en 26 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
+**59 nodos en 22 tipos**, con seis categorías: Generación verde, Valor dorado, Recogida azul, Control violeta, Tiempo naranja y Automatización coral. Mapa y requisitos completos: [árbol vigente](arbol-de-mejoras.md). Precios y efectos exactos: [balance.csv](balance.csv).
 
 - Pantalla independiente, sin título, botón visible de atrás ni botones de zoom. Navegación con arrastre y pellizco.
 - Descubrimiento progresivo: comprados y siguientes nodos accesibles. La partida nueva comienza mostrando Mano I.
@@ -152,7 +171,7 @@ aleatorias propuestas en CF-19, que siguen pendientes.
 
 Acceso directo: botón **DEBUG**, arriba a la izquierda del árbol. Un toque abre el panel; el saldo ya no requiere ni reconoce una pulsación mantenida para entrar.
 
-- Vista completa: encuadra los 69 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
+- Vista completa: encuadra los 59 nodos. Permite comprar gratis cualquier nodo y adquirir también sus requisitos, o comprar todo.
 - Vista del jugador: descubrimiento y compras normales usando saldo y mejoras de prueba. Ambas vistas comparten esa configuración; para ver el principio hay que reiniciar la prueba desde cero.
 - Añadir 1000 monedas de prueba, reiniciar, jugar jornadas de prueba y salir.
 - La prueba es temporal: no sobrescribe el progreso normal. Salir o reabrir recupera la partida real. Durante una jornada de prueba se muestra DEBUG y un botón de salida.
@@ -160,7 +179,7 @@ Acceso directo: botón **DEBUG**, arriba a la izquierda del árbol. Un toque abr
 
 **Incluido en el último APK:** el panel debug muestra el informe
 de la última jornada y permite copiar los últimos 20: emisiones efectivas,
-capturas, doradas, pico de combo y monedas generadas/cobradas/perdidas. Estos
+capturas, doradas, pico de combo y recompensas generadas/abonadas. Estos
 datos son temporales y se descartan al reiniciar la prueba o salir. Incluido desde la revisión `4d815d9` y conservado en el último APK. Las nuevas bolas aún no se
 han implementado: está pendiente discutir las reglas del prototipo.
 
@@ -186,7 +205,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v8** y balance vigente **v14** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–13 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
+Guardado JSON **v9** y balance vigente **v15** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–14 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, prestigio ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

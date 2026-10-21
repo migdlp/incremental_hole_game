@@ -541,7 +541,7 @@ void main() {
       expect(restored.board!.gravity.hasObject, isFalse);
       restored.finishDay();
       restored.startDay();
-      expect(restored.board!.settings.balanceVersion, 14);
+      expect(restored.board!.settings.balanceVersion, 15);
       await s.pendingWrites;
       await restored.pendingWrites;
       s.dispose();

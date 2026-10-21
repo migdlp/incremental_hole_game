@@ -1,5 +1,13 @@
 # Modo de depuración
 
+## C01 · Monedas automáticas y rendimiento
+
+Tienda → DEBUG → Monedas automáticas · rendimiento. Elegir adaptativo, sin
+animaciones o presupuesto de prueba; jugar con Captura total y comparar ingresos
+idénticos. Volver al panel para copiar frames y contadores. 24 monedas es solo
+un valor provisional. Medir con build profile y DevTools en Android físico; el
+APK debug no certifica 60 FPS. [Procedimiento](c01-cobro-automatico.md).
+
 Disponible en el código de la revisión 0.6.0+11. Es una sesión de pruebas temporal para inspeccionar el árbol y probar mejoras sin alterar el progreso guardado.
 
 ## Acceso desde el móvil

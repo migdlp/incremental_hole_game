@@ -55,6 +55,8 @@ class GardenGame extends FlameGame {
     super.onRemove();
   }
 
+  Offset walletTarget = const Offset(310, 28);
+  final Paint _rewardPaint = Paint();
   final GameSession session;
   bool wallEffectsEnabled;
   final _batFeedback = BatFeedback();
@@ -557,18 +559,6 @@ class GardenGame extends FlameGame {
     if (session.visualFeedback && board.paddle != null) {
       final point = board.paddle!;
       final p = offset(point);
-      if (board.canCollectCoins && board.settings['magnet_radius'] > 0) {
-        canvas.drawCircle(
-          p,
-          board.settings['magnet_radius'],
-          paint(const Color(0x12247d73)),
-        );
-        canvas.drawCircle(
-          p,
-          board.settings['magnet_radius'],
-          paint(const Color(0x50247d73), stroke: 1),
-        );
-      }
       if (!board.holdingPhysicalTool) {
         final ball = board.heldBall;
         final center = ball == null ? p : offset(ball.position);
@@ -728,19 +718,42 @@ class GardenGame extends FlameGame {
     if (board.coinOnly) {
       canvas.drawRect(bounds, paint(const Color(0xa6000000)));
     }
-    for (final coin in board.coins) {
-      final t = (1 - coin.landing / .2).clamp(0.0, 1.0);
-      final p =
-          offset(Board.hole + (coin.position - Board.hole) * t) -
-          Offset(0, math.sin(t * math.pi) * 25);
-      paintCoin(
-        canvas,
-        p,
-        CoinDenomination.values.firstWhere(
-          (d) => d.amount == coin.value,
-          orElse: () => CoinDenomination.one,
-        ),
+    final visuals = session.rewardVisuals;
+    for (final coin in visuals.coins) {
+      if (!coin.active || coin.age < visuals.delay) continue;
+      final denomination = coin.amount >= 500
+          ? CoinDenomination.fiveHundred
+          : coin.amount >= 100
+          ? CoinDenomination.hundred
+          : coin.amount >= 50
+          ? CoinDenomination.fifty
+          : coin.amount >= 10
+          ? CoinDenomination.ten
+          : CoinDenomination.one;
+      final center = Offset(
+        coin.x(walletTarget.dx, visuals.delay),
+        coin.y(walletTarget.dy, visuals.delay),
       );
+      _rewardPaint.color = coinColor(denomination);
+      canvas.drawCircle(center, 7, _rewardPaint);
+      _rewardPaint.color = const Color(0x88ffffff);
+      canvas.drawCircle(center - const Offset(1.5, 2), 3, _rewardPaint);
+    }
+    if (visuals.receiptPulse > 0) {
+      _rewardPaint.color = Color.fromRGBO(
+        245,
+        184,
+        61,
+        visuals.receiptPulse / .25 * .6,
+      );
+      _rewardPaint.style = PaintingStyle.stroke;
+      _rewardPaint.strokeWidth = 2;
+      canvas.drawCircle(
+        walletTarget,
+        12 + (1 - visuals.receiptPulse / .25) * 7,
+        _rewardPaint,
+      );
+      _rewardPaint.style = PaintingStyle.fill;
     }
     _renderGravity(canvas, board);
     _renderEventAnnouncements(canvas, board);

@@ -188,3 +188,12 @@ cuotas provisionales en juego normal. Quedan BAL01 (cantidades y progresión),
 S03 (derrota/reinicio/prestigio) y S02 (personalidad). Incumplir no causa pérdidas
 reales; fallo reversible solo en DEBUG. No convertir los valores provisionales
 10/+10 en balance definitivo ni introducir pérdidas irreversibles antes de S03.
+
+## Validación pendiente C01
+
+Cobro automático implementado; se retiró recogida manual y su fase exclusiva.
+Usuario autorizó eliminar las cuatro compras sin reembolso y Robot conserva
+Escoba ancha II. Pendiente elegir Android de referencia y medir CPU, raster/GPU,
+frames, memoria y asignaciones con capturas masivas. No cerrar presupuesto
+visual ni parámetros de trayectorias sin medir. Rediseño de la rama libre y
+revisión de balance por eliminar pérdidas corresponden a tareas separadas.

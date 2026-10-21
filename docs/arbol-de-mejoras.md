@@ -1,12 +1,18 @@
 # Árbol de mejoras progresivo
 
-Código **0.11.0+19**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
+## Retirada C01
+
+Barrido, Área, Imán y Atracción no están en el catálogo activo. Compras antiguas
+retiradas sin reembolso por autorización del usuario. Robot mantiene únicamente
+Escoba ancha II. 59 nodos / 22 tipos; no se rediseña la rama liberada.
+
+Código **0.13.0+21**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
 **Debug:** pulsar el botón DEBUG, arriba a la izquierda, para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
 ## Ampliación M03 · prototipo
 
-El catálogo vigente pasa a **69 nodos y 26 tipos**. Rama independiente de
+M03 añadió cuatro nodos; C01 retira después la recolección manual. Rama independiente de
 Producción: Generador II → Generador lanzador (120) → Frecuencia I/II/III
 (100/180/300), intervalos 2,4/1,8/1,2/0,8 s. Sin mejoras de potencia. Requisito,
 precios y niveles son provisionales, pendientes de balance; CSV como fuente
@@ -14,7 +20,7 @@ configurable. [Comportamiento y pruebas](m03-generador-lanzador.md).
 
 ## Mapa actual
 
-Veintiséis tipos y **69 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las nueve ramas iniciales se pueden desarrollar conjuntamente.
+Veintidós tipos y **59 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las siete ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
 🟣 MANO I · 13 monedas · 2 bolas
@@ -38,19 +44,13 @@ Veintiséis tipos y **69 nodos**, uno por nivel comprable. Cada nivel requiere e
 ├─ 🟡 RACHA · 40 monedas
 │  └─ CAPTURA TOTAL · 120 → RECARGA I → II
 │
-├─ 🔵 BARRIDO DE MONEDAS (opcional)
-│
-├─ 🔵 ÁREA I → II → III
-│                 ├─ Área IV → V
-│                 └─ IMÁN · 300 monedas → ATRACCIÓN I → II → III
-│
 └─ 🟣 MANO II · 3 bolas
    ├─ Mano III → IV → V · 4 → 5 → 6 bolas
    └─ DESBLOQUEAR ESCOBA · 20 monedas
       └─ ANCHURA I
          ├─ Anchura II
          │  ├─ Anchura III → IV → V
-         │  └─ 🔴 ROBOT (+ Barrido)
+         │  └─ 🔴 ROBOT
          │     └─ VELOCIDAD I → II → III → IV → V
          └─ ESCOBA EN V
 ```

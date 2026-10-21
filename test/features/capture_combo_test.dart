@@ -81,7 +81,7 @@ void main() {
       expect(session.economy.generated, expectedUnits * 3);
       expect(session.economy.collected, 0);
       expect(session.economy.balance, 0);
-      expect(session.board!.pending, expectedUnits * 3);
+      expect(session.rewards.outstanding, expectedUnits * 3);
     }
     expect(
       session.board!.coins.every(
@@ -90,7 +90,7 @@ void main() {
       isTrue,
     );
     session.finishDay();
-    expect(session.economy.balance, 0);
+    expect(session.economy.balance, expectedUnits * 3);
     expect(session.progress.last!.generated, expectedUnits * 3);
     session.startDay();
     expect(session.board!.combo.streak, 0);
@@ -123,7 +123,7 @@ void main() {
     },
   );
 
-  test('combo money still requires pickup and is banked exactly once', () {
+  test('combo money arrives automatically and is banked exactly once', () {
     final session = GameSession(catalog, MemoryStore())
       ..levels.addAll({'hand': 1, 'combo': 1})
       ..startDay();
@@ -132,10 +132,8 @@ void main() {
     }
     final board = session.board!;
     expect(session.economy.generated, 44);
-    for (final coin in List.of(board.coins)) {
-      coin.landing = 0;
-      session.touch(coin.position);
-      session.release();
+    for (var i = 0; i < 180; i++) {
+      session.tick(1 / 60);
     }
     expect(session.economy.collected, 44);
     expect(board.pending, 0);

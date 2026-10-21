@@ -35,12 +35,9 @@ void main() {
         containsAll(['hand:2', 'generator:1']),
       );
       final first = tree.visible({'hand': 1}).map((n) => n.id);
-      expect(
-        first,
-        containsAll(['generator:1', 'reward:1', 'sweep:1', 'hand:2']),
-      );
+      expect(first, containsAll(['generator:1', 'reward:1', 'hand:2']));
       expect(first, isNot(contains('broom:1')));
-      expect(first, contains('collection:1'));
+      expect(first, isNot(contains('collection:1')));
       expect(first, isNot(contains('duration:1')));
       expect(tree.visible({'hand': 2}).map((n) => n.id), contains('broom:1'));
       expect(
@@ -74,14 +71,7 @@ void main() {
       final visible = tree.visible(legacy);
       expect(
         visible.map((n) => n.id),
-        containsAll([
-          'paddle:1',
-          'paddle:2',
-          'broom:1',
-          'magnet:1',
-          'collection:1',
-          'hand:1',
-        ]),
+        containsAll(['paddle:1', 'paddle:2', 'broom:1', 'hand:1']),
       );
       expect(legacy.containsKey('generator'), isFalse);
     },

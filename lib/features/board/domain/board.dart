@@ -434,22 +434,26 @@ class Board {
     final onCoin = coins.any(
       (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
     );
-    final grabLauncher = !coinOnly && !onCoin && launcher.contains(paddle!);
     final handle =
         broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
     final grabBat =
         !coinOnly &&
-        !grabLauncher &&
         _onBat(paddle!, batThickness + 8) &&
         (tool == BallTool.bat || !_onBroom(paddle!, 12));
     final grabBroom =
         !coinOnly &&
         broomUnlocked &&
-        !grabLauncher &&
         !grabBat &&
         !onCoin &&
         (_onBroom(paddle!, 12) ||
             segmentDistance(paddle!, broomPosition, handle) <= 12);
+    // Broom/bat render above the launcher and keep their established grips.
+    final grabLauncher =
+        !coinOnly &&
+        !onCoin &&
+        !grabBat &&
+        !grabBroom &&
+        launcher.contains(paddle!);
     tool = grabBat
         ? BallTool.bat
         : grabBroom

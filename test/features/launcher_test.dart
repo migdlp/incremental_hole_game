@@ -142,6 +142,29 @@ void main() {
   );
 
   test(
+    'overlapping broom and bat keep their visible grip priority above the launcher',
+    () {
+      final b = board();
+      b.settings.values['broom_unlocked'] = 1;
+      b.broomPosition = b.launcher.position;
+      b.touch(b.launcher.position);
+      expect(b.holdingBroom, isTrue);
+      expect(b.holdingLauncher, isFalse);
+      b.releasePointer();
+      b.broomPosition = const Vec(290, 100);
+      b.settings.values['bat_power'] = 1;
+      b.batPosition = b.launcher.position;
+      b.touch(b.launcher.position);
+      expect(b.holdingBat, isTrue);
+      expect(b.holdingLauncher, isFalse);
+      b.releasePointer();
+      b.batPosition = const Vec(80, 300);
+      b.touch(b.launcher.position);
+      expect(b.holdingLauncher, isTrue);
+    },
+  );
+
+  test(
     'the complete body and barrel stay within the bottom quarter at every orientation',
     () {
       final b = board();

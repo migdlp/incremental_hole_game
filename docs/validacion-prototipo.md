@@ -2,6 +2,35 @@
 
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
+## S03 · 0.14.0+22 · 21/10/2026
+
+Fuente `6d11b9a`, rama `build/apk-0.6.0+13`.
+[Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/39678229238):
+**321 pruebas**, formato y análisis sin avisos, APK compilado y firma v2 verificada.
+Etiqueta Feed the Hole, paquete `com.migdlp.incremental_hole_game`, versionCode 22.
+[APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39678229238/artifacts/12381589376).
+
+23 pruebas específicas de prestigio: cuota fallida/cumplida, derrota sencilla,
+tienda, día 1, conservación permanente y P01 opaco, ausencia de estrellas automáticas,
+revisiones antiguas, recuperación desde checkpoint tras fallo del archivo normal,
+fallo de checkpoint y reintento, corrupción sin resurrección, dos copias en
+Android/nativo y web, restauración en tienda, DEBUG aislado, rombo grande a 45°,
+confirmación y cancelación en ambos modos, cierre de árbol/modal y botones
+bloqueados durante escritura. Suite anterior adaptada al nodo y a la derrota
+normal, sin perder cobertura de C01 ni otras mecánicas.
+
+Usuario autorizó derrota normal con cuotas provisionales; nodo en normal y DEBUG,
+mayor y girado 45°. Coste 10.000, Generador/Valor/Duración V y posición (48,48)
+son configuración de prueba pendiente de BAL01. Sin premios P01, catálogo ni
+efectos P02 inventados. No se certifica todavía que una nueva partida sea más
+potente sin P02, ni la experiencia física o narrativa de la primera muerte.
+[Contrato y pendientes](s03-prestigio-metaprogresion.md).
+
+Persisten avisos no bloqueantes de Node 20/24 y setup-java@v4. No se modifica
+infraestructura de CI. La pipeline comprueba esta firma pero no acredita
+actualización sobre APK anteriores con firma distinta; no desinstalar para
+resolverlo si se quiere conservar el progreso. Prueba Android física pendiente.
+
 ## C01 · 0.13.0+21 · 21/10/2026
 
 Fuente `c6f9125`, rama `build/apk-0.6.0+13`.

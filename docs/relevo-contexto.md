@@ -40,7 +40,7 @@ no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
 Las referencias anteriores a recogida manual o fase final describen versiones
 históricas y quedan sustituidas por C01.
 
-**Actualizado: 21/10/2026 · Último APK entregado: 0.13.0+21, revisión `c6f9125`.**
+**Actualizado: 21/10/2026 · Último APK entregado: 0.14.0+22, revisión `6d11b9a`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
 
@@ -78,7 +78,7 @@ con carga automática durante producción y mejoras de recarga, potencia y durac
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
 el otro agarre. Guardado v10 / balance v16, con balances anteriores congelados para jornadas
-antiguas. Verificación CI de la entrega: 298 pruebas y análisis
+antiguas. Verificación CI de la entrega: 321 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
 ## M01 implementado en la última entrega
@@ -179,9 +179,9 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 
 ## Última entrega y comprobaciones
 
-[Descargar APK 0.13.0+21 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39669624882/artifacts/12379681616). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
+[Descargar APK 0.14.0+22 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39678229238/artifacts/12381589376). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
-298 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39669624882). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+321 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39678229238). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
 
 ## Acceso a GitHub desde Codex Cloud (20/10/2026)
 
@@ -225,7 +225,7 @@ Continúa el proyecto Feed the Hole del repo
 migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
-no reconstruir el historial de commits. El último APK es 0.13.0+21:
+no reconstruir el historial de commits. El último APK es 0.14.0+22:
 agujero arriba, generador abajo, producción de 15 s con cobro automático y sin recogida final, alimentación con racha y cuotas provisionales con derrota, tienda de prestigio y nodo voluntario confirmado, generador lanzador, eventos Agujero negro y Gravedad por inclinación, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
 No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi

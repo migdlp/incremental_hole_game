@@ -73,6 +73,16 @@ void main() {
     expect(config.category(100), 2);
     expect(config.value(2), 25);
   });
+  test('successive expulsions spread directions instead of sharing a path', () {
+    final p = system(quotas: 2);
+    final first = p.bodies.single;
+    first.position = const Vec(80, 250);
+    p.populate(1);
+    expect(first.velocity.x, lessThan(0));
+    expect(p.bodies.last.velocity.x, greaterThan(0));
+    expect(first.velocity.y, greaterThan(0));
+    expect(p.bodies.last.velocity.y, greaterThan(0));
+  });
   test(
     'ledger quota and payment are idempotent with multiple bubble values',
     () {

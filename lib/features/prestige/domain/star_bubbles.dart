@@ -48,8 +48,8 @@ class StarBubbles {
   void sync(StarLedger value) => ledger = value;
   static const hole = Vec(180, 50);
   void _eject(StarBubble b) {
-    // Golden-angle progression spreads eject directions without consuming ball RNG.
-    final angle = .35 + (b.reward.id * 2.399963) % 2.4;
+    // Golden-ratio progression spreads eject directions without consuming ball RNG.
+    final angle = .35 + ((b.reward.id * .61803398875) % 1) * 2.4;
     b.position = hole;
     b.velocity =
         Vec(math.cos(angle), math.sin(angle)) * config['star_eject_speed'];

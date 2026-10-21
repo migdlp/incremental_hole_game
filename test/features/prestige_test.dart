@@ -527,7 +527,14 @@ void main() {
 
         await holdBuy();
         expect(find.text('¿Reiniciar la partida?'), findsOneWidget);
-        expect(find.textContaining('Conservas tus estrellas'), findsOneWidget);
+        expect(
+          find.textContaining('Conservas tus estrellas cobradas'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Las burbujas sin romper se pierden.'),
+          findsOneWidget,
+        );
         await tester.tap(find.text('Cancelar'));
         await tester.pumpAndSettle();
         expect(s.snapshot(), before);

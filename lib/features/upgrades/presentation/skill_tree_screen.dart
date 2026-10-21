@@ -121,7 +121,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         builder: (context) => AlertDialog(
           title: const Text('¿Reiniciar la partida?'),
           content: const Text(
-            'Comprar Prestigio termina esta partida inmediatamente. Se reinician las monedas y las mejoras normales. Conservas tus estrellas y mejoras permanentes.',
+            'Comprar Prestigio termina esta partida inmediatamente. Se reinician las monedas y las mejoras normales. Conservas tus estrellas cobradas y mejoras permanentes. Las burbujas sin romper se pierden.',
           ),
           actions: [
             TextButton(

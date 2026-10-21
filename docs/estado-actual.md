@@ -150,3 +150,11 @@ nombre/paquete son correctos. La comparación con la última APK detectó firmas
 diferentes y detuvo la publicación. Falta localizar y reutilizar el keystore
 original para cumplir la actualización conservando datos.
 [Diagnóstico y evidencia de G01](g01-feed-the-hole.md).
+
+**Entrega posterior G01 (21/10/2026):** APK Feed the Hole `0.6.0+14` generada
+con la pipeline habitual sobre `4f100fc`, a petición del usuario.
+[Descarga](https://github.com/migdlp/incremental_hole_game/actions/runs/39557666293/artifacts/12326019753).
+Pasaron formato, análisis, 154 pruebas, compilación y validación del nombre,
+paquete y firma del binario. Se omitió la comparación de actualización con la
+APK anterior: el conflicto de firma previamente confirmado sigue pendiente.
+No presentar esta entrega como actualización que conserve el progreso instalado.

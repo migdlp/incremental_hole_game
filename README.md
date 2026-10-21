@@ -1,15 +1,16 @@
 # Feed the Hole
 
-**G01:** el código de `0.6.0+14` utiliza Feed the Hole como nombre comercial.
-La APK anterior enlazada abajo mantiene su nombre histórico. La compilación G01
-ha confirmado una firma distinta y no se publica como actualización: hace falta
-reutilizar su keystore original. [Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
+**G01:** Feed the Hole `0.6.0+14` ya está disponible mediante la pipeline habitual.
+La comprobación previa detectó una firma distinta de la APK anterior; esta
+entrega no acredita actualización conservando su progreso. No desinstalar la
+instalación anterior para resolver el conflicto de firma.
+[Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código G01: 0.6.0+14. Último APK entregado: 0.6.0+13, revisión `4d815d9`**, 20/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.6.0+14, revisión `4f100fc`**, 20/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
-**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638/artifacts/12281513638)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638): formato, análisis, **154 pruebas**, compilación Android y firma. Descomprimir e instalar `jardin-mecanico-debug.apk`. Los artefactos tienen retención limitada.
+**[Descargar APK 0.6.0+14 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39557666293/artifacts/12326019753)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39557666293): formato, análisis, **154 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
 
 La última entrega incluye **interfaz de juego simplificada, una sola barra de tiempo, saldo y pausa dentro del tablero y feedback visual opcional apagado por defecto**, además de racha comprable, especiales y escoba de dos dedos. La interfaz usa «Tienda» y «Comenzar día», sin mostrar números de día. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 

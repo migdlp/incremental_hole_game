@@ -124,3 +124,16 @@ DevTools y los contadores de frames del panel de rendimiento, comparando 1/8/16/
 burbujas y el mismo número de bolas. Las pruebas de límites no certifican 60 FPS,
 el umbral agradable para los dedos ni que se rompan naturalmente con la frecuencia
 deseada. No cerrar BAL01 sin esas mediciones y pruebas de juego.
+
+## Entrega verificada
+
+Código publicado: `0ac69d0` en `build/apk-0.6.0+13`; `046ebb0` sigue siendo
+antepasado. La [pipeline 39686480457](https://github.com/migdlp/incremental_hole_game/actions/runs/39686480457)
+completó formato, análisis sin avisos, **354 pruebas**, compilación Android y
+verificación de firma. [APK 0.15.0+23 y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/39686480457/artifacts/12386228786).
+Paquete Android conservado: `com.migdlp.incremental_hole_game`; nombre Feed the Hole.
+
+No se ha probado en Android físico. La firma de esta APK se verifica, pero sigue
+pendiente reutilizar una identidad de firma estable para acreditar actualización
+sobre instalaciones anteriores conservando sus datos. No desinstalar para sortear
+ese conflicto si se necesita conservar el progreso.

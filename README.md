@@ -6,11 +6,11 @@ entrega no acredita actualización conservando su progreso. No desinstalar la
 instalación anterior para resolver el conflicto de firma.
 [Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.10.0+18, revisión `34b1592`**, 21/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, recoge sus monedas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.11.0+19, revisión `571d001`**, 21/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
-**[Descargar APK 0.10.0+18 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39641047592/artifacts/12365725792)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39641047592): formato, análisis, **232 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
+**[Descargar APK 0.11.0+19 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39645255701/artifacts/12366918039)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39645255701): formato, análisis, **262 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
 
 La entrega incluye [M01 · Paredes rebotadoras](docs/m01-paredes-rebotadoras.md): tres niveles permanentes, ondas elásticas y límite de velocidad, con balance provisional. Conserva **interfaz de juego simplificada, una sola barra de tiempo, saldo y pausa dentro del tablero y feedback visual opcional apagado por defecto**, además de racha comprable, especiales y escoba de dos dedos. La interfaz usa «Tienda» y «Comenzar día», sin mostrar números de día. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 
@@ -25,7 +25,7 @@ Pendiente de validación física. [Sensores y pruebas](docs/e01-gravedad.md).
 5 % por comprobación periódica, varios objetos rompibles y succión ampliada hasta
 10 s sin ampliar captura. DEBUG permite forzar 1–3 objetos. Parámetros provisionales.
 
-**M03 en preparación (0.11.0+19):** [Generador lanzador](docs/m03-generador-lanzador.md),
+**M03 incluido (0.11.0+19):** [Generador lanzador](docs/m03-generador-lanzador.md),
 segundo emisor orientable, frecuencia independiente, presión física y pose
 persistente. Desbloqueo y parámetros provisionales; disponible en DEBUG.
 
@@ -56,7 +56,7 @@ python3 -m http.server 8123 --directory build/web
 - Monedas de $1/$10/$50/$100/$500 con colores propios, sin cifras ni símbolos sobre sus caras; una bola genera $1 de base. Monedas individuales, aterrizaje, área manual mejorable sin imán y barrido opcional. No se fusionan; la reserva por denominaciones conserva el valor si se llena el límite visible. No se recogen ni atraen mientras se lleva una bola.
 - Día inicial de **20 segundos en total: 15 de producción y 5 de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso se banca una sola vez y lo pendiente se descarta.
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 1 segundo; las compras revelan nuevos caminos.
-- 24 tipos y 65 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
+- 26 tipos y 69 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja e imán ligado al dedo activo.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
 - Guardado JSON v7 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano y opción de silenciar los sonidos del sistema.
@@ -77,7 +77,7 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 
-La entrega vigente pasa **232 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
+La entrega vigente pasa **262 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
 
 La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisis y pruebas, compila el APK de depuración y lo guarda como artefacto descargable junto con su SHA-256. Se activa en **Actions → Flutter - APK manual → Run workflow**; no se dispara con cada push.
 

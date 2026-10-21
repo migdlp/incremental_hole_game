@@ -32,6 +32,7 @@ Un dedo sobre el cuerpo/cañón traslada conservando orientación. Dos dedos usa
 el mismo `TwoPointGrip` de escoba/bate para trasladar y girar. Puede seguir
 disparando agarrado. Levantar uno conserva el otro agarre; al soltar los dos
 mantiene pose, sin inercia de lanzamiento. Pausa/cancelación liberan los dedos.
+Escoba y bate conservan prioridad de agarre cuando se dibujan encima del lanzador.
 
 Solo puede ocupar la franja **y = 420–560**, el 25 % inferior. Se limita el cuerpo
 circular completo y el cañón, según su ángulo, también contra paredes laterales

@@ -2,6 +2,30 @@
 
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
+## M03 · 0.11.0+19 · 21/10/2026
+
+Fuente `571d001`, rama `build/apk-0.6.0+13`. [Pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39645255701).
+**262 pruebas**, formato y análisis sin avisos. Compilación Android y firma v2
+verificadas; etiqueta Feed the Hole, paquete `com.migdlp.incremental_hole_game`,
+versionCode 19. [APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39645255701/artifacts/12366918039).
+
+30 pruebas nuevas: rama y frecuencia independientes, emisores simultáneos,
+velocidad/sin retroceso, gestos y giro, cuerpo/cañón en todas las orientaciones,
+resistencia ante tres bolas, presión sostenida y parada, obstrucciones, límite
+de población, doradas, rebotes, 200 bolas, monedas, pausa/segundo plano/recogida,
+reanudación sin duplicados, pose entre jornadas/reinicios y guardado al soltar,
+migración v12, corrupción atómica, DEBUG aislado, sonido y render sin mutación,
+prioridad de agarres al solaparse, además de gestos reales de dos dedos en pantalla de 320×568. Suite anterior conservada.
+
+La presión de acumulación se verifica con contactos comprimidos sostenidos;
+calibración de una acumulación libre, tacto, rendimiento, sonido/aspecto y balance
+siguen pendientes en Android físico. Generador II, costes, niveles y parámetros
+son de prueba. No se certifica compatibilidad de firma con APK anteriores (G01).
+
+Avisos no bloqueantes de infraestructura en esta ejecución: las acciones con
+Node.js 20 se ejecutan mediante Node.js 24 y `actions/setup-java@v4` está deprecada.
+No fallaron las comprobaciones; actualizar acciones queda fuera de M03.
+
 ## E02 · 0.10.0+18 · 21/10/2026
 
 Fuente `34b1592`, rama `build/apk-0.6.0+13`. [Pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39641047592).

@@ -2,6 +2,25 @@
 
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
+## E02 · 0.10.0+18 · 21/10/2026
+
+Fuente `34b1592`, rama `build/apk-0.6.0+13`. [Pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39641047592).
+**232 pruebas**, formato y análisis sin avisos. Compilación Android y firma v2
+verificadas; etiqueta Feed the Hole, paquete `com.migdlp.incremental_hole_game`,
+versionCode 18. [APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39641047592/artifacts/12365725792).
+
+21 pruebas nuevas: comprobaciones periódicas y probabilidad, varios objetos,
+daños/gestos/solapamientos, alcance frente a captura, curva e inercia, doradas,
+agarres/monedas/herramientas, límites con 200 bolas, renovación de tiempo,
+pausa/segundo plano, guardado/restauración/corrupción, migración v11, independencia
+de RNG/E01, DEBUG aislado y pantalla pequeña, sonido sin reproducción duplicada
+y renderizado bajo las bolas sin mutar la simulación. Suite anterior conservada.
+La retirada de objetos al terminar producción responde a la elección del usuario.
+
+Pendientes: calibración de intervalo/física, gráficos/audio definitivos, prueba
+y rendimiento en Android físico. La pipeline habitual verifica esta firma; no
+acredita actualización sobre APK anteriores con otro certificado (G01).
+
 ## E01 · 0.9.0+17 · 21/10/2026
 
 Fuente `172872a`, rama `build/apk-0.6.0+13`. [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764):

@@ -8,7 +8,7 @@ activación ni sonido; reabre pausado. Recogida elimina objetos y efecto. El CSV
 v11 queda congelado para jornadas antiguas, sin cambiar saldo/compras ni
 introducir E02 a mitad. [Detalle de campos y pruebas](e02-agujero-negro.md).
 
-## Contrato vigente · E01, 0.9.0+17
+## Ampliación E01, 0.9.0+17
 
 JSON v7, balance v11. `eventRandom` guarda el RNG de eventos independiente del
 emisor de bolas; si falta en datos anteriores se inicializa sin borrar progreso.

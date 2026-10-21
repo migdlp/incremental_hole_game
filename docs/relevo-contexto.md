@@ -1,6 +1,6 @@
 # Relevo de contexto — Feed the Hole
 
-**Actualizado: 20/10/2026 · Último APK entregado: 0.6.0+13, revisión `4d815d9`.**
+**Actualizado: 21/10/2026 · Último APK entregado: 0.7.0+15, revisión `c74545a`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
 
@@ -37,9 +37,15 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v7 / balance v8, con balance v7 congelado para jornadas
-antiguas. Verificación local y CI: 154 pruebas y análisis
+el otro agarre. Guardado v7 / balance v9, con balances anteriores congelados para jornadas
+antiguas. Verificación local y CI: 164 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
+
+## M01 implementado en la última entrega
+
+Cuatro paredes con rebote base ×0,40 y mejora permanente I/II/III ×1,10/1,35/1,60; velocidad máxima 380 u/s. Línea elástica y ondas al impactar, sin cambiar monedas ni congelación final. Compras persistentes, aplicadas desde la jornada siguiente; jornadas v8 conservadas. Para probar: Tienda → DEBUG → comprar Paredes rebotadoras con requisitos → Comenzar día de prueba.
+
+Multiplicadores, límite y costes 40/100/220 con Mano I son **provisionales**, pendientes de validación de balance. [Implementación y pruebas](m01-paredes-rebotadoras.md). Sigue pendiente la compatibilidad de firma con APK anteriores descrita en [G01](g01-feed-the-hole.md); la pipeline estándar verifica la firma de esta APK, sin acreditar actualización sobre la anterior. No desinstalar para resolverlo si se quiere conservar su progreso.
 
 ## Próximas mejoras y decisiones abiertas
 
@@ -69,9 +75,9 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 
 ## Última entrega y comprobaciones
 
-[Descargar APK 0.6.0+13 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638/artifacts/12281513638). Descomprimir e instalar `jardin-mecanico-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
+[Descargar APK 0.7.0+15 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001/artifacts/12333480990). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
-154 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+164 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
 
 ## Acceso a GitHub desde Codex Cloud (20/10/2026)
 

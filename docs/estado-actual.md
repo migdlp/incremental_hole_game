@@ -1,6 +1,6 @@
 # Estado actual de Feed the Hole
 
-Actualizado: **20/10/2026**. Referencia de APK entregado: **0.6.0+13**. La revisión `4d815d9` incorpora interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **21/10/2026**. Referencia de APK entregado: **0.7.0+15**. La revisión `c74545a` añade M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -17,6 +17,12 @@ Los cuatro ejes de progresión son generar más bolas, capturar una proporción 
 - Al terminar, lo pendiente se pierde. El tablero siguiente empieza vacío y conserva saldo y mejoras.
 - Límite de **200 bolas**, **1000 monedas visibles** y reserva por denominación para monedas pendientes de emitir. La reserva no se cobra automáticamente.
 - Pausa y segundo plano detienen la simulación. No hay ingresos por tiempo con el juego cerrado.
+
+## Paredes rebotadoras · M01
+
+Las cuatro paredes rebotan desde el inicio (×0,40). La mejora permanente tiene tres compras: I ×1,10, II ×1,35 y III ×1,60; límite global de bolas 380 u/s. Todas las bolas, incluidas doradas, usan la misma respuesta; las monedas no cambian y las bolas siguen congeladas al recoger. Las paredes mejoradas muestran línea elástica, deformación y ondas transitorias.
+
+Las compras se conservan al reiniciar y se aplican desde la jornada siguiente. Requisito Mano I y costes 40/100/220, multiplicadores y límite son **provisionales de prueba**, no balance aprobado. [Detalle de implementación y pruebas](m01-paredes-rebotadoras.md).
 
 ## Mano, escoba y robot
 
@@ -91,17 +97,19 @@ han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
-**[Descargar APK 0.6.0+13 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638/artifacts/12281513638)**. Descomprimir e instalar `jardin-mecanico-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
+**[Descargar APK 0.7.0+15 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001/artifacts/12333480990)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39458229638): formato, análisis, **154 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `4d815d9`. Incluye Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001): formato, análisis, **164 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `c74545a`. Incluye M01 Paredes rebotadoras. Incluye Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
 
 Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 62 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 
-La revisión entregada pasa 154 pruebas automáticas, además de análisis sin avisos.
+La revisión entregada pasa 164 pruebas automáticas, además de análisis sin avisos.
 Incluyen compra y persistencia de Racha, cargas/activaciones de especiales,
 compatibilidad con jornadas anteriores, eventos reales de dos dedos y pantalla
 de 320 × 568 con texto al 150 %. La pausa permite desplazar su panel si el
 espacio es reducido. La pipeline genera el APK, pero no sustituye la prueba física.
+
+La pipeline estándar verifica la firma de esta APK, pero no resuelve la incompatibilidad con la firma de APK anteriores detectada en [G01](g01-feed-the-hole.md). No desinstalar la anterior si se quiere conservar su progreso.
 
 Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y fichas, tacto y rendimiento con carga, guardado/segundo plano/cierre y diversión del nuevo tablero. Falta medir ingresos y jornadas entre compras para ajustar el balance.
 
@@ -109,7 +117,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v7** y balance vigente **v9** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–7 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
+Guardado JSON **v7** y balance vigente **v9** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–8 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. No reiniciar progreso para aplicar mejoras de diseño sin una migración acordada.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, prestigio ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

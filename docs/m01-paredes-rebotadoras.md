@@ -73,3 +73,14 @@ reinyectadas hacia paredes para sostener los impactos, 120 frames de calentamien
 y 600 medidos: media aproximada de 1,34 ms por frame de física, búfer 32/32.
 No incluye renderizado ni certifica rendimiento Android. Repetir desde la raíz:
 `dart run tool/benchmark_rebounding_walls.dart`.
+
+## Entrega verificada
+
+APK **0.7.0+15**, código `c74545a`, publicado en `build/apk-0.6.0+13`.
+[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001): formato, análisis, **164 pruebas**, compilación Android y firma.
+[Descargar APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39572936001/artifacts/12333480990). El ZIP contiene `feed-the-hole-debug.apk`.
+
+Para probar niveles sin gastar progreso real: Tienda → DEBUG → comprar Paredes
+rebotadoras con sus requisitos → iniciar jornada de prueba. Probar por separado
+I, II y III; comprar todo activa el máximo. No consta prueba en teléfono físico.
+La compatibilidad de firma con APK anteriores sigue pendiente; ver [G01](g01-feed-the-hole.md).

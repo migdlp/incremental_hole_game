@@ -2,6 +2,24 @@
 
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
+## E01 · 0.9.0+17 · 21/10/2026
+
+Fuente `172872a`, rama `build/apk-0.6.0+13`. [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764):
+**211 pruebas**, formato, análisis sin avisos, compilación Android (incluido el
+puente Kotlin de sensores) y firma v2 correctos. Nombre Feed the Hole, paquete
+`com.migdlp.incremental_hole_game`, versionCode 17. [APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764/artifacts/12361665066).
+
+22 pruebas de Gravedad y 6 del adaptador: probabilidad, pulsaciones/gestos,
+fuerzas, agarres, monedas y premios, 200 bolas, tiempo, pausa/segundo plano,
+guardado, migración v10, DEBUG y disponibilidad/ejes/lecturas obsoletas. Suite
+anterior conservada. Revisadas imágenes de daño y anuncio; no hay prueba de
+sensores ni rendimiento en un Android físico. Parámetros y aspecto provisionales;
+daño por bolas y futuros eventos simultáneos siguen abiertos.
+
+La comparación de firma contra APK anteriores se omitió en la pipeline habitual;
+el bloqueo de compatibilidad de G01 sigue pendiente. No se modifica paquete,
+archivos de guardado, saldo, compras ni migraciones existentes.
+
 ## M02 · 0.8.0+16 · 21/10/2026
 
 Fuente compilada `e9e9620`, rama `build/apk-0.6.0+13`.

@@ -1,6 +1,6 @@
 # Estado actual de Feed the Hole
 
-Actualizado: **21/10/2026**. Referencia de APK entregado: **0.8.0+16**. La revisión `e9e9620` incluye M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **21/10/2026**. Referencia de APK entregado: **0.9.0+17**. La revisión `172872a` incluye E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -41,7 +41,7 @@ una respuesta cada 120 ms. [Física, guardado y pruebas](m02-bate-beisbol.md).
 
 ## Gravedad · E01
 
-Código **0.9.0+17**, pendiente de entrega APK. Evento aleatorio desde la primera
+Prototipo **0.9.0+17**, incluido en el APK enlazado abajo. Evento aleatorio desde la primera
 jornada compatible: probabilidad configurable 5 %, un objeto móvil durante
 producción y 3–6 pulsaciones para romperlo. Activa inclinación del teléfono hasta
 10 s o hasta recogida, con anuncio breve. Sensores Android comprobados mediante
@@ -127,13 +127,13 @@ han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
-**[Descargar APK 0.8.0+16 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892/artifacts/12336244410)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
+**[Descargar APK 0.9.0+17 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764/artifacts/12361665066)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892): formato, análisis, **183 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `e9e9620`. Incluye M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764): formato, análisis, **211 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `172872a`. Incluye E01 Gravedad, M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
 
 Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 65 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 
-La revisión entregada pasa 183 pruebas automáticas, además de análisis sin avisos.
+La revisión entregada pasa 211 pruebas automáticas, además de análisis sin avisos.
 Incluyen compra y persistencia de Racha, cargas/activaciones de especiales,
 compatibilidad con jornadas anteriores, eventos reales de dos dedos y pantalla
 de 320 × 568 con texto al 150 %. La pausa permite desplazar su panel si el

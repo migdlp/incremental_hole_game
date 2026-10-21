@@ -138,3 +138,12 @@ de un sensor físico. Siguen pendientes sentido real de inclinación, comodidad,
 fuerza, aspecto, batería y rendimiento en un teléfono. No declarar aceptación
 física por pasar pruebas automáticas o generar una imagen. La firma compatible
 con APK anteriores sigue pendiente según [G01](g01-feed-the-hole.md).
+
+## Entrega Android verificada
+
+APK **0.9.0+17**, fuente `172872a`, publicada en `build/apk-0.6.0+13`.
+[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764): **211 pruebas**, formato, análisis, compilación
+Android del puente de sensores y firma correctos. [Descargar APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764/artifacts/12361665066).
+El ZIP contiene `feed-the-hole-debug.apk`. No sustituye la prueba en teléfono
+físico ni acredita compatibilidad de firma con APK anteriores; no desinstalar
+la anterior para resolver un conflicto si se quiere conservar su progreso.

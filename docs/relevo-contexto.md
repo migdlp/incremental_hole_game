@@ -1,6 +1,6 @@
 # Relevo de contexto — Feed the Hole
 
-**Actualizado: 21/10/2026 · Último APK entregado: 0.8.0+16, revisión `e9e9620`.**
+**Actualizado: 21/10/2026 · Último APK entregado: 0.9.0+17, revisión `172872a`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
 
@@ -38,7 +38,7 @@ con carga automática durante producción y mejoras de recarga, potencia y durac
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
 el otro agarre. Guardado v7 / balance v11, con balances anteriores congelados para jornadas
-antiguas. Verificación CI de la entrega: 183 pruebas y análisis
+antiguas. Verificación CI de la entrega: 211 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
 ## M01 implementado en la última entrega
@@ -59,9 +59,9 @@ Precios 60/120/240, Mano I y potencia ×1/×1,35/×1,70 son **provisionales**.
 [Estado M02 y guía de prueba](m02-bate-beisbol.md). No implementar otras piezas
 ni nuevas bolas como parte de esta tarea.
 
-## E01 · Gravedad en código
+## E01 · Gravedad entregada
 
-Prototipo 0.9.0+17, pendiente de APK. 5 % por jornada compatible, máximo un objeto,
+APK 0.9.0+17 generado por la pipeline habitual. 5 % por jornada compatible, máximo un objeto,
 3–6 pulsaciones y hasta 10 s de producción inclinando el móvil. Sensor Android
 probado mediante lectura real (gravedad, o acelerómetro filtrado); sin sensores no
 aparece en juego normal. Bolas y escoba/bate libres reciben fuerza gradual;
@@ -100,9 +100,9 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 
 ## Última entrega y comprobaciones
 
-[Descargar APK 0.8.0+16 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892/artifacts/12336244410). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
+[Descargar APK 0.9.0+17 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764/artifacts/12361665066). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
-183 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39580911892). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+211 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39634096764). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
 
 ## Acceso a GitHub desde Codex Cloud (20/10/2026)
 
@@ -146,8 +146,8 @@ Continúa el proyecto Feed the Hole del repo
 migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
-no reconstruir el historial de commits. El último APK es 0.8.0+16:
-agujero arriba, generador abajo, ciclo 15+5, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
+no reconstruir el historial de commits. El último APK es 0.9.0+17:
+agujero arriba, generador abajo, ciclo 15+5, evento Gravedad por inclinación, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
 No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi
 siguiente petición concreta.

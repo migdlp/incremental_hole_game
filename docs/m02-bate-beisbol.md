@@ -21,7 +21,8 @@ un modo obligatorio ni botones para golpear.
 
 El control rígido se comparte con la escoba mediante `TwoPointGrip`. Se mantienen
 los nombres internos de las entradas de segundo puntero para no duplicar controles.
-El bate se mueve dentro del tablero, con los mismos límites en los tres niveles.
+El bate se mueve dentro del tablero, con límites calculados según su orientación
+para acercarse a las cuatro paredes y con el mismo control en los tres niveles.
 Durante recogida final queda congelado y se sueltan ambos agarres. Pausa,
 cancelación y segundo plano cancelan también los agarres.
 
@@ -47,7 +48,8 @@ La velocidad del bate tiene mayor peso en el impulso adicional que la velocidad
 de la propia bola. Un contacto persistente solo resuelve penetración y velocidad
 relativa, sin repetir ni el rebote aumentado ni la bonificación manual. La bola
 debe separarse de la cápsula, con una pequeña tolerancia de 0,75 u, para armar un
-nuevo impacto. No hay un enfriamiento global que impida golpear varias bolas.
+nuevo impacto. Un contacto quieto sin impacto no consume la bonificación: empezar
+a mover el bate contra esa bola permite su primer golpe. No hay un enfriamiento global que impida golpear varias bolas.
 
 Los resultados se limitan a `ball_speed_limit`, inicialmente **380 u/s**; se
 combinan con la restitución comprada de las paredes. Se mantienen las colisiones
@@ -121,7 +123,7 @@ háptica ni rendimiento en un teléfono. La firma de las APK anteriores sigue
 pendiente según [G01](g01-feed-the-hole.md): una compilación válida no acredita
 poder actualizar cualquier APK anterior conservando sus datos.
 
-Verificación local de esta implementación: **181 pruebas** superadas; las 17 de
-M02 volvieron a pasar tras la revisión final de feedback. `flutter analyze` sin
+Verificación local de esta implementación: **181 pruebas** superadas; las 19 de
+M02 y las cinco de control de escoba pasan tras la revisión de bordes/contacto. `flutter analyze` sin
 avisos, formato correcto y revisión de la imagen del tablero. Entrega Android
 pendiente de la pipeline manual; enlazar su ejecución al completarse.

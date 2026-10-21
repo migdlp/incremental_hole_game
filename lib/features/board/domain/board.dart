@@ -144,6 +144,12 @@ class Board {
     return ToolSegment(batPosition - axis, batPosition + axis);
   }
 
+  Vec _boundBat(Vec center, double angle) {
+    final x = math.cos(angle).abs() * batHalfLength + batThickness;
+    final y = math.sin(angle).abs() * batHalfLength + batThickness;
+    return Vec(center.x.clamp(x, width - x), center.y.clamp(y, height - y));
+  }
+
   List<Vec> get batHandles => [batSegment.a, batSegment.b];
   final batImpacts = <BatImpact>[];
   final _batContacts = <int>{};
@@ -662,6 +668,7 @@ class Board {
       speed: holdingBat ? settings['bat_move_speed'] : 900,
       angularSpeed: holdingBat ? settings['bat_angular_speed'] : 3,
       symmetric: holdingBroom && broomTool == BallTool.broom,
+      constrain: holdingBat ? _boundBat : null,
     );
     if (holdingBat) {
       batPosition = pose.center;
@@ -685,7 +692,7 @@ class Board {
       final delta = ball.position - contact;
       final reach = radius + batThickness;
       if (delta.length > reach + .75) continue;
-      touching.add(ball.id);
+      if (_batContacts.contains(ball.id)) touching.add(ball.id);
       if (delta.length >= reach) continue;
       final arm = contact - batPosition;
       final surface = _batVelocity + Vec(-arm.y, arm.x) * _batRotation;
@@ -702,6 +709,7 @@ class Board {
       ball.position = (ball.position + normal * (reach - delta.length + .01))
           .inside(radius);
       if (closing <= .001) continue;
+      touching.add(ball.id);
       final newImpact = !_batContacts.contains(ball.id);
       final bonus = newImpact
           ? math.max(0.0, surfaceNormal) *
@@ -914,9 +922,7 @@ class Board {
         throw const FormatException('Invalid bat angle');
       }
       board.batAngle = angle.toDouble() % (2 * math.pi);
-      final bounded = board.batPosition.inside(
-        board.batHalfLength + board.batThickness,
-      );
+      final bounded = board._boundBat(board.batPosition, board.batAngle);
       if ((bounded - board.batPosition).length > .0001) {
         throw const FormatException('Invalid bat position');
       }

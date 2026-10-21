@@ -521,6 +521,48 @@ void main() {
     },
   );
 
+  test(
+    'a resting contact arms one real strike when the player starts moving',
+    () {
+      final b = bat(speed: 40);
+      final item = ball(b, const Vec(180, 261.99), Vec.zero);
+      b.update(1 / 240, producing: false);
+      expect(b.batImpactSerial, 0);
+      b.touch(b.batPosition);
+      b.drag(const Vec(180, 350));
+      b.update(1 / 240, producing: false);
+      expect(b.batImpactSerial, 1);
+      expect(item.velocity.y, greaterThan(40));
+    },
+  );
+
+  test(
+    'bat reaches each edge according to its orientation and restores there',
+    () {
+      for (final angle in [0.0, math.pi / 2]) {
+        final b = bat()..batAngle = angle;
+        b.touch(b.batPosition);
+        b.drag(const Vec(0, 0));
+        advance(b, 1);
+        expect(b.batPosition.x, closeTo(angle == 0 ? 42 : 6, .001));
+        expect(b.batPosition.y, closeTo(angle == 0 ? 6 : 42, .001));
+        final loaded = Board.fromJson(b.settings, b.toJson());
+        expect(loaded.batPosition.x, closeTo(b.batPosition.x, .001));
+        expect(loaded.batPosition.y, closeTo(b.batPosition.y, .001));
+        b.releasePointer();
+        b.touch(b.batPosition);
+        b.drag(const Vec(360, 560));
+        advance(b, 1);
+        for (final point in b.batHandles) {
+          expect(point.x, inInclusiveRange(6 - 1e-9, 354 + 1e-9));
+          expect(point.y, inInclusiveRange(6 - 1e-9, 554 + 1e-9));
+        }
+        expect(b.batPosition.x, closeTo(angle == 0 ? 318 : 354, .001));
+        expect(b.batPosition.y, closeTo(angle == 0 ? 554 : 518, .001));
+      }
+    },
+  );
+
   testWidgets(
     'actual bat gestures share two-finger handoff and pause releases',
     (tester) async {

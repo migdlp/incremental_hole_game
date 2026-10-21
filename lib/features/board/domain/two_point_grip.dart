@@ -34,6 +34,7 @@ class TwoPointGrip {
     required double speed,
     required double angularSpeed,
     bool symmetric = false,
+    Vec Function(Vec, double)? constrain,
   }) {
     var destination = primary + _offset;
     final other = second;
@@ -52,17 +53,23 @@ class TwoPointGrip {
             _pivotOffset.x * s + _pivotOffset.y * c,
           );
     }
-    final next =
-        center + (destination.inside(margin) - center).limit(speed * dt);
     var delta = (_desiredAngle - angle + math.pi) % (2 * math.pi) - math.pi;
     if (symmetric) {
       if (delta > math.pi / 2) delta -= math.pi;
       if (delta < -math.pi / 2) delta += math.pi;
     }
     final turn = delta.clamp(-angularSpeed * dt, angularSpeed * dt);
+    final nextAngle = (angle + turn) % (2 * math.pi);
+    final goal = constrain == null
+        ? destination.inside(margin)
+        : constrain(destination, nextAngle);
+    final translated = center + (goal - center).limit(speed * dt);
+    final next = constrain == null
+        ? translated
+        : constrain(translated, nextAngle);
     return (
       center: next,
-      angle: (angle + turn) % (2 * math.pi),
+      angle: nextAngle,
       velocity: (next - center) * (1 / dt),
       angularVelocity: turn / dt,
     );

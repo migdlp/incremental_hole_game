@@ -2,6 +2,29 @@
 
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
+## S01 · 0.12.0+20 · 21/10/2026
+
+Fuente `8eaff28`, rama `build/apk-0.6.0+13`.
+[Pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39652999440):
+**285 pruebas**, formato y análisis sin avisos, APK compilado y firma v2 verificada.
+Etiqueta Feed the Hole, paquete `com.migdlp.incremental_hole_game`, versionCode 20.
+[APK y SHA-256](https://github.com/migdlp/incremental_hole_game/actions/runs/39652999440/artifacts/12369473392).
+
+23 pruebas nuevas de alimentación: recompensa completa con combo/dorada y Captura
+total, independencia del cobro, captura rápida, períodos de cinco jornadas,
+cuota anticipada y vencida, reinicio sin premios, continuidad normal sin derrota,
+guardado/restauración idempotente, migración v7, corrupción atómica, pausa y
+recogida, DEBUG aislado, anillo bajo bolas y pantalla pequeña al 150 %.
+Balance v14 con v13 congelado, JSON v8. El usuario confirmó que todos los
+multiplicadores cuentan y que se muestren cuotas provisionales en juego normal.
+10/+10 no es balance final; BAL01 y S03 siguen pendientes. Sin derrota real,
+prestigio inventado ni pérdida de progreso. Validación en Android físico pendiente.
+
+La pipeline habitual no acredita actualización sobre APK anteriores con firma
+distinta (G01); no desinstalar si se quiere conservar su progreso. Se mantienen
+avisos no bloqueantes de acciones Node.js 20/24 y setup-java@v4, sin cambios de
+infraestructura dentro de S01.
+
 ## M03 · 0.11.0+19 · 21/10/2026
 
 Fuente `571d001`, rama `build/apk-0.6.0+13`. [Pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39645255701).

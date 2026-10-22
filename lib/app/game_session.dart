@@ -801,8 +801,9 @@ class GameSession extends ChangeNotifier {
   }
 
   String? purchaseBlock(UpgradeDefinition definition) {
-    if (UpgradeCatalog.retiredIds.contains(definition.id))
+    if (UpgradeCatalog.retiredIds.contains(definition.id)) {
       return 'Mejora retirada';
+    }
     if (!canPlayRun || !prestigeReady) return 'Partida no disponible';
     if (running) return 'Disponible durante la noche';
     final level = levels[definition.id] ?? 0;

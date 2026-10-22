@@ -9,6 +9,9 @@ El cobro visual espera también esa pausa; importes, liquidación al cerrar,
 restauración y ausencia de física/interacción permanecen iguales.
 Incluye la corrección del hoyo al 22 % de altura descrita debajo.
 
+Validado: formato, análisis y **360 pruebas**, compilación Android y firma.
+Código compilado `e409af8`; [APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831). Sin prueba táctil en Android físico.
+
 ## Corrección posterior · 0.16.1+25
 
 El usuario sustituye la posición aproximada del 75 % por el **22 % de la altura**.
@@ -91,12 +94,12 @@ finales mientras falte esa decisión.
 
 ## Entrega y límites de validación
 
-Código compilado: `c61e070`, publicado en `build/apk-0.6.0+13` sin force push.
+Código compilado: `e409af8`, publicado en `build/apk-0.6.0+13` sin force push.
 El commit `046ebb0` continúa en su historial.
-[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503):
-formato, análisis sin avisos, **359 pruebas**, compilación Android, nombre,
+[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135):
+formato, análisis sin avisos, **360 pruebas**, compilación Android, nombre,
 paquete `com.migdlp.incremental_hole_game` y firma v2 del binario verificados.
-[APK 0.16.0+24 y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503/artifacts/12408450523).
+[APK 0.16.2+26 y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831).
 
 AJ-005 sigue pendiente de respuesta. No se ha validado el tacto ni el rendimiento
 en un teléfono físico. Sigue pendiente la firma compatible con APK anteriores;

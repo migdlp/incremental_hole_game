@@ -9,6 +9,9 @@ El cobro visual espera también esa pausa; importes, liquidación al cerrar,
 restauración y ausencia de física/interacción permanecen iguales.
 Incluye la corrección del hoyo al 22 % de altura descrita debajo.
 
+Validado: formato, análisis y **360 pruebas**, compilación Android y firma.
+Código compilado `e409af8`; [APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831). Sin prueba táctil en Android físico.
+
 ## Posición actual · 0.16.1+25
 
 Por nueva indicación del usuario, el hoyo pasa del 74 % al **22 % de altura**:
@@ -61,11 +64,11 @@ entrega no acredita actualización conservando su progreso. No desinstalar la
 instalación anterior para resolver el conflicto de firma.
 [Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, cobra automáticamente sus recompensas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.16.0+24, revisión `c61e070`**, 22/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, cobra automáticamente sus recompensas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.16.2+26, revisión `e409af8`**, 22/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
-**[Descargar APK 0.16.0+24 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503/artifacts/12408450523)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503): formato, análisis, **359 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
+**[Descargar APK 0.16.2+26 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135): formato, análisis, **360 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
 
 La entrega incluye [M01 · Paredes rebotadoras](docs/m01-paredes-rebotadoras.md): tres niveles permanentes, ondas elásticas y límite de velocidad, con balance provisional. Conserva **interfaz de juego simplificada, una sola barra de tiempo, saldo y pausa dentro del tablero y feedback visual opcional apagado por defecto**, además de racha comprable, especiales y escoba de dos dedos. La interfaz usa «Tienda» y «Comenzar día», sin mostrar números de día. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 
@@ -139,7 +142,7 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 
-La entrega vigente pasa **359 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
+La entrega vigente pasa **360 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
 
 La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisis y pruebas, compila el APK de depuración y lo guarda como artefacto descargable junto con su SHA-256. Se activa en **Actions → Flutter - APK manual → Run workflow**; no se dispara con cada push.
 

@@ -1,5 +1,15 @@
 # C01 — Cobro automático y animación de monedas
 
+## Ajuste de tiempos · 0.16.2+26
+
+Por indicación del usuario se mantiene toda la estética, el salto y el recorrido.
+Después del salto, la moneda permanece quieta un segundo. A continuación recorre
+la misma curva hacia el monedero, con arranque lento y aceleración, conservando
+el cierre suave. Su recepción económica incluye ese segundo; pausa, liquidación
+y restauración siguen garantizando el cobro exacto. Las monedas siguen siendo
+decorativas, sin colisiones ni fuerzas. Validado con 360 pruebas y pipeline Android;
+la percepción final debe comprobarse en móvil.
+
 Estado: implementación 0.13.0+21. Rendimiento de Android físico pendiente de
 medición; ningún presupuesto visual se considera definitivo.
 

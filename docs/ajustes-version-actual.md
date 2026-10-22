@@ -72,3 +72,18 @@ Una vez identificado el desencadenante, deberán probarse crecimiento visual y
 radio real, límites y separación respecto al generador (actualmente solo quedan
 65,6 unidades entre centros). No se introducen costes, requisitos ni porcentajes
 finales mientras falte esa decisión.
+
+## Entrega y límites de validación
+
+Código compilado: `c61e070`, publicado en `build/apk-0.6.0+13` sin force push.
+El commit `046ebb0` continúa en su historial.
+[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503):
+formato, análisis sin avisos, **359 pruebas**, compilación Android, nombre,
+paquete `com.migdlp.incremental_hole_game` y firma v2 del binario verificados.
+[APK 0.16.0+24 y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503/artifacts/12408450523).
+
+AJ-005 sigue pendiente de respuesta. No se ha validado el tacto ni el rendimiento
+en un teléfono físico. Sigue pendiente la firma compatible con APK anteriores;
+la pipeline estándar verifica esta APK, sin certificar actualización sobre ellas.
+No desinstalar una aplicación anterior para resolver la firma si se necesita
+conservar su progreso. Documentos históricos mantienen sus cifras originales.

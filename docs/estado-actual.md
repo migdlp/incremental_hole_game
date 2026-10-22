@@ -69,7 +69,7 @@ no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
 Las referencias anteriores a recogida manual o fase final describen versiones
 históricas y quedan sustituidas por C01.
 
-Actualizado: **21/10/2026**. Referencia de APK entregado: **0.15.0+23**. La revisión `0ac69d0` incluye P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático y S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **22/10/2026**. Referencia de APK entregado: **0.16.0+24**. La revisión `c61e070` incluye AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático y S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -235,13 +235,13 @@ han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
-**[Descargar APK 0.15.0+23 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39686480457/artifacts/12386228786)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
+**[Descargar APK 0.16.0+24 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503/artifacts/12408450523)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39686480457): formato, análisis, **354 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `0ac69d0`. Incluye P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático, S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39737430503): formato, análisis, **359 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `c61e070`. Incluye AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático, S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
 
 Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 60 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 
-La revisión entregada pasa 354 pruebas automáticas, además de análisis sin avisos.
+La revisión entregada pasa 359 pruebas automáticas, además de análisis sin avisos.
 Incluyen compra y persistencia de Racha, cargas/activaciones de especiales,
 compatibilidad con jornadas anteriores, eventos reales de dos dedos y pantalla
 de 320 × 568 con texto al 150 %. La pausa permite desplazar su panel si el

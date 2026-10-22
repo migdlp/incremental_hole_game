@@ -147,6 +147,7 @@ class GameSession extends ChangeNotifier {
     starConfig,
     ballRadius: board.radius,
     maximumSpeed: board.maximumSpeed,
+    hole: board.holePosition,
   )..sync(meta.starLedger);
 
   MetaProgress meta = MetaProgress();
@@ -276,7 +277,9 @@ class GameSession extends ChangeNotifier {
         for (final raw in checkpoints) {
           try {
             final data = jsonDecode(raw) as Map<String, dynamic>;
-            if (data['version'] != 10 && data['version'] != 11) {
+            if (data['version'] != 10 &&
+                data['version'] != 11 &&
+                data['version'] != 12) {
               throw const FormatException('Checkpoint incompatible');
             }
             final state = MetaProgress.fromJson(
@@ -798,6 +801,8 @@ class GameSession extends ChangeNotifier {
   }
 
   String? purchaseBlock(UpgradeDefinition definition) {
+    if (UpgradeCatalog.retiredIds.contains(definition.id))
+      return 'Mejora retirada';
     if (!canPlayRun || !prestigeReady) return 'Partida no disponible';
     if (running) return 'Disponible durante la noche';
     final level = levels[definition.id] ?? 0;
@@ -835,7 +840,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 11,
+    'version': 12,
     'meta': meta.toJson(),
     'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
@@ -882,7 +887,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 8 &&
         json['version'] != 9 &&
         json['version'] != 10 &&
-        json['version'] != 11) {
+        json['version'] != 11 &&
+        json['version'] != 12) {
       throw const FormatException('Versión de guardado no compatible');
     }
     if ((json['version'] as int) >= 10 &&
@@ -941,6 +947,10 @@ class GameSession extends ChangeNotifier {
         : (json['previousTree'] as Map<String, dynamic>? ?? {}).map(
             (key, value) => MapEntry(key, value as int),
           );
+    if ((json['version'] as int) >= 12 &&
+        savedLevels.containsKey('hand_grip')) {
+      throw const FormatException('Fuerza de agarre retirada');
+    }
     catalog.validateLevels(
       savedLevels,
       grandfathered: grandfathered,
@@ -952,7 +962,9 @@ class GameSession extends ChangeNotifier {
           ? 15
           : json['version'] == 10
           ? 16
-          : 17,
+          : json['version'] == 11
+          ? 17
+          : 18,
       retiredRemoved: (json['version'] as int) >= 9,
     );
     var restoredTool = legacy
@@ -1001,7 +1013,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 17)) {
+          (balanceVersion < 1 || balanceVersion > 18)) {
         throw const FormatException('Versión de balance inválida');
       }
       final runRetired = run['retiredLevels'] == null
@@ -1012,7 +1024,9 @@ class GameSession extends ChangeNotifier {
                   value is! int ||
                   value < 0 ||
                   value > definition.levels.length ||
-                  balanceVersion >= 15) {
+                  (id == 'hand_grip'
+                      ? balanceVersion >= 18
+                      : balanceVersion >= 15)) {
                 throw const FormatException(
                   'Archivo de compras retiradas inválido',
                 );
@@ -1184,12 +1198,14 @@ class GameSession extends ChangeNotifier {
           restoredMeta.starLedger,
           ballRadius: restoredBoard.radius,
           maximumSpeed: restoredBoard.maximumSpeed,
+          hole: restoredBoard.holePosition,
         );
       } else {
         restoredBoard.starBubbles = StarBubbles(
           StarConfig(catalog.base),
           ballRadius: restoredBoard.radius,
           maximumSpeed: restoredBoard.maximumSpeed,
+          hole: restoredBoard.holePosition,
         )..sync(restoredMeta.starLedger);
       }
     }
@@ -1230,7 +1246,13 @@ class GameSession extends ChangeNotifier {
     progress.day = day;
     progress.record = record;
     progress.last = last;
-    economy.balance = balance;
+    final retiredGrip = savedLevels['hand_grip'] ?? 0;
+    final gripRefund = retiredGrip == 0
+        ? 0
+        : UpgradeCatalog.retiredDefinition('hand_grip')!.levels
+              .take(retiredGrip)
+              .fold<int>(0, (sum, level) => sum + level.cost);
+    economy.balance = balance + gripRefund;
     economy.collected = collected;
     economy.generated = generated;
     _retiredRunLevels

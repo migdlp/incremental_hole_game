@@ -19,7 +19,7 @@ void main() {
   final catalog = testCatalog();
   void capture(GameSession s, {bool golden = false}) {
     final b = s.board!;
-    b.balls.add(Ball(b.nextId++, Board.hole, Vec.zero, golden: golden));
+    b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero, golden: golden));
     s.tick(1 / 60);
   }
 
@@ -84,7 +84,12 @@ void main() {
     () {
       final b = Board(catalog.settings({}));
       b.balls.add(
-        Ball(b.nextId++, const Vec(180, 75), const Vec(0, -380), golden: true),
+        Ball(
+          b.nextId++,
+          b.holePosition + const Vec(0, 25),
+          const Vec(0, -380),
+          golden: true,
+        ),
       );
       var food = 0;
       for (var i = 0; i < 30; i++) {
@@ -104,8 +109,8 @@ void main() {
       final s = session()..startDay();
       final b = s.board!;
       b.balls.addAll([
-        Ball(b.nextId++, Board.hole, Vec.zero),
-        Ball(b.nextId++, Board.hole, Vec.zero, golden: true),
+        Ball(b.nextId++, b.holePosition, Vec.zero),
+        Ball(b.nextId++, b.holePosition, Vec.zero, golden: true),
       ]);
       s.tick(1 / 60);
       expect(s.feeding.points, 11);
@@ -287,7 +292,7 @@ void main() {
     final b = s.board!;
     tick(s, 15.1);
     final before = s.feeding.points;
-    b.balls.add(Ball(b.nextId++, Board.hole, Vec.zero, golden: true));
+    b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero, golden: true));
     tick(s, 1);
     expect(s.board, isNull);
     expect(s.feeding.points, before);
@@ -394,7 +399,7 @@ void main() {
       s.finishDay();
       expect(s.feeding.completedDays, 0);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 17);
+      expect(s.board!.settings.balanceVersion, 18);
       capture(s, golden: true);
       expect(s.feeding.points, 10);
       expect(s.economy.balance, 211);

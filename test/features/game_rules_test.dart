@@ -24,7 +24,7 @@ void capture(GameSession session) {
 void main() {
   final catalog = testCatalog();
   test('balance source includes tool and coin unlocks with prerequisites', () {
-    expect(catalog.definitions.length, 23);
+    expect(catalog.definitions.length, 22);
     final levels = {for (final d in catalog.definitions) d.id: d.levels.length};
     final max = catalog.settings(levels);
     expect(max['production_duration'], 30);
@@ -83,8 +83,10 @@ void main() {
   test(
     'ten complete cycles bank once, discard pending and begin clean',
     () async {
-      final session = GameSession(catalog, MemoryStore())
-        ..levels.addAll({'hand': 1, 'reward': 1});
+      final session = GameSession(
+        testCatalog(automaticSpawns: false),
+        MemoryStore(),
+      )..levels.addAll({'hand': 1, 'reward': 1});
       for (var day = 1; day <= 10; day++) {
         session.startDay();
         expect(session.board!.coins, isEmpty);

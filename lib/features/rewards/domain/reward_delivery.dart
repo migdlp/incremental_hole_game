@@ -140,28 +140,28 @@ class RewardCoin {
   }
 
   // Scalar polynomial curves, without trig or allocating vectors every frame.
-  double x(double target, double delay) {
+  double x(double target, double delay, {double origin = 180}) {
     final t = age - delay;
-    if (t <= 0) return 180;
-    if (t < jump) return 180 + dx * (t / jump);
+    if (t <= 0) return origin;
+    if (t < jump) return origin + dx * (t / jump);
     final u = ((t - jump) / flight).clamp(0.0, 1.0);
     final eased = u * u * (3 - 2 * u);
-    return 180 +
+    return origin +
         dx +
-        (target - 180 - dx) * eased +
+        (target - origin - dx) * eased +
         bend * u * (1 - u) * (1 - 2 * u);
   }
 
-  double y(double target, double delay) {
+  double y(double target, double delay, {double origin = 50}) {
     final t = age - delay;
-    if (t <= 0) return 50;
+    if (t <= 0) return origin;
     if (t < jump) {
       final u = t / jump;
-      return 50 + dy * u - (23 + id % 7) * 4 * u * (1 - u);
+      return origin + dy * u - (23 + id % 7) * 4 * u * (1 - u);
     }
     final u = ((t - jump) / flight).clamp(0.0, 1.0);
     final eased = u * u * (3 - 2 * u);
-    return 50 + dy + (target - 50 - dy) * eased - bend * u * (1 - u);
+    return origin + dy + (target - origin - dy) * eased - bend * u * (1 - u);
   }
 }
 

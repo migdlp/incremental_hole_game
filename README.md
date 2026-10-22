@@ -1,5 +1,19 @@
 # Feed the Hole
 
+## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
+
+Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
+conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con
+cara/canto/grabado y contador sin fondo. Hoyo en (180,414.4), aproximadamente al 75 % del tablero,
+con origen compartido por captura, succión, monedas y estrellas.
+
+JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
+jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
+rápidas automáticas: no se compensan cambiando otras mecánicas.
+**AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no
+existe todavía una rama de nivel del agujero. No inventar esa relación ni añadir
+funcionalidades futuras. [Estado y compatibilidad](docs/ajustes-version-actual.md).
+
 ## P01 · Estrellas y burbujas físicas (0.15.0+23)
 
 Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
@@ -87,9 +101,9 @@ python3 -m http.server 8123 --directory build/web
 - Monedas decorativas en pool: salida del hoyo tras ~1 s y vuelo curvo al monedero. Cobro completo sin tocar, agrupar u omitir animaciones no cambia los ingresos. Cierre liquida pendientes.
 - Día inicial de **15 segundos de producción, sin fase final de recogida**. **1,5 bolas por segundo** (una cada ⅔ s); pausa y taller sin temporizador. El ingreso completo se banca una sola vez al cierre.
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 1 segundo; las compras revelan nuevos caminos.
-- 23 tipos y 60 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja bolas y Prestigio voluntario con confirmación.
+- 22 tipos y 55 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja bolas y Prestigio voluntario con confirmación.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
-- Guardado JSON v11 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
+- Guardado JSON v12 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano y opción de silenciar los sonidos del sistema.
 
 La tabla `docs/balance.csv` se empaqueta como recurso y se valida al cargar: es la fuente editable del balance actual. Las jornadas antiguas conservan su configuración hasta terminar; el siguiente día usa el balance nuevo. La noche descarta también cualquier bola agarrada.

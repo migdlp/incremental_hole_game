@@ -1,5 +1,7 @@
 # Documentación de Feed the Hole
 
+- [AJ-001 a AJ-005 · Ajustes actuales, compatibilidad y aclaración pendiente](ajustes-version-actual.md).
+
 - [P01 · Estrellas, burbujas físicas, persistencia y parámetros DEBUG](p01-estrellas-burbujas.md).
 
 - [S03 · Derrota, prestigio, checkpoints y dependencias P01/P02/BAL01](s03-prestigio-metaprogresion.md).

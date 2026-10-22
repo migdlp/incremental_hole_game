@@ -1,5 +1,19 @@
 # Referencia de guardado y recuperación
 
+## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
+
+Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
+conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con
+cara/canto/grabado y contador sin fondo. Hoyo en (180,414.4), aproximadamente al 75 % del tablero,
+con origen compartido por captura, succión, monedas y estrellas.
+
+JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
+jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
+rápidas automáticas: no se compensan cambiando otras mecánicas.
+**AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no
+existe todavía una rama de nivel del agujero. No inventar esa relación ni añadir
+funcionalidades futuras. [Estado y compatibilidad](ajustes-version-actual.md).
+
 ## P01 · Estrellas y burbujas físicas (0.15.0+23)
 
 Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes

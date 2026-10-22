@@ -1,4 +1,6 @@
 kind,id,level,cost,effect,effect_value,unit,requires,cap
+base,hand_grip_strength,0,0,hand_grip_strength,4,multiplier,,
+base,hole_y_ratio,0,0,hole_y_ratio,0.74,ratio,,
 base,star_count,0,0,star_count,1,prototype,,
 base,star_categories,0,0,star_categories,3,prototype,,
 base,star_value,0,0,star_value,1,prototype,,
@@ -113,11 +115,6 @@ upgrade,robot_speed,3,270,robot_speed,68.43937499999998,logical_units_per_second
 upgrade,robot_speed,4,450,robot_speed,78.70528124999997,logical_units_per_second,robot:1,
 upgrade,robot_speed,5,740,robot_speed,90.51107343749997,logical_units_per_second,robot:1,
 upgrade,double_spawn,1,500,balls_per_spawn,2,balls_per_spawn,generator:3&paddle:3,2
-upgrade,hand_grip,1,25,hand_grip_strength,1.25,multiplier,hand:1,2.5
-upgrade,hand_grip,2,50,hand_grip_strength,1.5,multiplier,hand:1,2.5
-upgrade,hand_grip,3,90,hand_grip_strength,1.8,multiplier,hand:1,2.5
-upgrade,hand_grip,4,160,hand_grip_strength,2.1,multiplier,hand:1,2.5
-upgrade,hand_grip,5,280,hand_grip_strength,2.5,multiplier,hand:1,2.5
 upgrade,combo,1,40,combo_unlocked,1,unlock,hand:1,1
 upgrade,capture_all,1,120,capture_all_unlocked,1,unlock,combo:1,1
 upgrade,capture_recharge,1,160,capture_all_cooldown,10,seconds,capture_all:1,12

@@ -200,9 +200,9 @@ void main() {
   });
 
   test(
-    'a sharp pull breaks the extra grip, keeps momentum and cannot reattach immediately',
+    'historical v17: a sharp pull breaks the extra grip, keeps momentum and cannot reattach immediately',
     () {
-      final board = Board(catalog.settings({'hand': 1}));
+      final board = Board(catalog.settings({'hand': 1}, balanceVersion: 17));
       final first = ball(board, const Vec(80, 250));
       final second = ball(board, const Vec(110, 250));
       board.touch(first.position);
@@ -224,31 +224,34 @@ void main() {
     },
   );
 
-  test('spring motion and breakage are consistent at 30, 60 and 120 fps', () {
-    Vec run(int hz) {
-      final board = Board(catalog.settings({'hand': 1}));
-      final first = ball(board, const Vec(80, 250));
-      final second = ball(board, const Vec(110, 250));
-      board.touch(first.position);
-      step(board, 240);
-      for (var i = 1; i <= hz; i++) {
-        board.drag(Vec(80 + 100 * i / hz, 250));
-        board.update(1 / hz, producing: false);
+  test(
+    'historical v17 spring motion and breakage are consistent at 30, 60 and 120 fps',
+    () {
+      Vec run(int hz) {
+        final board = Board(catalog.settings({'hand': 1}, balanceVersion: 17));
+        final first = ball(board, const Vec(80, 250));
+        final second = ball(board, const Vec(110, 250));
+        board.touch(first.position);
+        step(board, 240);
+        for (var i = 1; i <= hz; i++) {
+          board.drag(Vec(80 + 100 * i / hz, 250));
+          board.update(1 / hz, producing: false);
+        }
+        expect(board.heldBalls, hasLength(2));
+        // Reverse direction to stress the grip while respecting the speed cap.
+        board.drag(const Vec(20, 250));
+        for (var i = 0; i < hz ~/ 2; i++) {
+          board.update(1 / hz, producing: false);
+        }
+        expect(board.heldBalls, [first]);
+        return second.position;
       }
-      expect(board.heldBalls, hasLength(2));
-      // Reverse direction to stress the grip while respecting the speed cap.
-      board.drag(const Vec(20, 250));
-      for (var i = 0; i < hz ~/ 2; i++) {
-        board.update(1 / hz, producing: false);
-      }
-      expect(board.heldBalls, [first]);
-      return second.position;
-    }
 
-    final baseline = run(60);
-    expect((run(30) - baseline).length, lessThan(5));
-    expect((run(120) - baseline).length, lessThan(5));
-  });
+      final baseline = run(60);
+      expect((run(30) - baseline).length, lessThan(5));
+      expect((run(120) - baseline).length, lessThan(5));
+    },
+  );
 
   test(
     'capturing the manual ball frees its slot without promoting a spring to a rigid grip',

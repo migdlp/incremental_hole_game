@@ -18,7 +18,7 @@ void main() {
   test(
     'map has nine initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(60));
+      expect(tree.nodes, hasLength(55));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -31,7 +31,6 @@ void main() {
           'generator:1',
           'reward:1',
           'hand:2',
-          'hand_grip:1',
           'combo:1',
           'walls:1',
           'bat:1',
@@ -164,7 +163,7 @@ void main() {
           isFalse,
         ); // next purchase follows the new map
         reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 17);
+        expect(reopened.board!.settings.balanceVersion, 18);
         expect(reopened.board!.settings['production_duration'], 21);
         expect(reopened.levels.containsKey('hand'), isFalse);
         expect(reopened.levels.containsKey('sweep'), isFalse);

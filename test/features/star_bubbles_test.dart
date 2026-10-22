@@ -532,7 +532,7 @@ void main() {
           forcedBlackHoles: 1,
         )..starBubbles = system();
         final b = board.starBubbles!.bodies.single
-          ..position = const Vec(100, 150)
+          ..position = Board.hole + const Vec(-80, -100)
           ..velocity = Vec.zero;
         board.gravityTilt = const Vec(.7, 0);
         for (var i = 0; i < 6; i++) {

@@ -94,7 +94,12 @@ class Board {
     );
   }
   static const width = 360.0, height = 560.0;
-  static const hole = Vec(180, 50);
+  static const hole = Vec(180, 414.4);
+  late final Vec holePosition = Vec(
+    180,
+    settings.balanceVersion >= 18 ? height * settings['hole_y_ratio'] : 50,
+  );
+  double get captureRadius => settings['hole_capture_radius'];
   static const generator = Vec(180, 480);
   final DaySettings settings;
   StarBubbles? starBubbles;
@@ -587,12 +592,13 @@ class Board {
       var count = _queuedCoins[value] ?? 0;
       while (count > 0 && coins.length < settings['coin_pile_limit']) {
         // Coins never merge: each visible coin pays exactly its color's value.
-        var point = hole;
+        var point = holePosition;
         for (var attempt = 0; attempt < 6; attempt++) {
           final angle = random() * math.pi * 2;
           final distance = 40 + random() * (36 + attempt * 20);
-          point = (hole + Vec(math.cos(angle), math.sin(angle)) * distance)
-              .inside(14);
+          point =
+              (holePosition + Vec(math.cos(angle), math.sin(angle)) * distance)
+                  .inside(14);
           if (coins.every((coin) => (coin.position - point).length >= 22)) {
             break;
           }
@@ -675,7 +681,7 @@ class Board {
     if (settings['robot_count'] > 0) {
       final goal = robot.direction(dt, [
         for (final ball in balls) (id: ball.id, position: ball.position),
-      ], hole);
+      ], holePosition);
       if (goal != null) {
         final movement = (goal - robot.position).limit(
           settings['robot_speed'] * dt,
@@ -692,7 +698,7 @@ class Board {
       balls.removeWhere((ball) {
         if (!_captureAllIds.contains(ball.id) &&
             !sweptCaptures.contains(ball.id) &&
-            (ball.position - hole).length > settings['hole_capture_radius']) {
+            (ball.position - holePosition).length > captureRadius) {
           return false;
         }
         _heldBalls.remove(ball);
@@ -734,9 +740,8 @@ class Board {
       for (final ball in balls) {
         if (_heldBalls.containsKey(ball)) continue;
         ball.velocity = ball.velocity + gravityImpulse;
-        final toHole = hole - ball.position;
-        final baseAttraction =
-            toHole.length < settings['hole_capture_radius'] + 15 ? 220.0 : 0.0;
+        final toHole = holePosition - ball.position;
+        final baseAttraction = toHole.length < captureRadius + 15 ? 220.0 : 0.0;
         final expandedAttraction = blackHole.lastActiveTime > 0
             ? blackHole.accelerationAt(toHole.length)
             : 0.0;
@@ -756,8 +761,8 @@ class Board {
         final previous = ball.position;
         ball.position = ball.position + ball.velocity * step;
         _bounceWalls(ball);
-        if (segmentDistance(hole, previous, ball.position) <=
-            settings['hole_capture_radius']) {
+        if (segmentDistance(holePosition, previous, ball.position) <=
+            captureRadius) {
           sweptCaptures.add(ball.id);
         }
       }
@@ -1120,7 +1125,7 @@ class Board {
       final b = system.bodies[i];
       var impulse = bubbleGravity ? gravityImpulse : Vec.zero;
       if (bubbleBlackHole && blackHole.lastActiveTime > 0 && b != system.held) {
-        final toHole = hole - b.position;
+        final toHole = holePosition - b.position;
         impulse =
             impulse +
             toHole.unit *

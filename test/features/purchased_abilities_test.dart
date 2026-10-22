@@ -9,6 +9,7 @@ import 'package:incremental_hole_game/features/board/domain/special_abilities.da
 import 'package:incremental_hole_game/features/board/presentation/special_ability_bar.dart';
 import 'package:incremental_hole_game/features/day_cycle/domain/day_cycle.dart';
 import '../test_support.dart';
+import 'package:incremental_hole_game/features/upgrades/domain/catalog.dart';
 
 void advance(GameSession session, double seconds) {
   for (var i = 0; i < (seconds * 60).round(); i++) {
@@ -18,21 +19,22 @@ void advance(GameSession session, double seconds) {
 
 void capture(GameSession session) {
   final board = session.board!;
-  board.balls.add(Ball(board.nextId++, Board.hole, Vec.zero));
+  board.balls.add(Ball(board.nextId++, board.holePosition, Vec.zero));
   session.tick(1 / 60);
 }
 
 void main() {
   final catalog = testCatalog();
-  GameSession withAbilities() => GameSession(catalog, MemoryStore())
-    ..levels.addAll({
-      'hand': 1,
-      'combo': 1,
-      'generator': 1,
-      'capture_all': 1,
-      'boost': 1,
-    })
-    ..startDay();
+  GameSession withAbilities({UpgradeCatalog? custom}) =>
+      GameSession(custom ?? catalog, MemoryStore())
+        ..levels.addAll({
+          'hand': 1,
+          'combo': 1,
+          'generator': 1,
+          'capture_all': 1,
+          'boost': 1,
+        })
+        ..startDay();
 
   test(
     'streak must be purchased; owned streak and money survive reopening',
@@ -84,49 +86,57 @@ void main() {
       expect(session.board!.combo.enabled, isTrue);
       session.finishDay();
       session.startDay();
-      expect(session.board!.settings.balanceVersion, 17);
+      expect(session.board!.settings.balanceVersion, 18);
       expect(session.board!.combo.enabled, isFalse);
       expect(session.levels, isEmpty);
     },
   );
 
-  test('charges require production time and pause/reload never grant time', () {
-    final session = withAbilities();
-    expect(session.activateSpecial(SpecialAbility.boost), isFalse);
-    advance(session, 5);
-    final state = session.board!.specials;
-    expect(state.boostCharge, closeTo(5, 1e-8));
-    session.pause();
-    advance(session, 5);
-    expect(state.boostCharge, closeTo(5, 1e-8));
-    final reopened = GameSession(catalog, MemoryStore())
-      ..restore(session.snapshot());
-    expect(reopened.paused, isTrue);
-    expect(reopened.board!.specials.boostCharge, state.boostCharge);
-    expect(reopened.activateSpecial(SpecialAbility.boost), isFalse);
-    reopened.resume();
-    advance(reopened, 5);
-    expect(reopened.board!.specials.ready(SpecialAbility.boost), isTrue);
-    expect(reopened.board!.specials.ready(SpecialAbility.captureAll), isFalse);
-    expect(reopened.activateSpecial(SpecialAbility.boost), isTrue);
-    expect(reopened.activateSpecial(SpecialAbility.boost), isFalse);
-    advance(reopened, 1);
-    expect(reopened.board!.specials.boostCharge, 0);
-    final active = GameSession(catalog, MemoryStore())
-      ..restore(reopened.snapshot());
-    expect(active.board!.specials.boostRemaining, closeTo(3, 1e-8));
-    active.resume();
-    advance(active, 4);
-    expect(active.phase, DayPhase.night);
-    final frozen = active.snapshot();
-    advance(active, 1);
-    expect(active.snapshot(), frozen);
-    expect(active.activateSpecial(SpecialAbility.captureAll), isFalse);
-    active.finishDay();
-    active.startDay();
-    expect(active.board!.specials.captureCharge, 0);
-    expect(active.board!.specials.boostRemaining, 0);
-  });
+  test(
+    'charges require production time and pause/reload never grant time',
+    () async {
+      final catalog = testCatalog(automaticSpawns: false);
+      final session = withAbilities(custom: catalog);
+      expect(session.activateSpecial(SpecialAbility.boost), isFalse);
+      advance(session, 5);
+      final state = session.board!.specials;
+      expect(state.boostCharge, closeTo(5, 1e-8));
+      session.pause();
+      advance(session, 5);
+      expect(state.boostCharge, closeTo(5, 1e-8));
+      final reopened = GameSession(catalog, MemoryStore())
+        ..restore(session.snapshot());
+      expect(reopened.paused, isTrue);
+      expect(reopened.board!.specials.boostCharge, state.boostCharge);
+      expect(reopened.activateSpecial(SpecialAbility.boost), isFalse);
+      reopened.resume();
+      advance(reopened, 5);
+      expect(reopened.board!.specials.ready(SpecialAbility.boost), isTrue);
+      expect(
+        reopened.board!.specials.ready(SpecialAbility.captureAll),
+        isFalse,
+      );
+      expect(reopened.activateSpecial(SpecialAbility.boost), isTrue);
+      expect(reopened.activateSpecial(SpecialAbility.boost), isFalse);
+      advance(reopened, 1);
+      expect(reopened.board!.specials.boostCharge, 0);
+      final active = GameSession(catalog, MemoryStore())
+        ..restore(reopened.snapshot());
+      expect(active.board!.specials.boostRemaining, closeTo(3, 1e-8));
+      active.resume();
+      advance(active, 4);
+      expect(active.phase, DayPhase.night);
+      final frozen = active.snapshot();
+      advance(active, 1);
+      expect(active.snapshot(), frozen);
+      expect(active.activateSpecial(SpecialAbility.captureAll), isFalse);
+      active.finishDay();
+      await active.pendingWrites;
+      active.startDay();
+      expect(active.board!.specials.captureCharge, 0);
+      expect(active.board!.specials.boostRemaining, 0);
+    },
+  );
 
   test(
     'boost changes cadence by x2/x3, respects cap and duration upgrades',
@@ -165,8 +175,9 @@ void main() {
 
   test(
     'capture total persists once, releases held balls and still requires coins',
-    () {
-      final session = withAbilities();
+    () async {
+      final catalog = testCatalog(automaticSpawns: false);
+      final session = withAbilities(custom: catalog);
       advance(session, 12);
       final board = session.board!;
       board.balls.clear();

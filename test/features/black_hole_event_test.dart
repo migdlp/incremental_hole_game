@@ -181,7 +181,7 @@ void main() {
         final b = board();
         final item = ball(
           b,
-          const Vec(230, 100),
+          Board.hole + const Vec(50, 50),
           velocity: const Vec(900, 0),
           golden: golden,
         );
@@ -205,7 +205,7 @@ void main() {
       final broom = b.broomPosition, bat = b.batPosition;
       final coin = Coin(b.nextId++, const Vec(200, 90), 1, landing: 0);
       b.coins.add(coin);
-      final held = ball(b, const Vec(180, 150));
+      final held = ball(b, Board.hole + const Vec(0, 100));
       b.touch(held.position);
       final original = held.position;
       b.update(.2, producing: true);
@@ -313,7 +313,7 @@ void main() {
 
   test(
     'closing removes unbroken objects, ends suction and persists without activation',
-    () {
+    () async {
       final s = GameSession(catalog, MemoryStore())..startDay();
       final e = s.board!.blackHole;
       e.forceSpawn();
@@ -336,6 +336,7 @@ void main() {
       expect(e.activations, count);
       s.finishDay();
       expect(e.objects, isEmpty);
+      await s.pendingWrites;
       s.startDay();
       expect(s.board!.blackHole.activations, 0);
       expect(s.board!.blackHole.objects, isEmpty);
@@ -393,7 +394,7 @@ void main() {
       s.finishDay();
       s.startDay();
       expect(s.board!.blackHole.enabled, isTrue);
-      expect(s.board!.settings.balanceVersion, 17);
+      expect(s.board!.settings.balanceVersion, 18);
       s.dispose();
     },
   );

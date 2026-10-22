@@ -188,6 +188,11 @@ void main() {
       board.update(1 / 60, producing: false);
     }
     board.releasePointer();
+    // Deliver both gathered balls to the relocated hole with the same physical tool.
+    for (final item in [left, right]) {
+      item.position = board.holePosition;
+    }
+    board.update(1 / 60, producing: false);
     expect(board.captured, 2);
     expect(board.balls, [outside]);
   });
@@ -332,7 +337,7 @@ void main() {
       expect(restored.board!.settings['robot_count'], 1);
       expect(restored.board!.sweepEnabled, isFalse);
       expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 11);
+      expect(jsonDecode(restored.snapshot())['version'], 12);
     },
   );
 

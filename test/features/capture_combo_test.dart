@@ -11,7 +11,9 @@ import '../test_support.dart';
 
 void capture(GameSession session, {bool golden = false}) {
   final board = session.board!;
-  board.balls.add(Ball(board.nextId++, Board.hole, Vec.zero, golden: golden));
+  board.balls.add(
+    Ball(board.nextId++, board.holePosition, Vec.zero, golden: golden),
+  );
   session.tick(1 / 60);
 }
 
@@ -22,7 +24,7 @@ void advance(GameSession session, double seconds) {
 }
 
 void main() {
-  final catalog = testCatalog();
+  final catalog = testCatalog(automaticSpawns: false);
 
   test(
     'fifth and tenth capture use new multiplier without retroactive awards',

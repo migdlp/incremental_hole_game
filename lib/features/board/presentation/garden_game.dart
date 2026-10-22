@@ -264,7 +264,7 @@ class GardenGame extends FlameGame {
       final phase = (effect.elapsed * .7 + i / 3) % 1;
       final radius = 30 + (effect.reach - 30) * (1 - phase);
       canvas.drawCircle(
-        offset(Board.hole),
+        offset(board.holePosition),
         radius,
         paint(
           Color.fromRGBO(116, 81, 165, .14 * math.sin(phase * math.pi)),
@@ -512,8 +512,8 @@ class GardenGame extends FlameGame {
       paint(const Color(0x30766543), stroke: 2),
     );
     _renderElasticWalls(canvas, board);
-    final hole = offset(Board.hole);
-    final radius = board.settings['hole_capture_radius'];
+    final hole = offset(board.holePosition);
+    final radius = board.captureRadius;
     canvas.drawOval(
       Rect.fromCenter(
         center: hole + const Offset(0, 6),
@@ -833,13 +833,10 @@ class GardenGame extends FlameGame {
           ? CoinDenomination.ten
           : CoinDenomination.one;
       final center = Offset(
-        coin.x(walletTarget.dx, visuals.delay),
-        coin.y(walletTarget.dy, visuals.delay),
+        coin.x(walletTarget.dx, visuals.delay, origin: board.holePosition.x),
+        coin.y(walletTarget.dy, visuals.delay, origin: board.holePosition.y),
       );
-      _rewardPaint.color = coinColor(denomination);
-      canvas.drawCircle(center, 7, _rewardPaint);
-      _rewardPaint.color = const Color(0x88ffffff);
-      canvas.drawCircle(center - const Offset(1.5, 2), 3, _rewardPaint);
+      paintCoin(canvas, center, denomination, radius: 7, paint: _rewardPaint);
     }
     if (visuals.receiptPulse > 0) {
       _rewardPaint.color = Color.fromRGBO(

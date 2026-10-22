@@ -22,7 +22,7 @@ class SlowStore extends MemoryStore {
 }
 
 void main() {
-  final catalog = testCatalog();
+  final catalog = testCatalog(automaticSpawns: false);
   GameSession start() =>
       GameSession(catalog, MemoryStore(), eventSeed: 42)..startDay();
   void capture(GameSession s, {int count = 1}) {
@@ -174,7 +174,7 @@ void main() {
         'sweep': 1,
       };
       final b = Board(catalog.settings(oldLevels, balanceVersion: 14));
-      b.balls.add(Ball(b.nextId++, Board.hole, Vec.zero));
+      b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
       b.update(1 / 60, producing: true);
       b.releaseCoin(1);
       final j =
@@ -205,7 +205,7 @@ void main() {
       s.finishDay();
       expect(s.economy.balance, 101);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 17);
+      expect(s.board!.settings.balanceVersion, 18);
     },
   );
   test(

@@ -29,7 +29,12 @@ class StarFlight {
 }
 
 class StarBubbles {
-  StarBubbles(this.config, {required this.ballRadius, this.maximumSpeed = 380});
+  StarBubbles(
+    this.config, {
+    required this.ballRadius,
+    this.maximumSpeed = 380,
+    this.hole = const Vec(180, 414.4),
+  });
   final StarConfig config;
   final double ballRadius, maximumSpeed;
   late final _radii = List.generate(
@@ -46,7 +51,7 @@ class StarBubbles {
   Vec grabOffset = Vec.zero;
   double radius(StarBubble bubble) => _radii[bubble.reward.category];
   void sync(StarLedger value) => ledger = value;
-  static const hole = Vec(180, 50);
+  final Vec hole;
   void _eject(StarBubble b) {
     // Golden-ratio progression spreads eject directions without consuming ball RNG.
     final angle = .35 + ((b.reward.id * .61803398875) % 1) * 2.4;
@@ -170,11 +175,13 @@ class StarBubbles {
     StarLedger ledger, {
     required double ballRadius,
     required double maximumSpeed,
+    Vec hole = const Vec(180, 414.4),
   }) {
     final system = StarBubbles(
       StarConfig.fromJson(json['config'] as Map<String, dynamic>),
       ballRadius: ballRadius,
       maximumSpeed: maximumSpeed,
+      hole: hole,
     )..sync(ledger);
     final clock = json['entryClock'];
     final rows = json['bodies'];

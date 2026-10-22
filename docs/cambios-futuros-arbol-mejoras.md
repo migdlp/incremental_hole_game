@@ -1,5 +1,12 @@
 # Cambios futuros: mecánicas y árbol de mejoras
 
+## AJ-005 pendiente de aclaración
+
+Falta identificar qué compras deben hacer crecer el agujero. No hay una mejora
+actual de nivel del hoyo; no vincular crecimiento a Valor, Duración o cuotas sin
+respuesta. AJ-001 a AJ-004 ya están implementados sobre la última versión.
+[Seguimiento y pruebas](ajustes-version-actual.md).
+
 Actualizado el **21/10/2026**, contrastado con el último APK **0.15.0+23**, a partir del brainstorm del proyecto, ahora llamado Feed the Hole. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
 
 ## Cómo priorizar al retomar

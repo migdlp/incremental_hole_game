@@ -1,5 +1,19 @@
 # Estado actual de Feed the Hole
 
+## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
+
+Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
+conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con
+cara/canto/grabado y contador sin fondo. Hoyo en (180,414.4), aproximadamente al 75 % del tablero,
+con origen compartido por captura, succión, monedas y estrellas.
+
+JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
+jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
+rápidas automáticas: no se compensan cambiando otras mecánicas.
+**AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no
+existe todavía una rama de nivel del agujero. No inventar esa relación ni añadir
+funcionalidades futuras. [Estado y compatibilidad](ajustes-version-actual.md).
+
 ## P01 · Estrellas y burbujas físicas (0.15.0+23)
 
 Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
@@ -65,7 +79,7 @@ Los cuatro ejes de progresión son generar más bolas, capturar una proporción 
 
 ## Jornada y tablero vigentes
 
-- Arena lógica de 360 × 560. **Agujero arriba** en (180, 50) y **generador abajo** en (180, 480), con salida y velocidad inicial de las bolas hacia arriba. Ajuste de posiciones en código posterior al APK del commit `046ebb0`; pendiente de comprobar en móvil. Se retira la leyenda del jardín del tablero y la frase «Tu jardín te espera» de la pausa.
+- Arena lógica de 360 × 560. **Hoyo aproximadamente al 75 % de altura** en (180, 414.4) y **generador abajo** en (180, 480), con salida y velocidad inicial de las bolas hacia arriba. Ajuste de posiciones en código posterior al APK del commit `046ebb0`; pendiente de comprobar en móvil. Se retira la leyenda del jardín del tablero y la frase «Tu jardín te espera» de la pausa.
 - Base de **15 s de producción sin fase final de recogida**, con una sola barra en el mismo sitio: verde durante producción; contador pequeño encima y alineado a la derecha, sin rótulos de fase. Las mejoras de duración dan 18/21/24/27/30 s de producción; cierre directo con liquidación completa.
 - Emisión inicial de **1,5 bolas/s**: primera bola tras aproximadamente ⅔ s. Generador y Doble emisión aumentan la producción.
 - Durante producción se controlan bolas y las recompensas vuelan automáticamente al monedero. Al terminar se liquidan todas las pendientes antes de resultados.
@@ -241,7 +255,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v11** y balance vigente **v17** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–16 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. S03 permite reiniciar expresamente la partida al incumplir cuota o comprar Prestigio tras confirmar, conservando la metaprogresión.
+Guardado JSON **v12** y balance vigente **v18** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–16 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. S03 permite reiniciar expresamente la partida al incumplir cuota o comprar Prestigio tras confirmar, conservando la metaprogresión.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, catálogo permanente de P02 ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

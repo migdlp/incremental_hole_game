@@ -13,6 +13,7 @@ import 'balance_v13.dart';
 import 'balance_v14.dart';
 import 'balance_v15.dart';
 import 'balance_v16.dart';
+import 'balance_v17.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -37,7 +38,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 17});
+  DaySettings(this.values, {this.balanceVersion = 18});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -56,7 +57,6 @@ class UpgradeCatalog {
     'hand': ['Capacidad de la mano', 'Control'],
     'walls': ['Paredes rebotadoras', 'Control'],
     'bat': ['Bate de béisbol', 'Control'],
-    'hand_grip': ['Fuerza de agarre', 'Control'],
     'broom': ['Escoba recta', 'Control'],
     'paddle': ['Escoba más ancha', 'Control'],
     'broom_v': ['Escoba en V', 'Control'],
@@ -236,6 +236,12 @@ class UpgradeCatalog {
         throw const FormatException('Cuota de prueba no entera');
       }
     }
+    if (!base.containsKey('hole_y_ratio') ||
+        base['hole_y_ratio']! < .2 ||
+        base['hole_y_ratio']! > .75 ||
+        base['hand_grip_strength'] != 4) {
+      throw const FormatException('Posición del hoyo o agarre inválidos');
+    }
     StarConfig(base);
     return UpgradeCatalog._(base, definitions);
   }
@@ -247,10 +253,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 17}) {
-    final values = balanceVersion <= 16 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 16) {
-      final historicalCsv = balanceVersion == 16
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 18}) {
+    final values = balanceVersion <= 17 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 17) {
+      final historicalCsv = balanceVersion == 17
+          ? balanceV17Csv
+          : balanceVersion == 16
           ? balanceV16Csv
           : balanceVersion == 15
           ? balanceV15Csv
@@ -319,10 +327,16 @@ class UpgradeCatalog {
     return DaySettings(values, balanceVersion: balanceVersion);
   }
 
-  static const retiredIds = {'sweep', 'collection', 'magnet', 'attraction'};
+  static const retiredIds = {
+    'sweep',
+    'collection',
+    'magnet',
+    'attraction',
+    'hand_grip',
+  };
   static UpgradeDefinition? retiredDefinition(String id) {
     if (!retiredIds.contains(id)) return null;
-    final rows = balanceV14Csv
+    final rows = (id == 'hand_grip' ? balanceV17Csv : balanceV14Csv)
         .trim()
         .split('\n')
         .skip(1)
@@ -341,7 +355,7 @@ class UpgradeCatalog {
     bool legacy = false,
     bool retiredRemoved = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 17,
+    int balanceVersion = 18,
   }) {
     bool met(UpgradeLevel level) => level.requirements.every(
       (requirement) =>
@@ -377,7 +391,9 @@ class UpgradeCatalog {
     for (final entry in levels.entries) {
       final definition =
           definitions.where((d) => d.id == entry.key).firstOrNull ??
-          (balanceVersion <= 14 || legacy
+          (balanceVersion <= 14 ||
+                  (entry.key == 'hand_grip' && balanceVersion <= 17) ||
+                  legacy
               ? retiredDefinition(entry.key)
               : null);
       if (definition == null ||

@@ -43,7 +43,10 @@ void main() {
   testWidgets(
     'real pointer distinguishes tapping coins from dragging over them',
     (tester) async {
-      final session = GameSession(testCatalog(), MemoryStore())..startDay();
+      final session = GameSession(
+        testCatalog(automaticSpawns: false),
+        MemoryStore(),
+      )..startDay();
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pump(const Duration(milliseconds: 100));
       final gameFinder = find.byWidgetPredicate(

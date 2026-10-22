@@ -2,6 +2,17 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.16.0+24 — Ajustes AJ-001 a AJ-004
+
+- Fuerza alta base ×4 sin rama de fuerza; capacidad independiente conservada.
+  Devolución única del coste de los niveles de fuerza retirados.
+- Monedas con disco, canto y grabado, conservando toda la contabilidad C01.
+- Contador de monedas sin panel de fondo.
+- Hoyo aproximadamente al 75 % del tablero, configurable y sincronizado con captura, atracción,
+  robot, monedas y burbujas. No se cambia la emisión para compensar su proximidad.
+- JSON v12 / balance v18 con v17 congelado para jornadas interrumpidas.
+- AJ-005 pendiente de identificar qué compras deben activar el crecimiento.
+
 ## 0.15.0+23 — P01: estrellas y burbujas físicas
 
 - Recompensa de cuota única con burbujas flotantes, categorías y valores provisionales.

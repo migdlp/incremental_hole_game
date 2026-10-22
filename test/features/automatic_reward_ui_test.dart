@@ -16,7 +16,10 @@ void main() {
     '200-ball Capture total preserves every golden and combo reward at any visual budget',
     () {
       for (final budget in [0, 1, 24]) {
-        final s = GameSession(testCatalog(), MemoryStore())..enterDebug();
+        final s = GameSession(
+          testCatalog(automaticSpawns: false),
+          MemoryStore(),
+        )..enterDebug();
         s.debugPurchase('reward', 5);
         s.debugPurchase('capture_all', 1);
         s.debugSetRewardLimit(budget);
@@ -59,7 +62,8 @@ void main() {
   testWidgets(
     'reward destination matches actual wallet and real gestures still grab balls',
     (tester) async {
-      final s = GameSession(testCatalog(), MemoryStore())..startDay();
+      final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
+        ..startDay();
       await tester.pumpWidget(GardenApp(session: s));
       await tester.pump();
       await tester.pump();
@@ -74,7 +78,7 @@ void main() {
       expect(game.walletTarget.dx, closeTo(actual.x, .1));
       expect(game.walletTarget.dy, closeTo(actual.y, .1));
       final b = s.board!;
-      b.balls.add(Ball(b.nextId++, Board.hole, Vec.zero));
+      b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
       s.tick(1 / 60);
       for (var i = 0; i < 70; i++) {
         s.tick(1 / 60);
@@ -102,7 +106,8 @@ void main() {
   test(
     'coin rendering changes across phases without mutating money or persisted state',
     () async {
-      final s = GameSession(testCatalog(), MemoryStore())..startDay();
+      final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
+        ..startDay();
       s.board!.balls.add(Ball(s.board!.nextId++, Board.hole, Vec.zero));
       s.tick(1 / 60);
       final game = GardenGame(s)..onGameResize(Vector2(360, 560));

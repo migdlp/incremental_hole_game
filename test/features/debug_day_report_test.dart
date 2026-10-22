@@ -25,10 +25,13 @@ void main() {
       }
       for (var i = 0; i < 61; i++) {
         session.tick(1 / 60);
+        board.balls
+            .clear(); // Isolate ten injected captures while counting real emissions.
       }
       expect(board.combo.multiplier, 1);
       for (var i = 0; i < 180; i++) {
         session.tick(1 / 60);
+        board.balls.clear();
       }
       final collected = session.economy.collected;
       expect(collected, greaterThan(0));

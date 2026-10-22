@@ -389,10 +389,6 @@ class _DayScreenState extends State<DayScreen> {
                             horizontal: 8,
                             vertical: 4,
                           ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xeef1e5cd),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
                           child: Row(
                             key: const ValueKey('gameplay-balance'),
                             mainAxisSize: MainAxisSize.min,

@@ -1,5 +1,19 @@
 # Relevo de contexto — Feed the Hole
 
+## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
+
+Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
+conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con
+cara/canto/grabado y contador sin fondo. Hoyo en (180,414.4), aproximadamente al 75 % del tablero,
+con origen compartido por captura, succión, monedas y estrellas.
+
+JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
+jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
+rápidas automáticas: no se compensan cambiando otras mecánicas.
+**AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no
+existe todavía una rama de nivel del agujero. No inventar esa relación ni añadir
+funcionalidades futuras. [Estado y compatibilidad](ajustes-version-actual.md).
+
 ## P01 · Estrellas y burbujas físicas (0.15.0+23)
 
 Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
@@ -67,15 +81,15 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 
 ## Estado que hay que conservar
 
-- **Agujero arriba, generador abajo y emisión hacia arriba.** Último cambio solicitado; ya entregado en APK.
+- **AJ-004 vigente: hoyo abajo en (180,414.4), generador (180,480), emisión hacia arriba.** Sustituye la posición alta anterior.
 - Ajuste posterior al APK de `046ebb0`: agujero en (180, 50), generador en (180, 480), sin leyenda del jardín en el tablero ni «Tu jardín te espera» en pausa. Se ha seguido la última indicación del usuario de subir el agujero y bajar el generador; comprobar las posiciones jugando en móvil.
 - **15 s de producción sin fase final de recogida**; una sola barra verde, con segundos pequeños encima a la derecha y sin nombres de fase. El cierre liquida automáticamente lo pendiente. No hay temporizador en compras.
-- Generación base 1,5 bolas/s; límite de 200 bolas. Mano base de una bola, capacidad mejorable hasta seis y fuerza de agarre mejorable. Escoba física desbloqueable, anchura/V y robot que empuja bolas.
+- Generación base 1,5 bolas/s; límite de 200 bolas. Mano base de una bola, capacidad mejorable hasta seis y fuerza alta desde el inicio sin mejoras. Escoba física desbloqueable, anchura/V y robot que empuja bolas.
 - Capturar registra dinero garantizado y alimentación. Monedas decorativas al monedero tras ~1 s; sin recogida manual ni pérdidas. El control de bolas es independiente.
 - Monedas decorativas sin cifras, colores por rango; UI con icono, sin prefijo dólar. Resumen de cobro automático íntegro.
 - Recompensa global actual **1 → 2/3/5/8/13**; todavía no existen tiers individuales. Doradas con probabilidad 1 % y recompensa ×10.
 - Racha comprable tras Mano I por 40: ventana 1 s, quinta captura ×2, décima ×3, sin retroactividad. También cuentan capturas asistidas provisionalmente. Indicador desde la primera captura, multiplicador y barra temporal; no explicar umbrales en UI.
-- Árbol de 60 nodos y 23 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Barrido, Área, Imán y Atracción retirados sin reembolso; Robot solo requiere Escoba ancha II, confirmado por el usuario.
+- Árbol de 55 nodos y 22 tipos, descubrimiento progresivo y seis colores por categoría. Primera mejora de mano cuesta 13. Barrido, Área, Imán y Atracción retirados sin reembolso; Robot solo requiere Escoba ancha II, confirmado por el usuario.
 - Árbol sin título, botón visible de atrás ni botones de zoom; ficha solo al tocar, cantidades en verde y compra manteniendo el botón 1 s. Resultados → Tienda → Comenzar día. No mostrar números de día al jugador.
 - **Debug:** botón DEBUG, arriba a la izquierda del árbol. Sustituye la pulsación de 3 s porque el usuario reportó que no funcionaba en móvil. Mapa completo/compras gratis/comprar todo o Vista del jugador; reinicio y monedas de prueba. Progreso temporal, sin sobrescribir la partida normal. Para ver el inicio como jugador, reiniciar prueba y activar esa vista.
 
@@ -92,7 +106,7 @@ Incluidos en el APK: dos especiales comprables —Captura total y Aceleración�
 con carga automática durante producción y mejoras de recarga, potencia y duración.
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
-el otro agarre. Guardado v11 / balance v17, con balances anteriores congelados para jornadas
+el otro agarre. Guardado v12 / balance v18, con balances anteriores congelados para jornadas
 antiguas. Verificación CI de la entrega: 354 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 

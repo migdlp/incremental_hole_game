@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_app.dart';
@@ -10,8 +11,8 @@ import '../test_support.dart';
 
 void main() {
   final catalog = testCatalog();
-  Board grip(int level) {
-    final board = Board(catalog.settings({'hand': 1, 'hand_grip': level}));
+  Board grip() {
+    final board = Board(catalog.settings({'hand': 1}));
     board.balls.addAll([
       Ball(board.nextId++, const Vec(80, 250), Vec.zero),
       Ball(board.nextId++, const Vec(110, 250), Vec.zero),
@@ -27,65 +28,45 @@ void main() {
   }
 
   test(
-    'successive grip levels bring the next ball in faster without snapping',
+    'fixed high grip follows smoothly, retains both balls during normal pulls and preserves capacity',
     () {
-      var previousError = double.infinity;
-      for (var level = 0; level <= 5; level++) {
-        final board = grip(level);
-        final second = board.balls.last;
-        final initial = second.position;
-        advance(board, 1);
-        expect((second.position - initial).length, lessThan(1));
-        advance(board, 35);
-        final error = (second.position - const Vec(94, 250)).length;
-        expect(error, lessThan(previousError));
-        previousError = error;
+      final board = grip();
+      final second = board.balls.last, initial = board.balls.last.position;
+      expect(board.gripStrength, 4);
+      advance(board, 1);
+      expect((second.position - initial).length, lessThan(1));
+      advance(board, 240);
+      for (final point in [
+        const Vec(250, 250),
+        const Vec(40, 250),
+        const Vec(290, 250),
+      ]) {
+        board.drag(point);
+        advance(board, 180);
         expect(board.heldBalls, hasLength(2));
-        expect(board.handCapacity, 2);
-        expect(board.ballMagnetRadius, 36);
-        board.releasePointer(cancel: true);
-        expect(board.heldBalls, isEmpty);
-        expect(board.balls.every((ball) => ball.velocity.length == 0), isTrue);
       }
+      expect(board.handCapacity, 2);
+      board.enterClosing();
+      expect(board.heldBalls, isEmpty);
+      expect(board.balls.every((b) => b.velocity.length == 0), isTrue);
     },
   );
-
   test(
-    'stronger grip retains an extra ball during a pull that breaks the base grip',
+    'fixed grip needs a manually held ball and never adds capacity or coin reach',
     () {
-      final weak = grip(0), strong = grip(5);
-      advance(weak, 240);
-      advance(strong, 240);
-      weak.drag(const Vec(250, 250));
-      strong.drag(const Vec(250, 250));
-      advance(weak, 72);
-      advance(strong, 72);
-      expect(weak.heldBalls, hasLength(1));
-      expect(strong.heldBalls, hasLength(2));
-      strong.enterClosing();
-      expect(strong.heldBalls, isEmpty);
-      expect(strong.balls.every((ball) => ball.velocity.length == 0), isTrue);
-    },
-  );
-
-  test(
-    'grip still needs a manually held ball and does not increase capacity or coin reach',
-    () {
-      final board = grip(5)..releasePointer(cancel: true);
+      final board = grip()..releasePointer(cancel: true);
       board.touch(const Vec(30, 200));
       advance(board, 240);
       expect(board.heldBalls, isEmpty);
-      expect(board.settings['magnet_radius'], 0);
       expect(board.handCapacity, 2);
-      expect(board.balls.last.position.x, closeTo(110, .01));
+      expect(board.settings['magnet_radius'], 0);
     },
   );
-
   test(
-    'grip is stable across frame rates and purchases restore without upgrading old runs',
+    'grip is reliable at 30, 60 and 120 fps without any strength purchase',
     () {
       Vec follow(int hz) {
-        final board = grip(5);
+        final board = grip();
         advance(board, hz, hz: hz);
         for (var i = 1; i <= hz; i++) {
           board.drag(Vec(80 + 70 * i / hz, 250));
@@ -98,33 +79,40 @@ void main() {
       final baseline = follow(60);
       expect((follow(30) - baseline).length, lessThan(3));
       expect((follow(120) - baseline).length, lessThan(3));
-      final session = GameSession(catalog, MemoryStore())
-        ..economy.balance = 1000;
-      final definition = catalog.definitions.firstWhere(
-        (d) => d.id == 'hand_grip',
-      );
-      expect(session.purchase(definition), isFalse);
+      expect(catalog.definitions.any((d) => d.id == 'hand_grip'), isFalse);
       expect(
-        session.purchase(catalog.definitions.firstWhere((d) => d.id == 'hand')),
-        isTrue,
-      );
-      expect(session.purchase(definition), isTrue);
-      session.startDay();
-      final restored = GameSession(catalog, MemoryStore())
-        ..restore(session.snapshot());
-      expect(restored.board!.gripStrength, 1.25);
-      expect(restored.levels['hand_grip'], 1);
-      expect(restored.economy.balance, 962);
-      expect(restored.board!.heldBalls, isEmpty);
-      final old = GameSession(catalog, MemoryStore())..startDay();
-      final reopened = GameSession(catalog, MemoryStore())
-        ..restore(old.snapshot());
-      expect(reopened.board!.gripStrength, 1);
-      expect(reopened.levels.containsKey('hand_grip'), isFalse);
-      expect(
-        reopened.board!.settings.values.containsKey('hand_grip_strength'),
+        SkillTree(catalog).nodes.any((n) => n.definition.id == 'hand_grip'),
         isFalse,
       );
+    },
+  );
+  test(
+    'legacy strength purchases are refunded once and keep interrupted physics until the next day',
+    () {
+      final original = GameSession(catalog, MemoryStore())
+        ..levels.addAll({'hand': 1, 'hand_grip': 2})
+        ..economy.balance = 100
+        ..startDay();
+      original.board = Board(
+        catalog.settings(original.levels, balanceVersion: 17),
+      );
+      final j = jsonDecode(original.snapshot()) as Map<String, dynamic>;
+      j['version'] = 11;
+      final restored = GameSession(catalog, MemoryStore())
+        ..restore(jsonEncode(j));
+      expect(restored.levels, {'hand': 1});
+      expect(restored.economy.balance, 175);
+      expect(restored.board!.gripStrength, 1.5);
+      expect(restored.board!.holePosition.toJson(), [180.0, 50.0]);
+      final reopened = GameSession(catalog, MemoryStore())
+        ..restore(restored.snapshot());
+      expect(reopened.economy.balance, 175);
+      expect(reopened.board!.gripStrength, 1.5);
+      reopened.finishDay();
+      reopened.startDay();
+      expect(reopened.board!.gripStrength, 4);
+      expect(reopened.board!.handCapacity, 2);
+      expect(reopened.board!.holePosition.toJson(), [180.0, 414.4]);
     },
   );
 

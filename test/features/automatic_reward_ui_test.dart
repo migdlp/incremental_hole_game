@@ -92,7 +92,7 @@ void main() {
       );
       expect(b.heldBall, same(ball));
       await gesture.up();
-      for (var i = 0; i < 100; i++) {
+      for (var i = 0; i < 160; i++) {
         s.tick(1 / 60);
       }
       await tester.pump();
@@ -131,6 +131,10 @@ void main() {
       s.rewardVisuals.advance(1.1);
       final jump = await render();
       s.rewardVisuals.advance(.4);
+      final resting = await render();
+      s.rewardVisuals.advance(.4);
+      expect(await render(), orderedEquals(resting));
+      s.rewardVisuals.advance(.8);
       final flight = await render();
       expect(jump, isNot(orderedEquals(delayed)));
       expect(flight, isNot(orderedEquals(jump)));

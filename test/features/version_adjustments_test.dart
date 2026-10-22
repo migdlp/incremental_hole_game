@@ -84,7 +84,7 @@ void main() {
       );
       final coin = RewardCoin()..reset(1, 10);
       expect(coin.y(28, 1, origin: s.board!.holePosition.y), 123.2);
-      coin.age = 1 + coin.jump + coin.flight;
+      coin.age = 1 + coin.jump + RewardDelivery.hold + coin.flight;
       expect(coin.y(28, 1, origin: 420), closeTo(28, 1e-8));
       final r = GameSession(catalog, MemoryStore())..restore(s.snapshot());
       expect(r.board!.holePosition.toJson(), s.board!.holePosition.toJson());

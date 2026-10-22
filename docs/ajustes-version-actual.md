@@ -1,5 +1,14 @@
 # Ajustes de la versión actual — Feed the Hole
 
+## Tiempos de monedas · 0.16.2+26
+
+Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
+Tras aterrizar quedan inmóviles **1 segundo** y después vuelan al monedero
+con un inicio más lento y aceleración progresiva, manteniendo el final suave.
+El cobro visual espera también esa pausa; importes, liquidación al cerrar,
+restauración y ausencia de física/interacción permanecen iguales.
+Incluye la corrección del hoyo al 22 % de altura descrita debajo.
+
 ## Corrección posterior · 0.16.1+25
 
 El usuario sustituye la posición aproximada del 75 % por el **22 % de la altura**.
@@ -15,7 +24,7 @@ antiguas ni se añaden mecánicas de otros documentos.
 | AJ-001 | Implementado | Fuerza alta base, sin rama ni niveles; capacidad conservada |
 | AJ-002 | Implementado | Monedas acuñadas con canto, cara plana y grabado |
 | AJ-003 | Implementado | Icono y saldo sobre tablero sin recuadro |
-| AJ-004 | Implementado | Centro aproximadamente al 75 % de altura útil del tablero |
+| AJ-004 | Implementado y corregido | Centro vigente al 22 % de altura del tablero |
 | AJ-005 | Pendiente de aclaración | Falta identificar qué compras activan el crecimiento |
 
 ## Agarre y compatibilidad
@@ -76,8 +85,8 @@ superadas u otra compra existente. Vincularlo a Valor, Duración o cuotas sin es
 respuesta cerraría una decisión de diseño que no está definida.
 
 Una vez identificado el desencadenante, deberán probarse crecimiento visual y
-radio real, límites y separación respecto al generador (actualmente solo quedan
-65,6 unidades entre centros). No se introducen costes, requisitos ni porcentajes
+radio real, límites y separación respecto al generador (actualmente hay
+356,8 unidades entre centros). No se introducen costes, requisitos ni porcentajes
 finales mientras falte esa decisión.
 
 ## Entrega y límites de validación

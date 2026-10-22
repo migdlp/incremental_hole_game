@@ -1,7 +1,7 @@
 name: incremental_hole_game
 description: Feed the Hole, un juego incremental de empujar y recoger.
 publish_to: none
-version: 0.16.1+25
+version: 0.16.2+26
 
 environment:
   sdk: '>=3.9.2 <4.0.0'

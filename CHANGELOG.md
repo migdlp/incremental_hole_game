@@ -1,5 +1,11 @@
 # Historial de cambios
 
+## 0.16.2+26
+
+- Las monedas esperan inmóviles un segundo tras el salto, antes de volar al monedero.
+- El vuelo conserva su recorrido y estética; empieza más despacio y acelera.
+- Cobro sincronizado con la nueva duración, sin alterar importes ni liquidaciones.
+
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
 ## 0.16.1+25 — Posición del agujero al 22 %

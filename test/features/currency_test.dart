@@ -50,7 +50,7 @@ void main() {
       expect(s.board!.coins, isEmpty);
       tick(s, .8);
       expect(s.economy.collected, 0);
-      tick(s, 2);
+      tick(s, 2.4);
       expect(s.economy.collected, 1);
       expect(s.rewards.outstanding, 0);
       s.finishDay();
@@ -67,7 +67,7 @@ void main() {
       s.drag(const Vec(310, 28));
       s.release();
       expect(s.economy.collected, 0);
-      tick(s, 3);
+      tick(s, 4);
       expect(s.economy.collected, 1);
     },
   );
@@ -110,11 +110,11 @@ void main() {
     tick(s, 1.1);
     s.pause();
     final before = s.snapshot(), age = s.rewardVisuals.coins.first.age;
-    tick(s, 3);
+    tick(s, 4);
     expect(s.snapshot(), before);
     expect(s.rewardVisuals.coins.first.age, age);
     s.resume();
-    tick(s, 1);
+    tick(s, 2);
     expect(s.economy.collected, 1);
     s.setBackgrounded(true);
     final saved = s.snapshot();
@@ -139,8 +139,8 @@ void main() {
         delay: 1,
         capacity: 4,
       );
-      expect(restored.advance(3), sum);
-      expect(restored.advance(3), 0);
+      expect(restored.advance(4), sum);
+      expect(restored.advance(4), 0);
     },
   );
   test(
@@ -218,7 +218,7 @@ void main() {
       }
       expect(pool.activeCount, 4);
       expect(pool.grouped, 196);
-      pool.advance(3);
+      pool.advance(4);
       pool.add(201, 7);
       expect(pool.coins.first, same(objects.first));
       final s = GameSession(catalog, MemoryStore())..enterDebug();
@@ -240,9 +240,38 @@ void main() {
       expect(a.y(28, 1), 50);
       a.age = b.age = 1.1;
       expect(a.x(310, 1), isNot(b.x(310, 1)));
-      a.age = 1 + a.jump + a.flight;
+      a.age = 1 + a.jump + RewardDelivery.hold + a.flight;
       expect(a.x(310, 1), closeTo(310, 1e-8));
       expect(a.y(28, 1), closeTo(28, 1e-8));
+    },
+  );
+  test(
+    'coins rest for one second and traverse the same curve with a slow start',
+    () {
+      final coin = RewardCoin()..reset(1, 5);
+      final landed = 1 + coin.jump;
+      coin.age = landed;
+      final x = coin.x(310, 1), y = coin.y(28, 1);
+      for (final pause in [0.1, 0.5, 0.999, 1.0]) {
+        coin.age = landed + pause;
+        expect(coin.x(310, 1), closeTo(x, 1e-9));
+        expect(coin.y(28, 1), closeTo(y, 1e-9));
+      }
+      double distanceAt(double progress) {
+        coin.age = landed + RewardDelivery.hold + coin.flight * progress;
+        final dx = coin.x(310, 1) - x, dy = coin.y(28, 1) - y;
+        return dx * dx + dy * dy;
+      }
+
+      final early = distanceAt(.1), later = distanceAt(.5);
+      expect(later, greaterThan(early * 25));
+      coin.age = landed + RewardDelivery.hold + coin.flight;
+      expect(coin.x(310, 1), closeTo(310, 1e-9));
+      expect(coin.y(28, 1), closeTo(28, 1e-9));
+      final ledger = RewardDelivery()..register(5);
+      expect(ledger.advance(landed + RewardDelivery.hold), 0);
+      expect(ledger.advance(coin.flight), 5);
+      expect(ledger.advance(1), 0);
     },
   );
   test(

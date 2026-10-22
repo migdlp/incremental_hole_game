@@ -52,7 +52,7 @@ void main() {
     expect(session.economy.balance, 0);
     advance(session, .3);
     expect(session.economy.generated, 1);
-    advance(session, 2);
+    advance(session, 3);
     expect(session.economy.collected, 1);
     expect(session.board!.pending, 0);
   });

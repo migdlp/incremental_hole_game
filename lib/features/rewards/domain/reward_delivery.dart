@@ -23,13 +23,14 @@ class RewardDelivery {
   int nextId = 1;
   final pending = <PendingReward>[];
   int get outstanding => pending.fold(0, (sum, r) => sum + r.amount);
+  static const double hold = 1;
   static double jump(int id) => .24 + (id * 17 % 13) * .009;
   static double flight(int id) => .58 + (id * 23 % 17) * .012;
 
   int register(int amount) {
     if (amount <= 0) throw ArgumentError('Recompensa inválida');
     final id = nextId++;
-    final arrival = clock + delay + jump(id) + flight(id);
+    final arrival = clock + delay + jump(id) + hold + flight(id);
     if (pending.length < capacity) {
       pending.add(PendingReward(id, id, amount, arrival));
     } else {
@@ -106,7 +107,7 @@ class RewardDelivery {
           amount > 0x1fffffffffffff ||
           !arrival.isFinite ||
           arrival < clock ||
-          arrival > clock + delay + 2) {
+          arrival > clock + delay + hold + 2) {
         throw const FormatException('Recompensa duplicada o incoherente');
       }
       result.pending.add(
@@ -144,7 +145,12 @@ class RewardCoin {
     final t = age - delay;
     if (t <= 0) return origin;
     if (t < jump) return origin + dx * (t / jump);
-    final u = ((t - jump) / flight).clamp(0.0, 1.0);
+    // Keep the same spatial curve, but ease into its traversal after resting.
+    final progress = ((t - jump - RewardDelivery.hold) / flight).clamp(
+      0.0,
+      1.0,
+    );
+    final u = progress * progress;
     final eased = u * u * (3 - 2 * u);
     return origin +
         dx +
@@ -159,7 +165,12 @@ class RewardCoin {
       final u = t / jump;
       return origin + dy * u - (23 + id % 7) * 4 * u * (1 - u);
     }
-    final u = ((t - jump) / flight).clamp(0.0, 1.0);
+    // Keep the same spatial curve, but ease into its traversal after resting.
+    final progress = ((t - jump - RewardDelivery.hold) / flight).clamp(
+      0.0,
+      1.0,
+    );
+    final u = progress * progress;
     final eased = u * u * (3 - 2 * u);
     return origin + dy + (target - origin - dy) * eased - bend * u * (1 - u);
   }
@@ -223,7 +234,8 @@ class RewardVisuals {
     for (final coin in coins) {
       if (!coin.active) continue;
       coin.age += dt;
-      if (coin.age + 1e-9 >= delay + coin.jump + coin.flight) {
+      if (coin.age + 1e-9 >=
+          delay + coin.jump + RewardDelivery.hold + coin.flight) {
         coin.active = false;
       }
     }

@@ -1,5 +1,14 @@
 # Estado actual de Feed the Hole
 
+## Tiempos de monedas · 0.16.2+26
+
+Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
+Tras aterrizar quedan inmóviles **1 segundo** y después vuelan al monedero
+con un inicio más lento y aceleración progresiva, manteniendo el final suave.
+El cobro visual espera también esa pausa; importes, liquidación al cerrar,
+restauración y ausencia de física/interacción permanecen iguales.
+Incluye la corrección del hoyo al 22 % de altura descrita debajo.
+
 ## Posición actual · 0.16.1+25
 
 Por nueva indicación del usuario, el hoyo pasa del 74 % al **22 % de altura**:
@@ -8,7 +17,7 @@ estrellas comparten la posición. Balance v19 con v18 congelado; las jornadas
 ya empezadas conservan su configuración y la siguiente usa el 22 %.
 AJ-005 sigue pendiente de aclaración; esta corrección solo cambia la posición.
 
-## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
+## Entrega anterior · AJ-001 a AJ-004 (0.16.0+24)
 
 Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
 conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con

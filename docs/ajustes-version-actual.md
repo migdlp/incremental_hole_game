@@ -1,5 +1,12 @@
 # Ajustes de la versión actual — Feed the Hole
 
+## Corrección posterior · 0.16.1+25
+
+El usuario sustituye la posición aproximada del 75 % por el **22 % de la altura**.
+Centro vigente (180,123.2), horizontal conservada. Balance v19 con v18 congelado;
+la siguiente jornada aplica la posición nueva. El apartado de AJ-004 de 0.16.0
+inferior conserva la explicación de esa entrega anterior. AJ-005 sigue pendiente.
+
 Se continúa desde 0.15.0+23 y sus sistemas P01/C01/S03. No se recuperan versiones
 antiguas ni se añaden mecánicas de otros documentos.
 

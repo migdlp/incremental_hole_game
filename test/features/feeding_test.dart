@@ -399,7 +399,7 @@ void main() {
       s.finishDay();
       expect(s.feeding.completedDays, 0);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 18);
+      expect(s.board!.settings.balanceVersion, 19);
       capture(s, golden: true);
       expect(s.feeding.points, 10);
       expect(s.economy.balance, 211);

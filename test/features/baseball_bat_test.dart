@@ -333,7 +333,7 @@ void main() {
       restored.resume();
       restored.finishDay();
       restored.startDay();
-      expect(restored.board!.settings.balanceVersion, 18);
+      expect(restored.board!.settings.balanceVersion, 19);
       await session.pendingWrites;
       await restored.pendingWrites;
       session.dispose();

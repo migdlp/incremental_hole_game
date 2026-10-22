@@ -1,5 +1,13 @@
 # Feed the Hole
 
+## Posición actual · 0.16.1+25
+
+Por nueva indicación del usuario, el hoyo pasa del 74 % al **22 % de altura**:
+centro **(180,123.2)**, con la horizontal en 180. Captura, succión, monedas y
+estrellas comparten la posición. Balance v19 con v18 congelado; las jornadas
+ya empezadas conservan su configuración y la siguiente usa el 22 %.
+AJ-005 sigue pendiente de aclaración; esta corrección solo cambia la posición.
+
 ## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
 
 Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6

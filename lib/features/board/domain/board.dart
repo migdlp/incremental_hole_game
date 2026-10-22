@@ -94,7 +94,7 @@ class Board {
     );
   }
   static const width = 360.0, height = 560.0;
-  static const hole = Vec(180, 414.4);
+  static const hole = Vec(180, 123.2);
   late final Vec holePosition = Vec(
     180,
     settings.balanceVersion >= 18 ? height * settings['hole_y_ratio'] : 50,

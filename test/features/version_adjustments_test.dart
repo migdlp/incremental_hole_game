@@ -67,7 +67,7 @@ void main() {
     'AJ004: visible hole origin, real capture and all reward origins share the configurable position',
     () async {
       final s = GameSession(catalog, MemoryStore())..startDay();
-      expect(s.board!.holePosition.toJson(), [180.0, 414.4]);
+      expect(s.board!.holePosition.toJson(), [180.0, 123.2]);
       expect(
         (Board.generator - s.board!.holePosition).length,
         greaterThan(s.board!.captureRadius + 37),
@@ -83,7 +83,7 @@ void main() {
         s.board!.holePosition.toJson(),
       );
       final coin = RewardCoin()..reset(1, 10);
-      expect(coin.y(28, 1, origin: s.board!.holePosition.y), 414.4);
+      expect(coin.y(28, 1, origin: s.board!.holePosition.y), 123.2);
       coin.age = 1 + coin.jump + coin.flight;
       expect(coin.y(28, 1, origin: 420), closeTo(28, 1e-8));
       final r = GameSession(catalog, MemoryStore())..restore(s.snapshot());

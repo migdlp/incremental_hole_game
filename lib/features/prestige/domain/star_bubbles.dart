@@ -33,7 +33,7 @@ class StarBubbles {
     this.config, {
     required this.ballRadius,
     this.maximumSpeed = 380,
-    this.hole = const Vec(180, 414.4),
+    this.hole = const Vec(180, 123.2),
   });
   final StarConfig config;
   final double ballRadius, maximumSpeed;
@@ -175,7 +175,7 @@ class StarBubbles {
     StarLedger ledger, {
     required double ballRadius,
     required double maximumSpeed,
-    Vec hole = const Vec(180, 414.4),
+    Vec hole = const Vec(180, 123.2),
   }) {
     final system = StarBubbles(
       StarConfig.fromJson(json['config'] as Map<String, dynamic>),

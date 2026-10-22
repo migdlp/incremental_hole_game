@@ -2,6 +2,12 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## 0.16.1+25 — Posición del agujero al 22 %
+
+- Centro en (180,123.2), manteniendo la horizontal. Captura, succión, robot,
+  monedas y estrellas sincronizados. Sin cambio de tamaño ni nuevas mejoras.
+- Balance v19 con v18 congelado para conservar jornadas ya empezadas.
+
 ## 0.16.0+24 — Ajustes AJ-001 a AJ-004
 
 - Fuerza alta base ×4 sin rama de fuerza; capacidad independiente conservada.

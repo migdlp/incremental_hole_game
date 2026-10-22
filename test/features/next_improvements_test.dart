@@ -112,7 +112,7 @@ void main() {
       reopened.startDay();
       expect(reopened.board!.gripStrength, 4);
       expect(reopened.board!.handCapacity, 2);
-      expect(reopened.board!.holePosition.toJson(), [180.0, 414.4]);
+      expect(reopened.board!.holePosition.toJson(), [180.0, 123.2]);
     },
   );
 

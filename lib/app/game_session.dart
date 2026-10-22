@@ -965,7 +965,7 @@ class GameSession extends ChangeNotifier {
           ? 16
           : json['version'] == 11
           ? 17
-          : 18,
+          : 19,
       retiredRemoved: (json['version'] as int) >= 9,
     );
     var restoredTool = legacy
@@ -1014,7 +1014,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 18)) {
+          (balanceVersion < 1 || balanceVersion > 19)) {
         throw const FormatException('Versión de balance inválida');
       }
       final runRetired = run['retiredLevels'] == null

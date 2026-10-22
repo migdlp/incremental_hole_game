@@ -1,6 +1,6 @@
 kind,id,level,cost,effect,effect_value,unit,requires,cap
 base,hand_grip_strength,0,0,hand_grip_strength,4,multiplier,,
-base,hole_y_ratio,0,0,hole_y_ratio,0.74,ratio,,
+base,hole_y_ratio,0,0,hole_y_ratio,0.22,ratio,,
 base,star_count,0,0,star_count,1,prototype,,
 base,star_categories,0,0,star_categories,3,prototype,,
 base,star_value,0,0,star_value,1,prototype,,

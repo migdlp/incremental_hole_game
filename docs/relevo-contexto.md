@@ -1,5 +1,13 @@
 # Relevo de contexto — Feed the Hole
 
+## Posición actual · 0.16.1+25
+
+Por nueva indicación del usuario, el hoyo pasa del 74 % al **22 % de altura**:
+centro **(180,123.2)**, con la horizontal en 180. Captura, succión, monedas y
+estrellas comparten la posición. Balance v19 con v18 congelado; las jornadas
+ya empezadas conservan su configuración y la siguiente usa el 22 %.
+AJ-005 sigue pendiente de aclaración; esta corrección solo cambia la posición.
+
 ## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
 
 Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
@@ -81,7 +89,7 @@ Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejo
 
 ## Estado que hay que conservar
 
-- **AJ-004 vigente: hoyo abajo en (180,414.4), generador (180,480), emisión hacia arriba.** Sustituye la posición alta anterior.
+- **Posición vigente: hoyo al 22 % en (180,123.2), generador (180,480), emisión hacia arriba.** Sustituye el 74 % de la entrega anterior.
 - Ajuste posterior al APK de `046ebb0`: agujero en (180, 50), generador en (180, 480), sin leyenda del jardín en el tablero ni «Tu jardín te espera» en pausa. Se ha seguido la última indicación del usuario de subir el agujero y bajar el generador; comprobar las posiciones jugando en móvil.
 - **15 s de producción sin fase final de recogida**; una sola barra verde, con segundos pequeños encima a la derecha y sin nombres de fase. El cierre liquida automáticamente lo pendiente. No hay temporizador en compras.
 - Generación base 1,5 bolas/s; límite de 200 bolas. Mano base de una bola, capacidad mejorable hasta seis y fuerza alta desde el inicio sin mejoras. Escoba física desbloqueable, anchura/V y robot que empuja bolas.

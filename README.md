@@ -1,5 +1,14 @@
 # Feed the Hole
 
+## AJ-008A · Resultados animados (0.18.0+28)
+
+Nuevo modal con monedas por denominación hacia el monedero real, seguido del
+progreso del hoyo; Tienda aparece al finalizar. Saltos por bloque, movimiento
+reducido y scroll móvil. Contabilidad de presentación separada del cobro real.
+Paleta 1/10/50/100/500: bronce/plata/oro/verde/rojo. Sin cambios económicos.
+Mockup y vídeo no adjuntos: fidelidad visual pendiente de cotejar; pruebas en
+Android físico pendientes. [Detalles, archivos y validación](docs/aj008a-resultados.md).
+
 ## AJ-005A · Crecimiento por cuota (0.17.0+27)
 
 Cada cuota completada aumenta el **área de captura un 16 %**, una sola vez:

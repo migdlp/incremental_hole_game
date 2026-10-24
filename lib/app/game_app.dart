@@ -9,6 +9,8 @@ import '../features/board/presentation/streak_indicator.dart';
 import '../features/board/presentation/special_ability_bar.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/feeding/presentation/feeding_summary.dart';
+import '../features/results/domain/results_data.dart';
+import '../features/results/presentation/results_overlay.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
 import '../features/prestige/presentation/prestige_screen.dart';
@@ -65,6 +67,7 @@ class SessionScreen extends StatefulWidget {
 
 class _SessionScreenState extends State<SessionScreen>
     with WidgetsBindingObserver {
+  final _resultsWalletAnchor = GlobalKey();
   @override
   void initState() {
     super.initState();
@@ -130,15 +133,33 @@ class _SessionScreenState extends State<SessionScreen>
                                   excluding: !widget.session.running,
                                   child: IgnorePointer(
                                     ignoring: !widget.session.running,
-                                    child: DayScreen(session: widget.session),
+                                    child: DayScreen(
+                                      session: widget.session,
+                                      resultsWalletAnchor: _resultsWalletAnchor,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             if (!widget.session.running)
                               Positioned.fill(
-                                child: _DayResultsOverlay(
-                                  session: widget.session,
+                                child: ResultsOverlay(
+                                  key: ValueKey(
+                                    widget.session.progress.last!.day,
+                                  ),
+                                  data: ResultsData(
+                                    result: widget.session.progress.last!,
+                                    feeding: widget.session.feeding,
+                                    balance: widget.session.economy.balance,
+                                  ),
+                                  walletAnchor: _resultsWalletAnchor,
+                                  onShop: () => Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => SkillTreeScreen(
+                                        session: widget.session,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                           ],
@@ -155,8 +176,9 @@ class _SessionScreenState extends State<SessionScreen>
 }
 
 class DayScreen extends StatefulWidget {
-  const DayScreen({super.key, required this.session});
+  const DayScreen({super.key, required this.session, this.resultsWalletAnchor});
   final GameSession session;
+  final GlobalKey? resultsWalletAnchor;
   @override
   State<DayScreen> createState() => _DayScreenState();
 }
@@ -379,31 +401,35 @@ class _DayScreenState extends State<DayScreen> {
                     top: 15,
                     right: 16,
                     child: IgnorePointer(
-                      child: AnimatedScale(
-                        scale: session.rewardVisuals.receiptPulse > 0
-                            ? 1.06
-                            : 1,
-                        duration: const Duration(milliseconds: 120),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          child: Row(
-                            key: const ValueKey('gameplay-balance'),
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CoinIcon(key: _walletKey),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${session.economy.balance + (session.running ? session.economy.collected : 0)}',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
+                      child: Opacity(
+                        opacity: session.running ? 1 : 0,
+                        child: AnimatedScale(
+                          scale: session.rewardVisuals.receiptPulse > 0
+                              ? 1.06
+                              : 1,
+                          duration: const Duration(milliseconds: 120),
+                          child: Container(
+                            key: widget.resultsWalletAnchor,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              key: const ValueKey('gameplay-balance'),
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CoinIcon(key: _walletKey),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${session.economy.balance + (session.running ? session.economy.collected : 0)}',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -532,49 +558,6 @@ class _SettingsOptions extends StatelessWidget {
   );
 }
 
-class _DayResultsOverlay extends StatelessWidget {
-  const _DayResultsOverlay({required this.session});
-  final GameSession session;
-
-  @override
-  Widget build(BuildContext context) => PopScope(
-    canPop: false,
-    child: Stack(
-      children: [
-        const Positioned.fill(
-          child: ModalBarrier(dismissible: false, color: Color(0x99111c2e)),
-        ),
-        Dialog(
-          key: const ValueKey('day-results-popup'),
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 24,
-          ),
-          backgroundColor: ink,
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-            side: const BorderSide(color: Color(0xff41516a)),
-          ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 620, maxHeight: 740),
-            child: Semantics(
-              scopesRoute: true,
-              explicitChildNodes: true,
-              namesRoute: true,
-              label: 'Resultados y mejoras de la jornada',
-              child: FocusScope(
-                autofocus: true,
-                child: NightScreen(session: session),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 class NightScreen extends StatelessWidget {
   const NightScreen({super.key, required this.session});
   final GameSession session;
@@ -614,9 +597,7 @@ class NightScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 16),
             children: [
-              if (last != null)
-                _results()
-              else ...[
+              if (last == null) ...[
                 const Text(
                   'Cada bola cuenta.',
                   style: TextStyle(
@@ -678,92 +659,4 @@ class NightScreen extends StatelessWidget {
       ],
     );
   }
-
-  Widget _results() {
-    final result = session.progress.last!;
-    return Container(
-      key: const ValueKey('visual-day-results'),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CoinIcon(),
-          const SizedBox(height: 8),
-          const Text(
-            'Dinero ganado',
-            style: TextStyle(color: Color(0xffb5bdc9), fontSize: 13),
-          ),
-          const SizedBox(height: 8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              '${result.income}',
-              style: const TextStyle(
-                color: gold,
-                fontSize: 58,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: _metric(
-                  const Icon(Icons.adjust_rounded, size: 22, color: cream),
-                  '${result.captured}',
-                  'Bolas al hoyo',
-                  cream,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _metric(
-                  const CoinIcon(),
-                  '${result.generated}',
-                  'Recompensas',
-                  result.lost == 0
-                      ? const Color(0xff8fc7ba)
-                      : const Color(0xffffbb7c),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Cobro automático',
-            style: TextStyle(color: Color(0xffb5bdc9), fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _metric(Widget icon, String value, String label, Color color) =>
-      Column(
-        children: [
-          icon,
-          const SizedBox(height: 6),
-          FittedBox(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xffb5bdc9), fontSize: 11),
-          ),
-        ],
-      );
 }

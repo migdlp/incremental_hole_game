@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import '../core/vec.dart';
+import '../features/board/domain/coin_denomination.dart';
 import '../features/motion/motion_input.dart';
 import '../features/board/domain/board.dart';
 import '../features/board/domain/launcher.dart';
@@ -90,6 +91,15 @@ class GameSession extends ChangeNotifier {
   final UpgradeCatalog catalog;
   final SaveStore store;
   final economy = Economy();
+  final _rewardCounts = <int, int>{};
+  Map<int, int> _countsFor(int amount) =>
+      _rewardCounts.entries.fold<int>(0, (sum, e) => sum + e.key * e.value) ==
+          amount
+      ? Map.of(_rewardCounts)
+      : {
+          for (final s in CoinDenomination.split(amount))
+            s.denomination.amount: s.count,
+        };
   late RewardDelivery rewards = _newRewards();
   final rewardFrameMetrics = RewardFrameMetrics();
   int? _debugRewardLimit;
@@ -175,6 +185,7 @@ class GameSession extends ChangeNotifier {
     cycle = null;
     paused = false;
     economy.balance = economy.collected = economy.generated = 0;
+    _rewardCounts.clear();
     progress.day = 1;
     progress.record = 0;
     progress.last = null;
@@ -363,6 +374,7 @@ class GameSession extends ChangeNotifier {
     debugBlackHoleObjects = 0;
     cycle = DayCycle(production: settings['production_duration'], closing: 0);
     economy.begin();
+    _rewardCounts.clear();
     rewards = _newRewards();
     rewardVisuals = _newVisuals();
     board!.syncHoleGrowth(feeding.growths);
@@ -445,6 +457,14 @@ class GameSession extends ChangeNotifier {
     economy.collect(events.collected);
     for (final value in events.rewards) {
       economy.generated += value;
+      for (final stack in CoinDenomination.split(value)) {
+        final denomination = stack.denomination.amount;
+        _rewardCounts.update(
+          denomination,
+          (count) => count + stack.count,
+          ifAbsent: () => stack.count,
+        );
+      }
       final id = rewards.register(value);
       rewardVisuals.add(id, value);
     }
@@ -487,7 +507,9 @@ class GameSession extends ChangeNotifier {
       generated: economy.generated,
       captured: board!.captured,
       previousIncome: progress.last?.income,
-      collectedCoins: board!.automaticCoins || board!.collectedCoins == null
+      collectedCoins: board!.automaticCoins
+          ? Map.unmodifiable(_countsFor(economy.collected))
+          : board!.collectedCoins == null
           ? null
           : Map.unmodifiable(board!.collectedCoins!),
     );
@@ -796,6 +818,7 @@ class GameSession extends ChangeNotifier {
     selectedTool = BallTool.hand;
     economy.balance = 0;
     economy.begin();
+    _rewardCounts.clear();
     progress
       ..day = 1
       ..record = 0
@@ -868,6 +891,9 @@ class GameSession extends ChangeNotifier {
         : {
             'remaining': cycle!.remaining,
             'rewards': rewards.toJson(),
+            'rewardCounts': _countsFor(
+              economy.generated,
+            ).map((key, value) => MapEntry('$key', value)),
             'retiredLevels': _retiredRunLevels,
             'collected': economy.collected,
             'generated': economy.generated,
@@ -1152,6 +1178,19 @@ class GameSession extends ChangeNotifier {
         }
       }
     }
+    final restoredCounts = run?['rewardCounts'] == null
+        ? <int, int>{
+            for (final s in CoinDenomination.split(generated))
+              s.denomination.amount: s.count,
+          }
+        : CoinDenomination.readCounts(run!['rewardCounts']);
+    if (restoredCounts.entries.fold<int>(
+          0,
+          (sum, e) => sum + e.key * e.value,
+        ) !=
+        generated) {
+      throw const FormatException('Desglose de recompensas incoherente');
+    }
     final savedFeeding = json['feeding'];
     final FeedingProgress restoredFeeding;
     if ((json['version'] as int) >= 8) {
@@ -1304,6 +1343,9 @@ class GameSession extends ChangeNotifier {
     _eventRandomState = savedEventRandom;
     board = restoredBoard;
     board?.gravitySupported = gravityAvailable;
+    _rewardCounts
+      ..clear()
+      ..addAll(restoredCounts);
     rewards = restoredRewards;
     rewardVisuals = _newVisuals();
     if (restoredBoard != null) {

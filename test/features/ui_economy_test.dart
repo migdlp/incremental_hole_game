@@ -208,10 +208,19 @@ void main() {
     () {
       final session = completedDay();
       expect(session.progress.last!.income, 55);
-      expect(session.progress.last!.collectedCoins, isNull);
+      expect(
+        session.progress.last!.collectedCoins!.entries.fold<int>(
+          0,
+          (sum, e) => sum + e.key * e.value,
+        ),
+        55,
+      );
       final reopened = GameSession(catalog, MemoryStore())
         ..restore(session.snapshot());
-      expect(reopened.progress.last!.collectedCoins, isNull);
+      expect(
+        reopened.progress.last!.collectedCoins,
+        session.progress.last!.collectedCoins,
+      );
       final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
       data['last']['collectedCoins'] = {'50': 2};
       expect(() => reopened.restore(jsonEncode(data)), throwsFormatException);
@@ -252,7 +261,7 @@ void main() {
   );
 
   testWidgets(
-    'automatic summary has no collection bar or denomination counts and money uses icons',
+    'automatic summary shows denominations without a collection bar or redundant text',
     (tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1;
@@ -272,7 +281,8 @@ void main() {
         findsNothing,
       );
       expect(find.byKey(const ValueKey('collected-coin-50')), findsNothing);
-      expect(find.text('Cobro automático'), findsOneWidget);
+      expect(find.text('Cobro automático'), findsNothing);
+      expect(find.text('Monedas conseguidas'), findsOneWidget);
       expect(find.byType(CoinIcon), findsWidgets);
       for (final widget in tester.widgetList<Text>(find.byType(Text))) {
         expect(

@@ -57,12 +57,12 @@ void main() {
       expect((tester.widget(gameFinder) as GameWidget).game, same(game));
       expect(game.paused, isTrue);
       expect(
-        find.descendant(of: popup, matching: find.text('Dinero ganado')),
+        find.descendant(of: popup, matching: find.text('Monedas conseguidas')),
         findsOneWidget,
       );
       expect(
         find.descendant(of: popup, matching: find.text('4')),
-        findsOneWidget,
+        findsWidgets,
       );
       expect(
         find.descendant(of: popup, matching: find.text('Bolas al hoyo')),

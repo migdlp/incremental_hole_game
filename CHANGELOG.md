@@ -1,5 +1,12 @@
 # Historial de cambios
 
+## 0.18.0+28
+
+- AJ-008A: resultados en dos bloques progresivos, sin cambiar ingresos ni cuotas.
+- Monedas por denominación vuelan desde cada fila al monedero global; alimentación animada después.
+- Saltos por bloque, movimiento reducido, scroll móvil y acceso final a Tienda.
+- Paleta de monedas bronce/plata/oro/verde/rojo para los cinco valores existentes.
+
 ## 0.17.0+27
 
 - AJ-005A: cada cuota completada aumenta el área del hoyo un 16 %, una sola vez.

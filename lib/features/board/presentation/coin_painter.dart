@@ -2,11 +2,11 @@ import 'package:flutter/painting.dart';
 import '../domain/coin_denomination.dart';
 
 Color coinColor(CoinDenomination denomination) => switch (denomination) {
-  CoinDenomination.one => const Color(0xffeab308),
-  CoinDenomination.ten => const Color(0xff10b981),
-  CoinDenomination.fifty => const Color(0xff3b82f6),
-  CoinDenomination.hundred => const Color(0xffa855f7),
-  CoinDenomination.fiveHundred => const Color(0xfff43f5e),
+  CoinDenomination.one => const Color(0xffc88b58),
+  CoinDenomination.ten => const Color(0xffc8d2df),
+  CoinDenomination.fifty => const Color(0xffedc64c),
+  CoinDenomination.hundred => const Color(0xff45bd87),
+  CoinDenomination.fiveHundred => const Color(0xffdf6070),
 };
 
 final _coinStamp = Path()

@@ -31,7 +31,7 @@ void main() {
       await tester.pump();
       expect(session.paused, isFalse);
       session.finishDay();
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('Comenzar día 2'), findsNothing);
       expect(find.text('Tienda'), findsOneWidget);
       expect(tester.takeException(), isNull);

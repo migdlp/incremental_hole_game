@@ -497,14 +497,14 @@ void main() {
       capture(s);
       s.finishDay();
       await tester.pumpWidget(GardenApp(session: s));
-      await tester.pump();
+      await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('feeding-summary')),
         100,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Alimenta al agujero · 1 / 10'), findsOneWidget);
-      expect(find.text('4 jornadas restantes'), findsOneWidget);
+      expect(find.text('Cuota actual: 1 / 10'), findsOneWidget);
+      expect(find.text('Jornadas restantes: 4'), findsOneWidget);
       expect(find.text('Día 1'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

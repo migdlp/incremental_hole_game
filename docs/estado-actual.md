@@ -14,6 +14,9 @@ Los tiempos y la estética de monedas de 0.16.2 se conservan.
 **Decisión consultada aún abierta:** tamaño al llegar a los bordes. No se añade
 un tope de balance sin aprobación; se mantiene el crecimiento solicitado del 16 %.
 
+Validado: formato, análisis y **369 pruebas**, compilación Android y firma.
+Código compilado `9615d08`; [APK 0.17.0+27 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126). Prueba táctil en Android físico pendiente.
+
 ## Tiempos de monedas · 0.16.2+26
 
 Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
@@ -102,7 +105,7 @@ no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
 Las referencias anteriores a recogida manual o fase final describen versiones
 históricas y quedan sustituidas por C01.
 
-Actualizado: **22/10/2026**. Referencia de APK entregado: **0.16.2+26**. La revisión `e409af8` incluye pausa y aceleración de monedas, hoyo al 22 %, AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático y S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **24/10/2026**. Referencia de APK entregado: **0.17.0+27**. La revisión `9615d08` incluye crecimiento AJ-005A por cuota, pausa y aceleración de monedas, hoyo al 22 %, AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático y S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -268,9 +271,9 @@ han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
-**[Descargar APK 0.16.2+26 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
+**[Descargar APK 0.17.0+27 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135): formato, análisis, **360 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `e409af8`. Incluye AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático, S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219): formato, análisis, **369 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `9615d08`. Incluye AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático, S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
 
 Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 60 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 
@@ -288,7 +291,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v12** y balance vigente **v18** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–16 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. S03 permite reiniciar expresamente la partida al incumplir cuota o comprar Prestigio tras confirmar, conservando la metaprogresión.
+Guardado JSON **v13** y balance vigente **v19** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–16 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. S03 permite reiniciar expresamente la partida al incumplir cuota o comprar Prestigio tras confirmar, conservando la metaprogresión.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, catálogo permanente de P02 ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

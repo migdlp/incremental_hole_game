@@ -14,6 +14,9 @@ Los tiempos y la estética de monedas de 0.16.2 se conservan.
 **Decisión consultada aún abierta:** tamaño al llegar a los bordes. No se añade
 un tope de balance sin aprobación; se mantiene el crecimiento solicitado del 16 %.
 
+Validado: formato, análisis y **369 pruebas**, compilación Android y firma.
+Código compilado `9615d08`; [APK 0.17.0+27 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126). Prueba táctil en Android físico pendiente.
+
 ## Tiempos de monedas · 0.16.2+26
 
 Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
@@ -102,7 +105,7 @@ no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
 Las referencias anteriores a recogida manual o fase final describen versiones
 históricas y quedan sustituidas por C01.
 
-**Actualizado: 22/10/2026 · Último APK entregado: 0.16.2+26, revisión `e409af8`.**
+**Actualizado: 24/10/2026 · Último APK entregado: 0.17.0+27, revisión `9615d08`.**
 
 Este es el punto de entrada para continuar en un chat nuevo. El objetivo es mejorar la diversión y progresión de un incremental móvil con físicas, manteniendo una participación manual importante. El usuario prefiere avances concretos y documentación que sirva de fuente de verdad; no necesita un repaso de commits.
 
@@ -140,7 +143,7 @@ con carga automática durante producción y mejoras de recarga, potencia y durac
 Las cifras son **provisionales de prueba**, no un balance definitivo; ver estado
 actual y CSV. Escoba con dos dedos: uno traslada, dos orientan; soltar uno conserva
 el otro agarre. Guardado v12 / balance v18, con balances anteriores congelados para jornadas
-antiguas. Verificación CI de la entrega: 360 pruebas y análisis
+antiguas. Verificación CI de la entrega: 369 pruebas y análisis
 sin avisos, incluidos gestos de dos dedos, habilidades, guardado y pantalla pequeña.
 
 ## M01 implementado en la última entrega
@@ -241,9 +244,9 @@ No se ha registrado aceptación física del último APK. El usuario reportó ant
 
 ## Última entrega y comprobaciones
 
-[Descargar APK 0.16.2+26 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
+[Descargar APK 0.17.0+27 (ZIP con APK y SHA-256)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126). Descomprimir: contiene `feed-the-hole-debug.apk`. Retención limitada de GitHub; regenerar si caduca.
 
-360 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
+369 pruebas, formato, análisis, compilación Android y firma correctos en la [pipeline de entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219). Sin prueba en teléfono físico. El último código entregado está en `build/apk-0.6.0+13`; no asumir que `main` lo contiene. La pipeline Android es manual; el entorno local usado no tiene Android SDK.
 
 ## Acceso a GitHub desde Codex Cloud (20/10/2026)
 
@@ -287,7 +290,7 @@ Continúa el proyecto Feed the Hole del repo
 migdlp/incremental_hole_game. Lee primero docs/relevo-contexto.md,
 docs/estado-actual.md y docs/cambios-futuros-arbol-mejoras.md.
 Me interesa especialmente el estado jugable y las mejoras futuras,
-no reconstruir el historial de commits. El último APK es 0.16.2+26:
+no reconstruir el historial de commits. El último APK es 0.17.0+27:
 agujero arriba, generador abajo, producción de 15 s con cobro automático y sin recogida final, alimentación con racha y cuotas provisionales con derrota, tienda de prestigio y nodo voluntario confirmado, generador lanzador, eventos Agujero negro y Gravedad por inclinación, paredes rebotadoras, bate de tres potencias, racha comprable, especiales, escoba de dos dedos y debug por botón.
 No des por implementados los tiers ni las bolas especiales, ni cierres
 las decisiones abiertas sin discutirlas. Después continúa con mi

@@ -14,6 +14,9 @@ Los tiempos y la estética de monedas de 0.16.2 se conservan.
 **Decisión consultada aún abierta:** tamaño al llegar a los bordes. No se añade
 un tope de balance sin aprobación; se mantiene el crecimiento solicitado del 16 %.
 
+Validado: formato, análisis y **369 pruebas**, compilación Android y firma.
+Código compilado `9615d08`; [APK 0.17.0+27 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126). Prueba táctil en Android físico pendiente.
+
 ## Tiempos de monedas · 0.16.2+26
 
 Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
@@ -105,12 +108,12 @@ El límite al alcanzar los bordes se ha consultado; sigue sin resolverse.
 
 ## Entrega y límites de validación
 
-Código compilado: `e409af8`, publicado en `build/apk-0.6.0+13` sin force push.
+Código compilado: `9615d08`, publicado en `build/apk-0.6.0+13` sin force push.
 El commit `046ebb0` continúa en su historial.
-[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135):
-formato, análisis sin avisos, **360 pruebas**, compilación Android, nombre,
+[Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219):
+formato, análisis sin avisos, **369 pruebas**, compilación Android, nombre,
 paquete `com.migdlp.incremental_hole_game` y firma v2 del binario verificados.
-[APK 0.16.2+26 y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831).
+[APK 0.17.0+27 y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126).
 
 AJ-005A ya concreta el desencadenante; queda por decidir el límite en bordes. No se ha validado el tacto ni el rendimiento
 en un teléfono físico. Sigue pendiente la firma compatible con APK anteriores;

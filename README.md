@@ -14,6 +14,9 @@ Los tiempos y la estética de monedas de 0.16.2 se conservan.
 **Decisión consultada aún abierta:** tamaño al llegar a los bordes. No se añade
 un tope de balance sin aprobación; se mantiene el crecimiento solicitado del 16 %.
 
+Validado: formato, análisis y **369 pruebas**, compilación Android y firma.
+Código compilado `9615d08`; [APK 0.17.0+27 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126). Prueba táctil en Android físico pendiente.
+
 ## Tiempos de monedas · 0.16.2+26
 
 Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
@@ -77,11 +80,11 @@ entrega no acredita actualización conservando su progreso. No desinstalar la
 instalación anterior para resolver el conflicto de firma.
 [Estado y comprobaciones de G01](docs/g01-feed-the-hole.md).
 
-Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, cobra automáticamente sus recompensas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.16.2+26, revisión `e409af8`**, 22/10/2026.
+Prototipo jugable de un incremental móvil en Flutter + Flame. El jugador dirige bolas hacia un agujero, cobra automáticamente sus recompensas y compra mejoras permanentes entre jornadas. **Código y último APK entregado: 0.17.0+27, revisión `9615d08`**, 24/10/2026.
 
 **Para continuar en otro chat:** leer [relevo de contexto](docs/relevo-contexto.md), [estado actual](docs/estado-actual.md) y [cambios futuros](docs/cambios-futuros-arbol-mejoras.md). El primero resume el estado jugable y las decisiones abiertas; el último contiene únicamente pendientes. [Índice de documentación](docs/README.md).
 
-**[Descargar APK 0.16.2+26 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135): formato, análisis, **360 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
+**[Descargar APK 0.17.0+27 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126)** · [Pipeline correcta](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219): formato, análisis, **369 pruebas**, compilación Android y firma. Descomprimir el ZIP: contiene `feed-the-hole-debug.apk` y su SHA-256. Los artefactos tienen retención limitada.
 
 La entrega incluye [M01 · Paredes rebotadoras](docs/m01-paredes-rebotadoras.md): tres niveles permanentes, ondas elásticas y límite de velocidad, con balance provisional. Conserva **interfaz de juego simplificada, una sola barra de tiempo, saldo y pausa dentro del tablero y feedback visual opcional apagado por defecto**, además de racha comprable, especiales y escoba de dos dedos. La interfaz usa «Tienda» y «Comenzar día», sin mostrar números de día. Debug se abre con el botón DEBUG de arriba a la izquierda del árbol. La validación en Android físico y el ajuste de balance jugando siguen pendientes.
 
@@ -136,7 +139,7 @@ python3 -m http.server 8123 --directory build/web
 - Árbol progresivo con conexiones, arrastre, zoom, ficha de efecto y compra manteniendo pulsado 1 segundo; las compras revelan nuevos caminos.
 - 22 tipos y 55 nodos de mejora (la primera del árbol permite llevar dos bolas), con costes provisionales y requisitos del [balance actual](docs/balance.csv), robot que empuja bolas y Prestigio voluntario con confirmación.
 - Resultados y estadísticas en un pop-up sobre el juego detenido, con un único botón para ir al árbol en su pantalla independiente. Desde el árbol se pulsa «Comenzar día»; ahorro y compras persistentes.
-- Guardado JSON v12 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
+- Guardado JSON v13 con compatibilidad de jornadas anteriores, herramienta seleccionada, escrituras en orden, copia anterior válida y restauración pausada de jornadas interrumpidas. En Android se usa archivo temporal y reemplazo; en web, almacenamiento del navegador.
 - Pausa al pasar a segundo plano y opción de silenciar los sonidos del sistema.
 
 La tabla `docs/balance.csv` se empaqueta como recurso y se valida al cargar: es la fuente editable del balance actual. Las jornadas antiguas conservan su configuración hasta terminar; el siguiente día usa el balance nuevo. La noche descarta también cualquier bola agarrada.
@@ -155,7 +158,7 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 flutter build web --no-web-resources-cdn
 ```
 
-La entrega vigente pasa **360 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
+La entrega vigente pasa **369 pruebas**, análisis y compilación Android en la pipeline enlazada arriba. Los resultados de entregas anteriores se conservan en el [registro de validación](docs/validacion-prototipo.md).
 
 La [pipeline manual](docs/ci.md) ejecuta doctor, dependencias, formato, análisis y pruebas, compila el APK de depuración y lo guarda como artefacto descargable junto con su SHA-256. Se activa en **Actions → Flutter - APK manual → Run workflow**; no se dispara con cada push.
 

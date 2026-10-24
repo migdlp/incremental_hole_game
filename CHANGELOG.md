@@ -11,6 +11,14 @@
   sin convertir progreso monetario antiguo en bolas.
 - Proyección del agujero acotada al cubrir todo el tablero, sin limitar cuotas.
 
+## 0.19.0+30
+
+- AJ-007: mezcla centralizada offline, seis plops, capas suaves y cascadas musicales.
+- Háptica agrupada con prioridad, volumen persistente y ajustes DEBUG independientes.
+- Hundimiento de bolas con ocultación por el borde y reacción agrupada del hoyo.
+- Integración con monedas, estrellas y compras sin modificar la contabilidad.
+- Recursos originales/CC0 y scripts regenerables; calibración física/artística pendiente.
+
 
 ## 0.18.1+29
 

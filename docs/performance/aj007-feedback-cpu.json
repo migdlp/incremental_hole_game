@@ -1,0 +1,101 @@
+{
+  "scope": "Cloud AOT CPU: central mixer plus nonphysical sink pool. No native audio, hardware GPU, Android latency or physical haptics.",
+  "scenarios": [
+    {
+      "captures_per_burst": 1,
+      "continuous_15_seconds": false,
+      "cpu_p95_us": 1,
+      "cpu_p99_us": 2,
+      "cpu_max_us": 24,
+      "requested_voice_peak": 3,
+      "haptic_requests": 1,
+      "sink_peak": 1,
+      "sink_recycled": 0,
+      "rss_bytes": 5955584
+    },
+    {
+      "captures_per_burst": 1,
+      "continuous_15_seconds": true,
+      "cpu_p95_us": 4,
+      "cpu_p99_us": 23,
+      "cpu_max_us": 238,
+      "requested_voice_peak": 6,
+      "haptic_requests": 75,
+      "sink_peak": 2,
+      "sink_recycled": 0,
+      "rss_bytes": 6615040
+    },
+    {
+      "captures_per_burst": 10,
+      "continuous_15_seconds": false,
+      "cpu_p95_us": 1,
+      "cpu_p99_us": 2,
+      "cpu_max_us": 5,
+      "requested_voice_peak": 4,
+      "haptic_requests": 1,
+      "sink_peak": 10,
+      "sink_recycled": 0,
+      "rss_bytes": 6991872
+    },
+    {
+      "captures_per_burst": 10,
+      "continuous_15_seconds": true,
+      "cpu_p95_us": 4,
+      "cpu_p99_us": 6,
+      "cpu_max_us": 198,
+      "requested_voice_peak": 7,
+      "haptic_requests": 38,
+      "sink_peak": 20,
+      "sink_recycled": 0,
+      "rss_bytes": 7680000
+    },
+    {
+      "captures_per_burst": 50,
+      "continuous_15_seconds": false,
+      "cpu_p95_us": 1,
+      "cpu_p99_us": 2,
+      "cpu_max_us": 8,
+      "requested_voice_peak": 4,
+      "haptic_requests": 1,
+      "sink_peak": 50,
+      "sink_recycled": 0,
+      "rss_bytes": 8097792
+    },
+    {
+      "captures_per_burst": 50,
+      "continuous_15_seconds": true,
+      "cpu_p95_us": 5,
+      "cpu_p99_us": 9,
+      "cpu_max_us": 81,
+      "requested_voice_peak": 7,
+      "haptic_requests": 38,
+      "sink_peak": 100,
+      "sink_recycled": 0,
+      "rss_bytes": 8237056
+    },
+    {
+      "captures_per_burst": 100,
+      "continuous_15_seconds": false,
+      "cpu_p95_us": 0,
+      "cpu_p99_us": 3,
+      "cpu_max_us": 23,
+      "requested_voice_peak": 4,
+      "haptic_requests": 1,
+      "sink_peak": 100,
+      "sink_recycled": 0,
+      "rss_bytes": 8237056
+    },
+    {
+      "captures_per_burst": 100,
+      "continuous_15_seconds": true,
+      "cpu_p95_us": 9,
+      "cpu_p99_us": 14,
+      "cpu_max_us": 2606,
+      "requested_voice_peak": 7,
+      "haptic_requests": 38,
+      "sink_peak": 200,
+      "sink_recycled": 0,
+      "rss_bytes": 8245248
+    }
+  ]
+}

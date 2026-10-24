@@ -1,3 +1,5 @@
+import '../../feedback/domain/feedback_config.dart';
+import '../../feedback/domain/feedback_controller.dart';
 import '../../feeding/presentation/feeding_summary.dart';
 import '../../rewards/domain/reward_visual_config.dart';
 import '../../prestige/domain/star_rewards.dart';
@@ -158,10 +160,6 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         ? widget.session.debugPurchase(node.definition.id, node.level)
         : widget.session.purchase(node.definition);
     if (purchased) {
-      if (widget.session.sound) {
-        unawaited(SystemSound.play(SystemSoundType.click));
-      }
-      unawaited(HapticFeedback.lightImpact());
       setState(
         () => announcement = 'Mejora adquirida. Nuevos caminos disponibles.',
       );
@@ -654,6 +652,78 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                         value: session.debugBubbleBlackHole,
                         onChanged: (v) =>
                             session.debugSetBubbleInteractions(blackHole: v),
+                      ),
+                    ],
+                  ),
+                  ExpansionTile(
+                    key: const ValueKey('debug-audiovisual-tools'),
+                    title: const Text('Audio, háptica y absorción'),
+                    tilePadding: EdgeInsets.zero,
+                    children: [
+                      Text(session.feedback.backend.status),
+                      Text(
+                        'Voces pico ${session.feedback.peakVoices}; sonidos ${session.feedback.played}; agrupados/omitidos ${session.feedback.skipped}; pulsos ${session.feedback.hapticPulses}',
+                      ),
+                      if (!session.running) ...[
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            TextButton(
+                              onPressed: () => session.debugPreviewFeedback(
+                                FeedbackEvent.capture,
+                              ),
+                              child: const Text('Probar plop'),
+                            ),
+                            TextButton(
+                              onPressed: () => session.debugPreviewFeedback(
+                                FeedbackEvent.coinIn,
+                              ),
+                              child: const Text('Probar moneda'),
+                            ),
+                            TextButton(
+                              onPressed: () => session.debugPreviewFeedback(
+                                FeedbackEvent.star,
+                              ),
+                              child: const Text('Probar cristal'),
+                            ),
+                          ],
+                        ),
+                        for (final e in FeedbackConfig.ranges.entries)
+                          Row(
+                            children: [
+                              Expanded(child: Text(e.key)),
+                              SizedBox(
+                                width: 130,
+                                child: DropdownButton<double>(
+                                  key: ValueKey('feedback-parameter-${e.key}'),
+                                  value: session.feedback.config[e.key],
+                                  isExpanded: true,
+                                  items: [
+                                    for (final v in {
+                                      e.value.$1,
+                                      session.feedback.config[e.key],
+                                      e.value.$2,
+                                    })
+                                      DropdownMenuItem(
+                                        value: v,
+                                        child: Text('$v'),
+                                      ),
+                                  ],
+                                  onChanged: (v) {
+                                    if (v != null) {
+                                      session.debugSetFeedbackParameter(
+                                        e.key,
+                                        v,
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                      const Text(
+                        'Valores provisionales. Escucha, háptica y FPS en Android físico pendientes.',
                       ),
                     ],
                   ),

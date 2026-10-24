@@ -46,7 +46,16 @@ class StarBubbles {
   final flights = List.generate(24, (_) => StarFlight());
   StarLedger ledger = const StarLedger();
   double entryClock = 0;
-  int breakSerial = 0;
+  int breakSerial = 0, contactSerial = 0;
+  double contactStrength = 0;
+  final _previousSoft = <int>{}, _currentSoft = <int>{};
+  void beginAudioContacts() => _currentSoft.clear();
+  void endAudioContacts() {
+    _previousSoft
+      ..clear()
+      ..addAll(_currentSoft);
+  }
+
   StarBubble? held;
   Vec grabOffset = Vec.zero;
   double radius(StarBubble bubble) => _radii[bubble.reward.category];
@@ -113,7 +122,15 @@ class StarBubbles {
   }
 
   bool impact(StarBubble b, Vec normal, double closing, Vec point) {
-    if (closing < config['star_break_speed']) return false;
+    if (closing < config['star_break_speed']) {
+      if (closing > 12 &&
+          _currentSoft.add(b.reward.id) &&
+          !_previousSoft.contains(b.reward.id)) {
+        contactSerial++;
+        contactStrength = (closing / maximumSpeed).clamp(0, 1);
+      }
+      return false;
+    }
     if (!bodies.remove(b)) return false;
     if (held == b) held = null;
     broken.add(b.reward.id);

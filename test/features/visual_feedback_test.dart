@@ -88,6 +88,7 @@ void main() {
       );
       final setting = find.byKey(const ValueKey('visual-feedback-setting'));
       expect(tester.widget<SwitchListTile>(setting).value, isFalse);
+      await tester.ensureVisible(setting);
       await tester.tap(setting);
       await tester.pump();
       expect(session.visualFeedback, isTrue);

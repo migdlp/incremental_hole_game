@@ -50,6 +50,21 @@ class ResultsSequence extends ChangeNotifier {
     return math.min(data.balance, amount);
   }
 
+  int get receivedCoins {
+    var total = 0;
+    for (var i = 0; i < data.stacks.length; i++) {
+      final stack = data.stacks[i];
+      var received = 0;
+      for (var j = 0; j < stack.visualCount; j++) {
+        if (rowAge(i) + 1e-9 >= flightStart(stack, j) + flightDuration) {
+          received = stack.countThrough(j);
+        }
+      }
+      total += received;
+    }
+    return total;
+  }
+
   double get walletPulse {
     if (phase != ResultsPhase.coins || data.stacks.isEmpty) return 0;
     final stack = data.stacks[row];

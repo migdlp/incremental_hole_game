@@ -1,6 +1,6 @@
+import 'package:incremental_hole_game/features/feedback/domain/feedback_controller.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_app.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
@@ -693,27 +693,19 @@ void main() {
     testWidgets(
       'bubble break batch respects sound=$sound and does not play for every star',
       (tester) async {
-        final calls = <MethodCall>[];
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          SystemChannels.platform,
-          (call) async {
-            calls.add(call);
-            return null;
-          },
-        );
-        addTearDown(
-          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-            SystemChannels.platform,
-            null,
-          ),
-        );
+        final backend = RecordingFeedbackBackend();
         final c = testCatalog();
         c.base['star_count'] = 3;
-        final s = GameSession(c, MemoryStore(), eventSeed: 42)..setSound(sound);
+        final s = GameSession(
+          c,
+          MemoryStore(),
+          eventSeed: 42,
+          feedback: FeedbackController(backend: backend),
+        )..setSound(sound);
         await complete(s);
         await tester.pumpWidget(GardenApp(session: s));
         await tester.pump();
-        calls.clear();
+        backend.played.clear();
         final system = s.board!.starBubbles!;
         system.bodies.clear();
         for (var i = 0; i < 3; i++) {
@@ -726,10 +718,10 @@ void main() {
           );
         }
         s.tick(1 / 60);
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
         expect(s.meta.stars, 3);
         expect(
-          calls.where((c) => c.method == 'SystemSound.play'),
+          backend.played.where((c) => c.sample == 'star'),
           hasLength(sound ? 1 : 0),
         );
         await tester.pumpWidget(const SizedBox.shrink());

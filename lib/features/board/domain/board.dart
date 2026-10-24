@@ -7,6 +7,7 @@ import 'two_point_grip.dart';
 import 'bat_impact.dart';
 import 'coin_denomination.dart';
 import 'capture_combo.dart';
+import '../../feedback/domain/absorption_effects.dart';
 import 'special_abilities.dart';
 import 'gravity_event.dart';
 import 'black_hole_event.dart';
@@ -68,7 +69,9 @@ class Board {
     int forcedBlackHoles = 0,
     Vec? launcherPosition,
     double? launcherAngle,
-  }) : specials = SpecialAbilities(settings),
+    AbsorptionEffects? absorption,
+  }) : absorption = absorption ?? AbsorptionEffects(),
+       specials = SpecialAbilities(settings),
        combo = CaptureCombo(
          enabled:
              combosEnabled ??
@@ -125,6 +128,30 @@ class Board {
 
   static const generator = Vec(180, 480);
   final DaySettings settings;
+  final AbsorptionEffects absorption;
+  int contactSerial = 0;
+  double contactStrength = 0;
+  final _audioWalls = <(int, int)>{};
+  final _audioPairs = <(int, int)>{};
+  final _audioBroom = <int>{}, _audioLauncher = <int>{};
+  void _soundContact(double speed) {
+    if (speed < absorption.config['impactThreshold']) return;
+    contactSerial++;
+    contactStrength = (speed / maximumSpeed).clamp(0, 1);
+  }
+
+  double get rollingActivity {
+    var energy = 0.0;
+    for (final ball in balls) {
+      if (!_heldBalls.containsKey(ball)) {
+        energy +=
+            ball.velocity.x * ball.velocity.x +
+            ball.velocity.y * ball.velocity.y;
+      }
+    }
+    return (1 - math.exp(-math.sqrt(energy) / 600)).clamp(0, 1);
+  }
+
   StarBubbles? starBubbles;
   Vec _broomVelocity = Vec.zero;
   double _broomRotation = 0;
@@ -165,18 +192,26 @@ class Board {
 
   void _bounceWalls(Ball ball) {
     final position = ball.position;
+    if (position.x > radius + .5) _audioWalls.remove((ball.id, 0));
+    if (position.x < width - radius - .5) _audioWalls.remove((ball.id, 1));
+    if (position.y > radius + .5) _audioWalls.remove((ball.id, 2));
+    if (position.y < height - radius - .5) _audioWalls.remove((ball.id, 3));
     var vx = ball.velocity.x, vy = ball.velocity.y;
     if (position.x <= radius && vx < 0) {
+      if (_audioWalls.add((ball.id, 0))) _soundContact(-vx);
       _wallImpact(WallSide.left, position.y, -vx);
       vx = -vx * wallRestitution;
     } else if (position.x >= width - radius && vx > 0) {
+      if (_audioWalls.add((ball.id, 1))) _soundContact(vx);
       _wallImpact(WallSide.right, position.y, vx);
       vx = -vx * wallRestitution;
     }
     if (position.y <= radius && vy < 0) {
+      if (_audioWalls.add((ball.id, 2))) _soundContact(-vy);
       _wallImpact(WallSide.top, position.x, -vy);
       vy = -vy * wallRestitution;
     } else if (position.y >= height - radius && vy > 0) {
+      if (_audioWalls.add((ball.id, 3))) _soundContact(vy);
       _wallImpact(WallSide.bottom, position.x, vy);
       vy = -vy * wallRestitution;
     }
@@ -698,6 +733,7 @@ class Board {
       }
     }
     if (coinOnly) return BoardEvents(0, collected);
+    absorption.advance(dt);
     starBubbles?.advanceVisuals(dt);
     if (producing) starBubbles?.populate(dt);
     combo.advance(dt);
@@ -727,6 +763,16 @@ class Board {
         _heldBalls.remove(ball);
         if (ball == _manualBall) _manualBall = null;
         _slippedBalls.remove(ball);
+        absorption.capture(
+          ball.id,
+          ball.position,
+          ball.velocity,
+          radius,
+          ball.golden,
+        );
+        for (var side = 0; side < 4; side++) {
+          _audioWalls.remove((ball.id, side));
+        }
         captures++;
         if (ball.golden) goldenCaptures++;
         final reward =
@@ -1053,6 +1099,7 @@ class Board {
 
   void _contactLauncher(double dt) {
     if (!launcher.unlocked) return;
+    final contacts = <int>{};
     var pressure = Vec.zero;
     for (final ball in balls) {
       if (_heldBalls.containsKey(ball)) continue;
@@ -1069,6 +1116,9 @@ class Board {
       );
       // Saturation models finite transmitted stress and guarantees <=3 impacts
       // cannot defeat static resistance, regardless of their incoming speed.
+      if (contacts.add(ball.id) && !_audioLauncher.contains(ball.id)) {
+        _soundContact(closing);
+      }
       final stress = math.min(
         settings['launcher_contact_pressure_limit'],
         contact.depth * settings['launcher_pressure_stiffness'] + closing,
@@ -1085,6 +1135,9 @@ class Board {
       }
       _bounceWalls(ball);
     }
+    _audioLauncher
+      ..clear()
+      ..addAll(contacts);
     launcher.applyPressure(pressure, dt, held: holdingLauncher);
   }
 
@@ -1142,6 +1195,7 @@ class Board {
   void _stepBubbles(double dt, Vec gravityImpulse) {
     final system = starBubbles;
     if (system == null) return;
+    system.beginAudioContacts();
     if (system.held != null && target != null) system.moveHeld(target!, dt);
     // Fixed physical cap bounds these loops; no per-frame reward queue growth.
     for (var i = system.bodies.length - 1; i >= 0; i--) {
@@ -1294,6 +1348,7 @@ class Board {
         }
       }
     }
+    system.endAudioContacts();
   }
 
   Vec _nextGripOffset() {
@@ -1318,6 +1373,7 @@ class Board {
   }
 
   void _contactBroom(Vec velocity, double rotation) {
+    final contacts = <int>{};
     for (final segment in segments) {
       for (final ball in balls) {
         if (_heldBalls.containsKey(ball)) continue;
@@ -1334,6 +1390,9 @@ class Board {
         final surface = (velocity + rotating.limit(80)).limit(maximumSpeed);
         final relative = surface - ball.velocity;
         final impulse = relative.x * normal.x + relative.y * normal.y;
+        if (contacts.add(ball.id) && !_audioBroom.contains(ball.id)) {
+          _soundContact(impulse);
+        }
         if (impulse > 0) {
           ball.velocity = (ball.velocity + normal * impulse).limit(
             maximumSpeed,
@@ -1341,6 +1400,9 @@ class Board {
         }
       }
     }
+    _audioBroom
+      ..clear()
+      ..addAll(contacts);
   }
 
   void _push(Vec point, double size, Vec velocity, double correction) {
@@ -1363,6 +1425,7 @@ class Board {
   }
 
   void _collide() {
+    final contacts = <(int, int)>{};
     const cell = 20.0;
     final grid = <(int, int), List<Ball>>{};
     for (final ball in balls) {
@@ -1382,7 +1445,15 @@ class Board {
             final difference = other.position - ball.position;
             final overlap = radius * 2 - difference.length;
             if (overlap <= 0) continue;
+            final pair = (ball.id, other.id);
+            contacts.add(pair);
             final n = difference.unit;
+            if (!_audioPairs.contains(pair)) {
+              _soundContact(
+                (ball.velocity.x - other.velocity.x) * n.x +
+                    (ball.velocity.y - other.velocity.y) * n.y,
+              );
+            }
             final heldA = _heldBalls.containsKey(ball),
                 heldB = _heldBalls.containsKey(other);
             if (heldA && heldB) continue;
@@ -1412,6 +1483,9 @@ class Board {
         }
       }
     }
+    _audioPairs
+      ..clear()
+      ..addAll(contacts);
   }
 
   Map<String, dynamic> toJson() => {

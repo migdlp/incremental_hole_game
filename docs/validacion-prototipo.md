@@ -1,5 +1,15 @@
 # Registro de validación
 
+## Integración de AJ-005B con AJ-007 — 24 de octubre de 2026
+
+Se conserva AJ-007 y su banco de audio offline (`46b623a`) al integrar las cuotas.
+Cada evento de cuota completada se entrega al controlador audiovisual central;
+la agrupación de audio no cambia la cantidad de crecimientos ni recompensas P01.
+Análisis sin avisos, suite completa de **398 pruebas** correcta y **19 pruebas**
+de feedback correctas, incluida la nueva regresión de cuota por bolas doradas y
+restauración sin repetir el aviso. Compilación web correcta con los recursos
+AJ-007. No se ha generado una APK de esta integración.
+
 ## AJ-005B — 24 de octubre de 2026
 
 Implementación sobre `build/apk-0.6.0+13`, base `7d5266f`. Entorno Linux cloud,

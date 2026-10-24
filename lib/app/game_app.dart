@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import '../features/board/presentation/garden_game.dart';
 import '../features/board/presentation/coin_icon.dart';
@@ -13,6 +12,7 @@ import '../features/results/domain/results_data.dart';
 import '../features/results/presentation/results_overlay.dart';
 import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
+import '../features/feedback/domain/feedback_controller.dart';
 import '../features/prestige/presentation/prestige_screen.dart';
 
 const ink = Color(0xff111c2e);
@@ -66,22 +66,50 @@ class SessionScreen extends StatefulWidget {
 }
 
 class _SessionScreenState extends State<SessionScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   final _resultsWalletAnchor = GlobalKey();
+  late final Ticker _feedbackTicker;
+  Duration? _feedbackStamp;
+  void _wakeFeedback() {
+    if (!mounted || _feedbackTicker.isActive) return;
+    _feedbackStamp = null;
+    _feedbackTicker.start();
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    unawaited(widget.session.feedback.prepare());
+    _feedbackTicker = createTicker((elapsed) {
+      final previous = _feedbackStamp;
+      _feedbackStamp = elapsed;
+      if (previous != null) {
+        widget.session.feedback.advance(
+          (elapsed - previous).inMicroseconds / 1e6,
+        );
+      }
+      if (!widget.session.feedback.needsFrames) _feedbackTicker.stop();
+    });
+    widget.session.feedback.onActivity = _wakeFeedback;
+    if (widget.session.feedback.needsFrames) _wakeFeedback();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (widget.session.feedback.onActivity == _wakeFeedback) {
+      widget.session.feedback.onActivity = null;
+    }
+    _feedbackTicker.dispose();
+    widget.session.feedback.reset();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _feedbackStamp = null;
+    if (state != AppLifecycleState.resumed) _feedbackTicker.stop();
     widget.session.setBackgrounded(state != AppLifecycleState.resumed);
   }
 
@@ -153,6 +181,12 @@ class _SessionScreenState extends State<SessionScreen>
                                     balance: widget.session.economy.balance,
                                   ),
                                   walletAnchor: _resultsWalletAnchor,
+                                  onCoinReceipt: (count) =>
+                                      widget.session.feedback.emit(
+                                        FeedbackEvent.coinIn,
+                                        count: count,
+                                        gameplay: false,
+                                      ),
                                   onShop: () => Navigator.of(context).push(
                                     MaterialPageRoute<void>(
                                       builder: (_) => SkillTreeScreen(
@@ -188,9 +222,7 @@ class _DayScreenState extends State<DayScreen> {
   int? pointer, secondPointer;
   final _walletKey = GlobalKey();
   final _prestigeKey = GlobalKey();
-  int _lastStars = 0;
   final _boardKey = GlobalKey();
-  int lastIncome = 0;
   void _frameTimings(List<FrameTiming> timings) {
     if (widget.session.running && !widget.session.paused) {
       for (final frame in timings) {
@@ -229,11 +261,9 @@ class _DayScreenState extends State<DayScreen> {
     }
   }
 
-  DateTime lastSound = DateTime(2000);
   @override
   void initState() {
     super.initState();
-    _lastStars = widget.session.meta.stars;
     widget.session.addListener(_changes);
     SchedulerBinding.instance.addTimingsCallback(_frameTimings);
   }
@@ -242,20 +272,6 @@ class _DayScreenState extends State<DayScreen> {
     if (!widget.session.running || widget.session.paused) {
       pointer = secondPointer = null;
     }
-    if (widget.session.economy.collected > lastIncome &&
-        widget.session.sound &&
-        DateTime.now().difference(lastSound).inMilliseconds > 150) {
-      unawaited(SystemSound.play(SystemSoundType.click));
-      lastSound = DateTime.now();
-    }
-    if (widget.session.meta.stars > _lastStars &&
-        widget.session.sound &&
-        DateTime.now().difference(lastSound).inMilliseconds > 150) {
-      unawaited(SystemSound.play(SystemSoundType.click));
-      lastSound = DateTime.now();
-    }
-    _lastStars = widget.session.meta.stars;
-    lastIncome = widget.session.economy.collected;
   }
 
   @override
@@ -565,9 +581,24 @@ class _SettingsOptions extends StatelessWidget {
     children: [
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: const Text('Sonidos del sistema'),
+        title: const Text('Sonido'),
         value: session.sound,
         onChanged: session.setSound,
+      ),
+      Row(
+        children: [
+          const Expanded(child: Text('Volumen de efectos')),
+          Text('${(session.effectsVolume * 100).round()} %'),
+        ],
+      ),
+      Slider(
+        key: const ValueKey('effects-volume'),
+        value: session.effectsVolume,
+        min: 0,
+        max: 1,
+        divisions: 100,
+        label: '${(session.effectsVolume * 100).round()} %',
+        onChanged: session.setEffectsVolume,
       ),
       SwitchListTile(
         key: const ValueKey('haptics-setting'),

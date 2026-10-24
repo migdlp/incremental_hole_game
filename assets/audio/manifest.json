@@ -1,0 +1,117 @@
+{
+  "plop0": {
+    "file": "assets/audio/sfx/plop0.wav",
+    "duration": 0.14,
+    "sha256": "ad3bb35a769ab80c3374578acb167124a89c60a200a11b87d04f9a001cb0c189"
+  },
+  "plop1": {
+    "file": "assets/audio/sfx/plop1.wav",
+    "duration": 0.14399092970521543,
+    "sha256": "58c3cb2b9e26d0997460349510458a3112722f6b39883f4faf4dd53ac3e45d17"
+  },
+  "plop2": {
+    "file": "assets/audio/sfx/plop2.wav",
+    "duration": 0.14798185941043085,
+    "sha256": "01f51a3a1ee33c1cf85b0e5aaeb7ecb75f2055712299e5b03b2bda5f792f4e78"
+  },
+  "plop3": {
+    "file": "assets/audio/sfx/plop3.wav",
+    "duration": 0.15201814058956917,
+    "sha256": "29292277a99fde39e694e0bcd03d2c85b56f072684c020c7634dd068db513170"
+  },
+  "plop4": {
+    "file": "assets/audio/sfx/plop4.wav",
+    "duration": 0.15600907029478459,
+    "sha256": "b20bad2cc9614e6e08e2beca81e5a4e8f145c9b15347e4fb86c35d120305875b"
+  },
+  "plop5": {
+    "file": "assets/audio/sfx/plop5.wav",
+    "duration": 0.16,
+    "sha256": "3c7d22fffa265f0e64eb7f37009b1424f2a06466bf0d7d13a50b1c68db9a215b"
+  },
+  "coin0": {
+    "file": "assets/audio/sfx/coin0.wav",
+    "duration": 0.19002267573696144,
+    "sha256": "268ca8d98ab28900e4e1368ac8ddd6f12f578d5c92826d305de9bc8afed4c871"
+  },
+  "coin1": {
+    "file": "assets/audio/sfx/coin1.wav",
+    "duration": 0.19002267573696144,
+    "sha256": "27feba7fe9b61c35a5ca1677cfb35544e131d4b73408a8e4b14866db96c484c2"
+  },
+  "coin2": {
+    "file": "assets/audio/sfx/coin2.wav",
+    "duration": 0.19002267573696144,
+    "sha256": "fc53a206d564669d9c002326f77931d89f953de81f349601e205b12fdd6832bb"
+  },
+  "coin3": {
+    "file": "assets/audio/sfx/coin3.wav",
+    "duration": 0.19002267573696144,
+    "sha256": "cca3550226bb2e244480fabcd7477997b360814baf0413d6c42940d55ac1bc90"
+  },
+  "coin4": {
+    "file": "assets/audio/sfx/coin4.wav",
+    "duration": 0.19002267573696144,
+    "sha256": "3d2d44f6414d6e07150ac70fd1394acb2ffe31321fc1fee0278726ceb3a447c7"
+  },
+  "coinout0": {
+    "file": "assets/audio/sfx/coinout0.wav",
+    "duration": 0.07501133786848073,
+    "sha256": "ff3f9cc594372ad76c1a3b344595004b1e5373f61b90d2ca76c95fb588302915"
+  },
+  "coinout1": {
+    "file": "assets/audio/sfx/coinout1.wav",
+    "duration": 0.07501133786848073,
+    "sha256": "8c2f9b17f96297cdb263c4b1e8e74ee4a0888fffb6e84730d34c7e40618775ba"
+  },
+  "impact0": {
+    "file": "assets/audio/sfx/impact0.wav",
+    "duration": 0.07501133786848073,
+    "sha256": "2242f10e87085722095ab8d7859718aea77070ffe1ba6a18fadaf14b65b8308b"
+  },
+  "impact1": {
+    "file": "assets/audio/sfx/impact1.wav",
+    "duration": 0.07501133786848073,
+    "sha256": "07cc0f87b1597ea6d6253a4eee4393c88889ea457e0898d22b925b1e994cb33c"
+  },
+  "impact2": {
+    "file": "assets/audio/sfx/impact2.wav",
+    "duration": 0.07501133786848073,
+    "sha256": "0f7c7a0a0b136e031063097df0749cafe810de7adf41fb56cf75222935f936f2"
+  },
+  "crystal": {
+    "file": "assets/audio/sfx/crystal.wav",
+    "duration": 0.10498866213151928,
+    "sha256": "35ec8d01bf2d89b27fc9e92972e33cb3d7f4872b3ae2e462e5839d13184ecfdf"
+  },
+  "star": {
+    "file": "assets/audio/sfx/star.wav",
+    "duration": 0.36,
+    "sha256": "c3fe66b70de3803541cce94a35919dbda454f925cca6672a4400843251eef343"
+  },
+  "upgrade": {
+    "file": "assets/audio/sfx/upgrade.wav",
+    "duration": 0.32,
+    "sha256": "07f99385548903f8a35010d9be83dd33d4224531d9d6d75213572923a05c18f2"
+  },
+  "quota": {
+    "file": "assets/audio/sfx/quota.wav",
+    "duration": 0.32,
+    "sha256": "726202f44fb9826b0ccd863a2d193eedcf5e577935b9fe5e68c5f20c3864c21f"
+  },
+  "special": {
+    "file": "assets/audio/sfx/special.wav",
+    "duration": 0.32,
+    "sha256": "9cc04019ebb71f44435c0e2b31a12f8d8eb3d64e68af3a599b7d0145406af89f"
+  },
+  "absorb": {
+    "file": "assets/audio/sfx/absorb.wav",
+    "duration": 1.0,
+    "sha256": "b7d7b5a16757b5a18da16e137322524dbe2e9aeb22ba2f9a7c391070e0769fa4"
+  },
+  "rolling": {
+    "file": "assets/audio/sfx/rolling.wav",
+    "duration": 0.988390022675737,
+    "sha256": "50c3ca50376737f54bb47201df2c6a3919ec1be12fc14f973e5a6d5cd021d020"
+  }
+}

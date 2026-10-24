@@ -1,6 +1,7 @@
 # AJ-005B — Cuotas infinitas por bolas capturadas
 
-Implementado sobre `build/apk-0.6.0+13` (base `7d5266f`). Sustituye las reglas
+Implementado sobre `build/apk-0.6.0+13` (base `7d5266f`) e integrado con
+AJ-007 y su banco de audio offline (`46b623a`). Sustituye las reglas
 monetarias y los vencimientos de S01/S03; conserva economía C01, estrellas P01
 y fórmula de área AJ-005A. No cambia duración, precios ni tienda de prestigio.
 
@@ -23,8 +24,8 @@ por cuota. No hay máximo de cuotas definido ni relación con el día global.
 
 La sesión aplica el crecimiento y entrega cada evento a `StarLedger.award` en
 el mismo paso. Cada cuota genera su recompensa P01 una sola vez; se conservan
-las identidades y la política existente de cobro de burbujas. No se espera al
-cierre de jornada ni se abre una pantalla al cumplir cuotas.
+las identidades y la política existente de cobro de burbujas. AJ-007 recibe un evento audiovisual por cuota, respetando su agrupación de
+sonido. No se espera al cierre de jornada ni se abre una pantalla al cumplir cuotas.
 
 HUD, anillo, Tienda y resultados muestran inmediatamente la cuota activa,
 progreso y bolas restantes. La animación de resultados puede animar el recuento

@@ -20,7 +20,7 @@ ResultsData data({
   int before = 10,
   int target = 50,
 }) {
-  final f = FeedingProgress(startDay: 1, target: target, quotaStep: 10);
+  final f = FeedingProgress(startDay: 1, target: target);
   f.credit(1, normal: before, instant: 0);
   f.finishDay(1);
   f.beginDay(2);
@@ -207,7 +207,7 @@ void main() {
       await tester.tap(find.text('Resultados del día'));
       await tester.pump();
       expect(find.byKey(const ValueKey('results-shop')), findsOneWidget);
-      expect(find.text('Cuota completada'), findsOneWidget);
+      expect(find.text('CUOTA 1'), findsOneWidget);
       expect(s.economy.balance, 1661);
       expect(s.snapshot(), saved);
       await tester.tap(find.text('Tienda'));
@@ -266,33 +266,13 @@ void main() {
   });
 
   test(
-    'feeding starts from prior points; next target only at period end, no clamping of actual food',
+    'feeding result always shows the immediately active quota after carryover',
     () {
       final d = data(food: 11063, before: 10);
-      expect(d.foodBefore, 10);
-      expect(d.foodAfter, 11063);
-      expect(d.nextTarget, isNull);
-      final f = FeedingProgress(startDay: 1, target: 50, quotaStep: 10);
-      for (var day = 1; day <= 5; day++) {
-        f.beginDay(day);
-        f.credit(day, normal: 20, instant: 0);
-        f.finishDay(day);
-      }
-      final end = ResultsData(
-        result: const DayResult(
-          day: 5,
-          income: 0,
-          generated: 0,
-          captured: 0,
-          previousIncome: null,
-        ),
-        feeding: f,
-        balance: 0,
-      );
-      expect(end.nextTarget, 60);
-      expect(end.daysRemaining, 0);
-      expect(end.foodAfter, 100);
-      expect(end.foodBefore, 80);
+      expect(d.foodBefore, BigInt.zero);
+      expect(d.foodAfter, BigInt.from(5513));
+      expect(d.target, BigInt.from(50000));
+      expect(d.quotaLevel, 4);
     },
   );
 

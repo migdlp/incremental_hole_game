@@ -21,17 +21,19 @@ class ResultsData {
   }) : income = result.income,
        captured = result.captured,
        foodAfter = feeding.points,
-       foodBefore = feeding.points - feeding.runNormal - feeding.runInstant,
+       foodBefore = feeding.points >= feeding.runBalls
+           ? feeding.points - feeding.runBalls
+           : BigInt.zero,
+       quotaLevel = feeding.period,
        target = feeding.target,
-       daysRemaining = feeding.remainingDays,
-       nextTarget = feeding.due && feeding.met ? feeding.nextTarget : null,
        stacks = _stacks(result) {
     if (stacks.fold<int>(0, (sum, s) => sum + s.amount) != income) {
       throw ArgumentError('Desglose distinto del ingreso real');
     }
   }
-  final int income, balance, captured, foodBefore, foodAfter, daysRemaining;
-  final int? target, nextTarget;
+  final int income, balance, captured, quotaLevel;
+  final BigInt foodBefore, foodAfter;
+  final BigInt? target;
   final List<ResultStack> stacks;
   // A reopened historical result may follow spending in the shop.
   int get startingBalance => balance < income ? balance : balance - income;

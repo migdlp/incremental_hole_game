@@ -78,6 +78,13 @@ void main() {
       s.tick(1 / 60);
       expect(s.economy.generated, 10);
       expect(s.board!.captured, 1);
+      // P01 now requires 100 actual balls, independent of the golden payout.
+      for (var i = 0; i < 99; i++) {
+        s.board!.balls.add(
+          Ball(s.board!.nextId++, s.board!.holePosition, Vec.zero),
+        );
+      }
+      s.tick(1 / 60);
       expect(
         s.board!.starBubbles!.bodies.single.position.toJson(),
         s.board!.holePosition.toJson(),

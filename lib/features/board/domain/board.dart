@@ -111,10 +111,17 @@ class Board {
     if (growths < 0) throw ArgumentError('Crecimiento negativo');
     if (growths == _holeGrowths) return;
     // Area grows by 16%, so the radius grows by sqrt(1.16).
-    final grown = settings['hole_capture_radius'] * math.pow(1.16, growths / 2);
-    if (!grown.isFinite) {
-      throw const FormatException('Tamaño del agujero no representable');
-    }
+    // Beyond full board coverage, larger radii have identical capture behavior.
+    // Bound only the physical projection; the persistent growth count is unlimited.
+    final coverage = math.sqrt(
+      math.pow(math.max(holePosition.x, width - holePosition.x), 2) +
+          math.pow(math.max(holePosition.y, height - holePosition.y), 2),
+    );
+    final base = settings['hole_capture_radius'];
+    final logRadius = math.log(base) + growths * math.log(1.16) / 2;
+    final grown = logRadius >= math.log(coverage)
+        ? coverage
+        : base * math.pow(1.16, growths / 2);
     _holeGrowths = growths;
     _grownCaptureRadius = grown;
   }

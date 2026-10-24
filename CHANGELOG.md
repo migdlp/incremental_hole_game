@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## AJ-005B — Cuotas infinitas por bolas capturadas
+
+- Cada bola aporta una unidad, independientemente de dinero, dorada o racha.
+- Cuotas 100/1.000/10.000… inmediatas, con excedentes y eventos P01 por cuota.
+- Sin vencimientos, bloqueo DEBUG ni derrota por cuotas; prestigio voluntario conservado.
+- Crecimiento de área del 16 % por cuota, persistente y sin duplicados.
+- HUD, Tienda y resultados en bolas, sin jornadas restantes.
+- JSON v14 con BigInt decimales y migración segura: conserva cuotas y crecimientos,
+  sin convertir progreso monetario antiguo en bolas.
+- Proyección del agujero acotada al cubrir todo el tablero, sin limitar cuotas.
+
 ## 0.19.0+30
 
 - AJ-007: mezcla centralizada offline, seis plops, capas suaves y cascadas musicales.

@@ -411,6 +411,24 @@ class _DayScreenState extends State<DayScreen> {
                       child: GameWidget(game: game),
                     ),
                   ),
+                  if (session.running)
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      right: 8,
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: const Color(0xdd111c2e),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: FeedingSummary(
+                            session: session,
+                            compact: true,
+                          ),
+                        ),
+                      ),
+                    ),
                   Positioned(
                     top: 6,
                     left: 6,

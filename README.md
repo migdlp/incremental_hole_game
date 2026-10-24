@@ -1,5 +1,9 @@
 # Feed the Hole
 
+> **AJ-005B:** [cuotas infinitas por bolas capturadas](docs/aj-005b-cuotas-infinitas.md), sin vencimiento ni
+> derrota por cuotas, con excedentes, crecimiento AJ-005A y eventos P01. JSON v14.
+> Esta actualización prevalece sobre las reglas históricas de alimentación.
+
 ## AJ-007 · Feedback audiovisual (0.19.0+30)
 
 Audio offline centralizado con plops variables, absorción y rodadura compartidas,

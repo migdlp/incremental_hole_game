@@ -1,5 +1,12 @@
 # Economía y monedas
 
+> **AJ-005B vigente:** la alimentación cuenta exclusivamente bolas capturadas;
+> la recompensa monetaria sigue siendo independiente. Cuotas 100/1.000/10.000…
+> sin vencimiento, con excedentes y sin derrota.
+> [Reglas, crecimiento y migración](aj-005b-cuotas-infinitas.md). Las menciones
+> históricas inferiores a alimentación por dinero o derrota quedan sustituidas.
+
+
 ## C01 · Cobro automático vigente (0.13.0+21)
 
 Cada captura calcula una única recompensa completa (Valor, dorada y racha),

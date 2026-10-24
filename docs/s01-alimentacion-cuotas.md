@@ -1,5 +1,10 @@
 # S01 — Sistema de alimentación y cuotas
 
+> **Sustituido por [AJ-005B](aj-005b-cuotas-infinitas.md):** cada bola aporta una
+> unidad; cuotas 100 × 10^(n−1), excedentes e inicio inmediato de la siguiente.
+> No existen vencimientos ni derrota por cuotas. Lo siguiente documenta S01
+> histórico y no define las reglas vigentes.
+
 **S03 sustituye la previsualización sin derrota:** el usuario autorizó perder
 la partida al incumplir las cuotas provisionales actuales, también en normal.
 [Prestigio y migración](s03-prestigio-metaprogresion.md).

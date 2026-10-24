@@ -1,5 +1,14 @@
 # Referencia de guardado y recuperación
 
+## Vigente — AJ-005B · JSON v14
+
+La alimentación usa BigInt serializados como cadenas decimales, cuotas inmediatas
+100 × 10^(n−1), crecimiento persistente y ninguna fecha de vencimiento. El balance
+y la economía conservan su formato anterior. Se admiten v1–v13 con migración
+segura de cuotas y crecimientos, sin convertir importes monetarios en bolas.
+[Contrato completo, campos y limitación del progreso parcial](aj-005b-cuotas-infinitas.md#guardado-y-migración).
+Las referencias inferiores a otros esquemas describen entregas históricas.
+
 ## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
 
 Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
@@ -7,7 +16,7 @@ conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con
 cara/canto/grabado y contador sin fondo. Hoyo en (180,414.4), aproximadamente al 75 % del tablero,
 con origen compartido por captura, succión, monedas y estrellas.
 
-JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
+JSON v12 / balance v20 con v17 congelado para jornadas ya empezadas. Su siguiente
 jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
 rápidas automáticas: no se compensan cambiando otras mecánicas.
 **AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no

@@ -34,7 +34,7 @@ void main() {
     () async {
       final s = start();
       final base = s.board!.captureRadius;
-      capture(s, 9);
+      capture(s, 99);
       expect(s.board!.captureRadius, base);
       capture(s, 1);
       expect(s.feeding.growths, 1);
@@ -45,7 +45,7 @@ void main() {
       await nextPeriod(s);
       expect(s.feeding.period, 2);
       expect(s.board!.captureRadius / base, closeTo(math.sqrt(1.16), 1e-12));
-      capture(s, s.feeding.target!);
+      capture(s, s.feeding.remaining!.toInt());
       expect(s.feeding.growths, 2);
       expect(s.board!.captureRadius / base, closeTo(1.16, 1e-12));
       expect(
@@ -59,7 +59,7 @@ void main() {
   test('new capture zone catches a ball outside the original radius', () {
     final s = start();
     final base = s.board!.captureRadius;
-    capture(s, 10);
+    capture(s, 100);
     final b = s.board!;
     final before = b.captured;
     final distance = (base + b.captureRadius) / 2;
@@ -73,7 +73,7 @@ void main() {
     );
     s.tick(1 / 60);
     expect(b.captured, before + 1);
-    expect(s.economy.generated, 20);
+    expect(s.economy.generated, 110);
     expect(s.feeding.growths, 1);
     s.dispose();
   });
@@ -83,7 +83,7 @@ void main() {
     () async {
       final store = MemoryStore();
       final s = start(store);
-      capture(s, 10);
+      capture(s, 100);
       await s.pendingWrites;
       final saved = store.candidates.first;
       final restored = GameSession(catalog, store);
@@ -106,37 +106,13 @@ void main() {
     },
   );
 
-  test(
-    'old saves keep all progress and do not regrant already completed quotas',
-    () async {
-      final s = start();
-      capture(s, 10);
-      final old = jsonDecode(s.snapshot()) as Map<String, dynamic>;
-      old['version'] = 12;
-      old['feeding'].remove('growths');
-      old['feeding'].remove('growthPeriod');
-      final restored = GameSession(catalog, MemoryStore())
-        ..restore(jsonEncode(old));
-      expect(restored.feeding.points, 10);
-      expect(restored.feeding.growths, 0);
-      expect(restored.board!.captureRadius, 22);
-      restored.resume();
-      restored.tick(.1);
-      expect(restored.feeding.growths, 0);
-      await nextPeriod(restored);
-      capture(restored, restored.feeding.target!);
-      expect(restored.feeding.growths, 1);
-      s.dispose();
-      restored.dispose();
-    },
-  );
-
-  test('unrepresentable growth cannot corrupt an existing board', () {
-    final board = Board(catalog.settings({}))..syncHoleGrowth(1);
-    final before = board.captureRadius;
-    expect(() => board.syncHoleGrowth(100000), throwsFormatException);
-    expect(board.captureRadius, before);
-    expect(board.holeGrowths, 1);
+  test('extreme growth covers the physical board without overflow', () {
+    final board = Board(catalog.settings({}))..syncHoleGrowth(100000);
+    expect(board.captureRadius.isFinite, isTrue);
+    expect(board.holeGrowths, 100000);
+    board.balls.add(Ball(1, const Vec(350, 550), Vec.zero));
+    board.update(1 / 60, producing: true);
+    expect(board.captured, 1);
   });
 
   test('fast balls use the enlarged swept capture zone', () {
@@ -152,7 +128,7 @@ void main() {
 
   test('invalid growth records reject restoration atomically', () {
     final s = start();
-    capture(s, 10);
+    capture(s, 100);
     final original = s.snapshot();
     for (final mutate in <void Function(Map<String, dynamic>)>[
       (j) => j['feeding']['growths'] = -1,
@@ -173,7 +149,7 @@ void main() {
     final baseline = s.snapshot();
     s.enterDebug();
     s.startDay();
-    capture(s, 10);
+    capture(s, 100);
     expect(s.feeding.growths, 1);
     s.finishDay();
     s.debugBuyAll();
@@ -189,7 +165,7 @@ void main() {
 
   test('visible dark hole and real capture radius grow together', () async {
     final s = start();
-    capture(s, 10);
+    capture(s, 100);
     final game = GardenGame(s)..onGameResize(Vector2(360, 560));
     final recorder = ui.PictureRecorder();
     game.render(ui.Canvas(recorder));

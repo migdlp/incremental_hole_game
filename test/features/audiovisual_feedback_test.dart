@@ -205,6 +205,36 @@ void main() {
       restored.dispose();
     },
   );
+  test('AJ-005B quota feedback counts balls and never replays on restore', () {
+    final backend = RecordingFeedbackBackend();
+    final fx = FeedbackController(backend: backend);
+    final s = GameSession(
+      testCatalog(automaticSpawns: false),
+      MemoryStore(),
+      feedback: fx,
+    )..startDay();
+    void capture(int count, {bool golden = false}) {
+      final b = s.board!;
+      for (var i = 0; i < count; i++) {
+        b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero, golden: golden));
+      }
+      s.tick(1 / 60);
+      fx.advance(.2);
+    }
+
+    capture(99, golden: true);
+    expect(backend.played.where((c) => c.sample == 'quota'), isEmpty);
+    capture(1);
+    expect(s.feeding.period, 2);
+    expect(backend.played.where((c) => c.sample == 'quota'), hasLength(1));
+    s.restore(s.snapshot());
+    s.resume();
+    s.tick(.1);
+    fx.advance(.2);
+    expect(backend.played.where((c) => c.sample == 'quota'), hasLength(1));
+    s.dispose();
+  });
+
   test(
     'contact audio ignores persistent resting contacts and physics remains bounded',
     () {

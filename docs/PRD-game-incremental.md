@@ -1,5 +1,12 @@
 # PRD — Feed the Hole
 
+> **AJ-005B vigente:** la alimentación cuenta exclusivamente bolas capturadas;
+> la recompensa monetaria sigue siendo independiente. Cuotas 100/1.000/10.000…
+> sin vencimiento, con excedentes y sin derrota.
+> [Reglas, crecimiento y migración](aj-005b-cuotas-infinitas.md). Las menciones
+> históricas inferiores a alimentación por dinero o derrota quedan sustituidas.
+
+
 ## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
 
 Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6

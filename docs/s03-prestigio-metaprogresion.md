@@ -1,5 +1,19 @@
 # S03 — Prestigio y metaprogresión
 
+## Actualización vigente — AJ-005B
+
+[Cuotas por bolas](aj-005b-cuotas-infinitas.md) elimina la derrota por
+incumplimiento: ninguna jornada ni cuota termina la partida. Se puede continuar
+indefinidamente. No hay causas nuevas de muerte ni prestigio automático. El nodo
+voluntario conserva compra, confirmación y reinicio de S03; la tienda no cambia.
+El reinicio limpia nivel/progreso de cuota y crecimientos, sin emitir eventos.
+
+El flujo asociado a derrota queda pendiente de rediseño. Los estados antiguos
+se conservan para restaurar partidas ya terminadas y proteger sus checkpoints.
+La opción DEBUG de provocar derrota por cuotas se retira. Las secciones
+siguientes describen la entrega histórica de S03 y sus mecanismos de
+persistencia, no autorizan volver a activar vencimientos.
+
 Estado: infraestructura implementada en 0.14.0+22. Integración final de recompensas,
 catálogo, efectos permanentes y balance pendiente de P01, P02 y BAL01.
 

@@ -1,5 +1,12 @@
 # P01 — Estrellas de prestigio y burbujas físicas
 
+> **AJ-005B vigente:** las cuotas cuentan bolas, independientemente de recompensa
+> monetaria, doradas o racha. Cada cuota completada emite su evento inmediatamente;
+> varias cuotas simultáneas conceden varias recompensas únicas y no dependen del
+> quinto día. Se conserva la física, identidad y cobro P01. Ya no hay derrota por
+> cuotas. [Reglas y migración actuales](aj-005b-cuotas-infinitas.md). Las menciones
+> a períodos y alimentación monetaria inferiores son históricas.
+
 Prototipo **0.15.0+23**. Requisitos funcionales implementados; BAL01 y validación
 física en Android pendientes. P02 sigue siendo otra tarea: no se inventa un
 catálogo de compras permanentes.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/game_session.dart';
+import '../domain/feeding_progress.dart';
 
 class FeedingSummary extends StatelessWidget {
   const FeedingSummary({
@@ -12,17 +13,6 @@ class FeedingSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final feed = session.feeding;
-    final title = feed.missed
-        ? 'Cuota no alcanzada'
-        : feed.met
-        ? 'Cuota completada'
-        : 'Alimenta al agujero';
-    final amount = feed.target == null
-        ? '${feed.points}'
-        : '${feed.points} / ${feed.target}';
-    final remaining = feed.remainingDays == 1
-        ? '1 jornada restante'
-        : '${feed.remainingDays} jornadas restantes';
     return Semantics(
       key: ValueKey(compact ? 'feeding-store-summary' : 'feeding-summary'),
       container: true,
@@ -35,26 +25,18 @@ class FeedingSummary extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '$title · $amount',
+              'CUOTA ${feed.period}',
               style: TextStyle(
                 fontSize: compact ? 13 : 18,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xff8dd4b2),
               ),
             ),
-            Text(remaining, style: TextStyle(fontSize: compact ? 12 : 14)),
-            if (!compact &&
-                feed.due &&
-                feed.target != null &&
-                !session.debugFeedingFailed)
-              Text('Próximo objetivo: ${feed.nextTarget}'),
-            if (!compact && session.debugFeedingFailed) ...[
-              const Text('Fin de la prueba de cuota.'),
-              TextButton(
-                onPressed: session.debugRestartFeedingPeriod,
-                child: const Text('Reiniciar período de prueba'),
-              ),
-            ],
+            Text(
+              '${ballNumber(feed.points)}${feed.target == null ? '' : ' / ${ballNumber(feed.target!)}'} bolas',
+            ),
+            if (feed.remaining != null)
+              Text('Faltan ${ballNumber(feed.remaining!)}.'),
           ],
         ),
       ),

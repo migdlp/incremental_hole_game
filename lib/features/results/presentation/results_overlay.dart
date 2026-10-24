@@ -1,3 +1,4 @@
+import '../../feeding/domain/feeding_progress.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -264,10 +265,10 @@ class _ResultsOverlayState extends State<ResultsOverlay>
   Widget _holeCard() {
     final d = widget.data,
         p = Curves.easeInOut.transform(sequence.holeProgress);
-    final food = d.foodBefore + ((d.foodAfter - d.foodBefore) * p).floor();
+    final food = d.foodAfter;
     final target = d.target;
     final met = target != null && food >= target;
-    final fraction = target == null ? 0.0 : (food / target).clamp(0.0, 1.0);
+    final fraction = target == null ? 0.0 : ratio(food, target);
     final appeared = sequence.done ? 1.0 : (sequence.age / .2).clamp(0.0, 1.0);
     return Opacity(
       opacity: appeared,
@@ -343,8 +344,8 @@ class _ResultsOverlayState extends State<ResultsOverlay>
                               ],
                             )
                           else
-                            const Text(
-                              'Cuota en curso',
+                            Text(
+                              'CUOTA ${d.quotaLevel}',
                               style: TextStyle(
                                 color: _mint,
                                 fontWeight: FontWeight.w700,
@@ -353,20 +354,16 @@ class _ResultsOverlayState extends State<ResultsOverlay>
                           const SizedBox(height: 8),
                           Text(
                             target == null
-                                ? 'Alimentación: ${resultNumber(food)}'
-                                : 'Cuota actual: ${resultNumber(food)} / ${resultNumber(target)}',
+                                ? 'Alimentación: ${ballNumber(food)}'
+                                : '${ballNumber(food)} / ${ballNumber(target)} bolas',
                             key: const ValueKey('results-food'),
                             style: const TextStyle(fontSize: 13),
                           ),
                           if (target != null)
                             Text(
-                              'Restante: ${resultNumber(math.max(0, target - food))}',
+                              'Restante: ${ballNumber(target - food)}',
                               style: const TextStyle(fontSize: 13),
                             ),
-                          Text(
-                            'Jornadas restantes: ${d.daysRemaining}',
-                            style: const TextStyle(fontSize: 13),
-                          ),
                         ],
                       ),
                     ),
@@ -374,17 +371,6 @@ class _ResultsOverlayState extends State<ResultsOverlay>
                 );
               },
             ),
-            if (sequence.done && d.nextTarget != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(
-                  'Próximo objetivo: ${resultNumber(d.nextTarget!)}',
-                  style: const TextStyle(
-                    color: _mint,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

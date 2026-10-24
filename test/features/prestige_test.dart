@@ -7,8 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:incremental_hole_game/persistence/store_web.dart';
 import 'package:incremental_hole_game/app/game_app.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
-import 'package:incremental_hole_game/core/vec.dart';
-import 'package:incremental_hole_game/features/board/domain/board.dart';
 import 'package:incremental_hole_game/features/prestige/domain/meta_progress.dart';
 import 'package:incremental_hole_game/features/upgrades/domain/skill_tree.dart';
 import 'package:incremental_hole_game/persistence/store_native.dart';
@@ -43,10 +41,12 @@ void main() {
   GameSession session({MemoryStore? store}) =>
       GameSession(catalog, store ?? MemoryStore(), eventSeed: 42);
   Future<void> lose(GameSession s) async {
-    for (var i = 0; i < 5; i++) {
-      s.startDay();
-      s.finishDay();
-    }
+    // A terminal state created by the historical S03 rules remains loadable.
+    // Current gameplay has no quota defeat trigger.
+    final blank = jsonDecode(session().snapshot()) as Map<String, dynamic>;
+    blank['meta'] = s.meta.end(voluntary: false).toJson();
+    s.restore(jsonEncode(blank));
+    await s.save();
     await s.pendingWrites;
   }
 
@@ -66,67 +66,24 @@ void main() {
     s.restore(jsonEncode(j));
   }
 
-  test(
-    'normal fifth missed quota defeats without awarding stars and clears only run data',
-    () async {
-      final s = session();
-      seedPermanent(s);
-      s.economy.balance = 900;
-      s.levels['hand'] = 1;
-      for (var i = 0; i < 4; i++) {
-        s.startDay();
-        s.finishDay();
-        expect(s.canPlayRun, isTrue);
-      }
+  test('empty days never defeat or erase run progress', () async {
+    final s = session();
+    seedPermanent(s);
+    s.economy.balance = 900;
+    s.levels['hand'] = 1;
+    for (var i = 0; i < 30; i++) {
       s.startDay();
       s.finishDay();
-      expect(s.meta.phase, PrestigePhase.defeat);
-      expect(s.progress.last, isNull);
-      expect(s.progress.day, 1);
-      expect(s.economy.balance, 0);
-      expect(s.levels, isEmpty);
-      expect(s.meta.stars, 37);
-      expect(s.meta.upgrades, {'future-p02-record': 2});
-      expect(s.meta.pendingStarObjects, isEmpty);
-      expect(s.meta.discoveries, ['future-secret']);
-      expect(s.meta.extensions, {
-        'future': {'persistent': true},
-      });
-      expect(s.meta.firstDefeatSeen, isTrue);
-      s.startDay();
-      expect(s.running, isFalse);
-      await s.pendingWrites;
-      expect(s.prestigeReady, isTrue);
-      s.dispose();
-    },
-  );
-  test(
-    'complete quota early and continue the five-day period without auto-crediting stars',
-    () async {
-      final s = session();
-      s.startDay();
-      s.board!.balls.add(
-        Ball(s.board!.nextId++, Board.hole, Vec.zero, golden: true),
-      );
-      s.tick(1 / 60);
-      await s.pendingWrites;
-      s.finishDay();
-      for (var i = 0; i < 4; i++) {
-        s.startDay();
-        s.finishDay();
-      }
-      expect(s.canPlayRun, isTrue);
-      expect(s.meta.stars, 0);
-      expect(s.feeding.met, isTrue);
-      s.startDay();
-      expect(s.feeding.target, 20);
-      expect(s.feeding.points, 0);
-      expect(s.meta.runId, 1);
-      s.finishDay();
-      await s.pendingWrites;
-      s.dispose();
-    },
-  );
+    }
+    expect(s.canPlayRun, isTrue);
+    expect(s.progress.day, 31);
+    expect(s.economy.balance, 900);
+    expect(s.levels['hand'], 1);
+    expect(s.meta.firstDefeatSeen, isFalse);
+    expect(s.feeding.target, BigInt.from(100));
+    await s.pendingWrites;
+    s.dispose();
+  });
   test(
     'defeat to shop to new run is idempotent and preserves permanent state every time',
     () async {
@@ -149,7 +106,7 @@ void main() {
       expect(s.meta.upgrades.length, 1);
       expect(s.meta.pendingStarObjects, isEmpty);
       expect(s.progress.day, 1);
-      expect(s.feeding.points, 0);
+      expect(s.feeding.points, BigInt.zero);
       s.startDay();
       expect(s.board!.balls, isEmpty);
       expect(s.board!.segments, isEmpty);
@@ -221,7 +178,6 @@ void main() {
       final baseline = s.snapshot();
       s.enterDebug();
       await s.pendingWrites;
-      s.debugSetPrestigeRules(true);
       await lose(s);
       expect(s.meta.phase, PrestigePhase.defeat);
       expect(s.continueToPrestigeShop(), isTrue);
@@ -327,10 +283,7 @@ void main() {
       s.finishDay();
       await s.pendingWrites;
       store.failMain = true;
-      for (var i = 0; i < 4; i++) {
-        s.startDay();
-        s.finishDay();
-      }
+      await lose(s);
       await s.pendingWrites;
       expect(s.saveError, isNotNull);
       expect(store.prestigeCandidates, isNotEmpty);
@@ -384,13 +337,23 @@ void main() {
       data.remove('meta');
       data['day'] = 6;
       data['balance'] = 456;
-      data['feeding']['completedDays'] = 5;
+      data['feeding'] = {
+        'startDay': 1,
+        'period': 1,
+        'completedDays': 5,
+        'normal': 0,
+        'instant': 0,
+        'runNormal': 0,
+        'runInstant': 0,
+        'target': 10,
+        'quotaStep': 10,
+      };
       s.restore(jsonEncode(data));
       expect(s.canPlayRun, isTrue);
       expect(s.economy.balance, 456);
       expect(s.meta.stars, 0);
       s.startDay();
-      expect(s.feeding.period, 2);
+      expect(s.feeding.period, 1);
       s.finishDay();
       await s.pendingWrites;
       s.dispose();
@@ -450,10 +413,10 @@ void main() {
       final store = BlockedMetaStore();
       // Use the same blocked store that the session owns.
       final real = session(store: store);
-      for (var i = 0; i < 5; i++) {
-        real.startDay();
-        real.finishDay();
-      }
+      final blank = jsonDecode(session().snapshot()) as Map<String, dynamic>;
+      blank['meta'] = real.meta.end(voluntary: false).toJson();
+      real.restore(jsonEncode(blank));
+      real.save();
       await tester.pumpWidget(GardenApp(session: real));
       await tester.pump();
       final button = tester.widget<FilledButton>(
@@ -553,34 +516,30 @@ void main() {
       },
     );
   }
-  testWidgets(
-    'DEBUG simulated defeat closes both tools modal and tree to reveal defeat',
-    (tester) async {
-      final store = MemoryStore();
-      final s = session(store: store)..enterDebug();
-      await s.pendingWrites;
-      await tester.pumpWidget(GardenApp(session: s));
-      await tester.pump();
-      await tester.tap(find.text('Tienda'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('tree-debug-tools')));
-      await tester.pumpAndSettle();
-      s.debugSetPrestigeRules(true);
-      for (var i = 0; i < 5; i++) {
-        s.debugSimulateEmptyDay();
-      }
-      await tester.pumpAndSettle();
-      expect(find.text('DERROTA'), findsOneWidget);
-      expect(find.byKey(const ValueKey('skill-tree-viewer')), findsNothing);
-      expect(store.prestigeCandidates, isEmpty);
-      await tester.tap(find.byKey(const ValueKey('session-debug-exit')));
-      await tester.pumpAndSettle();
-      expect(s.canPlayRun, isTrue);
-      expect(s.meta.revision, 0);
-      await tester.pumpWidget(const SizedBox());
-      s.dispose();
-    },
-  );
+  testWidgets('DEBUG empty days do not trigger a defeat', (tester) async {
+    final store = MemoryStore();
+    final s = session(store: store)..enterDebug();
+    await s.pendingWrites;
+    await tester.pumpWidget(GardenApp(session: s));
+    await tester.pump();
+    await tester.tap(find.text('Tienda'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tree-debug-tools')));
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 5; i++) {
+      s.debugSimulateEmptyDay();
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('DERROTA'), findsNothing);
+    expect(find.byKey(const ValueKey('skill-tree-viewer')), findsOneWidget);
+    expect(store.prestigeCandidates, isEmpty);
+    await tester.tap(find.byKey(const ValueKey('debug-exit')));
+    await tester.pumpAndSettle();
+    expect(s.canPlayRun, isTrue);
+    expect(s.meta.revision, 0);
+    await tester.pumpWidget(const SizedBox());
+    s.dispose();
+  });
   test(
     'shop checkpoint restores between defeat and new run with all permanent data',
     () async {

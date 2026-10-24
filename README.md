@@ -1,5 +1,10 @@
 # Feed the Hole
 
+> **AJ-005B:** [cuotas infinitas por bolas capturadas](docs/aj-005b-cuotas-infinitas.md), sin vencimiento ni
+> derrota por cuotas, con excedentes, crecimiento AJ-005A y eventos P01. JSON v14.
+> Esta actualización prevalece sobre las reglas históricas de alimentación.
+
+
 ## BUG-001 · Lluvia de monedas (0.18.1+29)
 
 Microlotes de 200 ms, siete monedas para 34, expansión exacta y variada para

@@ -46,7 +46,7 @@ void main() {
       expect(s.economy.generated, 1);
       expect(s.economy.collected, 0);
       expect(s.rewards.outstanding, 1);
-      expect(s.feeding.points, 1);
+      expect(s.feeding.points, BigInt.one);
       expect(s.board!.coins, isEmpty);
       tick(s, .8);
       expect(s.economy.collected, 0);
@@ -183,6 +183,7 @@ void main() {
       j['version'] = 8;
       j['balance'] = 100;
       j['levels'] = oldLevels;
+      j['feeding'] = legacyFeeding();
       j['feeding']['completedDays'] = 0;
       j['feeding']['normal'] = 1;
       j['feeding']['runNormal'] = 1;
@@ -314,7 +315,7 @@ void main() {
       final restored = GameSession(catalog, MemoryStore())
         ..restore(store.writes.last);
       expect(restored.economy.collected, 100);
-      expect(restored.feeding.points, 100);
+      expect(restored.feeding.points, BigInt.zero);
       s.dispose();
       restored.dispose();
     },

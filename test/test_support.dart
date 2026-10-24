@@ -43,3 +43,17 @@ class MemoryStore implements SaveStore, PrestigeStore {
     candidates = [contents, if (previous != null) previous];
   }
 }
+
+// Historical monetary feeding fixture; changing only the outer save version is
+// insufficient now that AJ-005B writes decimal BigInt ball counters.
+Map<String, dynamic> legacyFeeding({int normal = 0, int instant = 0}) => {
+  'startDay': 1,
+  'period': 1,
+  'completedDays': 0,
+  'normal': normal,
+  'instant': instant,
+  'runNormal': normal,
+  'runInstant': instant,
+  'target': 10,
+  'quotaStep': 10,
+};

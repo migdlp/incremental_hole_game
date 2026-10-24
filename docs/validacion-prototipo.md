@@ -1,5 +1,24 @@
 # Registro de validación
 
+## AJ-005B — 24 de octubre de 2026
+
+Implementación sobre `build/apk-0.6.0+13`, base `7d5266f`. Entorno Linux cloud,
+Flutter 3.35.7 y Dart 3.9.2. Formato y análisis sin avisos; **380 pruebas**
+superadas. Compilación web con `--no-web-resources-cdn` correcta. Prueba adicional
+en Chromium correcta: transición de cuotas de 500 dígitos, conservación exacta
+de excedentes, JSON decimal BigInt y proporción del indicador sin overflow.
+
+Se verifican capturas masivas, doradas/racha y Captura total, independencia de
+economía, 30 jornadas sin captura sin derrota, persistencia entre jornadas y
+compras, crecimiento AJ-005A sin duplicados, recompensas múltiples P01 y
+compatibilidad/recuperación de prestigio histórico.
+
+[Migración y reglas](aj-005b-cuotas-infinitas.md): se conserva crecimiento previo;
+el progreso monetario parcial antiguo se reinicia sin convertirlo en bolas.
+No se ha generado una APK de esta tarea ni validado tacto/rendimiento en un
+Android físico. Las descargas históricas inferiores no contienen AJ-005B.
+
+
 > **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
 
 ## S03 · 0.14.0+22 · 21/10/2026

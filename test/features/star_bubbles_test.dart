@@ -30,9 +30,11 @@ void main() {
 
   Future<void> complete(GameSession s) async {
     s.startDay();
-    s.board!.balls.add(
-      Ball(s.board!.nextId++, Board.hole, Vec.zero, golden: true),
-    );
+    for (var i = 0; i < 100; i++) {
+      s.board!.balls.add(
+        Ball(s.board!.nextId++, s.board!.holePosition, Vec.zero),
+      );
+    }
     s.tick(1 / 60);
     await s.pendingWrites;
   }
@@ -59,8 +61,8 @@ void main() {
       s.tick(.1);
       expect(s.meta.revision, revision);
       expect(s.meta.stars, 0);
-      expect(s.feeding.points, 10);
-      expect(s.economy.generated, 10);
+      expect(s.feeding.points, BigInt.zero);
+      expect(s.economy.generated, 100);
       s.dispose();
     },
   );
@@ -314,7 +316,7 @@ void main() {
     },
   );
   test(
-    'defeat discards pending bubbles but preserves stars already earned',
+    'empty days preserve pending bubbles and earned stars indefinitely',
     () async {
       final c = testCatalog();
       c.base['star_count'] = 2;
@@ -342,15 +344,10 @@ void main() {
         s.finishDay();
         await s.pendingWrites;
       }
-      expect(s.meta.phase, PrestigePhase.defeat);
+      expect(s.meta.phase, PrestigePhase.playing);
       expect(s.meta.stars, 1);
-      expect(s.meta.starLedger.pending, isEmpty);
-      s.continueToPrestigeShop();
-      await s.pendingWrites;
-      s.beginNewRun();
-      await s.pendingWrites;
-      expect(s.meta.stars, 1);
-      expect(s.meta.starLedger.quota, 0);
+      expect(s.meta.starLedger.pending, hasLength(1));
+      expect(s.continueToPrestigeShop(), isFalse);
       s.dispose();
     },
   );

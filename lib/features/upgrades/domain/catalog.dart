@@ -15,6 +15,8 @@ import 'balance_v15.dart';
 import 'balance_v16.dart';
 import 'balance_v17.dart';
 import 'balance_v18.dart';
+import 'balance_v19.dart';
+import '../../rewards/domain/reward_visual_config.dart';
 
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
@@ -39,7 +41,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 19});
+  DaySettings(this.values, {this.balanceVersion = 20});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -138,6 +140,7 @@ class UpgradeCatalog {
         ),
       );
     }
+    RewardVisualConfig.fromMap(base);
     for (final key in [
       'production_duration',
       'reward_delay',
@@ -254,10 +257,12 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 19}) {
-    final values = balanceVersion <= 18 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 18) {
-      final historicalCsv = balanceVersion == 18
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 20}) {
+    final values = balanceVersion <= 19 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 19) {
+      final historicalCsv = balanceVersion == 19
+          ? balanceV19Csv
+          : balanceVersion == 18
           ? balanceV18Csv
           : balanceVersion == 17
           ? balanceV17Csv
@@ -358,7 +363,7 @@ class UpgradeCatalog {
     bool legacy = false,
     bool retiredRemoved = false,
     Map<String, int> previousTree = const {},
-    int balanceVersion = 19,
+    int balanceVersion = 20,
   }) {
     bool met(UpgradeLevel level) => level.requirements.every(
       (requirement) =>

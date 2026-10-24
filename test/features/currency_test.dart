@@ -205,7 +205,7 @@ void main() {
       s.finishDay();
       expect(s.economy.balance, 101);
       s.startDay();
-      expect(s.board!.settings.balanceVersion, 19);
+      expect(s.board!.settings.balanceVersion, 20);
     },
   );
   test(
@@ -216,10 +216,15 @@ void main() {
       for (var i = 1; i <= 200; i++) {
         pool.add(i, i);
       }
+      expect(pool.activeCount, 0);
+      pool.advance(.2);
       expect(pool.activeCount, 4);
-      expect(pool.grouped, 196);
+      pool.advance(.5);
+      expect(pool.grouped, greaterThan(0));
       pool.advance(4);
+      pool.clear();
       pool.add(201, 7);
+      pool.advance(.2);
       expect(pool.coins.first, same(objects.first));
       final s = GameSession(catalog, MemoryStore())..enterDebug();
       s.debugSetRewardLimit(0);
@@ -277,13 +282,17 @@ void main() {
   test(
     'adaptive quality lowers visual budget and recovers without touching economics',
     () {
-      final v = RewardVisuals(24, 1);
+      final v = RewardVisuals(256, .2);
       v.observeFrame(.04);
-      expect(v.limit, 12);
-      for (var i = 0; i < 150; i++) {
+      expect(v.limit, 256);
+      for (var i = 0; i < 119; i++) {
+        v.observeFrame(.04);
+      }
+      expect(v.limit, lessThan(256));
+      for (var i = 0; i < 300; i++) {
         v.observeFrame(1 / 60);
       }
-      expect(v.limit, greaterThan(12));
+      expect(v.limit, 256);
     },
   );
   test(

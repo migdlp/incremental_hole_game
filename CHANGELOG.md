@@ -1,5 +1,13 @@
 # Historial de cambios
 
+## 0.18.1+29
+
+- BUG-001: microlotes de 200 ms y lluvia de monedas con denominaciones exactas y variadas.
+- Expulsión rápida, pooling, oleadas y agrupación progresiva conservando cantidad y valor.
+- Estadísticas por microlote compatibles con AJ-008A y restauración sin ingresos duplicados.
+- Parámetros y presets de captura DEBUG, diagnóstico de picos y benchmarks Cloud.
+- Balance v20 con v19 congelado. Calibración de rendimiento en Android físico pendiente.
+
 ## 0.18.0+28
 
 - AJ-008A: resultados en dos bloques progresivos, sin cambiar ingresos ni cuotas.

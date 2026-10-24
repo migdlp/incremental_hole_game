@@ -12,6 +12,7 @@ import '../features/board/domain/tool.dart';
 import '../features/day_cycle/domain/day_cycle.dart';
 import '../features/economy/domain/economy.dart';
 import '../features/rewards/domain/reward_delivery.dart';
+import '../features/rewards/domain/reward_visual_config.dart';
 import '../features/rewards/domain/reward_frame_metrics.dart';
 import '../features/progression/domain/progress.dart';
 import '../features/prestige/domain/meta_progress.dart';
@@ -91,17 +92,44 @@ class GameSession extends ChangeNotifier {
   final UpgradeCatalog catalog;
   final SaveStore store;
   final economy = Economy();
-  final _rewardCounts = <int, int>{};
-  Map<int, int> _countsFor(int amount) =>
-      _rewardCounts.entries.fold<int>(0, (sum, e) => sum + e.key * e.value) ==
-          amount
-      ? Map.of(_rewardCounts)
-      : {
-          for (final s in CoinDenomination.split(amount))
-            s.denomination.amount: s.count,
-        };
+  final _debugRewardParameters = <String, double>{};
+  RewardVisualConfig get rewardConfig =>
+      RewardVisualConfig.fromMap({...catalog.base, ..._debugRewardParameters});
+  void debugSetRewardParameter(String key, double value) {
+    if (!debugEnabled ||
+        running ||
+        !RewardVisualConfig.ranges.containsKey(key)) {
+      return;
+    }
+    final proposed = {...catalog.base, ..._debugRewardParameters, key: value};
+    RewardVisualConfig.fromMap(proposed);
+    _debugRewardParameters[key] = value;
+    rewardVisuals = _newVisuals();
+    notifyListeners();
+  }
+
+  Map<int, int> _countsFor(int amount) {
+    final counts = rewardVisuals.projectedCounts;
+    return counts.entries.fold<int>(0, (sum, e) => sum + e.key * e.value) ==
+            amount
+        ? counts
+        : {
+            for (final s in CoinDenomination.split(amount))
+              s.denomination.amount: s.count,
+          };
+  }
+
   late RewardDelivery rewards = _newRewards();
   final rewardFrameMetrics = RewardFrameMetrics();
+  int debugCoinRainCaptures = 0;
+  void debugSetCoinRainCaptures(int count) {
+    if (!debugEnabled || running || ![0, 1, 10, 50, 100, 200].contains(count)) {
+      return;
+    }
+    debugCoinRainCaptures = count;
+    notifyListeners();
+  }
+
   int? _debugRewardLimit;
   late RewardVisuals rewardVisuals = _newVisuals();
   RewardDelivery _newRewards() => RewardDelivery(
@@ -111,6 +139,7 @@ class GameSession extends ChangeNotifier {
   RewardVisuals _newVisuals() => RewardVisuals(
     catalog.base['reward_visual_limit']!.toInt(),
     catalog.base['reward_delay']!,
+    config: rewardConfig,
   )..debugLimit = _debugRewardLimit;
   void debugSetRewardLimit(int? value) {
     if (!debugEnabled ||
@@ -185,7 +214,6 @@ class GameSession extends ChangeNotifier {
     cycle = null;
     paused = false;
     economy.balance = economy.collected = economy.generated = 0;
-    _rewardCounts.clear();
     progress.day = 1;
     progress.record = 0;
     progress.last = null;
@@ -374,9 +402,19 @@ class GameSession extends ChangeNotifier {
     debugBlackHoleObjects = 0;
     cycle = DayCycle(production: settings['production_duration'], closing: 0);
     economy.begin();
-    _rewardCounts.clear();
     rewards = _newRewards();
     rewardVisuals = _newVisuals();
+    rewardFrameMetrics.clear();
+    if (debugEnabled) {
+      for (
+        var i = 0;
+        i < math.min(debugCoinRainCaptures, settings['ball_limit'].toInt());
+        i++
+      ) {
+        board!.balls.add(Ball(board!.nextId++, board!.holePosition, Vec.zero));
+      }
+      debugCoinRainCaptures = 0;
+    }
     board!.syncHoleGrowth(feeding.growths);
     board!.enableAutomaticCoins();
     board!.starBubbles = _newBubbles(board!)..populate(0);
@@ -457,14 +495,7 @@ class GameSession extends ChangeNotifier {
     economy.collect(events.collected);
     for (final value in events.rewards) {
       economy.generated += value;
-      for (final stack in CoinDenomination.split(value)) {
-        final denomination = stack.denomination.amount;
-        _rewardCounts.update(
-          denomination,
-          (count) => count + stack.count,
-          ifAbsent: () => stack.count,
-        );
-      }
+      if (value == 0) continue;
       final id = rewards.register(value);
       rewardVisuals.add(id, value);
     }
@@ -677,6 +708,8 @@ class GameSession extends ChangeNotifier {
     _debugStars = null;
     debugBubbleGravity = debugBubbleBlackHole = false;
     _debugRewardLimit = null;
+    _debugRewardParameters.clear();
+    debugCoinRainCaptures = 0;
     rewardVisuals.debugLimit = null;
     _debugFeedingTrials = false;
     debugForceGravity = false;
@@ -818,7 +851,6 @@ class GameSession extends ChangeNotifier {
     selectedTool = BallTool.hand;
     economy.balance = 0;
     economy.begin();
-    _rewardCounts.clear();
     progress
       ..day = 1
       ..record = 0
@@ -891,6 +923,7 @@ class GameSession extends ChangeNotifier {
         : {
             'remaining': cycle!.remaining,
             'rewards': rewards.toJson(),
+            'rewardPresentation': rewardVisuals.toJson(),
             'rewardCounts': _countsFor(
               economy.generated,
             ).map((key, value) => MapEntry('$key', value)),
@@ -995,7 +1028,7 @@ class GameSession extends ChangeNotifier {
           ? 16
           : json['version'] == 11
           ? 17
-          : 19,
+          : 20,
       retiredRemoved: (json['version'] as int) >= 9,
     );
     var restoredTool = legacy
@@ -1044,7 +1077,7 @@ class GameSession extends ChangeNotifier {
           ? run['balanceVersion']
           : 1;
       if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 19)) {
+          (balanceVersion < 1 || balanceVersion > 20)) {
         throw const FormatException('Versión de balance inválida');
       }
       final runRetired = run['retiredLevels'] == null
@@ -1190,6 +1223,16 @@ class GameSession extends ChangeNotifier {
         ) !=
         generated) {
       throw const FormatException('Desglose de recompensas incoherente');
+    }
+    final restoredVisuals = _newVisuals();
+    final presentation = run?['rewardPresentation'];
+    if (presentation != null) {
+      if (presentation is! Map<String, dynamic>) {
+        throw const FormatException('Presentación inválida');
+      }
+      restoredVisuals.restorePresentation(presentation, expected: generated);
+    } else {
+      restoredVisuals.restoreCounts(restoredCounts);
     }
     final savedFeeding = json['feeding'];
     final FeedingProgress restoredFeeding;
@@ -1343,11 +1386,8 @@ class GameSession extends ChangeNotifier {
     _eventRandomState = savedEventRandom;
     board = restoredBoard;
     board?.gravitySupported = gravityAvailable;
-    _rewardCounts
-      ..clear()
-      ..addAll(restoredCounts);
     rewards = restoredRewards;
-    rewardVisuals = _newVisuals();
+    rewardVisuals = restoredVisuals;
     if (restoredBoard != null) {
       restoredBoard.enableAutomaticCoins();
       economy.collect(rewards.settle());

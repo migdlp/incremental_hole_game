@@ -7,8 +7,17 @@ class RewardFrameMetrics {
   final _raster = List<int>.filled(240, 0);
   final _total = List<int>.filled(240, 0);
   int count = 0, _cursor = 0;
+  int totalFrames = 0, slowFrames = 0, maximumTotal = 0;
+  void clear() {
+    count = _cursor = totalFrames = slowFrames = maximumTotal = 0;
+  }
+
   void add(List<FrameTiming> timings) {
     for (final frame in timings) {
+      totalFrames++;
+      final total = frame.totalSpan.inMicroseconds;
+      if (total > 16667) slowFrames++;
+      if (total > maximumTotal) maximumTotal = total;
       _build[_cursor] = frame.buildDuration.inMicroseconds;
       _raster[_cursor] = frame.rasterDuration.inMicroseconds;
       _total[_cursor] = frame.totalSpan.inMicroseconds;
@@ -19,14 +28,16 @@ class RewardFrameMetrics {
 
   String get report {
     if (count == 0) return 'Sin muestras de frames todavía.';
-    double percentile(List<int> source) {
+    double percentile(List<int> source, [double p = .95]) {
       final copy = source.take(count).toList()..sort();
-      return copy[((count - 1) * .95).round()] / 1000;
+      return copy[((count - 1) * p).round()] / 1000;
     }
 
-    return '$count frames · p95 build ${percentile(_build).toStringAsFixed(2)} ms · '
+    return '$totalFrames frames jornada · p95 últimos $count build ${percentile(_build).toStringAsFixed(2)} ms · '
         'raster ${percentile(_raster).toStringAsFixed(2)} ms · '
         'total ${percentile(_total).toStringAsFixed(2)} ms · '
-        '${_total.take(count).where((t) => t > 16667).length} frames >16,67 ms';
+        'p99 ${percentile(_total, .99).toStringAsFixed(2)} ms · '
+        'máx jornada ${(maximumTotal / 1000).toStringAsFixed(2)} ms · '
+        '$slowFrames frames >16,67 ms';
   }
 }

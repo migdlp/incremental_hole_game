@@ -16,8 +16,8 @@ base,star_break_speed,0,0,star_break_speed,110,prototype,,
 base,star_active_limit,0,0,star_active_limit,8,prototype,,
 base,star_reentry_interval,0,0,star_reentry_interval,0.4,prototype,,
 base,star_color,0,0,star_color,45,prototype,,
-base,reward_delay,0,0,reward_delay,1,seconds,,
-base,reward_visual_limit,0,0,reward_visual_limit,24,objects,,
+base,reward_delay,0,0,reward_delay,0.2,seconds,,
+base,reward_visual_limit,0,0,reward_visual_limit,192,objects,,
 base,reward_ledger_limit,0,0,reward_ledger_limit,128,records,,
 base,production_duration,0,0,production_duration,15,seconds,,30
 base,closing_duration,0,0,closing_duration,0,seconds,,0
@@ -132,3 +132,15 @@ upgrade,bat,1,60,bat_power,1,multiplier,hand:1,1.7
 upgrade,bat,2,120,bat_power,1.35,multiplier,hand:1,1.7
 upgrade,bat,3,240,bat_power,1.7,multiplier,hand:1,1.7
 upgrade,prestige,1,10000,prestige_action,1,action,generator:5&reward:5&duration:5,1
+base,reward_batch_window,0,0,reward_batch_window,0.2,seconds,,
+base,reward_target_coins,0,0,reward_target_coins,64,coins,,
+base,reward_large_threshold,0,0,reward_large_threshold,50,coins,,
+base,reward_pending_limit,0,0,reward_pending_limit,1024,coins,,
+base,reward_wave_span,0,0,reward_wave_span,0.12,seconds,,
+base,reward_max_wait,0,0,reward_max_wait,0.4,seconds,,
+base,reward_hold,0,0,reward_hold,1,seconds,,
+base,reward_flight_scale,0,0,reward_flight_scale,1,multiplier,,
+base,reward_variation,0,0,reward_variation,1,multiplier,,
+base,reward_feedback_samples,0,0,reward_feedback_samples,30,frames,,
+base,reward_bad_ms,0,0,reward_bad_ms,18,ms,,
+base,reward_recovery_seconds,0,0,reward_recovery_seconds,2,seconds,,

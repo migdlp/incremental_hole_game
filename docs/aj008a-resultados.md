@@ -15,6 +15,13 @@ Las cinco denominaciones reales siguen valiendo 1/10/50/100/500. La paleta
 compartida pasa a bronce/plata/oro/verde/rojo. No se inventa una sexta denominación.
 No se modifican el salto ni la pausa ni la física de las monedas del gameplay.
 
+## Integración posterior BUG-001 (0.18.1+29)
+
+El desglose por captura descrito en la primera implementación se sustituye por
+el desglose de microlotes de 200 ms. La agrupación visual del gameplay no cambia
+los recuentos del resumen ni su total. El diseño y la secuencia de este documento
+se conservan. [Funcionamiento y rendimiento](bug001-lluvia-monedas.md).
+
 ## Datos y contabilidad
 
 `ResultsData` toma una copia inmutable de `DayResult`, `FeedingProgress` y saldo.

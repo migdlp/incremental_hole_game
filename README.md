@@ -1,5 +1,15 @@
 # Feed the Hole
 
+## BUG-001 · Lluvia de monedas (0.18.1+29)
+
+Microlotes de 200 ms, siete monedas para 34, expansión exacta y variada para
+recompensas grandes, pool reutilizable y agrupación solo bajo presión. Los
+recuentos del resumen AJ-008A proceden del microlote, no de los iconos agrupados.
+Salida normal en 0,2–0,32 s; se mantiene la pausa tras el salto. Pool inicial
+provisional de 192 basado en medidas de Cloud; rendimiento Android físico
+pendiente, sin certificación de 60 FPS. Balance v20, con v19 congelado.
+Incluye el rediseño AJ-008A. [Detalles y mediciones](docs/bug001-lluvia-monedas.md).
+
 ## AJ-008A · Resultados animados (0.18.0+28)
 
 Nuevo modal con monedas por denominación hacia el monedero real, seguido del

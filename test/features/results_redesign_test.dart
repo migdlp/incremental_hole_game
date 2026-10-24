@@ -52,38 +52,35 @@ void main() {
       expect(data(income: 0).stacks, isEmpty);
     },
   );
-  test(
-    'automatic counts follow captures, survive restore, and never add money',
-    () {
-      final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
-        ..startDay();
-      void capture(GameSession game) {
-        final b = game.board!;
-        b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
-        game.tick(1 / 60);
-      }
+  test('automatic microbatch counts survive restore and never add money', () {
+    final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
+      ..startDay();
+    void capture(GameSession game) {
+      final b = game.board!;
+      b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
+      game.tick(1 / 60);
+    }
 
-      for (var i = 0; i < 10; i++) {
-        capture(s);
-      }
-      final raw = s.snapshot();
-      final r = GameSession(s.catalog, MemoryStore())
-        ..restore(raw)
-        ..resume();
-      capture(r);
-      r.finishDay();
-      expect(r.progress.last!.collectedCoins, {1: 11});
-      expect(r.economy.balance, 11);
-      final broken = jsonDecode(raw) as Map<String, dynamic>;
-      broken['run']['rewardCounts'] = {'10': 2};
-      expect(
-        () => GameSession(s.catalog, MemoryStore()).restore(jsonEncode(broken)),
-        throwsFormatException,
-      );
-      s.dispose();
-      r.dispose();
-    },
-  );
+    for (var i = 0; i < 10; i++) {
+      capture(s);
+    }
+    final raw = s.snapshot();
+    final r = GameSession(s.catalog, MemoryStore())
+      ..restore(raw)
+      ..resume();
+    capture(r);
+    r.finishDay();
+    expect(r.progress.last!.collectedCoins, {10: 1, 1: 1});
+    expect(r.economy.balance, 11);
+    final broken = jsonDecode(raw) as Map<String, dynamic>;
+    broken['run']['rewardCounts'] = {'10': 2};
+    expect(
+      () => GameSession(s.catalog, MemoryStore()).restore(jsonEncode(broken)),
+      throwsFormatException,
+    );
+    s.dispose();
+    r.dispose();
+  });
   test(
     'historical recorded counts take precedence over presentation splitting',
     () {

@@ -1,5 +1,15 @@
 # Estado actual de Feed the Hole
 
+## BUG-001 · Lluvia de monedas (0.18.1+29)
+
+Microlotes de 200 ms, siete monedas para 34, expansión exacta y variada para
+recompensas grandes, pool reutilizable y agrupación solo bajo presión. Los
+recuentos del resumen AJ-008A proceden del microlote, no de los iconos agrupados.
+Salida normal en 0,2–0,32 s; se mantiene la pausa tras el salto. Pool inicial
+provisional de 192 basado en medidas de Cloud; rendimiento Android físico
+pendiente, sin certificación de 60 FPS. Balance v20, con v19 congelado.
+Incluye el rediseño AJ-008A. [Detalles y mediciones](bug001-lluvia-monedas.md).
+
 ## AJ-008A · Resultados animados (0.18.0+28)
 
 Nuevo modal con monedas por denominación hacia el monedero real, seguido del
@@ -300,7 +310,7 @@ Pendiente de validar en móvil: acceso debug con dedo, legibilidad del árbol y 
 
 Flutter/Dart con Flame, Android vertical y web de apoyo. Juego individual sin cuentas, backend ni dependencia de conexión.
 
-Guardado JSON **v13** y balance vigente **v19** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–16 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. S03 permite reiniciar expresamente la partida al incumplir cuota o comprar Prestigio tras confirmar, conservando la metaprogresión.
+Guardado JSON **v13** y balance vigente **v20** son números diferentes. Se conservan saldo y compras; las jornadas activas con balances 1–16 mantienen su configuración económica y tiempos hasta terminar. El siguiente día usa el balance actual. Los guardados anteriores a combos terminan esa jornada sin introducirlos a mitad. Una jornada antigua con racha gratuita conserva su comportamiento hasta terminar; en la siguiente jornada se requiere comprar Racha. No se eliminan ni regalan compras para aplicar el cambio. Las cargas y activaciones pendientes de las especiales se guardan; una pausa o reapertura no concede tiempo ni ejecuta dos veces Captura total. S03 permite reiniciar expresamente la partida al incumplir cuota o comprar Prestigio tras confirmar, conservando la metaprogresión.
 
 No hay tiers individuales, potenciadora, duplicadora, bomba, cartas, flippers, bumpers, fábrica configurable, catálogo permanente de P02 ni progreso offline. Sus reglas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 

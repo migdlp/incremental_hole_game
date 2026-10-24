@@ -192,7 +192,18 @@ class _DayScreenState extends State<DayScreen> {
   final _boardKey = GlobalKey();
   int lastIncome = 0;
   void _frameTimings(List<FrameTiming> timings) {
-    if (widget.session.debugEnabled) {
+    if (widget.session.running && !widget.session.paused) {
+      for (final frame in timings) {
+        final build = frame.buildDuration.inMicroseconds,
+            raster = frame.rasterDuration.inMicroseconds;
+        widget.session.rewardVisuals.observeRenderCost(
+          (build > raster ? build : raster) / 1e6,
+        );
+      }
+    }
+    if (widget.session.debugEnabled &&
+        widget.session.running &&
+        !widget.session.paused) {
       widget.session.rewardFrameMetrics.add(timings);
     }
   }

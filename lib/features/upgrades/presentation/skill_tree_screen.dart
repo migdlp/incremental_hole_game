@@ -1,4 +1,5 @@
 import '../../feeding/presentation/feeding_summary.dart';
+import '../../rewards/domain/reward_visual_config.dart';
 import '../../prestige/domain/star_rewards.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -674,6 +675,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             0,
                             8,
                             16,
+                            64,
+                            128,
                             session.rewardVisuals.capacity,
                           })
                             DropdownMenuItem(
@@ -693,6 +696,61 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                           }
                         },
                       ),
+                      if (!session.running)
+                        DropdownButtonFormField<int>(
+                          key: const ValueKey('debug-coin-rain-captures'),
+                          initialValue: session.debugCoinRainCaptures,
+                          items: [
+                            for (final n in [0, 1, 10, 50, 100, 200])
+                              DropdownMenuItem(
+                                value: n,
+                                child: Text(
+                                  n == 0
+                                      ? 'Sin captura de prueba'
+                                      : 'Capturar $n bolas al iniciar',
+                                ),
+                              ),
+                          ],
+                          onChanged: (n) {
+                            if (n != null) session.debugSetCoinRainCaptures(n);
+                          },
+                        ),
+                      if (!session.running)
+                        for (final entry in RewardVisualConfig.ranges.entries)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  RewardVisualConfig.labels[entry.key]!,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 135,
+                                child: DropdownButtonFormField<double>(
+                                  initialValue: session.catalog.base[entry.key],
+                                  items: [
+                                    for (final n in {
+                                      entry.value.$1,
+                                      session.catalog.base[entry.key]!,
+                                      entry.value.$2,
+                                    })
+                                      DropdownMenuItem(
+                                        value: n,
+                                        child: Text('$n'),
+                                      ),
+                                  ],
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      session.debugSetRewardParameter(
+                                        entry.key,
+                                        value,
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                       Text(session.rewardFrameMetrics.report),
                       TextButton.icon(
                         icon: const Icon(Icons.copy),

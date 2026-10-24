@@ -6,7 +6,6 @@ import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
 import '../domain/wall_impact.dart';
-import '../domain/coin_denomination.dart';
 import 'coin_painter.dart';
 import 'bat_feedback.dart';
 import 'black_hole_feedback.dart';
@@ -823,20 +822,29 @@ class GardenGame extends FlameGame {
     final visuals = session.rewardVisuals;
     for (final coin in visuals.coins) {
       if (!coin.active || coin.age < visuals.delay) continue;
-      final denomination = coin.amount >= 500
-          ? CoinDenomination.fiveHundred
-          : coin.amount >= 100
-          ? CoinDenomination.hundred
-          : coin.amount >= 50
-          ? CoinDenomination.fifty
-          : coin.amount >= 10
-          ? CoinDenomination.ten
-          : CoinDenomination.one;
+      final denomination = coin.denomination;
       final center = Offset(
-        coin.x(walletTarget.dx, visuals.delay, origin: board.holePosition.x),
-        coin.y(walletTarget.dy, visuals.delay, origin: board.holePosition.y),
+        coin.x(
+          walletTarget.dx,
+          visuals.delay,
+          origin: board.holePosition.x,
+          simple: visuals.quality >= 2,
+        ),
+        coin.y(
+          walletTarget.dy,
+          visuals.delay,
+          origin: board.holePosition.y,
+          simple: visuals.quality >= 2,
+        ),
       );
-      paintCoin(canvas, center, denomination, radius: 7, paint: _rewardPaint);
+      paintCoin(
+        canvas,
+        center,
+        denomination,
+        radius: 7,
+        paint: _rewardPaint,
+        details: visuals.quality < 2,
+      );
     }
     if (visuals.receiptPulse > 0) {
       _rewardPaint.color = Color.fromRGBO(

@@ -24,6 +24,7 @@ void paintCoin(
   CoinDenomination denomination, {
   double radius = 10,
   Paint? paint,
+  bool details = true,
 }) {
   final brush = paint ?? Paint();
   final color = coinColor(denomination);
@@ -40,7 +41,7 @@ void paintCoin(
     ..style = PaintingStyle.stroke
     ..strokeWidth = radius * .10
     ..color = const Color(0xffb3842e);
-  for (var i = -2; i <= 2; i++) {
+  for (var i = -2; details && i <= 2; i++) {
     final x = center.dx + i * radius * .28;
     canvas.drawLine(
       Offset(x, center.dy + radius * .64),
@@ -68,6 +69,6 @@ void paintCoin(
   canvas.save();
   canvas.translate(center.dx, center.dy);
   canvas.scale(radius);
-  canvas.drawPath(_coinStamp, brush);
+  if (details) canvas.drawPath(_coinStamp, brush);
   canvas.restore();
 }

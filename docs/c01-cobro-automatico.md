@@ -1,5 +1,14 @@
 # C01 — Cobro automático y animación de monedas
 
+## Estado actual · BUG-001 (0.18.1+29)
+
+La presentación actual usa microlotes de 200 ms, desglose exacto, expansión para
+lluvias variadas y pool provisional de 192. La expulsión ya no espera un segundo;
+se mantiene la pausa de un segundo tras el salto. Los recuentos alimentan AJ-008A
+antes de cualquier agrupación. [Código, parámetros y mediciones](bug001-lluvia-monedas.md).
+El contenido inferior documenta entregas anteriores; el retraso de 1 s y pool 24
+no son los valores vigentes. Rendimiento Android físico todavía pendiente.
+
 ## Ajuste de tiempos · 0.16.2+26
 
 Por indicación del usuario se mantiene toda la estética, el salto y el recorrido.

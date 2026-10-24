@@ -1,5 +1,15 @@
 # Historial de cambios
 
+## 0.19.1+31
+
+- BUG-002: un único emisor secuencial, con una salida máxima por fotograma real.
+- Dispersión angular variada y ola horaria con cadencia y giro suavizados según carga.
+- Orígenes y curvas adaptados al crecimiento y bordes; animación y pausa conservadas.
+- Presupuesto adaptable y agrupación por capacidad, sin cambiar plan ni recompensas.
+- Parámetros de presentación DEBUG; balance v20 y guardados sin modificaciones.
+- Validación y calibración en Android físico pendientes.
+
+
 ## 0.19.0+30
 
 - AJ-007: mezcla centralizada offline, seis plops, capas suaves y cascadas musicales.

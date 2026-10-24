@@ -1,5 +1,15 @@
 # Estado actual de Feed the Hole
 
+## BUG-002 · Expulsión secuencial (0.19.1+31)
+
+Un emisor compartido sustituye las familias de dirección y el escalonado repetido.
+Una moneda nueva por fotograma, dispersión pequeña variada y ola horaria con
+cadencia/giro progresivos. Trayectorias adaptadas al hoyo y a los bordes;
+pausa de un segundo y vuelo al monedero conservados. Parámetros DEBUG, pool
+adaptativo y contabilidad intacta; balance v20/JSON v13 sin cambios.
+[Detalles, archivos, pruebas y límites](bug002-expulsion-secuencial.md). Android físico pendiente.
+
+
 ## AJ-007 · Feedback audiovisual (0.19.0+30)
 
 Audio offline centralizado con plops variables, absorción y rodadura compartidas,

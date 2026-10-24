@@ -218,8 +218,12 @@ void main() {
       }
       expect(pool.activeCount, 0);
       pool.advance(.2);
+      expect(pool.activeCount, 1);
+      for (var frame = 0; frame < 20; frame++) {
+        pool.advance(1 / 60);
+      }
       expect(pool.activeCount, 4);
-      pool.advance(.5);
+      pool.advance(5.1);
       expect(pool.grouped, greaterThan(0));
       pool.advance(4);
       pool.clear();

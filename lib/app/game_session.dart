@@ -105,6 +105,10 @@ class GameSession extends ChangeNotifier {
   final _debugRewardParameters = <String, double>{};
   RewardVisualConfig get rewardConfig =>
       RewardVisualConfig.fromMap({...catalog.base, ..._debugRewardParameters});
+  double rewardParameterValue(String key) =>
+      _debugRewardParameters[key] ??
+      catalog.base[key] ??
+      RewardVisualConfig.optionalDefaults[key]!;
   void debugSetRewardParameter(String key, double value) {
     if (!debugEnabled ||
         running ||
@@ -147,7 +151,7 @@ class GameSession extends ChangeNotifier {
     capacity: catalog.base['reward_ledger_limit']!.toInt(),
   );
   RewardVisuals _newVisuals() => RewardVisuals(
-    catalog.base['reward_visual_limit']!.toInt(),
+    rewardConfig.capacity,
     catalog.base['reward_delay']!,
     config: rewardConfig,
   )..debugLimit = _debugRewardLimit;
@@ -479,10 +483,12 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  int _frameEmissionStart = 0;
   void tick(double dt) {
     if (!running || paused || !dt.isFinite) return;
     final generatedBefore = economy.generated;
     final metaBefore = meta.revision;
+    _frameEmissionStart = rewardVisuals.emittedObjects;
     rewardVisuals.observeFrame(dt);
     _accumulator += dt.clamp(0.0, .1);
     while (_accumulator + 1e-9 >= 1 / 60 && running) {
@@ -583,7 +589,15 @@ class GameSession extends ChangeNotifier {
     }
     final beforeEmitted = rewardVisuals.emittedQuantity,
         beforeArrived = rewardVisuals.arrivedQuantity;
-    rewardVisuals.advance(dt);
+    rewardVisuals.geometry(
+      board!.holePosition.x,
+      board!.holePosition.y,
+      board!.captureRadius,
+    );
+    rewardVisuals.advance(
+      dt,
+      allowEmission: rewardVisuals.emittedObjects == _frameEmissionStart,
+    );
     if (rewardVisuals.emittedQuantity > beforeEmitted) {
       feedback.emit(
         FeedbackEvent.coinOut,

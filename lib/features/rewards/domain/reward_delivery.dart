@@ -133,6 +133,7 @@ class RewardCoin {
   double hold = RewardDelivery.hold;
   double age = 0, jump = 0, flight = 0;
   double dx = 0, dy = 0, bend = 0;
+  double offsetX = 0, offsetY = 0, arcHeight = 26, angle = 0, emittedAt = 0;
   void reset(
     int rewardId,
     int value, {
@@ -141,6 +142,8 @@ class RewardCoin {
     RewardVisualConfig config = const RewardVisualConfig(),
   }) {
     active = true;
+    offsetX = offsetY = 0;
+    arcHeight = 26;
     id = rewardId;
     amount = value;
     quantity = count;
@@ -171,6 +174,7 @@ class RewardCoin {
     double origin = 180,
     bool simple = false,
   }) {
+    origin += offsetX;
     final t = age - delay;
     if (t <= 0) return origin;
     if (t < jump) return origin + dx * (t / jump);
@@ -190,20 +194,25 @@ class RewardCoin {
     double origin = 50,
     bool simple = false,
   }) {
+    origin += offsetY;
     final t = age - delay;
     if (t <= 0) return origin;
     if (t < jump) {
       final u = t / jump;
-      return origin + dy * u - (23 + id % 7) * 4 * u * (1 - u);
+      return origin + dy * u - arcHeight * 4 * u * (1 - u);
     }
     // Keep the same spatial curve, but ease into its traversal after resting.
     final progress = ((t - jump - hold) / flight).clamp(0.0, 1.0);
     final u = progress * progress;
     final eased = u * u * (3 - 2 * u);
+    final safeBend = bend.clamp(
+      -4 * math.max(0.0, math.min(550 - origin - dy, 550 - target)),
+      4 * math.max(0.0, math.min(origin + dy - 10, target - 10)),
+    );
     return origin +
         dy +
         (target - origin - dy) * eased -
-        (simple ? 0 : bend) * u * (1 - u);
+        (simple ? 0 : safeBend) * u * (1 - u);
   }
 }
 
@@ -212,7 +221,37 @@ class RewardVisuals {
     this.capacity,
     this.delay, {
     this.config = const RewardVisualConfig(),
-  }) : coins = List.generate(capacity, (_) => RewardCoin());
+    int? seed,
+  }) : _randomState = seed ?? math.Random().nextInt(0x100000000),
+       coins = List.generate(capacity, (_) => RewardCoin());
+  int _randomState;
+  double _random() {
+    _randomState = (1664525 * _randomState + 1013904223) & 0xffffffff;
+    return _randomState / 0x100000000;
+  }
+
+  double clock = 0,
+      _nextEmission = 0,
+      _angle = 0,
+      _load = 0,
+      _lastEmission = -10;
+  int emittedObjects = 0;
+  final _recentAngles = <double>[];
+  double holeX = 180,
+      holeY = 50,
+      holeRadius = 22,
+      boardWidth = 360,
+      boardHeight = 560;
+  double get emissionInterval =>
+      config.emitMax + (config.emitMin - config.emitMax) * _load;
+  double get angularSpeed =>
+      config.angularMin + (config.angularMax - config.angularMin) * _load;
+  void geometry(double x, double y, double radius) {
+    holeX = x;
+    holeY = y;
+    holeRadius = radius;
+  }
+
   final RewardVisualConfig config;
   final int capacity;
   // Curve offset retained for callers; coins are initialized at this offset on
@@ -221,18 +260,20 @@ class RewardVisuals {
   final List<RewardCoin> coins;
   final counts = <int, int>{};
   final _pending = <int, int>{};
+  final _pendingTimes = <int, double>{};
   int _batchAmount = 0, _serial = 0, _nextType = 0, _active = 0;
-  double _batchAge = 0, _pendingAge = 0;
+  double _batchAge = 0;
   int? debugLimit;
   int grouped = 0, omitted = 0, peak = 0, batches = 0, quality = 0;
   int emittedQuantity = 0, arrivedQuantity = 0;
   int get activeCount => _active;
   int get pendingCount => _pending.values.fold(0, (a, b) => a + b);
-  int get limit => debugLimit ?? _adaptiveLimit;
+  int get limit => (debugLimit ?? _adaptiveLimit).clamp(0, capacity);
   late int _adaptiveLimit = capacity;
   final _costs = <double>[];
   double _recovery = 0;
   bool _renderSamples = false;
+  double _displayInterval = 1 / 60;
   double receiptPulse = 0;
   void observeRenderCost(double seconds) {
     _renderSamples = true;
@@ -240,6 +281,9 @@ class RewardVisuals {
   }
 
   void observeFrame(double dt) {
+    if (dt.isFinite && dt > 0) {
+      _displayInterval += (dt.clamp(1 / 120, .1) - _displayInterval) * .1;
+    }
     if (!_renderSamples) _cost(dt);
   }
 
@@ -299,6 +343,10 @@ class RewardVisuals {
     for (final e in planCoins(_batchAmount, config).entries) {
       counts.update(e.key, (n) => n + e.value, ifAbsent: () => e.value);
       if (emit) {
+        final old = _pending[e.key] ?? 0;
+        _pendingTimes[e.key] =
+            ((_pendingTimes[e.key] ?? clock) * old + clock * e.value) /
+            (old + e.value);
         _pending.update(e.key, (n) => n + e.value, ifAbsent: () => e.value);
       }
     }
@@ -307,28 +355,41 @@ class RewardVisuals {
     _batchAge = 0;
   }
 
-  void _drain() {
+  void _drain({required bool allowEmission}) {
     if (_pending.isEmpty) return;
     if (limit == 0) {
       omitted += pendingCount;
       _pending.clear();
+      _pendingTimes.clear();
       return;
     }
+    // Capacity includes the one-start-per-frame constraint. A queue which
+    // remains nonempty is not necessarily old: continuous small batches must
+    // never be grouped merely because the stream has lasted several seconds.
+    final lifetime = .36 + config.hold + .8 * config.flightScale;
+    final throughput = math.min(
+      1 / math.max(config.emitMin, math.max(1 / 60, _displayInterval)),
+      limit / lifetime,
+    );
+    final packetBudget = math.max(1, (config.wait * throughput).floor());
+    final aged = _pendingTimes.values.any((t) => clock - t >= config.wait);
     final saturated =
-        pendingCount > config.pending || _pendingAge >= config.wait;
+        pendingCount > config.pending || pendingCount > packetBudget || aged;
     if (saturated && _active >= limit) {
       // Coalesce only coins still resting, with the same denomination. Never
       // recolor or teleport a flying coin, and never discard the pending value.
       for (final c in coins) {
         if (c.active && c.age < delay + c.jump + c.hold) {
           final n = _pending.remove(c.denomination.amount) ?? 0;
+          _pendingTimes.remove(c.denomination.amount);
           c.quantity += n;
           c.amount += n * c.denomination.amount;
           grouped += n;
         }
       }
     }
-    var free = math.max(0, limit - _active), emitted = 0;
+    if (!allowEmission || clock + 1e-9 < _nextEmission) return;
+    var free = math.max(0, limit - _active);
     for (final coin in coins) {
       if (free == 0 || _pending.isEmpty) break;
       if (coin.active) continue;
@@ -348,10 +409,18 @@ class RewardVisuals {
       if (type == null) break;
       final count = _pending[type.amount]!;
       final slots = math.max(1, free ~/ _pending.length);
-      final portion = saturated ? (count + slots - 1) ~/ slots : 1;
+      final timeSlots = math.max(1, packetBudget ~/ _pending.length);
+      final age = clock - (_pendingTimes[type.amount] ?? clock);
+      final portion = age >= config.wait
+          ? count
+          : saturated
+          ? (count + math.min(slots, timeSlots) - 1) ~/
+                math.min(slots, timeSlots)
+          : 1;
       final n = math.min(count, portion);
       if (n == count) {
         _pending.remove(type.amount);
+        _pendingTimes.remove(type.amount);
       } else {
         _pending[type.amount] = count - n;
       }
@@ -362,19 +431,92 @@ class RewardVisuals {
         count: n,
         config: config,
       );
-      coin.age = delay - (emitted % 24) / 24 * config.wave;
-      if (coin.age >= delay) emittedQuantity += coin.quantity;
+      if (clock - _lastEmission > .6) {
+        _angle = _random() * math.pi * 2;
+        _recentAngles.clear();
+      } else {
+        final turn =
+            angularSpeed * math.max(emissionInterval, clock - _lastEmission);
+        final scattered = 1.8 + _random() * 1.1;
+        final blend = ((_load - .15) / .2).clamp(0.0, 1.0);
+        final rotation = blend * blend * (3 - 2 * blend);
+        _angle +=
+            (scattered * (1 - rotation) + turn * rotation) *
+            (1 + (_random() * 2 - 1) * config.angleJitter);
+      }
+      if (_load < .22) {
+        for (var attempt = 0; attempt < 64; attempt++) {
+          final close = _recentAngles.any(
+            (a) =>
+                ((_angle - a + math.pi) % (2 * math.pi) - math.pi).abs() <
+                config.smallSeparation,
+          );
+          if (!close) break;
+          _angle += math.pi / 32;
+        }
+      }
+      _recentAngles.add(_angle);
+      if (_recentAngles.length > 3) _recentAngles.removeAt(0);
+      coin.angle = _angle;
+      coin.emittedAt = clock;
+      final cos = math.cos(_angle), sin = math.sin(_angle);
+      final originRadius =
+          math.min(holeRadius * .18, 14.0) * (.5 + _random() * .5);
+      coin.offsetX = (cos * originRadius).clamp(
+        10 - holeX,
+        boardWidth - 10 - holeX,
+      );
+      coin.offsetY = (sin * originRadius).clamp(
+        10 - holeY,
+        boardHeight - 10 - holeY,
+      );
+      final distance = config.jumpDistance * (.7 + _random() * .6);
+      coin.dx = (cos * distance).clamp(
+        10 - holeX - coin.offsetX,
+        boardWidth - 10 - holeX - coin.offsetX,
+      );
+      coin.dy = (sin * distance).clamp(
+        10 - holeY - coin.offsetY,
+        boardHeight - 10 - holeY - coin.offsetY,
+      );
+      coin.arcHeight = math.max(
+        0,
+        math.min(
+          23 + _random() * 6,
+          math.min(holeY + coin.offsetY, holeY + coin.offsetY + coin.dy) - 10,
+        ),
+      );
+      final margin = math.max(
+        0.0,
+        math.min(
+          holeX + coin.offsetX + coin.dx - 10,
+          boardWidth - 10 - holeX - coin.offsetX - coin.dx,
+        ),
+      );
+      coin.bend = coin.bend.clamp(-margin, margin);
+      coin.age = delay;
+      emittedQuantity += coin.quantity;
+      emittedObjects++;
+      _lastEmission = clock;
+      _nextEmission =
+          clock +
+          (emissionInterval * (1 + (_random() - .5) * config.wave)).clamp(
+            config.emitMin,
+            config.emitMax,
+          );
       _active++;
-      emitted++;
       free--;
       grouped += n - 1;
       peak = math.max(peak, _active);
+      break; // One global emitter: never catch up with multiple starts in a frame.
     }
-    if (_pending.isEmpty) _pendingAge = 0;
   }
 
-  void advance(double dt) {
+  void advance(double dt, {bool allowEmission = true}) {
     if (!dt.isFinite || dt <= 0) return;
+    clock += dt;
+    final targetLoad = pendingCount / (pendingCount + config.loadScale);
+    _load += (targetLoad - _load) * (1 - math.exp(-10 * dt));
     receiptPulse = math.max(0, receiptPulse - dt);
     for (final coin in coins) {
       if (!coin.active) continue;
@@ -387,12 +529,11 @@ class RewardVisuals {
         _active--;
       }
     }
-    if (_pending.isNotEmpty) _pendingAge += dt;
     if (_batchAmount > 0) {
       _batchAge += dt;
       if (_batchAge + 1e-9 >= config.window) _close();
     }
-    _drain();
+    _drain(allowEmission: allowEmission);
   }
 
   Map<String, dynamic> toJson() => {
@@ -436,7 +577,11 @@ class RewardVisuals {
     }
     _active = 0;
     _pending.clear();
-    _pendingAge = 0;
+    _pendingTimes.clear();
+    _load = 0;
+    _lastEmission = -10;
+    _nextEmission = clock;
+    _recentAngles.clear();
     receiptPulse = 0;
   }
 }

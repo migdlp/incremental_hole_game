@@ -15,7 +15,7 @@ int value(Map<int, int> counts) =>
 void main() {
   const config = RewardVisualConfig();
   test(
-    '34 has exactly three tens and four units and all seven appear after 200 ms',
+    '34 has exactly three tens and four units and emission starts after 200 ms and all seven follow sequentially',
     () {
       final v = RewardVisuals(256, .2);
       for (final n in [10, 10, 10, 4]) {
@@ -24,6 +24,10 @@ void main() {
       v.advance(.199);
       expect(v.activeCount, 0);
       v.advance(.001);
+      expect(v.activeCount, 1);
+      for (var i = 0; i < 45; i++) {
+        v.advance(1 / 60);
+      }
       expect(v.activeCount, 7);
       expect(v.counts, {10: 3, 1: 4});
       expect(
@@ -92,7 +96,10 @@ void main() {
         final v = RewardVisuals(192, .2)
           ..add(1, amount)
           ..advance(.2);
-        expect(v.activeCount, greaterThan(1));
+        for (var i = 0; i < 30; i++) {
+          v.advance(1 / 60);
+        }
+        expect(v.emittedObjects, greaterThan(1));
         expect(value(v.counts), amount);
         expect(v.grouped, 0);
       }
@@ -104,15 +111,13 @@ void main() {
       final v = RewardVisuals(256, .2)
         ..add(1, 50000)
         ..advance(.2);
-      expect(v.activeCount, greaterThanOrEqualTo(100));
-      expect(
-        v.coins
-            .where((c) => c.active)
-            .map((c) => c.denomination)
-            .toSet()
-            .length,
-        5,
-      );
+      final seen = <Object>{};
+      for (var i = 0; i < 300; i++) {
+        v.advance(1 / 60);
+        seen.addAll(v.coins.where((c) => c.active).map((c) => c.denomination));
+      }
+      expect(v.emittedObjects, greaterThanOrEqualTo(100));
+      expect(seen.length, 5);
       expect(v.grouped, 0);
       expect(v.omitted, 0);
       expect(value(v.counts), 50000);

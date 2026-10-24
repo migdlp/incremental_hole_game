@@ -797,11 +797,13 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                               SizedBox(
                                 width: 135,
                                 child: DropdownButtonFormField<double>(
-                                  initialValue: session.catalog.base[entry.key],
+                                  initialValue: session.rewardParameterValue(
+                                    entry.key,
+                                  ),
                                   items: [
                                     for (final n in {
                                       entry.value.$1,
-                                      session.catalog.base[entry.key]!,
+                                      session.rewardParameterValue(entry.key),
                                       entry.value.$2,
                                     })
                                       DropdownMenuItem(

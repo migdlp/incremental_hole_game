@@ -1,0 +1,22 @@
+{
+  "maxVoices": 8,
+  "groupWindow": 0.05,
+  "captureWindow": 0.5,
+  "frequentRate": 6,
+  "massRate": 30,
+  "attack": 9,
+  "release": 4,
+  "pitchVariation": 0.045,
+  "captureGain": 0.24,
+  "coinGain": 0.22,
+  "impactGain": 0.08,
+  "starGain": 0.3,
+  "upgradeGain": 0.25,
+  "absorbGain": 0.065,
+  "rollingGain": 0.028,
+  "impactThreshold": 24,
+  "hapticInterval": 0.18,
+  "sinkDuration": 0.24,
+  "sinkCapacity": 1024,
+  "rippleGain": 0.035
+}

@@ -1,5 +1,8 @@
 # AJ-008A — Resultados animados (0.18.0+28)
 
+Validado: formato, análisis y **392 pruebas**, compilación Android y firma.
+Código compilado `d41b711`; [APK 0.18.1+29 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40118367557/artifacts/12569447730). Incluye AJ-008A y BUG-001.
+
 Implementado conforme a la especificación textual. La imagen del mockup y el
 vídeo de referencia no estaban adjuntos en esta tarea: **pendiente comparar
 fidelidad visual con esos originales**, además de la validación en Android físico.
@@ -83,7 +86,7 @@ español y representación compacta, sin cambiar su valor interno.
 - `pubspec.yaml`, `CHANGELOG.md`, `README.md`, `docs/estado-actual.md`,
   `docs/relevo-contexto.md` y este documento: versión y entrega.
 
-## Validación pendiente de registrar
+## Validación y pendientes
 
 Pruebas de orden, cantidades grandes, ingreso cero, alimentación previa/exceso,
 objetivo siguiente, saldo intacto, saltos, movimiento reducido, posición real de

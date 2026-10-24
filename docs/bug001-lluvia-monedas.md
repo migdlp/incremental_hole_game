@@ -1,5 +1,8 @@
 # BUG-001 — Microlotes y lluvia de monedas (0.18.1+29)
 
+Validado: formato, análisis y **392 pruebas**, compilación Android y firma.
+Código compilado `d41b711`; [APK 0.18.1+29 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40118367557/artifacts/12569447730). Incluye AJ-008A y BUG-001.
+
 Funcionalidad implementada, con AJ-008A incluido. **La medición en Android físico
 sigue pendiente**: Cloud no tiene dispositivo ni GPU Android conectados. Los
 valores visuales son provisionales; no se certifican 60 FPS con estas mediciones.
@@ -146,8 +149,8 @@ CHANGELOG y pubspec reflejan la entrega.
 Pruebas de igualdad de valor para 0–5.000, importes máximos y denominaciones
 alternativas; ventanas y fronteras de 200 ms; siete monedas para 34; variedad en
 50.000; saturación, pausa, guardado, final de jornada, estadísticas, aislamiento
-DEBUG y retención de picos. Validación local: **392 pruebas** completas y el benchmark de dibujo opt-in
-correctos. Análisis final y validación CI se registrarán con la entrega.
+DEBUG y retención de picos. Validación: **392 pruebas** completas y el benchmark de dibujo opt-in correctos.
+Análisis y pipeline Android correctos en la entrega enlazada al comienzo.
 
 Para cerrar la aceptación de rendimiento se necesita Android físico en modo
 profile: CPU y GPU por frame, p95/p99/máximos, frames perdidos, GC y memoria con

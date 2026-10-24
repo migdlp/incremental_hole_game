@@ -7,7 +7,7 @@ con guardado y captura sincronizada. Queda consultado qué hacer al alcanzar los
 bordes: limitar al espacio disponible o permitir crecimiento fuera del tablero.
 No aplicar un tope sin respuesta. [Seguimiento](ajustes-version-actual.md).
 
-Actualizado el **24/10/2026**, contrastado con el último APK **0.17.0+27**, a partir del brainstorm del proyecto, ahora llamado Feed the Hole. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
+Actualizado el **24/10/2026**, contrastado con el último APK **0.18.1+29**, a partir del brainstorm del proyecto, ahora llamado Feed the Hole. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
 
 ## Cómo priorizar al retomar
 

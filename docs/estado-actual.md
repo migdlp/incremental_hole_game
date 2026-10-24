@@ -10,6 +10,9 @@ provisional de 192 basado en medidas de Cloud; rendimiento Android físico
 pendiente, sin certificación de 60 FPS. Balance v20, con v19 congelado.
 Incluye el rediseño AJ-008A. [Detalles y mediciones](bug001-lluvia-monedas.md).
 
+Validado: formato, análisis y **392 pruebas**, compilación Android y firma.
+Código compilado `d41b711`; [APK 0.18.1+29 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40118367557/artifacts/12569447730). Incluye AJ-008A y BUG-001.
+
 ## AJ-008A · Resultados animados (0.18.0+28)
 
 Nuevo modal con monedas por denominación hacia el monedero real, seguido del
@@ -124,7 +127,7 @@ no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
 Las referencias anteriores a recogida manual o fase final describen versiones
 históricas y quedan sustituidas por C01.
 
-Actualizado: **24/10/2026**. Referencia de APK entregado: **0.17.0+27**. La revisión `9615d08` incluye crecimiento AJ-005A por cuota, pausa y aceleración de monedas, hoyo al 22 %, AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático y S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
+Actualizado: **24/10/2026**. Referencia de APK entregado: **0.18.1+29**. La revisión `d41b711` incluye AJ-008A, microlotes BUG-001 y crecimiento AJ-005A por cuota, pausa y aceleración de monedas, hoyo al 22 %, AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático y S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate de béisbol y M01 Paredes rebotadoras y conserva interfaz simplificada, feedback visual opcional desactivado por defecto, racha comprable, especiales, escoba de dos puntos y botón DEBUG. Este documento describe lo que existe; las propuestas pendientes están en [cambios futuros](cambios-futuros-arbol-mejoras.md). Para continuar en otro chat, empieza por el [relevo de contexto](relevo-contexto.md).
 
 ## Juego y dirección
 
@@ -290,9 +293,9 @@ han implementado: está pendiente discutir las reglas del prototipo.
 
 ## Entrega y comprobaciones
 
-**[Descargar APK 0.17.0+27 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219/artifacts/12566373126)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
+**[Descargar APK 0.18.1+29 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40118367557/artifacts/12569447730)**. Descomprimir `feed-the-hole-debug.apk`; es un APK de depuración para pruebas, no una publicación en tienda. Los artefactos de GitHub tienen retención limitada y pueden requerir iniciar sesión.
 
-[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/40111416219): formato, análisis, **369 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `9615d08`. Incluye AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático, S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
+[Pipeline de esa entrega](https://github.com/migdlp/incremental_hole_game/actions/runs/40118367557): formato, análisis, **392 pruebas**, compilación Android y verificación de firma correctos. Código compilado: `d41b711`. Incluye AJ-001–AJ-004, P01 Estrellas y burbujas, S03 Prestigio, C01 Cobro automático, S01 Alimentación y cuotas, M03 Generador lanzador, E02 Agujero negro, E01 Gravedad, M02 Bate, M01 Paredes rebotadoras, Racha comprable, especiales, escoba de dos dedos, informes de prueba, botón DEBUG y el ajuste de posiciones.
 
 Las pruebas del debug de esa entrega comprobaron acceso por botón, presencia y encuadre de los 60 nodos, compra de un nodo profundo, ambas vistas, restauración del progreso y pantalla pequeña. Las de juego cubren capturas, grupos, escoba, robot, monedas, ciclo y guardado. **No equivalen a una prueba en Android físico.** El usuario dijo que el «modo dibujo» no funcionaba en un APK anterior; se trató como el modo debug del árbol. No consta aún una confirmación manual del último APK.
 

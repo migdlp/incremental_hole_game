@@ -9,6 +9,11 @@ pausa de un segundo y vuelo al monedero conservados. Parámetros DEBUG, pool
 adaptativo y contabilidad intacta; balance v20 y JSON v14 de AJ-005B conservados.
 [Detalles, archivos, pruebas y límites](bug002-expulsion-secuencial.md). Android físico pendiente.
 
+Validado en la pipeline: **412 pruebas**, análisis, formato, compilación y firma.
+Código compilado `038f026`.
+[Descargar APK 0.19.1+31 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40142624007/artifacts/12578883845).
+Incluye la integración remota de AJ-005B.
+
 
 La rama remota incorporó AJ-005B durante BUG-002: cuotas infinitas por bolas,
 sin vencimiento, JSON v14. Se conserva íntegramente; prevalece sobre las reglas

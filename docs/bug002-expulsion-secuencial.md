@@ -188,3 +188,22 @@ flutter test tool/preview_sequential_coins.dart
 
 La última orden escribe `/tmp/bug002-preview.png`, un diagnóstico del emisor y
 pintor. No sustituye la revisión del movimiento, GPU, FPS y sonido en Android.
+
+
+## Entrega
+
+Código compilado: `038f026356f0df429cb723ebd780bc199666149c`.
+[Pipeline 40142624007](https://github.com/migdlp/incremental_hole_game/actions/runs/40142624007):
+**correcta**, con 412 pruebas, formato, análisis, compilación Android y firma.
+
+[APK 0.19.1+31 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40142624007/artifacts/12578883845).
+Artefacto `feed-the-hole-debug-apk`, 147054756 bytes, caduca 2026-11-07.
+[Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40142624007/artifacts/12579123483).
+Identificador Android `com.migdlp.incremental_hole_game` conservado; la comparación
+de actualización con APK anterior se omitió por no pasar referencia, por lo que
+verificar la firma actual no certifica compatibilidad con otra instalación.
+
+`046ebb0` permanece como antecesor y AJ-005B (`2407458`) está integrado. Publicación
+normal, sin force push ni reinicio del workspace. Escucha, movimiento real y
+medidas de GPU/FPS/memoria en Android físico continúan pendientes; los parámetros
+siguen siendo provisionales.

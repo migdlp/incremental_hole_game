@@ -225,6 +225,7 @@ class RewardVisuals {
   double _batchAge = 0, _pendingAge = 0;
   int? debugLimit;
   int grouped = 0, omitted = 0, peak = 0, batches = 0, quality = 0;
+  int emittedQuantity = 0, arrivedQuantity = 0;
   int get activeCount => _active;
   int get pendingCount => _pending.values.fold(0, (a, b) => a + b);
   int get limit => debugLimit ?? _adaptiveLimit;
@@ -362,6 +363,7 @@ class RewardVisuals {
         config: config,
       );
       coin.age = delay - (emitted % 24) / 24 * config.wave;
+      if (coin.age >= delay) emittedQuantity += coin.quantity;
       _active++;
       emitted++;
       free--;
@@ -376,8 +378,11 @@ class RewardVisuals {
     receiptPulse = math.max(0, receiptPulse - dt);
     for (final coin in coins) {
       if (!coin.active) continue;
+      final wasHidden = coin.age < delay;
       coin.age += dt;
+      if (wasHidden && coin.age >= delay) emittedQuantity += coin.quantity;
       if (coin.age + 1e-9 >= delay + coin.jump + coin.hold + coin.flight) {
+        arrivedQuantity += coin.quantity;
         coin.active = false;
         _active--;
       }

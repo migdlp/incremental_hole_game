@@ -1,3 +1,5 @@
+import 'package:incremental_hole_game/features/feedback/domain/feedback_controller.dart';
+import 'package:incremental_hole_game/features/feedback/domain/feedback_config.dart';
 import 'dart:io';
 import 'package:incremental_hole_game/features/upgrades/domain/catalog.dart';
 import 'package:incremental_hole_game/persistence/save_store.dart';
@@ -42,4 +44,44 @@ class MemoryStore implements SaveStore, PrestigeStore {
     writes.add(contents);
     candidates = [contents, if (previous != null) previous];
   }
+}
+
+/// Deterministic sink for audiovisual tests; never calls a device or writes money.
+class RecordingFeedbackBackend implements FeedbackBackend {
+  RecordingFeedbackBackend({this.hasHaptics = true});
+  @override
+  String get status => 'Backend de pruebas';
+  final bool hasHaptics;
+  final played = <SoundCue>[];
+  final pulses = <String>[];
+  final stopped = <int>[];
+  double absorb = 0, rolling = 0;
+  int frames = 0, stops = 0;
+  @override
+  Future<FeedbackBank?> prepare() async =>
+      FeedbackBank(const FeedbackConfig(), {});
+  @override
+  void frame(
+    List<SoundCue> play,
+    List<int> stop,
+    double absorb,
+    double rolling,
+    String? haptic,
+  ) {
+    played.addAll(play);
+    stopped.addAll(stop);
+    frames++;
+    this.absorb = absorb;
+    this.rolling = rolling;
+    if (hasHaptics && haptic != null) pulses.add(haptic);
+  }
+
+  @override
+  void stop() {
+    absorb = rolling = 0;
+    stops++;
+  }
+
+  @override
+  void dispose() => stop();
 }

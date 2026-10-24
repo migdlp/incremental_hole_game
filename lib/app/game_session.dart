@@ -1,5 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
+import '../features/feedback/domain/feedback_controller.dart';
+import '../features/feedback/domain/feedback_config.dart';
+import '../features/feedback/domain/absorption_effects.dart';
+import '../features/feedback/platform/platform_feedback_backend.dart';
 import 'package:flutter/foundation.dart';
 import '../core/vec.dart';
 import '../features/board/domain/coin_denomination.dart';
@@ -28,13 +33,17 @@ class GameSession extends ChangeNotifier {
     this.store, {
     this.motion = const NoMotionInput(),
     int? eventSeed,
-  }) : _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000) {
+    FeedbackController? feedback,
+  }) : feedback =
+           feedback ?? FeedbackController(backend: PlatformFeedbackBackend()),
+       _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000) {
     feeding = FeedingProgress(
       startDay: 1,
       target: feedingInitialQuota,
       quotaStep: feedingQuotaStep,
     );
   }
+  final FeedbackController feedback;
   final MotionInput motion;
   int _eventRandomState;
   bool _backgrounded = false;
@@ -81,6 +90,7 @@ class GameSession extends ChangeNotifier {
 
   void setBackgrounded(bool value) {
     _backgrounded = value;
+    feedback.setBackground(value);
     if (value) pause();
     _syncMotion();
   }
@@ -206,6 +216,8 @@ class GameSession extends ChangeNotifier {
   }
 
   void _clearRun() {
+    feedback.setPlaying(false);
+    feedback.reset();
     recoveryMessage = null;
     release(cancel: true);
     board?.enterClosing();
@@ -286,6 +298,20 @@ class GameSession extends ChangeNotifier {
   bool paused = false;
   bool sound = true;
   bool haptics = true;
+  double effectsVolume = .8;
+  void _feedbackPreferences() => feedback.preferences(
+    sound: sound,
+    haptics: haptics,
+    volume: effectsVolume,
+  );
+  void setEffectsVolume(double value) {
+    if (!value.isFinite || value < 0 || value > 1) return;
+    effectsVolume = value;
+    _feedbackPreferences();
+    save();
+    notifyListeners();
+  }
+
   bool visualFeedback = false;
   String? saveError;
   String? recoveryMessage;
@@ -297,6 +323,26 @@ class GameSession extends ChangeNotifier {
   bool _saving = false;
   bool _disposed = false;
   String? _debugBaseline;
+  FeedbackConfig? _feedbackBaseline;
+  void debugSetFeedbackParameter(String key, double value) {
+    if (!debugEnabled || running || !FeedbackConfig.ranges.containsKey(key)) {
+      return;
+    }
+    try {
+      final config = feedback.config.changed(key, value);
+      feedback.reset();
+      feedback.config = config;
+      notifyListeners();
+    } on FormatException {
+      /* Reject incompatible DEBUG threshold combinations. */
+    }
+  }
+
+  void debugPreviewFeedback(FeedbackEvent event) {
+    if (!debugEnabled || running) return;
+    feedback.emit(event, gameplay: false);
+  }
+
   bool _debugFullTree = true;
   final _debugReports = <DebugDayReport>[];
   List<DebugDayReport> get debugReports => List.unmodifiable(_debugReports);
@@ -386,8 +432,12 @@ class GameSession extends ChangeNotifier {
     _retiredRunLevels.clear();
     final settings = catalog.settings(levels);
     _eventRandomState = (1664525 * _eventRandomState + 1013904223) & 0xffffffff;
+    feedback.reset();
+    _feedbackPreferences();
+    feedback.setPlaying(true);
     board = Board(
       settings,
+      absorption: AbsorptionEffects(config: feedback.config),
       randomState: progress.day * 7919,
       tool: selectedTool,
       gravitySupported: gravityAvailable,
@@ -470,16 +520,45 @@ class GameSession extends ChangeNotifier {
     board!.gravitySupported = gravityAvailable;
     board!.gravityTilt = _debugTilt ?? motion.tilt;
     board!.starBubbles ??= _newBubbles(board!);
+    final beforeContact = board!.contactSerial,
+        beforeBat = board!.batImpactSerial,
+        beforeShots = board!.launcher.shots,
+        beforeCrystal = board!.starBubbles?.contactSerial ?? 0;
     final events = board!.update(dt, producing: producing);
+    if (events.captured > 0) {
+      feedback.emit(FeedbackEvent.capture, count: events.captured);
+    }
+    if (board!.contactSerial > beforeContact) {
+      feedback.emit(
+        FeedbackEvent.collision,
+        count: board!.contactSerial - beforeContact,
+        strength: board!.contactStrength,
+      );
+    }
+    if (board!.batImpactSerial > beforeBat) {
+      feedback.emit(FeedbackEvent.bat, strength: board!.lastBatImpactStrength);
+    }
+    if (board!.launcher.shots > beforeShots) {
+      feedback.emit(FeedbackEvent.launcher);
+    }
+    if ((board!.starBubbles?.contactSerial ?? 0) > beforeCrystal) {
+      feedback.emit(
+        FeedbackEvent.crystal,
+        strength: board!.starBubbles!.contactStrength,
+      );
+    }
+    feedback.motion(board!.rollingActivity);
     if (debugEnabled) {
       _debugMaxCombo = math.max(_debugMaxCombo, board!.combo.multiplier);
     }
+    final quotaWasMet = feeding.met;
     feeding.credit(
       progress.day,
       normal: events.normalFood,
       instant: events.instantFood,
     );
     board!.syncHoleGrowth(feeding.growths);
+    if (!quotaWasMet && feeding.met) feedback.emit(FeedbackEvent.quota);
     if (feeding.met && feeding.period > meta.starLedger.quota) {
       _changeStars(
         meta.starLedger.award(feeding.period, board!.starBubbles!.config),
@@ -490,6 +569,9 @@ class GameSession extends ChangeNotifier {
     if (bubbles != null && bubbles.broken.isNotEmpty) {
       final transaction = meta.starLedger.redeem(bubbles.broken);
       _changeStars(transaction.ledger, paid: transaction.paid);
+      if (transaction.paid > 0) {
+        feedback.emit(FeedbackEvent.star, count: bubbles.broken.length);
+      }
       bubbles.broken.clear();
     }
     economy.collect(events.collected);
@@ -499,7 +581,21 @@ class GameSession extends ChangeNotifier {
       final id = rewards.register(value);
       rewardVisuals.add(id, value);
     }
+    final beforeEmitted = rewardVisuals.emittedQuantity,
+        beforeArrived = rewardVisuals.arrivedQuantity;
     rewardVisuals.advance(dt);
+    if (rewardVisuals.emittedQuantity > beforeEmitted) {
+      feedback.emit(
+        FeedbackEvent.coinOut,
+        count: rewardVisuals.emittedQuantity - beforeEmitted,
+      );
+    }
+    if (rewardVisuals.arrivedQuantity > beforeArrived) {
+      feedback.emit(
+        FeedbackEvent.coinIn,
+        count: rewardVisuals.arrivedQuantity - beforeArrived,
+      );
+    }
     final arrived = rewards.advance(dt);
     if (arrived > 0) {
       economy.collect(arrived);
@@ -517,6 +613,8 @@ class GameSession extends ChangeNotifier {
     if (!running) return;
     economy.collect(rewards.settle());
     rewardVisuals.clear();
+    board!.absorption.clear();
+    feedback.setPlaying(false);
     board!.enterClosing();
     if (debugEnabled) {
       _debugReports.add(
@@ -567,7 +665,13 @@ class GameSession extends ChangeNotifier {
   void touch(Vec position, {double? time}) {
     if (!running || paused || _backgrounded) return;
     board!.gravitySupported = gravityAvailable;
+    final blackBefore = board!.blackHole.activations,
+        gravityBefore = board!.gravity.remaining;
     economy.collect(board!.touch(position, time: time));
+    if (board!.blackHole.activations > blackBefore ||
+        (gravityBefore == 0 && board!.gravity.remaining > 0)) {
+      feedback.emit(FeedbackEvent.special);
+    }
     notifyListeners();
   }
 
@@ -635,6 +739,7 @@ class GameSession extends ChangeNotifier {
   void pause() {
     if (!running || paused) return;
     paused = true;
+    feedback.setPlaying(false);
     _syncMotion();
     _accumulator = 0;
     release(cancel: true);
@@ -645,6 +750,8 @@ class GameSession extends ChangeNotifier {
   void resume() {
     if (_backgrounded) return;
     paused = false;
+    feedback.setPlaying(running);
+    _feedbackPreferences();
     _syncMotion();
     _accumulator = 0;
     notifyListeners();
@@ -657,6 +764,7 @@ class GameSession extends ChangeNotifier {
         !board!.activateSpecial(ability)) {
       return false;
     }
+    feedback.emit(FeedbackEvent.special);
     save();
     notifyListeners();
     return true;
@@ -664,12 +772,17 @@ class GameSession extends ChangeNotifier {
 
   void setSound(bool value) {
     sound = value;
+    _feedbackPreferences();
+    if (value) {
+      unawaited(feedback.prepare());
+    }
     save();
     notifyListeners();
   }
 
   void setHaptics(bool value) {
     haptics = value;
+    _feedbackPreferences();
     save();
     notifyListeners();
   }
@@ -686,6 +799,7 @@ class GameSession extends ChangeNotifier {
     final baseline = snapshot();
     save();
     _debugBaseline = baseline;
+    _feedbackBaseline = feedback.config;
     _debugFeedingTrials = false;
     _debugReports.clear();
     _debugFullTree = true;
@@ -704,6 +818,8 @@ class GameSession extends ChangeNotifier {
       _allowPrestigeRollback = false;
     }
     _debugBaseline = null;
+    if (_feedbackBaseline != null) feedback.config = _feedbackBaseline!;
+    _feedbackBaseline = null;
     debugPrestigeRules = false;
     _debugStars = null;
     debugBubbleGravity = debugBubbleBlackHole = false;
@@ -761,6 +877,7 @@ class GameSession extends ChangeNotifier {
 
     unlock(definition, targetLevel);
     _applyDebugLevels(next);
+    feedback.emit(FeedbackEvent.upgrade, gameplay: false);
     return true;
   }
 
@@ -888,8 +1005,13 @@ class GameSession extends ChangeNotifier {
     if (definition.id == 'prestige' && !confirmPrestige) return false;
     final level = levels[definition.id] ?? 0;
     if (!economy.spend(definition.levels[level].cost)) return false;
-    if (definition.id == 'prestige') return _endRun(voluntary: true);
+    if (definition.id == 'prestige') {
+      final ended = _endRun(voluntary: true);
+      if (ended) feedback.emit(FeedbackEvent.upgrade, gameplay: false);
+      return ended;
+    }
     levels[definition.id] = level + 1;
+    feedback.emit(FeedbackEvent.upgrade, gameplay: false);
     if (definition.id == 'bat') selectedTool = BallTool.bat;
     if (definition.id == 'broom') selectedTool = BallTool.broom;
     if (definition.id == 'broom_v') selectedTool = BallTool.vee;
@@ -916,6 +1038,7 @@ class GameSession extends ChangeNotifier {
     'levels': levels,
     'sound': sound,
     'haptics': haptics,
+    'effectsVolume': effectsVolume,
     'visualFeedback': visualFeedback,
     'last': progress.last?.toJson(),
     'run': !running
@@ -1327,6 +1450,13 @@ class GameSession extends ChangeNotifier {
     if ((savedPosition - savedLauncher.position).length > 1e-6) {
       throw const FormatException('Posición del lanzador inválida');
     }
+    final savedVolume = json['effectsVolume'] ?? .8;
+    if (savedVolume is! num ||
+        !savedVolume.isFinite ||
+        savedVolume < 0 ||
+        savedVolume > 1) {
+      throw const FormatException('Volumen inválido');
+    }
     final savedSound = json['sound'] as bool;
     final savedHaptics = json['haptics'] as bool? ?? true;
     final savedVisualFeedback = json['visualFeedback'] as bool? ?? false;
@@ -1403,6 +1533,10 @@ class GameSession extends ChangeNotifier {
     cycle = restoredCycle;
     sound = savedSound;
     haptics = savedHaptics;
+    effectsVolume = savedVolume.toDouble();
+    feedback.reset();
+    feedback.setPlaying(false);
+    _feedbackPreferences();
     visualFeedback = savedVisualFeedback;
     paused = running;
     _syncMotion();
@@ -1455,6 +1589,7 @@ class GameSession extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    feedback.dispose();
     motion.dispose();
     super.dispose();
   }

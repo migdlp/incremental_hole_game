@@ -1,3 +1,4 @@
+import '../../feedback/platform/absorption_painter.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient;
 import 'package:flame/game.dart';
@@ -7,9 +8,6 @@ import '../../../core/vec.dart';
 import '../domain/board.dart';
 import '../domain/wall_impact.dart';
 import 'coin_painter.dart';
-import 'bat_feedback.dart';
-import 'black_hole_feedback.dart';
-import 'launcher_feedback.dart';
 import '../domain/black_hole_event.dart';
 import '../domain/bat_impact.dart';
 
@@ -30,20 +28,9 @@ class GardenGame extends FlameGame {
 
   void _syncEngine() {
     if (session.board != null) _displayBoard = session.board!;
-    _launcherFeedback.sync(
-      _displayBoard,
-      sound: session.sound,
-      playing: session.running && !session.paused,
-    );
-    _blackHoleFeedback.sync(
-      _displayBoard,
-      sound: session.sound,
-      playing: session.running && !session.paused,
-    );
     if (session.running && !session.paused) {
       resumeEngine();
     } else {
-      _batFeedback.suppress(_displayBoard);
       pauseEngine();
     }
   }
@@ -59,9 +46,6 @@ class GardenGame extends FlameGame {
   final Paint _rewardPaint = Paint();
   final GameSession session;
   bool wallEffectsEnabled;
-  final _batFeedback = BatFeedback();
-  final _blackHoleFeedback = BlackHoleFeedback();
-  final _launcherFeedback = LauncherFeedback();
   final _labels = <String, TextPainter>{};
   double get scale => math.min(size.x / Board.width, size.y / Board.height);
   Offset get origin => Offset(
@@ -84,19 +68,6 @@ class GardenGame extends FlameGame {
     _displayBoard = session.board!;
     super.update(dt);
     session.tick(dt);
-    _launcherFeedback.sync(
-      _displayBoard,
-      sound: session.sound,
-      playing: session.running && !session.paused,
-    );
-    if (session.running && !session.paused) {
-      _batFeedback.update(
-        dt,
-        session.board!,
-        sound: session.sound,
-        haptics: session.haptics,
-      );
-    }
   }
 
   Paint paint(Color color, {double? stroke}) => Paint()
@@ -620,6 +591,13 @@ class GardenGame extends FlameGame {
         paint(ball.golden ? const Color(0xfffff4b0) : const Color(0xff97a2ad)),
       );
     }
+    paintAbsorption(
+      canvas,
+      board.absorption,
+      board.holePosition,
+      board.captureRadius,
+      _rewardPaint,
+    );
     _renderStarBubbles(canvas, board);
     if (board.settings['robot_count'] > 0) {
       final p = offset(board.robot.position);

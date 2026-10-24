@@ -62,6 +62,7 @@ class _BootstrapState extends State<Bootstrap> {
             (await (store as PrestigeStore).loadPrestigeCandidates()).isEmpty;
         rethrow;
       }
+      await next.feedback.prepare();
       if (!mounted) {
         next.dispose();
         return;

@@ -1,5 +1,15 @@
 # Feed the Hole
 
+## AJ-007 · Feedback audiovisual (0.19.0+30)
+
+Audio offline centralizado con plops variables, absorción y rodadura compartidas,
+cascadas musicales de monedas y cristal/estrellas. Háptica agrupada independiente,
+volumen persistente y controles DEBUG. Cada bola se hunde bajo el borde del hoyo;
+reacciones agrupadas y compatibles con su crecimiento. Sin cambios económicos.
+Escucha, vibración y rendimiento en Android físico pendientes de calibración.
+[Arquitectura, recursos, pruebas y límites](docs/aj007-feedback-audiovisual.md).
+
+
 ## BUG-001 · Lluvia de monedas (0.18.1+29)
 
 Microlotes de 200 ms, siete monedas para 34, expansión exacta y variada para

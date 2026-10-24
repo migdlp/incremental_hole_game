@@ -30,6 +30,8 @@ android {
         versionName = flutter.versionName
     }
 
+    androidResources { noCompress += "wav" }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

@@ -15,10 +15,12 @@ class ResultsOverlay extends StatefulWidget {
     required this.data,
     required this.walletAnchor,
     required this.onShop,
+    this.onCoinReceipt,
   });
   final ResultsData data;
   final GlobalKey walletAnchor;
   final Future<void> Function() onShop;
+  final void Function(int count)? onCoinReceipt;
   @override
   State<ResultsOverlay> createState() => _ResultsOverlayState();
 }
@@ -35,7 +37,7 @@ class _ResultsOverlayState extends State<ResultsOverlay>
   final scroll = ScrollController();
   Duration? last;
   int? tapGeneration;
-  int lastRow = -1;
+  int lastRow = -1, _receivedCoins = 0;
   bool shopOpened = false;
   Rect? anchor;
   @override
@@ -50,6 +52,7 @@ class _ResultsOverlayState extends State<ResultsOverlay>
     super.didChangeDependencies();
     if (MediaQuery.disableAnimationsOf(context)) {
       sequence.completeAll();
+      _receivedCoins = sequence.receivedCoins;
       ticker.stop();
     }
   }
@@ -69,6 +72,11 @@ class _ResultsOverlayState extends State<ResultsOverlay>
     final dt = last == null ? 0.0 : (elapsed - last!).inMicroseconds / 1e6;
     last = elapsed;
     sequence.advance(dt);
+    final received = sequence.receivedCoins;
+    if (received > _receivedCoins) {
+      widget.onCoinReceipt?.call(received - _receivedCoins);
+    }
+    _receivedCoins = received;
     if (sequence.done) ticker.stop();
   }
 
@@ -120,6 +128,7 @@ class _ResultsOverlayState extends State<ResultsOverlay>
     final generation = tapGeneration;
     tapGeneration = null;
     if (generation != null) sequence.skip(generation);
+    _receivedCoins = sequence.receivedCoins;
     if (sequence.done) ticker.stop();
   }
 

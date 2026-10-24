@@ -126,7 +126,29 @@ dart --suppress-analytics compile exe tool/benchmark_feedback.dart -o /tmp/feedb
 /tmp/feedback-bench
 ```
 
-Validación local: suite completa de 409 pruebas correcta y 18 pruebas específicas
-correctas tras añadir el caso de despertar del ticker (410 casos en el conjunto
-final). Análisis sin incidencias y formato sin cambios. La pipeline vuelve a
-validar el conjunto completo y compila el puente Kotlin Android.
+Validación local: suite de 409 pruebas y 18 específicas correctas después de
+incorporar el caso adicional del ticker. Validación final en GitHub Actions:
+**410 pruebas**, formato, análisis, puente Kotlin, APK y firma correctos.
+
+Código compilado: `46b623a93c3837cd5c1cbb328414646e069e163f`.
+[Pipeline 40140079810](https://github.com/migdlp/incremental_hole_game/actions/runs/40140079810).
+[APK 0.19.0+30 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40140079810/artifacts/12578322298).
+Artefacto `feed-the-hole-debug-apk`, 147040048 bytes, caduca 2026-11-07.
+[Registros de validación](https://github.com/migdlp/incremental_hole_game/actions/runs/40140079810/artifacts/12578706978).
+La comparación de actualización con una APK anterior se omitió por no disponer
+del parámetro de referencia; verificar firma actual no acredita compatibilidad
+con una instalación anterior. Identificador Android sin cambios.
+Advertencias no bloqueantes de Actions: versiones v4 de acciones Node 20 y
+setup-java v4 deprecadas; no se cambiaron como parte de AJ-007.
+
+### Incidencia de acceso al seguimiento
+
+Durante la compilación, las nuevas llamadas de `gh` devolvieron
+`HTTP 401: Bad credentials`; las consultas anteriores y la publicación habían
+funcionado. El estado del environment pasó de revisión 128 a 129, con red
+conectada y política aplicada. No se ha demostrado la causa de la invalidación.
+No se alteraron proxies ni tokens. La conexión integrada de GitHub de Codex
+permitió consultar los jobs, y `git ls-remote` siguió confirmando la rama publicada.
+Para seguimiento, usar esa conexión autorizada cuando falle la CLI; reparar la
+credencial de `gh` desde la configuración del environment si se necesita la CLI.
+Este recurso alternativo no equivale a haber reparado el token inválido.

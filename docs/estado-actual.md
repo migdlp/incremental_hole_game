@@ -10,6 +10,11 @@ Escucha, vibración y rendimiento en Android físico pendientes de calibración.
 [Arquitectura, recursos, pruebas y límites](aj007-feedback-audiovisual.md).
 
 
+Validado en GitHub Actions: formato, análisis, **410 pruebas**, compilación Android
+y firma correctos. Código `46b623a`.
+[Descargar APK 0.19.0+30 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40140079810/artifacts/12578322298).
+Comparación de firma con APK anterior no ejecutada; no certifica actualización.
+
 ## BUG-001 · Lluvia de monedas (0.18.1+29)
 
 Microlotes de 200 ms, siete monedas para 34, expansión exacta y variada para

@@ -337,7 +337,7 @@ void main() {
       expect(restored.board!.settings['robot_count'], 1);
       expect(restored.board!.sweepEnabled, isFalse);
       expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 12);
+      expect(jsonDecode(restored.snapshot())['version'], 13);
     },
   );
 

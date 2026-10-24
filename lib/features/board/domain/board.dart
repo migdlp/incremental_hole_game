@@ -99,7 +99,23 @@ class Board {
     180,
     settings.balanceVersion >= 18 ? height * settings['hole_y_ratio'] : 50,
   );
-  double get captureRadius => settings['hole_capture_radius'];
+  double? _grownCaptureRadius;
+  int _holeGrowths = 0;
+  int get holeGrowths => _holeGrowths;
+  double get captureRadius =>
+      _grownCaptureRadius ?? settings['hole_capture_radius'];
+  void syncHoleGrowth(int growths) {
+    if (growths < 0) throw ArgumentError('Crecimiento negativo');
+    if (growths == _holeGrowths) return;
+    // Area grows by 16%, so the radius grows by sqrt(1.16).
+    final grown = settings['hole_capture_radius'] * math.pow(1.16, growths / 2);
+    if (!grown.isFinite) {
+      throw const FormatException('Tamaño del agujero no representable');
+    }
+    _holeGrowths = growths;
+    _grownCaptureRadius = grown;
+  }
+
   static const generator = Vec(180, 480);
   final DaySettings settings;
   StarBubbles? starBubbles;

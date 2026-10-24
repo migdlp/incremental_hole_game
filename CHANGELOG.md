@@ -1,5 +1,12 @@
 # Historial de cambios
 
+## 0.17.0+27
+
+- AJ-005A: cada cuota completada aumenta el área del hoyo un 16 %, una sola vez.
+- Dibujo y captura comparten el radio ampliado; persistencia entre jornadas y reinicios.
+- Guardado v13 con contador y cuota aplicada; migración segura desde versiones anteriores.
+- Las cuotas históricas no vuelven a premiarse; el prestigio reinicia el tamaño de la partida.
+
 ## 0.16.2+26
 
 - Las monedas esperan inmóviles un segundo tras el salto, antes de volar al monedero.

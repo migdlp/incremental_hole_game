@@ -1,5 +1,19 @@
 # Estado actual de Feed the Hole
 
+## AJ-005A · Crecimiento por cuota (0.17.0+27)
+
+Cada cuota completada aumenta el **área de captura un 16 %**, una sola vez:
+radio = radio base × √(1,16^cuotas). El dibujo y la captura usan el mismo radio.
+Se aplica en la jornada actual y persiste entre jornadas y reinicios; se pierde
+al terminar la partida normal, como el resto de su progresión temporal.
+No depende de compras, no añade nodos y conserva el centro al 22 % de altura.
+JSON v13 registra número de crecimientos y última cuota aplicada. Los guardados
+anteriores conservan su progreso y empiezan a crecer con la siguiente cuota;
+las cuotas ya completadas no se vuelven a premiar. Balance v19 sin cambios.
+Los tiempos y la estética de monedas de 0.16.2 se conservan.
+**Decisión consultada aún abierta:** tamaño al llegar a los bordes. No se añade
+un tope de balance sin aprobación; se mantiene el crecimiento solicitado del 16 %.
+
 ## Tiempos de monedas · 0.16.2+26
 
 Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
@@ -18,7 +32,7 @@ Por nueva indicación del usuario, el hoyo pasa del 74 % al **22 % de altura**:
 centro **(180,123.2)**, con la horizontal en 180. Captura, succión, monedas y
 estrellas comparten la posición. Balance v19 con v18 congelado; las jornadas
 ya empezadas conservan su configuración y la siguiente usa el 22 %.
-AJ-005 sigue pendiente de aclaración; esta corrección solo cambia la posición.
+La aclaración posterior AJ-005A vincula el crecimiento a cuotas; esta entrega histórica solo cambió la posición.
 
 ## Entrega anterior · AJ-001 a AJ-004 (0.16.0+24)
 
@@ -30,9 +44,8 @@ con origen compartido por captura, succión, monedas y estrellas.
 JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
 jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
 rápidas automáticas: no se compensan cambiando otras mecánicas.
-**AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no
-existe todavía una rama de nivel del agujero. No inventar esa relación ni añadir
-funcionalidades futuras. [Estado y compatibilidad](ajustes-version-actual.md).
+**Aclaración posterior AJ-005A:** el crecimiento corresponde a cuotas completadas;
+no se añade una rama de nivel del agujero. [Estado y compatibilidad](ajustes-version-actual.md).
 
 ## P01 · Estrellas y burbujas físicas (0.15.0+23)
 

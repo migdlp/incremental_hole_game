@@ -1,5 +1,19 @@
 # Ajustes de la versión actual — Feed the Hole
 
+## AJ-005A · Crecimiento por cuota (0.17.0+27)
+
+Cada cuota completada aumenta el **área de captura un 16 %**, una sola vez:
+radio = radio base × √(1,16^cuotas). El dibujo y la captura usan el mismo radio.
+Se aplica en la jornada actual y persiste entre jornadas y reinicios; se pierde
+al terminar la partida normal, como el resto de su progresión temporal.
+No depende de compras, no añade nodos y conserva el centro al 22 % de altura.
+JSON v13 registra número de crecimientos y última cuota aplicada. Los guardados
+anteriores conservan su progreso y empiezan a crecer con la siguiente cuota;
+las cuotas ya completadas no se vuelven a premiar. Balance v19 sin cambios.
+Los tiempos y la estética de monedas de 0.16.2 se conservan.
+**Decisión consultada aún abierta:** tamaño al llegar a los bordes. No se añade
+un tope de balance sin aprobación; se mantiene el crecimiento solicitado del 16 %.
+
 ## Tiempos de monedas · 0.16.2+26
 
 Se conserva el dibujo, el salto de salida y el recorrido de las monedas.
@@ -17,7 +31,7 @@ Código compilado `e409af8`; [APK y SHA-256 (ZIP)](https://github.com/migdlp/inc
 El usuario sustituye la posición aproximada del 75 % por el **22 % de la altura**.
 Centro vigente (180,123.2), horizontal conservada. Balance v19 con v18 congelado;
 la siguiente jornada aplica la posición nueva. El apartado de AJ-004 de 0.16.0
-inferior conserva la explicación de esa entrega anterior. AJ-005 sigue pendiente.
+inferior conserva la explicación de esa entrega anterior. AJ-005A define posteriormente el crecimiento por cuotas.
 
 Se continúa desde 0.15.0+23 y sus sistemas P01/C01/S03. No se recuperan versiones
 antiguas ni se añaden mecánicas de otros documentos.
@@ -28,7 +42,7 @@ antiguas ni se añaden mecánicas de otros documentos.
 | AJ-002 | Implementado | Monedas acuñadas con canto, cara plana y grabado |
 | AJ-003 | Implementado | Icono y saldo sobre tablero sin recuadro |
 | AJ-004 | Implementado y corregido | Centro vigente al 22 % de altura del tablero |
-| AJ-005 | Pendiente de aclaración | Falta identificar qué compras activan el crecimiento |
+| AJ-005A | Implementado | +16 % de área por cuota, persistente y sin duplicados |
 
 ## Agarre y compatibilidad
 
@@ -80,17 +94,14 @@ la generación, cuotas o balance para compensarla. Requiere prueba del usuario.
 Las pruebas de contabilidad aíslan capturas explícitas; las pruebas de generación
 y física siguen usando el balance real y comprueban emisiones aunque ya se capturen.
 
-## Aclaración requerida para AJ-005
+## Aclaración recibida: AJ-005A
 
-El catálogo actual no contiene mejoras de nivel o barrera del agujero. Se ha
-preguntado qué compras deben hacerlo crecer: una nueva mejora de tamaño, cuotas
-superadas u otra compra existente. Vincularlo a Valor, Duración o cuotas sin esa
-respuesta cerraría una decisión de diseño que no está definida.
-
-Una vez identificado el desencadenante, deberán probarse crecimiento visual y
-radio real, límites y separación respecto al generador (actualmente hay
-356,8 unidades entre centros). No se introducen costes, requisitos ni porcentajes
-finales mientras falte esa decisión.
+El usuario vincula el crecimiento a cada cuota de alimentación completada.
+Esto sustituye la propuesta previa de hacerlo depender de compras del árbol.
+La fórmula aumenta el área, no el radio, un 16 % sobre el área anterior.
+Se registra una sola vez por período incluso con Captura total, exceso de
+alimentación, pausa o restauraciones repetidas. DEBUG conserva su aislamiento.
+El límite al alcanzar los bordes se ha consultado; sigue sin resolverse.
 
 ## Entrega y límites de validación
 
@@ -101,7 +112,7 @@ formato, análisis sin avisos, **360 pruebas**, compilación Android, nombre,
 paquete `com.migdlp.incremental_hole_game` y firma v2 del binario verificados.
 [APK 0.16.2+26 y SHA-256 en ZIP](https://github.com/migdlp/incremental_hole_game/actions/runs/39861748135/artifacts/12462915831).
 
-AJ-005 sigue pendiente de respuesta. No se ha validado el tacto ni el rendimiento
+AJ-005A ya concreta el desencadenante; queda por decidir el límite en bordes. No se ha validado el tacto ni el rendimiento
 en un teléfono físico. Sigue pendiente la firma compatible con APK anteriores;
 la pipeline estándar verifica esta APK, sin certificar actualización sobre ellas.
 No desinstalar una aplicación anterior para resolver la firma si se necesita

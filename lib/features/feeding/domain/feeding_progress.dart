@@ -7,6 +7,7 @@ class FeedingProgress {
   int period = 1, completedDays = 0;
   int normalPoints = 0, instantPoints = 0;
   int runNormal = 0, runInstant = 0;
+  int growths = 0, growthPeriod = 0;
   int? target;
   final int quotaStep;
   static const periodLength = 5;
@@ -45,6 +46,10 @@ class FeedingProgress {
     instantPoints += instant;
     runNormal += normal;
     runInstant += instant;
+    if (met && period > growthPeriod) {
+      growths++;
+      growthPeriod = period;
+    }
   }
 
   bool finishDay(int day) {
@@ -66,12 +71,15 @@ class FeedingProgress {
     'runInstant': runInstant,
     'target': target,
     'quotaStep': quotaStep,
+    'growths': growths,
+    'growthPeriod': growthPeriod,
   };
 
   factory FeedingProgress.fromJson(
     Map<String, dynamic> json, {
     required int day,
     required bool running,
+    bool requireGrowth = false,
   }) {
     int number(String key, {int minimum = 0}) {
       final value = json[key];
@@ -98,6 +106,22 @@ class FeedingProgress {
           ..instantPoints = number('instant')
           ..runNormal = number('runNormal')
           ..runInstant = number('runInstant');
+    final hasGrowth =
+        json.containsKey('growths') || json.containsKey('growthPeriod');
+    if (requireGrowth || hasGrowth) {
+      state.growths = number('growths');
+      state.growthPeriod = number('growthPeriod');
+    } else {
+      // Historical quotas are already settled; growth starts with future quotas.
+      state.growthPeriod = state.met ? state.period : state.period - 1;
+    }
+    if (state.growths > state.growthPeriod ||
+        state.growthPeriod > state.period ||
+        (state.met
+            ? state.growthPeriod != state.period
+            : state.growthPeriod == state.period)) {
+      throw const FormatException('Crecimiento del agujero incoherente');
+    }
     final expectedDay = state.startDay + state.completedDays;
     final migratedRun =
         running &&

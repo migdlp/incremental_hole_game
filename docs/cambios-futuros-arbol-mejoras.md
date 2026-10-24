@@ -1,11 +1,11 @@
 # Cambios futuros: mecánicas y árbol de mejoras
 
-## AJ-005 pendiente de aclaración
+## Límite de tamaño del agujero pendiente de decisión
 
-Falta identificar qué compras deben hacer crecer el agujero. No hay una mejora
-actual de nivel del hoyo; no vincular crecimiento a Valor, Duración o cuotas sin
-respuesta. AJ-001 a AJ-004 ya están implementados sobre la última versión.
-[Seguimiento y pruebas](ajustes-version-actual.md).
+AJ-005A ya implementa el crecimiento del área un 16 % por cuota completada,
+con guardado y captura sincronizada. Queda consultado qué hacer al alcanzar los
+bordes: limitar al espacio disponible o permitir crecimiento fuera del tablero.
+No aplicar un tope sin respuesta. [Seguimiento](ajustes-version-actual.md).
 
 Actualizado el **21/10/2026**, contrastado con el último APK **0.16.0+24**, a partir del brainstorm del proyecto, ahora llamado Feed the Hole. Aquí se mantienen únicamente cambios pendientes. El [contexto del proyecto](contexto-proyecto-para-ideas.md), el [árbol vigente](arbol-de-mejoras.md) y [balance.csv](balance.csv) describen lo implementado.
 

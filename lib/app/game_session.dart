@@ -279,7 +279,8 @@ class GameSession extends ChangeNotifier {
             final data = jsonDecode(raw) as Map<String, dynamic>;
             if (data['version'] != 10 &&
                 data['version'] != 11 &&
-                data['version'] != 12) {
+                data['version'] != 12 &&
+                data['version'] != 13) {
               throw const FormatException('Checkpoint incompatible');
             }
             final state = MetaProgress.fromJson(
@@ -364,6 +365,7 @@ class GameSession extends ChangeNotifier {
     economy.begin();
     rewards = _newRewards();
     rewardVisuals = _newVisuals();
+    board!.syncHoleGrowth(feeding.growths);
     board!.enableAutomaticCoins();
     board!.starBubbles = _newBubbles(board!)..populate(0);
     board!.bubbleGravity = debugEnabled && debugBubbleGravity;
@@ -427,6 +429,7 @@ class GameSession extends ChangeNotifier {
       normal: events.normalFood,
       instant: events.instantFood,
     );
+    board!.syncHoleGrowth(feeding.growths);
     if (feeding.met && feeding.period > meta.starLedger.quota) {
       _changeStars(
         meta.starLedger.award(feeding.period, board!.starBubbles!.config),
@@ -841,7 +844,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 12,
+    'version': 13,
     'meta': meta.toJson(),
     'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
@@ -889,7 +892,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 9 &&
         json['version'] != 10 &&
         json['version'] != 11 &&
-        json['version'] != 12) {
+        json['version'] != 12 &&
+        json['version'] != 13) {
       throw const FormatException('Versión de guardado no compatible');
     }
     if ((json['version'] as int) >= 10 &&
@@ -1158,6 +1162,7 @@ class GameSession extends ChangeNotifier {
         savedFeeding,
         day: day,
         running: run != null,
+        requireGrowth: (json['version'] as int) >= 13,
       );
       if (restoredBoard != null &&
           restoredBoard.settings.balanceVersion >= 14 &&
@@ -1210,6 +1215,7 @@ class GameSession extends ChangeNotifier {
         )..sync(restoredMeta.starLedger);
       }
     }
+    restoredBoard?.syncHoleGrowth(restoredFeeding.growths);
     // Commit only after validating every module; a failed load leaves no partial state.
     final savedEventRandom = json['eventRandom'] ?? _eventRandomState;
     if (savedEventRandom is! int ||

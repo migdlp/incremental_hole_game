@@ -73,7 +73,8 @@ valores v20 y el CSV de balance permanecen idénticos a la versión publicada.
 - Variación angular: 12 %; separación pequeña: 0,85 rad.
 - Salto inicial: 38 unidades, con variación y adaptación a bordes.
 - Pool inicial: 192, provisional. DEBUG permite probar capacidad hasta 1024.
-- Presión temporal de agrupación inicial: 5 s de servicio estimado. Es un umbral,
+- Presión temporal de agrupación inicial: 5 s de servicio estimado y edad media
+  ponderada por denominación. Es un umbral,
   no una garantía exacta de latencia por captura.
 - El presupuesto sigue reduciendo detalles/curvas antes de limitar objetos según
   los tiempos de renderizado; se recupera con histéresis cuando mejora la carga.
@@ -138,3 +139,52 @@ AJ-005B). Se integró mediante merge, conservando sus cuotas, crecimiento,
 prestigio y migración v14. Los conflictos de documentación conservan ambas
 entregas; el bucle mantiene tanto la detección de cuotas como el límite de una
 emisión visual por fotograma. Se repite la validación sobre el conjunto integrado.
+
+
+## Validación integrada y medidas Cloud
+
+Sobre AJ-005B: **412 pruebas completas** correctas, análisis sin incidencias y
+formato correcto. Las 13 pruebas nuevas del emisor siguen presentes; la cantidad
+total cambia respecto al conjunto anterior porque AJ-005B sustituye pruebas de
+las antiguas reglas de cuotas/derrota. La previsualización fuera de pantalla
+pasó además como prueba optativa del pintor real.
+
+Comparación AOT con `2407458` como base, 2880 muestras por escenario.
+Tiempos de pared de CPU del modelo, curvas y, donde se indica, tablero con
+200 bolas/escoba/bate/lanzador; no son tiempos GPU ni FPS Android:
+
+| Escenario | Antes p95 / p99 / pico (ms) | Después p95 / p99 / pico (ms) |
+|---|---:|---:|
+| Capturas repetidas, monedas | 0.003 / 0.042 / 1.256 | 0.011 / 0.048 / 34.905 |
+| Con tablero cargado | 2.707 / 4.754 / 91.778 | 3.920 / 13.255 / 466.510 |
+
+Se conservan los picos, incluido **466,5 ms** del modelo cargado posterior.
+Estas medidas de un host Cloud compartido no permiten atribuir cada pausa al
+emisor ni certificar ausencia de tirones. El emisor aislado, con el plan real,
+midió p95 25 µs, p99 58 µs y pico 662 µs en la corriente de importe 3400 cada
+200 ms. No se cambió la física para alterar el benchmark.
+
+- 4 monedas aisladas: cuatro objetos, última salida a 0,45 s.
+- Corriente pequeña de 300: 300 objetos, cero agrupaciones ni omisiones.
+- Corriente extrema: 38850 monedas planificadas se representaron mediante
+  1111 objetos a lo largo de 15 s de capturas y su cola posterior. Pico de
+  120 objetos activos, una salida máxima por fotograma, sin omisiones y sin
+  pendientes al terminar la prueba de 25 s. Última salida a 18,87 s.
+- Los recuentos agrupados más los objetos emitidos conservan siempre la cantidad
+  del plan. La cola tardía agrupa por edad media de cada denominación, evitando
+  tanto la espera creciente como agrupar una corriente pequeña solo por durar.
+- RSS del proceso aislado hasta 9,73 MB; no es memoria Android ni atribución exacta
+  a las monedas. Los JSON conservan CPU, colas, simultaneidad y RSS completos.
+
+Reproducción:
+
+```sh
+dart --suppress-analytics compile exe tool/benchmark_reward_visuals.dart -o /tmp/coin-model
+/tmp/coin-model
+dart --suppress-analytics compile exe tool/benchmark_sequential_coins.dart -o /tmp/coin-sequence
+/tmp/coin-sequence
+flutter test tool/preview_sequential_coins.dart
+```
+
+La última orden escribe `/tmp/bug002-preview.png`, un diagnóstico del emisor y
+pintor. No sustituye la revisión del movimiento, GPU, FPS y sonido en Android.

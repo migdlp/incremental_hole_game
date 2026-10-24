@@ -98,6 +98,7 @@ void main() {
       );
       final j = jsonDecode(original.snapshot()) as Map<String, dynamic>;
       j['version'] = 11;
+      j['feeding'] = legacyFeeding();
       final restored = GameSession(catalog, MemoryStore())
         ..restore(jsonEncode(j));
       expect(restored.levels, {'hand': 1});

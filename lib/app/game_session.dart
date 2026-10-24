@@ -24,6 +24,7 @@ import '../features/prestige/domain/meta_progress.dart';
 import '../features/prestige/domain/star_rewards.dart';
 import '../features/prestige/domain/star_bubbles.dart';
 import '../features/feeding/domain/feeding_progress.dart';
+import '../features/feeding/domain/legacy_feeding_progress.dart';
 import '../features/upgrades/domain/catalog.dart';
 import '../persistence/save_store.dart';
 
@@ -37,11 +38,7 @@ class GameSession extends ChangeNotifier {
   }) : feedback =
            feedback ?? FeedbackController(backend: PlatformFeedbackBackend()),
        _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000) {
-    feeding = FeedingProgress(
-      startDay: 1,
-      target: feedingInitialQuota,
-      quotaStep: feedingQuotaStep,
-    );
+    feeding = FeedingProgress(startDay: 1, target: feedingInitialQuota);
   }
   final FeedbackController feedback;
   final MotionInput motion;
@@ -207,17 +204,10 @@ class GameSession extends ChangeNotifier {
   MetaProgress? _metaFloor;
   int _durableMetaRevision = 0;
   bool _allowPrestigeRollback = false;
-  bool debugPrestigeRules = false;
   bool get prestigeReady =>
       debugEnabled ||
       (meta.revision <= _durableMetaRevision && saveError == null);
   bool get canPlayRun => meta.phase == PrestigePhase.playing;
-  bool get quotaDefeatEnabled => !debugEnabled || debugPrestigeRules;
-  void debugSetPrestigeRules(bool value) {
-    if (!debugEnabled || running || !canPlayRun) return;
-    debugPrestigeRules = value;
-    notifyListeners();
-  }
 
   void _clearRun() {
     feedback.setPlaying(false);
@@ -240,11 +230,7 @@ class GameSession extends ChangeNotifier {
     selectedTool = BallTool.hand;
     _launcherPosition = const Vec(285, 510);
     _launcherAngle = math.pi * 1.75;
-    feeding = FeedingProgress(
-      startDay: 1,
-      target: feedingInitialQuota,
-      quotaStep: feedingQuotaStep,
-    );
+    feeding = FeedingProgress(startDay: 1, target: feedingInitialQuota);
     rewards = _newRewards();
     rewardVisuals = _newVisuals();
     debugForceGravity = false;
@@ -289,7 +275,6 @@ class GameSession extends ChangeNotifier {
   final progress = Progress();
   late FeedingProgress feeding;
   bool _debugFeedingTrials = false;
-  bool get debugFeedingFailed => debugFeedingQuotas && feeding.missed;
   final levels = <String, int>{};
   final _grandfathered = <String, int>{};
   final _previousTree = <String, int>{};
@@ -369,7 +354,8 @@ class GameSession extends ChangeNotifier {
             if (data['version'] != 10 &&
                 data['version'] != 11 &&
                 data['version'] != 12 &&
-                data['version'] != 13) {
+                data['version'] != 13 &&
+                data['version'] != 14) {
               throw const FormatException('Checkpoint incompatible');
             }
             final state = MetaProgress.fromJson(
@@ -431,7 +417,7 @@ class GameSession extends ChangeNotifier {
   }
 
   void startDay() {
-    if (running || debugFeedingFailed || !canPlayRun || !prestigeReady) return;
+    if (running || !canPlayRun || !prestigeReady) return;
     feeding.beginDay(progress.day);
     _retiredRunLevels.clear();
     final settings = catalog.settings(levels);
@@ -489,6 +475,7 @@ class GameSession extends ChangeNotifier {
     final generatedBefore = economy.generated;
     final metaBefore = meta.revision;
     _frameEmissionStart = rewardVisuals.emittedObjects;
+    final quotaBefore = feeding.period;
     rewardVisuals.observeFrame(dt);
     _accumulator += dt.clamp(0.0, .1);
     while (_accumulator + 1e-9 >= 1 / 60 && running) {
@@ -515,7 +502,7 @@ class GameSession extends ChangeNotifier {
       _checkpoint = 0;
       save();
     }
-    if (_uiClock >= .1) {
+    if (_uiClock >= .1 || feeding.period != quotaBefore) {
       _uiClock = 0;
       notifyListeners();
     }
@@ -557,18 +544,17 @@ class GameSession extends ChangeNotifier {
     if (debugEnabled) {
       _debugMaxCombo = math.max(_debugMaxCombo, board!.combo.multiplier);
     }
-    final quotaWasMet = feeding.met;
-    feeding.credit(
+    // Board food counters are historical monetary rewards. Only captured balls
+    // feed AJ-005B, including instant abilities, golden balls and combos equally.
+    final completedQuotas = feeding.credit(
       progress.day,
-      normal: events.normalFood,
-      instant: events.instantFood,
+      normal: events.captured,
+      instant: 0,
     );
     board!.syncHoleGrowth(feeding.growths);
-    if (!quotaWasMet && feeding.met) feedback.emit(FeedbackEvent.quota);
-    if (feeding.met && feeding.period > meta.starLedger.quota) {
-      _changeStars(
-        meta.starLedger.award(feeding.period, board!.starBubbles!.config),
-      );
+    for (final quota in completedQuotas) {
+      feedback.emit(FeedbackEvent.quota);
+      _changeStars(meta.starLedger.award(quota, board!.starBubbles!.config));
       board!.starBubbles?.populate(0);
     }
     final bubbles = board!.starBubbles;
@@ -668,12 +654,8 @@ class GameSession extends ChangeNotifier {
     paused = false;
     _syncMotion();
     _accumulator = 0;
-    if (quotaDefeatEnabled && feeding.missed) {
-      _endRun(voluntary: false);
-    } else {
-      save();
-      notifyListeners();
-    }
+    save();
+    notifyListeners();
   }
 
   void touch(Vec position, {double? time}) {
@@ -834,7 +816,6 @@ class GameSession extends ChangeNotifier {
     _debugBaseline = null;
     if (_feedbackBaseline != null) feedback.config = _feedbackBaseline!;
     _feedbackBaseline = null;
-    debugPrestigeRules = false;
     _debugStars = null;
     debugBubbleGravity = debugBubbleBlackHole = false;
     _debugRewardLimit = null;
@@ -926,8 +907,7 @@ class GameSession extends ChangeNotifier {
   }
 
   bool get debugFeedingQuotas => debugEnabled && _debugFeedingTrials;
-  int get feedingInitialQuota => catalog.base['feeding_quota_initial']!.toInt();
-  int get feedingQuotaStep => catalog.base['feeding_quota_step']!.toInt();
+  int get feedingInitialQuota => FeedingProgress.initialQuota;
   void debugConfigureFeeding({required bool quotas, int? target}) {
     if (!debugEnabled || running || !canPlayRun) return;
     final amount = target ?? feedingInitialQuota;
@@ -942,15 +922,16 @@ class GameSession extends ChangeNotifier {
     feeding = FeedingProgress(
       startDay: progress.day,
       target: quotas ? amount : null,
-      quotaStep: quotas ? feedingQuotaStep : 0,
     );
     notifyListeners();
   }
 
-  void debugRestartFeedingPeriod() =>
-      debugConfigureFeeding(quotas: debugFeedingQuotas, target: feeding.target);
+  void debugRestartFeedingPeriod() => debugConfigureFeeding(
+    quotas: debugFeedingQuotas,
+    target: feeding.initialTarget?.toInt(),
+  );
   void debugSimulateEmptyDay() {
-    if (!debugEnabled || running || debugFeedingFailed) return;
+    if (!debugEnabled || running) return;
     startDay();
     finishDay();
   }
@@ -966,11 +947,7 @@ class GameSession extends ChangeNotifier {
     _changeStars(const StarLedger());
     _debugReports.clear();
     _debugFeedingTrials = false;
-    feeding = FeedingProgress(
-      startDay: 1,
-      target: feedingInitialQuota,
-      quotaStep: feedingQuotaStep,
-    );
+    feeding = FeedingProgress(startDay: 1, target: feedingInitialQuota);
     debugForceGravity = false;
     debugGravityTilt = 'sensor';
     debugBlackHoleObjects = 0;
@@ -1035,7 +1012,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 13,
+    'version': 14,
     'meta': meta.toJson(),
     'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
@@ -1089,7 +1066,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 10 &&
         json['version'] != 11 &&
         json['version'] != 12 &&
-        json['version'] != 13) {
+        json['version'] != 13 &&
+        json['version'] != 14) {
       throw const FormatException('Versión de guardado no compatible');
     }
     if ((json['version'] as int) >= 10 &&
@@ -1377,34 +1355,50 @@ class GameSession extends ChangeNotifier {
       if (savedFeeding is! Map<String, dynamic>) {
         throw const FormatException('Falta la alimentación');
       }
-      restoredFeeding = FeedingProgress.fromJson(
-        savedFeeding,
-        day: day,
-        running: run != null,
-        requireGrowth: (json['version'] as int) >= 13,
-      );
-      if (restoredBoard != null &&
-          restoredBoard.settings.balanceVersion >= 14 &&
-          (restoredFeeding.startDay > day ||
-              restoredFeeding.runNormal != restoredBoard.normalFood ||
-              restoredFeeding.runInstant != restoredBoard.instantFood)) {
-        throw const FormatException('Capturas de alimentación incoherentes');
-      }
-      if (restoredBoard != null &&
-          restoredBoard.settings.balanceVersion < 14 &&
-          restoredFeeding.startDay != day + 1) {
-        throw const FormatException('Migración de alimentación incoherente');
+      if ((json['version'] as int) >= 14) {
+        restoredFeeding = FeedingProgress.fromJson(
+          savedFeeding,
+          day: day,
+          running: run != null,
+        );
+        if (restoredBoard != null &&
+            restoredFeeding.startDay <= day &&
+            restoredFeeding.runBalls +
+                    BigInt.from(restoredFeeding.runCapturedBaseline) !=
+                BigInt.from(restoredBoard.captured)) {
+          throw const FormatException('Capturas de bolas incoherentes');
+        }
+      } else {
+        final old = LegacyFeedingProgress.fromJson(
+          savedFeeding,
+          day: day,
+          running: run != null,
+          requireGrowth: (json['version'] as int) >= 13,
+        );
+        if (restoredBoard != null &&
+            restoredBoard.settings.balanceVersion >= 14 &&
+            (old.startDay > day ||
+                old.runNormal != restoredBoard.normalFood ||
+                old.runInstant != restoredBoard.instantFood)) {
+          throw const FormatException('Capturas de alimentación incoherentes');
+        }
+        restoredFeeding = FeedingProgress.migrate(
+          savedFeeding,
+          day: day,
+          running: run != null,
+          requireGrowth: (json['version'] as int) >= 13,
+          capturedBaseline: restoredBoard?.captured ?? 0,
+        );
       }
     } else {
       // Historical captures cannot be reconstructed without guessing ability use.
       restoredFeeding = FeedingProgress(
-        startDay: day + (run != null ? 1 : 0),
+        startDay: day,
         target: feedingInitialQuota,
-        quotaStep: feedingQuotaStep,
-      );
+      )..runCapturedBaseline = restoredBoard?.captured ?? 0;
     }
     if (restoredMeta.phase != PrestigePhase.playing &&
-        (restoredFeeding.points != 0 ||
+        (restoredFeeding.points != BigInt.zero ||
             restoredFeeding.completedDays != 0 ||
             restoredFeeding.period != 1 ||
             restoredFeeding.startDay != 1)) {

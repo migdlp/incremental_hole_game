@@ -1,76 +1,100 @@
-/// Feeding records full capture rewards, independently of collecting their coins.
-/// The current numeric schedule is provisional until BAL01. A null target is
-/// available to disable quota evaluation in isolated DEBUG experiments.
+import 'legacy_feeding_progress.dart';
+
+/// Capturable balls only. Money and day deadlines never enter this ledger.
 class FeedingProgress {
-  FeedingProgress({required this.startDay, this.target, this.quotaStep = 0});
+  static const initialQuota = 100;
+  FeedingProgress({required this.startDay, int? target = initialQuota})
+    : initialTarget = target == null ? null : BigInt.from(target),
+      target = target == null ? null : BigInt.from(target) {
+    if (startDay < 1 || (target != null && target < 1)) {
+      throw ArgumentError('Inicio u objetivo de alimentación inválido');
+    }
+  }
+
   int startDay;
   int period = 1, completedDays = 0;
-  int normalPoints = 0, instantPoints = 0;
-  int runNormal = 0, runInstant = 0;
+  BigInt normalPoints = BigInt.zero, instantPoints = BigInt.zero;
+  int runCapturedBaseline = 0;
   int growths = 0, growthPeriod = 0;
-  int? target;
-  final int quotaStep;
-  static const periodLength = 5;
-  bool get due => completedDays == periodLength;
-  int get points => normalPoints + instantPoints;
-  int get remainingDays => periodLength - completedDays;
-  bool get met => target != null && points >= target!;
-  bool get missed => due && target != null && !met;
-  int? get nextTarget => target == null ? null : target! + quotaStep;
-  double? get fraction =>
-      target == null ? null : (points / target!).clamp(0.0, 1.0);
+  BigInt? initialTarget, target;
+  BigInt get points => normalPoints + instantPoints;
+  int get completed => period - 1;
+  BigInt? get remaining => target == null ? null : target! - points;
+  BigInt? get nextTarget => target == null ? null : target! * BigInt.from(10);
+  double? get fraction => target == null ? null : ratio(points, target!);
 
-  /// A migrated interrupted day finishes unchanged; the first full day starts S01.
+  // Day bookkeeping validates snapshots without evaluating any deadline.
   bool beginDay(int day) {
     if (day < startDay) return false;
     if (day != startDay + completedDays) {
       throw StateError('Jornada de alimentación incoherente');
     }
-    if (due) {
-      startDay += periodLength;
-      period++;
-      completedDays = normalPoints = instantPoints = 0;
-      target = nextTarget;
-    }
-    runNormal = runInstant = 0;
+    runBalls = BigInt.zero;
+    runCapturedBaseline = 0;
     return true;
   }
 
-  void credit(int day, {required int normal, required int instant}) {
-    if (normal < 0 || instant < 0) throw ArgumentError('Alimentación negativa');
-    if (day < startDay) return;
-    if (due || day != startDay + completedDays) {
+  /// Ordered completion events; excess is consumed exactly once by each quota.
+  List<int> credit(int day, {required int normal, required int instant}) =>
+      creditBalls(
+        day,
+        normal: BigInt.from(normal),
+        instant: BigInt.from(instant),
+      );
+
+  List<int> creditBalls(
+    int day, {
+    required BigInt normal,
+    required BigInt instant,
+  }) {
+    if (normal.isNegative || instant.isNegative) {
+      throw ArgumentError('Alimentación negativa');
+    }
+    if (day < startDay) return const [];
+    if (day != startDay + completedDays) {
       throw StateError('Captura fuera de jornada');
     }
     normalPoints += normal;
     instantPoints += instant;
-    runNormal += normal;
-    runInstant += instant;
-    if (met && period > growthPeriod) {
+    // Per-day counters use BigInt as well; no conversion through double.
+    runBalls += normal + instant;
+    final events = <int>[];
+    while (target != null && points >= target!) {
+      var consumed = target!;
+      final fromNormal = normalPoints < consumed ? normalPoints : consumed;
+      normalPoints -= fromNormal;
+      consumed -= fromNormal;
+      instantPoints -= consumed;
+      events.add(period);
       growths++;
       growthPeriod = period;
+      period++;
+      target = nextTarget;
     }
+    return events;
   }
 
+  BigInt runBalls = BigInt.zero;
   bool finishDay(int day) {
     if (day < startDay || day == startDay + completedDays - 1) return false;
-    if (due || day != startDay + completedDays) {
-      throw StateError('Vencimiento de alimentación incoherente');
+    if (day != startDay + completedDays) {
+      throw StateError('Jornada de alimentación incoherente');
     }
     completedDays++;
     return true;
   }
 
   Map<String, dynamic> toJson() => {
+    'rules': 'balls-v1',
     'startDay': startDay,
     'period': period,
     'completedDays': completedDays,
-    'normal': normalPoints,
-    'instant': instantPoints,
-    'runNormal': runNormal,
-    'runInstant': runInstant,
-    'target': target,
-    'quotaStep': quotaStep,
+    'normal': normalPoints.toString(),
+    'instant': instantPoints.toString(),
+    'runBalls': runBalls.toString(),
+    'runCapturedBaseline': runCapturedBaseline,
+    'initialTarget': initialTarget?.toString(),
+    'target': target?.toString(),
     'growths': growths,
     'growthPeriod': growthPeriod,
   };
@@ -79,65 +103,99 @@ class FeedingProgress {
     Map<String, dynamic> json, {
     required int day,
     required bool running,
-    bool requireGrowth = false,
   }) {
     int number(String key, {int minimum = 0}) {
-      final value = json[key];
-      if (value is! int || value < minimum || value > 0x1fffffffffffff) {
+      final n = json[key];
+      if (n is! int || n < minimum || n > 0x1fffffffffffff) {
         throw const FormatException('Registro de alimentación inválido');
       }
-      return value;
+      return n;
     }
 
-    final target = json['target'];
-    if (target != null &&
-        (target is! int || target < 1 || target > 0x1fffffffffffff)) {
-      throw const FormatException('Regla de alimentación inválida');
+    BigInt big(String key) {
+      final s = json[key];
+      if (s is! String || !RegExp(r'^(0|[1-9][0-9]*)$').hasMatch(s)) {
+        throw const FormatException('Contador de bolas inválido');
+      }
+      return BigInt.parse(s);
     }
-    final state =
-        FeedingProgress(
-            startDay: number('startDay', minimum: 1),
-            target: target as int?,
-            quotaStep: number('quotaStep'),
-          )
-          ..period = number('period', minimum: 1)
-          ..completedDays = number('completedDays')
-          ..normalPoints = number('normal')
-          ..instantPoints = number('instant')
-          ..runNormal = number('runNormal')
-          ..runInstant = number('runInstant');
-    final hasGrowth =
-        json.containsKey('growths') || json.containsKey('growthPeriod');
-    if (requireGrowth || hasGrowth) {
-      state.growths = number('growths');
-      state.growthPeriod = number('growthPeriod');
-    } else {
-      // Historical quotas are already settled; growth starts with future quotas.
-      state.growthPeriod = state.met ? state.period : state.period - 1;
+
+    if (json['rules'] != 'balls-v1') {
+      throw const FormatException('Reglas de alimentación inválidas');
     }
-    if (state.growths > state.growthPeriod ||
-        state.growthPeriod > state.period ||
-        (state.met
-            ? state.growthPeriod != state.period
-            : state.growthPeriod == state.period)) {
-      throw const FormatException('Crecimiento del agujero incoherente');
-    }
-    final expectedDay = state.startDay + state.completedDays;
+    final state = FeedingProgress(startDay: number('startDay', minimum: 1))
+      ..period = number('period', minimum: 1)
+      ..completedDays = number('completedDays')
+      ..normalPoints = big('normal')
+      ..instantPoints = big('instant')
+      ..runBalls = big('runBalls')
+      ..runCapturedBaseline = number('runCapturedBaseline')
+      ..growths = number('growths')
+      ..growthPeriod = number('growthPeriod')
+      ..initialTarget = json['initialTarget'] == null
+          ? null
+          : big('initialTarget')
+      ..target = json['target'] == null ? null : big('target');
     final migratedRun =
         running &&
         state.startDay == day + 1 &&
         state.completedDays == 0 &&
-        state.period == 1 &&
-        state.normalPoints == 0 &&
-        state.instantPoints == 0;
-    if (state.completedDays > periodLength ||
-        state.runNormal > state.normalPoints ||
-        state.runInstant > state.instantPoints ||
-        (!migratedRun && expectedDay != day) ||
-        (running && state.due) ||
-        (state.target == null ? state.quotaStep != 0 : state.quotaStep < 1)) {
-      throw const FormatException('Período de alimentación incoherente');
+        state.runBalls == BigInt.zero;
+    if ((!migratedRun && state.startDay + state.completedDays != day) ||
+        state.growths > state.growthPeriod ||
+        state.growthPeriod != state.completed ||
+        (state.target == null
+            ? state.initialTarget != null
+            : state.initialTarget == null ||
+                  state.initialTarget! <= BigInt.zero ||
+                  state.target !=
+                      state.initialTarget! *
+                          BigInt.from(10).pow(state.completed) ||
+                  state.points >= state.target!)) {
+      throw const FormatException('Progreso de cuotas incoherente');
     }
     return state;
   }
+
+  /// Monetary partial progress is intentionally discarded, never treated as balls.
+  factory FeedingProgress.migrate(
+    Map<String, dynamic> json, {
+    required int day,
+    required bool running,
+    required bool requireGrowth,
+    int capturedBaseline = 0,
+  }) {
+    final old = LegacyFeedingProgress.fromJson(
+      json,
+      day: day,
+      running: running,
+      requireGrowth: requireGrowth,
+    );
+    final completed = old.period - 1 + (old.met ? 1 : 0);
+    final state =
+        FeedingProgress(startDay: old.startDay > day ? day : old.startDay)
+          ..period = completed + 1
+          ..completedDays = old.completedDays
+          ..growths = old.growths
+          ..growthPeriod = completed
+          ..runCapturedBaseline = capturedBaseline;
+    state.target = state.initialTarget! * BigInt.from(10).pow(completed);
+    return state;
+  }
+}
+
+/// A bounded presentation ratio without overflowing double at huge quotas.
+double ratio(BigInt value, BigInt target) =>
+    ((value * BigInt.from(1000000)) ~/ target).toInt().clamp(0, 1000000) /
+    1000000;
+
+String ballNumber(BigInt value) {
+  final digits = value.toString();
+  if (digits.length > 24) {
+    final tail = digits.substring(6);
+    final approximate = tail.contains(RegExp(r'[1-9]')) ? '≈ ' : '';
+    final fraction = digits.substring(1, 6).replaceFirst(RegExp(r'0+$'), '');
+    return '$approximate${digits[0]}${fraction.isEmpty ? '' : ',$fraction'} ×10^${digits.length - 1}';
+  }
+  return digits.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
 }

@@ -389,7 +389,6 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                     key: const ValueKey('tree-start-day'),
                     onPressed:
                         session.running ||
-                            session.debugFeedingFailed ||
                             !session.canPlayRun ||
                             !session.prestigeReady
                         ? null
@@ -839,29 +838,18 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                       ),
                     ],
                   ),
-                  SwitchListTile(
-                    key: const ValueKey('debug-prestige-rules'),
-                    title: const Text('Probar derrota y prestigio'),
-                    subtitle: const Text(
-                      'El fallo de cuota termina solo la partida de prueba.',
-                    ),
-                    value: session.debugPrestigeRules,
-                    onChanged: session.running
-                        ? null
-                        : session.debugSetPrestigeRules,
-                  ),
                   ExpansionTile(
                     key: const ValueKey('debug-feeding-tools'),
                     title: const Text('Alimentación y cuotas'),
                     tilePadding: EdgeInsets.zero,
                     children: [
                       const Text(
-                        'Cuotas experimentales. Cambiar una opción reinicia solo el período de prueba.',
+                        'Cuotas por bolas sin vencimiento. Cambiar una opción reinicia la prueba.',
                       ),
                       SwitchListTile(
                         key: const ValueKey('debug-feeding-enabled'),
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Simular fallo de cuota'),
+                        title: const Text('Activar cuotas de prueba'),
                         value: session.debugFeedingQuotas,
                         onChanged: session.running
                             ? null
@@ -872,7 +860,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                         key: const ValueKey('debug-feeding-target'),
                         isExpanded: true,
                         value:
-                            session.feeding.target ??
+                            session.feeding.initialTarget?.toInt() ??
                             session.feedingInitialQuota,
                         items:
                             {
@@ -882,8 +870,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                                     100,
                                     1000,
                                   ],
-                                  if (session.feeding.target != null)
-                                    session.feeding.target!,
+                                  if (session.feeding.initialTarget != null)
+                                    session.feeding.initialTarget!.toInt(),
                                 }
                                 .map(
                                   (amount) => DropdownMenuItem(
@@ -907,7 +895,6 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                         key: const ValueKey('debug-feeding-empty-day'),
                         onPressed:
                             session.running ||
-                                session.debugFeedingFailed ||
                                 !session.canPlayRun ||
                                 !session.prestigeReady
                             ? null

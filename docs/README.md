@@ -1,5 +1,10 @@
 # Documentación de Feed the Hole
 
+> **AJ-005B:** [cuotas infinitas por bolas capturadas](aj-005b-cuotas-infinitas.md), sin vencimiento ni
+> derrota por cuotas, con excedentes, crecimiento AJ-005A y eventos P01. JSON v14.
+> Esta actualización prevalece sobre las reglas históricas de alimentación.
+
+
 - [AJ-001 a AJ-005 · Ajustes actuales, compatibilidad y aclaración pendiente](ajustes-version-actual.md).
 
 - [P01 · Estrellas, burbujas físicas, persistencia y parámetros DEBUG](p01-estrellas-burbujas.md).

@@ -1,5 +1,10 @@
 # Cómo está implementado el juego
 
+> **AJ-005B:** [cuotas infinitas por bolas capturadas](aj-005b-cuotas-infinitas.md), sin vencimiento ni
+> derrota por cuotas, con excedentes, crecimiento AJ-005A y eventos P01. JSON v14.
+> Esta actualización prevalece sobre las reglas históricas de alimentación.
+
+
 ## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
 
 Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6

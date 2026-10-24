@@ -1,7 +1,8 @@
 # BUG-002 — Expulsión secuencial y dispersión orgánica
 
 Versión **0.19.1+31**. Implementado sobre AJ-007/BUG-001.
-Balance v20 y guardados JSON v13 sin cambios. No cambian los importes,
+Balance v20 conservado. BUG-002 no modifica el formato de guardado; conserva
+el JSON v14 incorporado por AJ-005B en la rama remota. No cambian los importes,
 las denominaciones, el plan de monedas, las cuotas ni el resumen AJ-008A.
 Validación artística y medición en Android físico pendientes.
 
@@ -130,3 +131,10 @@ Validación local antes de integrar cambios remotos: 422 pruebas completas,
 13 pruebas del emisor y 27 económicas correctas, análisis y formato correctos.
 La imagen de diagnóstico usa `tool/preview_sequential_coins.dart` con el pintor
 real de monedas; es un render de Cloud, no una captura Android.
+
+
+Integración: durante el trabajo la rama avanzó hasta `2407458` (PR #19,
+AJ-005B). Se integró mediante merge, conservando sus cuotas, crecimiento,
+prestigio y migración v14. Los conflictos de documentación conservan ambas
+entregas; el bucle mantiene tanto la detección de cuotas como el límite de una
+emisión visual por fotograma. Se repite la validación sobre el conjunto integrado.

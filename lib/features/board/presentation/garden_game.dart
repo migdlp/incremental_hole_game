@@ -521,10 +521,7 @@ class GardenGame extends FlameGame {
         -math.pi / 2,
         progress * math.pi * 2,
         false,
-        paint(
-          feeding.met ? const Color(0xff8dd4b2) : const Color(0xff247d73),
-          stroke: 3,
-        ),
+        paint(const Color(0xff247d73), stroke: 3),
       );
     }
     _renderBlackHoleSuction(canvas, board);

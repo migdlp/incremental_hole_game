@@ -6,9 +6,13 @@ Un emisor compartido sustituye las familias de dirección y el escalonado repeti
 Una moneda nueva por fotograma, dispersión pequeña variada y ola horaria con
 cadencia/giro progresivos. Trayectorias adaptadas al hoyo y a los bordes;
 pausa de un segundo y vuelo al monedero conservados. Parámetros DEBUG, pool
-adaptativo y contabilidad intacta; balance v20/JSON v13 sin cambios.
+adaptativo y contabilidad intacta; balance v20 y JSON v14 de AJ-005B conservados.
 [Detalles, archivos, pruebas y límites](bug002-expulsion-secuencial.md). Android físico pendiente.
 
+
+La rama remota incorporó AJ-005B durante BUG-002: cuotas infinitas por bolas,
+sin vencimiento, JSON v14. Se conserva íntegramente; prevalece sobre las reglas
+históricas. Detalles: [AJ-005B](aj-005b-cuotas-infinitas.md).
 
 ## AJ-007 · Feedback audiovisual (0.19.0+30)
 

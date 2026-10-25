@@ -8,6 +8,12 @@ Reservas y llegadas ordenadas, reinicio diario, pausa/restauración y cierre vis
 acotado; economía, denominaciones y compras intactas. JSON v14 y balance v20.
 [Detalles, imagen aprobada y pruebas](docs/aj009-coleccion-monedas.md). Android físico pendiente.
 
+Validación publicada: **424 pruebas correctas**, formato, análisis, compilación y firma.
+Código `6f83f479b1d2e82d5c8e33fa538fb05956822c0d`, con `046ebb0` conservado en el historial.
+[APK 0.20.0+33 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40184781696/artifacts/12596006493) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40184781696) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40184781696/artifacts/12596281025).
+Prueba de actualización sobre APK anterior omitida por la configuración habitual;
+compatibilidad de instalación entre APKs no verificada en esta ejecución.
+
 
 ## Monedas aisladas · 0.19.2+32
 

@@ -125,10 +125,16 @@ pueden emitirse durante las jornadas válidas, sin limitar dinero ni recompensas
 
 ## Validación
 
-Antes de la aclaración de superposición: suite de 424 pruebas correcta.
-Después del apilado aprobado: once pruebas específicas correctas, previsualización
-y benchmark de pintura correctos; análisis sin incidencias. La pipeline vuelve a
-comprobar todo el conjunto y compila Android.
+Pipeline completa correcta con el apilado aprobado: **424 pruebas**, formato,
+análisis, compilación Android y verificación de firma. Once pruebas nuevas de
+colección; previsualización y benchmark de pintura correctos.
+
+Validación publicada: **424 pruebas correctas**, formato, análisis, compilación y firma.
+Código `6f83f479b1d2e82d5c8e33fa538fb05956822c0d`, con `046ebb0` conservado en el historial.
+[APK 0.20.0+33 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40184781696/artifacts/12596006493) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40184781696) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40184781696/artifacts/12596281025).
+Prueba de actualización sobre APK anterior omitida por la configuración habitual;
+compatibilidad de instalación entre APKs no verificada en esta ejecución.
+
 
 Se prueban primera capa, columna siguiente, superposición sin huecos, distintos
 colores, orden, captura masiva, 500 reservas, clipping, cache, final de jornada,

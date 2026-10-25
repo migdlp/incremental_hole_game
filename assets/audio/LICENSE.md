@@ -15,3 +15,6 @@ star break/contact; the wood effect to soft collisions and subtle rolling grains
 ambient loops, musical tones and upgrade/other cues use original synthesis.
 
 Archive SHA-256: `029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8`.
+
+`coincascade.wav` combines the existing `coin0`–`coin2` samples at 80 ms intervals,
+using the same synthesis and CC0 sources above. No new third-party resources.

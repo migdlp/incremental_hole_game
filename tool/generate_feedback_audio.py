@@ -54,5 +54,15 @@ texture = texture[RATE:]
 fade = 256
 seam = [texture[-fade+i]*(1-i/(fade-1)) + texture[i]*i/(fade-1) for i in range(fade)]
 save('rolling', texture[fade:-fade] + seam, loop=True)
+# Isolated receipts reuse a short fragment of the existing ascending cascade.
+# A single preloaded voice keeps the same voice/priority limits under load.
+cascade = [0.0] * round(RATE * .35)
+for note in range(3):
+    with wave.open(str(OUT / f'coin{note}.wav'), 'rb') as w:
+        pcm = array.array('h'); pcm.frombytes(w.readframes(w.getnframes()))
+    offset = round(note * .08 * RATE)
+    for i, value in enumerate(pcm):
+        if offset + i < len(cascade): cascade[offset + i] += value / 32767
+save('coincascade', cascade)
 (ROOT/'assets/audio/manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print(f'{len(manifest)} sounds generated; peak <=0.62 PCM, mono {RATE} Hz')

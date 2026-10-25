@@ -481,4 +481,24 @@ void main() {
     expect(wakes, 1);
     fx.dispose();
   });
+  test(
+    'isolated coins reuse a short cascade without advancing the existing mass melody',
+    () {
+      final b = RecordingFeedbackBackend();
+      final fx = FeedbackController(backend: b)..setPlaying(true);
+      fx.emit(FeedbackEvent.coinIn);
+      advance(fx, .5);
+      expect(b.played.single.sample, 'coincascade');
+      expect(b.played.single.rate, 1);
+      fx.emit(FeedbackEvent.coinIn, count: 100);
+      advance(fx, .5);
+      expect(b.played.last.sample, 'coin0');
+      fx.emit(FeedbackEvent.coinIn);
+      advance(fx, .5);
+      fx.emit(FeedbackEvent.coinIn, count: 100);
+      advance(fx, .5);
+      expect(b.played.last.sample, 'coin1');
+      fx.dispose();
+    },
+  );
 }

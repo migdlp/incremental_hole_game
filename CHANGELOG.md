@@ -1,5 +1,11 @@
 # Historial de cambios
 
+## 0.19.2+32
+
+- Monedas aisladas: sustituyen la nota suelta por un fragmento corto de la cascada.
+- La lluvia masiva conserva sus recursos y progresión musical; sin cambios económicos.
+
+
 ## 0.19.1+31
 
 - BUG-002: un único emisor secuencial, con una salida máxima por fotograma real.

@@ -1,5 +1,14 @@
 # Estado actual de Feed the Hole
 
+## Monedas aisladas · 0.19.2+32
+
+Las monedas aisladas usan un tintineo corto con tres notas de la cascada existente
+(350 ms), en lugar de una nota suelta. La secuencia y los archivos de la lluvia
+masiva permanecen idénticos. Una sola voz precargada por tintineo, con los límites
+de mezcla y háptica de AJ-007. Sin cambios visuales, económicos ni de guardado.
+Recurso `coincascade.wav`, regenerable con `tool/generate_feedback_audio.py`.
+
+
 ## BUG-002 · Expulsión secuencial (0.19.1+31)
 
 Un emisor compartido sustituye las familias de dirección y el escalonado repetido.

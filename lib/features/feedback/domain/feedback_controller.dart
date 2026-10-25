@@ -224,7 +224,7 @@ class FeedbackController {
   };
   String sample(FeedbackEvent e, int count) => switch (e) {
     FeedbackEvent.capture => 'plop${_variant++ % 6}',
-    FeedbackEvent.coinIn => 'coin${count > 1 ? _tone++ % 5 : _variant++ % 5}',
+    FeedbackEvent.coinIn => count > 1 ? 'coin${_tone++ % 5}' : 'coincascade',
     FeedbackEvent.coinOut => 'coinout${_variant++ % 2}',
     FeedbackEvent.star => 'star',
     FeedbackEvent.crystal => 'crystal',

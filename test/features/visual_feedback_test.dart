@@ -65,7 +65,7 @@ void main() {
   );
 
   testWidgets(
-    'pause settings toggle feedback and total balance stays on board',
+    'pause settings toggle feedback while the balance stays in the economic model',
     (tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1;
@@ -81,11 +81,12 @@ void main() {
       session.pause();
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pump();
-      final balance = find.byKey(const ValueKey('gameplay-balance'));
+      expect(find.byKey(const ValueKey('gameplay-balance')), findsNothing);
       expect(
-        find.descendant(of: balance, matching: find.text('124')),
+        find.byKey(const ValueKey('daily-coin-collection')),
         findsOneWidget,
       );
+      expect(session.economy.balance + session.economy.collected, 124);
       final setting = find.byKey(const ValueKey('visual-feedback-setting'));
       expect(tester.widget<SwitchListTile>(setting).value, isFalse);
       await tester.ensureVisible(setting);

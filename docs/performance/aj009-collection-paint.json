@@ -1,0 +1,65 @@
+{
+  "scope": "Cloud Flutter test engine. Cached command recording and offscreen image wall time; not Android GPU/FPS.",
+  "reports": [
+    {
+      "coins": 1,
+      "visible_cells": 1,
+      "static_recordings": 1,
+      "record_p95_us": 29,
+      "record_p99_us": 52,
+      "record_max_us": 52,
+      "offscreen_raster_p95_us": 136,
+      "offscreen_raster_p99_us": 237,
+      "offscreen_raster_max_us": 237,
+      "process_rss_bytes": 149123072
+    },
+    {
+      "coins": 10,
+      "visible_cells": 10,
+      "static_recordings": 1,
+      "record_p95_us": 37,
+      "record_p99_us": 242,
+      "record_max_us": 242,
+      "offscreen_raster_p95_us": 689,
+      "offscreen_raster_p99_us": 891,
+      "offscreen_raster_max_us": 891,
+      "process_rss_bytes": 153051136
+    },
+    {
+      "coins": 50,
+      "visible_cells": 50,
+      "static_recordings": 1,
+      "record_p95_us": 165,
+      "record_p99_us": 176,
+      "record_max_us": 176,
+      "offscreen_raster_p95_us": 2161,
+      "offscreen_raster_p99_us": 2789,
+      "offscreen_raster_max_us": 2789,
+      "process_rss_bytes": 157122560
+    },
+    {
+      "coins": 100,
+      "visible_cells": 100,
+      "static_recordings": 1,
+      "record_p95_us": 583,
+      "record_p99_us": 1057,
+      "record_max_us": 1057,
+      "offscreen_raster_p95_us": 5852,
+      "offscreen_raster_p99_us": 8868,
+      "offscreen_raster_max_us": 8868,
+      "process_rss_bytes": 162312192
+    },
+    {
+      "coins": 500,
+      "visible_cells": 200,
+      "static_recordings": 1,
+      "record_p95_us": 652,
+      "record_p99_us": 7922,
+      "record_max_us": 7922,
+      "offscreen_raster_p95_us": 8953,
+      "offscreen_raster_p99_us": 38480,
+      "offscreen_raster_max_us": 38480,
+      "process_rss_bytes": 166637568
+    }
+  ]
+}

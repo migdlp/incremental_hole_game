@@ -7,7 +7,7 @@ import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
 import 'package:incremental_hole_game/features/board/domain/special_abilities.dart';
-import 'package:incremental_hole_game/features/board/presentation/coin_icon.dart';
+import 'package:incremental_hole_game/features/rewards/presentation/collection_painter.dart';
 import 'package:incremental_hole_game/features/board/presentation/garden_game.dart';
 import '../test_support.dart';
 
@@ -60,7 +60,7 @@ void main() {
   );
 
   testWidgets(
-    'reward destination matches actual wallet and real gestures still grab balls',
+    'reward destination matches the collection grid and real gestures still grab balls',
     (tester) async {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..startDay();
@@ -69,14 +69,20 @@ void main() {
       await tester.pump();
       final finder = find.byWidgetPredicate((w) => w is GameWidget);
       final game = (tester.widget(finder) as GameWidget).game as GardenGame;
-      final wallet = find.descendant(
-        of: find.byKey(const ValueKey('gameplay-balance')),
-        matching: find.byType(CoinIcon),
+      expect(game.externalCoinLayer, isTrue);
+      final layer = find.byKey(const ValueKey('daily-coin-layer'));
+      final painter =
+          tester.widget<CustomPaint>(layer).painter! as DailyCollectionPainter;
+      final target =
+          tester.getTopLeft(layer) +
+          Offset(painter.grid.x(0), painter.grid.y(0));
+      expect(
+        tester
+            .getRect(find.byKey(const ValueKey('daily-coin-collection')))
+            .contains(target),
+        isTrue,
       );
-      final screen = tester.getCenter(wallet) - tester.getTopLeft(finder);
-      final actual = game.boardPoint(screen)!;
-      expect(game.walletTarget.dx, closeTo(actual.x, .1));
-      expect(game.walletTarget.dy, closeTo(actual.y, .1));
+      expect(target.dy, lessThan(tester.getTopLeft(finder).dy));
       final b = s.board!;
       b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
       s.tick(1 / 60);

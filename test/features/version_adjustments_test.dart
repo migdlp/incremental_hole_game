@@ -121,21 +121,17 @@ void main() {
     },
   );
   testWidgets(
-    'AJ003: wallet contains only the coin icon and amount without a decorated panel',
+    'AJ009 supersedes the old wallet with an undecorated daily collection',
     (tester) async {
       final s = GameSession(catalog, MemoryStore())..startDay();
       await tester.pumpWidget(GardenApp(session: s));
       await tester.pump();
-      final wallet = find.byKey(const ValueKey('gameplay-balance'));
-      expect(wallet, findsOneWidget);
-      final containers = tester.widgetList<Container>(
-        find.ancestor(of: wallet, matching: find.byType(Container)),
-      );
-      expect(containers.where((c) => c.decoration != null), isEmpty);
+      expect(find.byKey(const ValueKey('gameplay-balance')), findsNothing);
       expect(
-        find.descendant(of: wallet, matching: find.text('0')),
+        find.byKey(const ValueKey('daily-coin-collection')),
         findsOneWidget,
       );
+      expect(s.economy.balance, 0);
       await tester.pumpWidget(const SizedBox());
       await s.pendingWrites;
       s.dispose();

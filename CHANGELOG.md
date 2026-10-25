@@ -1,5 +1,15 @@
 # Historial de cambios
 
+## 0.20.0+33
+
+- AJ-009: reemplaza el saldo del gameplay por pilas de monedas superpuestas de la jornada.
+- Caras ovaladas y capas alineadas, según el aspecto aprobado por el usuario.
+- Destinos reservados, orden de llegada y colección estática reutilizable.
+- Reinicio diario, cierre visual acotado y restauración sin repetir pagos.
+- Saldo en Tienda/resultados conservado; sin cambios económicos ni de denominaciones.
+- Balance v20 y JSON v14 con extensión visual opcional; Android físico pendiente.
+
+
 ## 0.19.2+32
 
 - Monedas aisladas: sustituyen la nota suelta por un fragmento corto de la cascada.

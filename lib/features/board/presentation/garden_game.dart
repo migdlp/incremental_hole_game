@@ -46,6 +46,7 @@ class GardenGame extends FlameGame {
   final Paint _rewardPaint = Paint();
   final GameSession session;
   bool wallEffectsEnabled;
+  bool externalCoinLayer = false;
   final _labels = <String, TextPainter>{};
   double get scale => math.min(size.x / Board.width, size.y / Board.height);
   Offset get origin => Offset(
@@ -795,33 +796,35 @@ class GardenGame extends FlameGame {
       canvas.drawRect(bounds, paint(const Color(0xa6000000)));
     }
     final visuals = session.rewardVisuals;
-    for (final coin in visuals.coins) {
-      if (!coin.active || coin.age < visuals.delay) continue;
-      final denomination = coin.denomination;
-      final center = Offset(
-        coin.x(
-          walletTarget.dx,
-          visuals.delay,
-          origin: board.holePosition.x,
-          simple: visuals.quality >= 2,
-        ),
-        coin.y(
-          walletTarget.dy,
-          visuals.delay,
-          origin: board.holePosition.y,
-          simple: visuals.quality >= 2,
-        ),
-      );
-      paintCoin(
-        canvas,
-        center,
-        denomination,
-        radius: 7,
-        paint: _rewardPaint,
-        details: visuals.quality < 2,
-      );
+    if (!externalCoinLayer) {
+      for (final coin in visuals.coins) {
+        if (!coin.active || coin.age < visuals.delay) continue;
+        final denomination = coin.denomination;
+        final center = Offset(
+          coin.x(
+            walletTarget.dx,
+            visuals.delay,
+            origin: board.holePosition.x,
+            simple: visuals.quality >= 2,
+          ),
+          coin.y(
+            walletTarget.dy,
+            visuals.delay,
+            origin: board.holePosition.y,
+            simple: visuals.quality >= 2,
+          ),
+        );
+        paintCoin(
+          canvas,
+          center,
+          denomination,
+          radius: 7,
+          paint: _rewardPaint,
+          details: visuals.quality < 2,
+        );
+      }
     }
-    if (visuals.receiptPulse > 0) {
+    if (!externalCoinLayer && visuals.receiptPulse > 0) {
       _rewardPaint.color = Color.fromRGBO(
         245,
         184,

@@ -341,12 +341,11 @@ void main() {
       final boardRect = tester.getRect(
         find.byKey(const ValueKey('gameplay-board')),
       );
-      final balanceRect = tester.getRect(
-        find.byKey(const ValueKey('gameplay-balance')),
+      final collectionRect = tester.getRect(
+        find.byKey(const ValueKey('daily-coin-collection')),
       );
-      expect(boardRect.contains(balanceRect.topLeft), isTrue);
-      expect(boardRect.contains(balanceRect.bottomRight), isTrue);
-      expect(balanceRect.center.dx, greaterThan(boardRect.center.dx));
+      expect(collectionRect.bottom, closeTo(boardRect.top, .01));
+      expect(find.byKey(const ValueKey('gameplay-balance')), findsNothing);
       expect(
         boardRect.contains(tester.getCenter(find.byTooltip('Pausar'))),
         isTrue,

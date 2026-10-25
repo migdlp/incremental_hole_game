@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import '../../board/domain/coin_denomination.dart';
 import 'reward_visual_config.dart';
 import 'coin_plan.dart';
+import 'daily_coin_collection.dart';
 
 /// Economic delivery records are independent of the optional visual pool.
 /// Inclusive ID ranges allow a bounded batch to represent any capture burst.
@@ -128,7 +129,8 @@ class RewardDelivery {
 /// Preallocated presentation state: never used to calculate or award money.
 class RewardCoin {
   bool active = false;
-  int id = 0, amount = 0, quantity = 1;
+  int id = 0, amount = 0, quantity = 1, collectionSlot = -1;
+  String collectionDay = '';
   CoinDenomination denomination = CoinDenomination.one;
   double hold = RewardDelivery.hold;
   double age = 0, jump = 0, flight = 0;
@@ -252,6 +254,8 @@ class RewardVisuals {
     holeRadius = radius;
   }
 
+  final collection = DailyCoinCollection();
+  double _lastArrival = 0;
   final RewardVisualConfig config;
   final int capacity;
   // Curve offset retained for callers; coins are initialized at this offset on
@@ -382,6 +386,7 @@ class RewardVisuals {
         if (c.active && c.age < delay + c.jump + c.hold) {
           final n = _pending.remove(c.denomination.amount) ?? 0;
           _pendingTimes.remove(c.denomination.amount);
+          collection.addQuantity(c.collectionSlot, n);
           c.quantity += n;
           c.amount += n * c.denomination.amount;
           grouped += n;
@@ -494,6 +499,12 @@ class RewardVisuals {
         ),
       );
       coin.bend = coin.bend.clamp(-margin, margin);
+      coin.collectionSlot = collection.reserve(type, n);
+      coin.collectionDay = collection.day;
+      final natural = clock + coin.jump + coin.hold + coin.flight;
+      final finish = math.max(natural, _lastArrival + 1 / 60);
+      coin.flight += finish - natural;
+      _lastArrival = finish;
       coin.age = delay;
       emittedQuantity += coin.quantity;
       emittedObjects++;
@@ -524,7 +535,10 @@ class RewardVisuals {
       coin.age += dt;
       if (wasHidden && coin.age >= delay) emittedQuantity += coin.quantity;
       if (coin.age + 1e-9 >= delay + coin.jump + coin.hold + coin.flight) {
-        arrivedQuantity += coin.quantity;
+        arrivedQuantity += collection.arrive(
+          coin.collectionSlot,
+          coin.collectionDay,
+        );
         coin.active = false;
         _active--;
       }
@@ -540,6 +554,7 @@ class RewardVisuals {
     'counts': counts.map((key, value) => MapEntry('$key', value)),
     'batchAmount': _batchAmount,
     'batchAge': _batchAge,
+    'collection': collection.toJson(),
   };
   void restoreCounts(Map<int, int> value) {
     counts
@@ -570,8 +585,20 @@ class RewardVisuals {
   }
 
   void receipt() => receiptPulse = .25;
-  void clear() {
+  void stopEmitting() {
     _close(emit: false);
+    _pending.clear();
+    _pendingTimes.clear();
+  }
+
+  void clear({bool preserveCollection = false}) {
+    stopEmitting();
+    if (preserveCollection) {
+      collection.resolve();
+    } else {
+      collection.begin(collection.day);
+    }
+    _lastArrival = clock;
     for (final coin in coins) {
       coin.active = false;
     }

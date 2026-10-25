@@ -731,14 +731,18 @@ void main() {
     );
   }
   testWidgets(
-    'prestige counter appears inside gameplay alongside normal wallet',
+    'prestige counter remains inside gameplay while coins use the daily strip',
     (tester) async {
       final s = session();
       s.startDay();
       await tester.pumpWidget(GardenApp(session: s));
       await tester.pump();
       expect(find.byKey(const ValueKey('gameplay-stars')), findsOneWidget);
-      expect(find.byKey(const ValueKey('gameplay-balance')), findsOneWidget);
+      expect(find.byKey(const ValueKey('gameplay-balance')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('daily-coin-collection')),
+        findsOneWidget,
+      );
       await tester.pumpWidget(const SizedBox.shrink());
       await s.pendingWrites;
       s.dispose();

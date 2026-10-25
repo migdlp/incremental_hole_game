@@ -132,6 +132,7 @@ class GameSession extends ChangeNotifier {
 
   late RewardDelivery rewards = _newRewards();
   final rewardFrameMetrics = RewardFrameMetrics();
+  final rewardRepaint = ChangeNotifier();
   int debugCoinRainCaptures = 0;
   void debugSetCoinRainCaptures(int count) {
     if (!debugEnabled || running || ![0, 1, 10, 50, 100, 200].contains(count)) {
@@ -210,6 +211,7 @@ class GameSession extends ChangeNotifier {
   bool get canPlayRun => meta.phase == PrestigePhase.playing;
 
   void _clearRun() {
+    _rewardTransitionRemaining = 0;
     feedback.setPlaying(false);
     feedback.reset();
     recoveryMessage = null;
@@ -418,6 +420,7 @@ class GameSession extends ChangeNotifier {
 
   void startDay() {
     if (running || !canPlayRun || !prestigeReady) return;
+    _rewardTransitionRemaining = 0;
     feeding.beginDay(progress.day);
     _retiredRunLevels.clear();
     final settings = catalog.settings(levels);
@@ -444,6 +447,7 @@ class GameSession extends ChangeNotifier {
     economy.begin();
     rewards = _newRewards();
     rewardVisuals = _newVisuals();
+    rewardVisuals.collection.begin('${meta.runId}:${progress.day}');
     rewardFrameMetrics.clear();
     if (debugEnabled) {
       for (
@@ -469,9 +473,35 @@ class GameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  double _rewardTransitionRemaining = 0;
+  bool get rewardTransitionActive =>
+      !_disposed &&
+      !running &&
+      !_backgrounded &&
+      _rewardTransitionRemaining > 0;
+  void advanceRewardTransition(double dt) {
+    if (!rewardTransitionActive || !dt.isFinite || dt <= 0) return;
+    dt = dt.clamp(0, .1);
+    _rewardTransitionRemaining -= dt;
+    final before = rewardVisuals.arrivedQuantity;
+    rewardVisuals.advance(dt, allowEmission: false);
+    if (rewardVisuals.arrivedQuantity > before) {
+      feedback.emit(
+        FeedbackEvent.coinIn,
+        count: rewardVisuals.arrivedQuantity - before,
+        gameplay: false,
+      );
+    }
+    if (_rewardTransitionRemaining <= 0 || rewardVisuals.activeCount == 0) {
+      rewardVisuals.clear(preserveCollection: true);
+      _rewardTransitionRemaining = 0;
+    }
+    rewardRepaint.notifyListeners();
+  }
+
   int _frameEmissionStart = 0;
   void tick(double dt) {
-    if (!running || paused || !dt.isFinite) return;
+    if (_disposed || !running || paused || !dt.isFinite) return;
     final generatedBefore = economy.generated;
     final metaBefore = meta.revision;
     _frameEmissionStart = rewardVisuals.emittedObjects;
@@ -496,6 +526,7 @@ class GameSession extends ChangeNotifier {
         (economy.generated != generatedBefore || meta.revision != metaBefore)) {
       save();
     }
+    rewardRepaint.notifyListeners();
     _uiClock += dt.clamp(0.0, .1);
     _checkpoint += dt.clamp(0.0, .1);
     if (_checkpoint >= 5) {
@@ -612,7 +643,12 @@ class GameSession extends ChangeNotifier {
   void finishDay() {
     if (!running) return;
     economy.collect(rewards.settle());
-    rewardVisuals.clear();
+    rewardVisuals.stopEmitting();
+    _rewardTransitionRemaining = rewardVisuals.activeCount > 0 ? .45 : 0;
+    if (_rewardTransitionRemaining == 0) {
+      rewardVisuals.clear(preserveCollection: true);
+    }
+    rewardRepaint.notifyListeners();
     board!.absorption.clear();
     feedback.setPlaying(false);
     board!.enterClosing();
@@ -1340,12 +1376,27 @@ class GameSession extends ChangeNotifier {
       throw const FormatException('Desglose de recompensas incoherente');
     }
     final restoredVisuals = _newVisuals();
+    restoredVisuals.collection.begin('${restoredMeta.runId}:$day');
     final presentation = run?['rewardPresentation'];
     if (presentation != null) {
       if (presentation is! Map<String, dynamic>) {
         throw const FormatException('Presentación inválida');
       }
       restoredVisuals.restorePresentation(presentation, expected: generated);
+      if (presentation['collection'] != null) {
+        try {
+          restoredVisuals.collection.restore(
+            presentation['collection'],
+            identity: '${restoredMeta.runId}:$day',
+            planned: restoredVisuals.counts,
+          );
+        } on FormatException {
+          // Optional presentation data cannot discard a valid economic save.
+          restoredVisuals.collection.begin('${restoredMeta.runId}:$day');
+        }
+      } else {
+        restoredVisuals.collection.begin('${restoredMeta.runId}:$day');
+      }
     } else {
       restoredVisuals.restoreCounts(restoredCounts);
     }
@@ -1526,6 +1577,7 @@ class GameSession extends ChangeNotifier {
     board?.gravitySupported = gravityAvailable;
     rewards = restoredRewards;
     rewardVisuals = restoredVisuals;
+    _rewardTransitionRemaining = 0;
     if (restoredBoard != null) {
       restoredBoard.enableAutomaticCoins();
       economy.collect(rewards.settle());
@@ -1598,6 +1650,7 @@ class GameSession extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     feedback.dispose();
+    rewardRepaint.dispose();
     motion.dispose();
     super.dispose();
   }

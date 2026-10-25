@@ -1,0 +1,41 @@
+{
+  "scope": "Cloud AOT collection and JSON serialization; no Android CPU/GPU or displayed FPS.",
+  "reports": [
+    {
+      "coins": 10,
+      "reserve_and_place_us": 0,
+      "serialize_p95_us": 5,
+      "serialize_p99_us": 19,
+      "serialize_max_us": 36,
+      "json_bytes": 107,
+      "process_rss_bytes": 7303168
+    },
+    {
+      "coins": 100,
+      "reserve_and_place_us": 5,
+      "serialize_p95_us": 32,
+      "serialize_p99_us": 94,
+      "serialize_max_us": 395,
+      "json_bytes": 756,
+      "process_rss_bytes": 8130560
+    },
+    {
+      "coins": 500,
+      "reserve_and_place_us": 4,
+      "serialize_p95_us": 231,
+      "serialize_p99_us": 317,
+      "serialize_max_us": 341,
+      "json_bytes": 3636,
+      "process_rss_bytes": 8163328
+    },
+    {
+      "coins": 2000,
+      "reserve_and_place_us": 17,
+      "serialize_p95_us": 606,
+      "serialize_p99_us": 811,
+      "serialize_max_us": 1123,
+      "json_bytes": 14437,
+      "process_rss_bytes": 14553088
+    }
+  ]
+}

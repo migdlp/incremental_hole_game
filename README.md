@@ -1,5 +1,14 @@
 # Feed the Hole
 
+## AJ-009 · Pilas de monedas de la jornada (0.20.0+33)
+
+El gameplay sustituye el saldo numérico por pilas 2D superpuestas, con perspectiva
+ovalada, en una franja fija entre tiempo y tablero. Aspecto aprobado por el usuario.
+Reservas y llegadas ordenadas, reinicio diario, pausa/restauración y cierre visual
+acotado; economía, denominaciones y compras intactas. JSON v14 y balance v20.
+[Detalles, imagen aprobada y pruebas](docs/aj009-coleccion-monedas.md). Android físico pendiente.
+
+
 ## Monedas aisladas · 0.19.2+32
 
 Las monedas aisladas usan un tintineo corto con tres notas de la cascada existente

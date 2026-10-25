@@ -64,7 +64,15 @@ migración segura de AJ-005B y no se vuelven a conceder premios históricos.
 
 ## Archivos y pruebas
 
-Validación local: **457 pruebas correctas**, formato y análisis sin incidencias.
+Validación local y pipeline correctas.
+
+Entrega validada: **457 pruebas correctas**, formato, análisis, compilación Android
+y firma. Código `07803a5eed44571e9d91757b1c15e3cbfa8b9c7d`.
+[APK 0.22.0+35 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40217807563/artifacts/12607534495) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40217807563) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40217807563/artifacts/12607624051).
+`046ebb0` permanece en el historial. Prueba de actualización con APK anterior omitida;
+compatibilidad de instalación entre APKs no verificada en esta ejecución.
+Pendientes Android físico y balance BAL01.
+
 
 - `feeding_progress.dart`: fecha por cuota, cierre y validación/migración.
 - `game_session.dart`: secuencia de cierre/derrota, avance de día, restauración,
@@ -88,5 +96,5 @@ astral siguen verificando tiradas por cuota sin duplicar estrellas.
 
 Pendiente la prueba del flujo en Android físico y el balance de dificultad BAL01.
 Las limitaciones de saturación extrema y salida bloqueada de Fiebre dorada de P02
-no se modifican en esta tarea. La pipeline debe validar formato, análisis, pruebas,
-compilación y firma; comparación entre APKs solo si se solicita su entrada opcional.
+no se modifican en esta tarea. La pipeline valida formato, análisis, pruebas,
+compilación y firma; la comparación entre APKs no se ejecutó en esta entrega.

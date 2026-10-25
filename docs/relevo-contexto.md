@@ -11,6 +11,13 @@ JSON v15, balance v20, catálogo/precios P02 y nodo voluntario sin cambios.
 [Especificación](s03-aj005b-cuotas-4-jornadas.md) · [Implementación y pruebas](cuotas-4-jornadas-implementacion.md).
 Esta regla sustituye los textos históricos de cuotas sin vencimiento.
 
+Entrega validada: **457 pruebas correctas**, formato, análisis, compilación Android
+y firma. Código `07803a5eed44571e9d91757b1c15e3cbfa8b9c7d`.
+[APK 0.22.0+35 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40217807563/artifacts/12607534495) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40217807563) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40217807563/artifacts/12607624051).
+`046ebb0` permanece en el historial. Prueba de actualización con APK anterior omitida;
+compatibilidad de instalación entre APKs no verificada en esta ejecución.
+Pendientes Android físico y balance BAL01.
+
 
 ## P02 · Tienda permanente (0.21.0+34)
 

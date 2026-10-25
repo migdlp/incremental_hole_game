@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import '../../prestige/domain/star_bubbles.dart';
+import '../../prestige/domain/permanent_skills.dart';
 import '../../../core/vec.dart';
 import '../../automation/domain/robot.dart';
 import 'tool.dart';
@@ -153,6 +154,13 @@ class Board {
   }
 
   StarBubbles? starBubbles;
+  final _bubbleCells = <List<int>>[];
+  final _bubbleCandidates = <int>[];
+  PermanentRun? permanentRun;
+  bool productionEcho = false;
+  int get ordinaryBallLimit =>
+      settings['ball_limit'].toInt() -
+      (permanentRun?.goldenAt != null && !permanentRun!.goldenSpawned ? 1 : 0);
   Vec _broomVelocity = Vec.zero;
   double _broomRotation = 0;
   // Experimental interactions stay separate from ordinary-ball ability rules.
@@ -672,6 +680,44 @@ class Board {
     }
   }
 
+  bool _emitMain(Vec spawn, {bool forceGolden = false}) {
+    if (balls.length >=
+            (forceGolden ? settings['ball_limit'] : ordinaryBallLimit) ||
+        (starBubbles?.bodies.any(
+              (b) =>
+                  (b.position - spawn).length < radius + starBubbles!.radius(b),
+            ) ??
+            false) ||
+        launcher.contact(spawn, radius) != null ||
+        balls.any((b) => (b.position - spawn).length <= radius * 2.2)) {
+      return false;
+    }
+    spawned++;
+    balls.add(
+      Ball(
+        nextId++,
+        spawn,
+        Vec((random() - .5) * 36, -85),
+        golden: forceGolden || random() < .01,
+      ),
+    );
+    return true;
+  }
+
+  bool _emitExtra({bool forceGolden = false}) {
+    // Same factory and probabilities as ordinary production. Probe a small
+    // deterministic grid at its outlet; no overlapping bodies or off-board spawn.
+    for (var row = 0; row < 3; row++) {
+      for (var column = 0; column < 7; column++) {
+        final point =
+            generator +
+            Vec((column - 3) * radius * 2.4, -30 - row * radius * 2.4);
+        if (_emitMain(point, forceGolden: forceGolden)) return true;
+      }
+    }
+    return false;
+  }
+
   BoardEvents update(double dt, {required bool producing}) {
     var collected = 0;
     for (final impact in batImpacts) {
@@ -692,30 +738,29 @@ class Board {
       specials.advance(dt);
       while (spawnClock + 1e-9 >= settings['spawn_interval']) {
         spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
+        permanentRun?.cycle(echo: productionEcho);
         final count = math.max(1, settings['balls_per_spawn'].toInt());
         final center = generator + Vec((random() - .5) * 42, -30);
         for (var index = 0; index < count; index++) {
-          final spawn =
-              center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
-          if (balls.length < settings['ball_limit'] &&
-              !(starBubbles?.bodies.any(
-                    (b) =>
-                        (b.position - spawn).length <
-                        radius + starBubbles!.radius(b),
-                  ) ??
-                  false) &&
-              launcher.contact(spawn, radius) == null &&
-              balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
-            spawned++;
-            balls.add(
-              Ball(
-                nextId++,
-                spawn,
-                Vec((random() - .5) * 36, -85),
-                golden: random() < .01,
-              ),
-            );
-          }
+          _emitMain(
+            center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0),
+          );
+        }
+      }
+      final permanent = permanentRun;
+      if (permanent != null) {
+        permanent.elapsed += dt;
+        if (!permanent.goldenSpawned &&
+            permanent.goldenAt != null &&
+            permanent.elapsed + 1e-9 >= permanent.goldenAt!) {
+          permanent.goldenSpawned = _emitExtra(forceGolden: true);
+        }
+        // Retry blocked extras safely, without turning them into normal cycles.
+        var emitted = 0;
+        while (permanent.pendingEcho > 0 && emitted < 5) {
+          if (!_emitExtra()) break;
+          permanent.pendingEcho--;
+          emitted++;
         }
       }
     }
@@ -1029,7 +1074,7 @@ class Board {
     while (launcher.clock + 1e-9 >= launcher.interval) {
       launcher.clock = math.max(0.0, launcher.clock - launcher.interval);
       launcher.attempts++;
-      if (balls.length >= settings['ball_limit']) continue;
+      if (balls.length >= ordinaryBallLimit) continue;
       final exit =
           launcher.muzzle +
           launcher.axis * (launcher.barrelRadius + radius + .5);
@@ -1197,7 +1242,7 @@ class Board {
     if (system == null) return;
     system.beginAudioContacts();
     if (system.held != null && target != null) system.moveHeld(target!, dt);
-    // Fixed physical cap bounds these loops; no per-frame reward queue growth.
+    // Bodies are ledger-backed; P02 admits every new quota reward immediately.
     for (var i = system.bodies.length - 1; i >= 0; i--) {
       final b = system.bodies[i];
       var impulse = bubbleGravity ? gravityImpulse : Vec.zero;
@@ -1287,8 +1332,15 @@ class Board {
         }
       }
       for (final ball in balls) {
+        final reach = system.radius(b) + radius;
+        // Exact broad-phase rejection avoids vectors/square roots for distant
+        // pairs when Astral admits many bodies; collision response is unchanged.
+        if ((b.position.x - ball.position.x).abs() >= reach ||
+            (b.position.y - ball.position.y).abs() >= reach) {
+          continue;
+        }
         final delta = b.position - ball.position;
-        final overlap = system.radius(b) + radius - delta.length;
+        final overlap = reach - delta.length;
         if (overlap <= 0) continue;
         final n = delta.unit;
         final heldBubble = b == system.held,
@@ -1317,12 +1369,66 @@ class Board {
         }
       }
     }
+    // Uniform broad phase, rebuilt after motion and tool/ball contacts.
+    // Reuse buckets and candidate storage; keep deterministic pair order. As in
+    // discrete physics, positional corrections are indexed again next step.
+    final useGrid = system.bodies.length > 24;
+    var cellSize = 1.0, columns = 1, rows = 1;
+    if (useGrid) {
+      for (final body in system.bodies) {
+        cellSize = math.max(cellSize, 2 * system.radius(body));
+      }
+      columns = (width / cellSize).ceil();
+      rows = (height / cellSize).ceil();
+      while (_bubbleCells.length < columns * rows) {
+        _bubbleCells.add(<int>[]);
+      }
+      for (final cell in _bubbleCells) {
+        cell.clear();
+      }
+      for (var i = 0; i < system.bodies.length; i++) {
+        final p = system.bodies[i].position;
+        final x = (p.x / cellSize).floor().clamp(0, columns - 1);
+        final y = (p.y / cellSize).floor().clamp(0, rows - 1);
+        _bubbleCells[y * columns + x].add(i);
+      }
+    }
     for (var i = 0; i < system.bodies.length; i++) {
       final a = system.bodies[i];
-      for (var j = i + 1; j < system.bodies.length; j++) {
+      _bubbleCandidates.clear();
+      if (useGrid) {
+        final x = (a.position.x / cellSize).floor().clamp(0, columns - 1);
+        final y = (a.position.y / cellSize).floor().clamp(0, rows - 1);
+        for (
+          var cy = math.max(0, y - 1);
+          cy <= math.min(rows - 1, y + 1);
+          cy++
+        ) {
+          for (
+            var cx = math.max(0, x - 1);
+            cx <= math.min(columns - 1, x + 1);
+            cx++
+          ) {
+            for (final j in _bubbleCells[cy * columns + cx]) {
+              if (j > i) _bubbleCandidates.add(j);
+            }
+          }
+        }
+        _bubbleCandidates.sort();
+      } else {
+        for (var j = i + 1; j < system.bodies.length; j++) {
+          _bubbleCandidates.add(j);
+        }
+      }
+      for (final j in _bubbleCandidates) {
         final b = system.bodies[j];
+        final reach = system.radius(a) + system.radius(b);
+        if ((b.position.x - a.position.x).abs() >= reach ||
+            (b.position.y - a.position.y).abs() >= reach) {
+          continue;
+        }
         final delta = b.position - a.position;
-        final overlap = system.radius(a) + system.radius(b) - delta.length;
+        final overlap = reach - delta.length;
         if (overlap <= 0) continue;
         final n = delta.unit;
         final ah = a == system.held, bh = b == system.held;

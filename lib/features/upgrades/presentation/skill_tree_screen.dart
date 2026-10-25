@@ -236,6 +236,22 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   @override
   Widget build(BuildContext context) {
     final session = widget.session;
+    if (!session.normalShopAvailable && !session.debugEnabled) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Feed the Hole')),
+        body: Center(
+          child: FilledButton(
+            onPressed: session.running
+                ? null
+                : () {
+                    session.startDay();
+                    Navigator.of(context).maybePop();
+                  },
+            child: const Text('Comenzar día'),
+          ),
+        ),
+      );
+    }
     final visible = _visible;
     return Scaffold(
       backgroundColor: _background,

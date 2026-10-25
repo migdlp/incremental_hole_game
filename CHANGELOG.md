@@ -1,5 +1,14 @@
 # Historial de cambios
 
+## 0.21.0+34 — P02: mejoras permanentes
+
+- Herencia, Eco de producción, Fiebre dorada y Lluvia astral, con compra única y confirmación.
+- Guardado protegido de compras y efectos temporales por partida/jornada.
+- La tienda normal se habilita tras la primera jornada de cada partida.
+- Burbujas de cuotas inmediatas y optimización de contactos para poblaciones altas.
+- Sin modificar costes del nodo de prestigio, economía de capturas ni cuotas AJ-005B.
+
+
 ## 0.20.0+33
 
 - AJ-009: reemplaza el saldo del gameplay por pilas de monedas superpuestas de la jornada.

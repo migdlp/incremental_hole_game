@@ -84,6 +84,8 @@ void main() {
   }) async {
     final session = GameSession(testCatalog(), MemoryStore())
       ..economy.balance = balance;
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     await tester.pumpWidget(GardenApp(session: session));
     await tester.scrollUntilVisible(find.text('Tienda'), 200);
     await tester.pumpAndSettle();

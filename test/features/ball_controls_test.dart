@@ -241,6 +241,8 @@ void main() {
     'tool purchase and selection persist; locked tool cannot be selected',
     () {
       final session = GameSession(catalog, MemoryStore());
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       session.selectTool(BallTool.vee);
       expect(session.selectedTool, BallTool.hand);
       session.economy.balance = 500;

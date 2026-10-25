@@ -181,6 +181,8 @@ void main() {
     'purchases persist through reload and apply only to subsequent days',
     () async {
       final session = GameSession(catalog, MemoryStore());
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       session.economy.balance = 10000;
       final hand = catalog.definitions.firstWhere((d) => d.id == 'hand');
       final walls = catalog.definitions.firstWhere((d) => d.id == 'walls');

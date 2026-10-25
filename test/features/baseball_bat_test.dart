@@ -255,6 +255,8 @@ void main() {
     () async {
       final store = MemoryStore();
       final session = GameSession(catalog, store)..economy.balance = 10000;
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       final definition = catalog.definitions.firstWhere((d) => d.id == 'bat');
       expect(session.purchase(definition), isFalse);
       session.purchase(catalog.definitions.firstWhere((d) => d.id == 'hand'));

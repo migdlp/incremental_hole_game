@@ -93,10 +93,10 @@ class StarLedger {
   const StarLedger({this.quota = 0, this.nextId = 1, this.pending = const []});
   final int quota, nextId;
   final List<StarReward> pending;
-  StarLedger award(int period, StarConfig config) {
+  StarLedger award(int period, StarConfig config, {bool duplicate = false}) {
     if (period <= quota) return this;
     final category = config.category(period);
-    final count = config['star_count'].toInt();
+    final count = config['star_count'].toInt() * (duplicate ? 2 : 1);
     return StarLedger(
       quota: period,
       nextId: nextId + count,

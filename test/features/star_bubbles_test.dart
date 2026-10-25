@@ -661,6 +661,8 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final s = session();
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(s);
       await tester.pumpWidget(GardenApp(session: s));
       await tester.scrollUntilVisible(find.text('Tienda'), 150);
       await tester.tap(find.text('Tienda'));

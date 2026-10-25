@@ -135,6 +135,8 @@ void main() {
 
   Future<GameSession> open(WidgetTester tester) async {
     final session = GameSession(catalog, MemoryStore());
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     await tester.pumpWidget(GardenApp(session: session));
     await tester.scrollUntilVisible(find.text('Tienda'), 200);
     await tester.tap(find.text('Tienda'));

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'star_rewards.dart';
+import 'permanent_skills.dart';
 
 enum PrestigePhase { playing, defeat, shop }
 
@@ -63,6 +64,31 @@ class MetaProgress {
     endCause: endCause,
   );
 
+  bool owns(String id) => (upgrades[id] ?? 0) > 0;
+  MetaProgress purchase(String id) {
+    final skill = PermanentSkill.find(id);
+    if (phase != PrestigePhase.shop ||
+        skill == null ||
+        owns(id) ||
+        stars < skill.price) {
+      throw StateError('Compra permanente no disponible');
+    }
+    return MetaProgress(
+      revision: revision + 1,
+      runId: runId,
+      lastEndedRun: lastEndedRun,
+      phase: phase,
+      stars: stars - skill.price,
+      upgrades: Map.unmodifiable({...upgrades, id: 1}),
+      discoveries: discoveries,
+      pendingStarObjects: pendingStarObjects,
+      starLedger: starLedger,
+      extensions: extensions,
+      firstDefeatSeen: firstDefeatSeen,
+      endCause: endCause,
+    );
+  }
+
   MetaProgress end({required bool voluntary}) {
     if (phase != PrestigePhase.playing || lastEndedRun >= runId) {
       throw StateError('Esta partida ya terminó');
@@ -120,7 +146,8 @@ class MetaProgress {
               e.key.isEmpty ||
               e.value is! int ||
               e.value < 1 ||
-              e.value > 0x1fffffffffffff,
+              e.value > 0x1fffffffffffff ||
+              (PermanentSkill.find(e.key) != null && e.value != 1),
         ) ||
         discoveries is! List ||
         discoveries.any((v) => v is! String || v.isEmpty) ||

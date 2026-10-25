@@ -21,6 +21,7 @@ import '../features/rewards/domain/reward_visual_config.dart';
 import '../features/rewards/domain/reward_frame_metrics.dart';
 import '../features/progression/domain/progress.dart';
 import '../features/prestige/domain/meta_progress.dart';
+import '../features/prestige/domain/permanent_skills.dart';
 import '../features/prestige/domain/star_rewards.dart';
 import '../features/prestige/domain/star_bubbles.dart';
 import '../features/feeding/domain/feeding_progress.dart';
@@ -208,9 +209,31 @@ class GameSession extends ChangeNotifier {
   bool get prestigeReady =>
       debugEnabled ||
       (meta.revision <= _durableMetaRevision && saveError == null);
+  PermanentRun permanentRun = PermanentRun();
+  bool get normalShopAvailable => canPlayRun && progress.day > 1;
+  bool canBuyPermanent(String id) {
+    final skill = PermanentSkill.find(id);
+    return meta.phase == PrestigePhase.shop &&
+        prestigeReady &&
+        skill != null &&
+        !meta.owns(id) &&
+        meta.stars >= skill.price;
+  }
+
+  bool buyPermanent(String id) {
+    if (!canBuyPermanent(id)) return false;
+    meta = meta.purchase(id);
+    _metaFloor = meta;
+    save();
+    feedback.emit(FeedbackEvent.upgrade, gameplay: false);
+    notifyListeners();
+    return true;
+  }
+
   bool get canPlayRun => meta.phase == PrestigePhase.playing;
 
   void _clearRun() {
+    permanentRun = PermanentRun();
     _rewardTransitionRemaining = 0;
     feedback.setPlaying(false);
     feedback.reset();
@@ -269,7 +292,13 @@ class GameSession extends ChangeNotifier {
     meta = meta.newRun();
     _metaFloor = meta;
     _clearRun();
-    save();
+    if (meta.owns(PermanentSkill.inheritance)) economy.balance = 100;
+    final newRunId = meta.runId;
+    save().then((_) {
+      if (!_disposed && meta.runId == newRunId && canPlayRun && prestigeReady) {
+        startDay();
+      }
+    });
     notifyListeners();
     return true;
   }
@@ -425,6 +454,12 @@ class GameSession extends ChangeNotifier {
     _retiredRunLevels.clear();
     final settings = catalog.settings(levels);
     _eventRandomState = (1664525 * _eventRandomState + 1013904223) & 0xffffffff;
+    permanentRun.beginDay(
+      goldenTime: meta.owns(PermanentSkill.gold)
+          ? settings['production_duration'] *
+                (.05 + .85 * (_eventRandomState / 0x100000000))
+          : null,
+    );
     feedback.reset();
     _feedbackPreferences();
     feedback.setPlaying(true);
@@ -441,6 +476,8 @@ class GameSession extends ChangeNotifier {
       forcedBlackHoles: debugEnabled ? debugBlackHoleObjects : 0,
       forceGravity: debugEnabled && debugForceGravity,
     );
+    board!.permanentRun = permanentRun;
+    board!.productionEcho = meta.owns(PermanentSkill.echo);
     debugForceGravity = false;
     debugBlackHoleObjects = 0;
     cycle = DayCycle(production: settings['production_duration'], closing: 0);
@@ -461,7 +498,7 @@ class GameSession extends ChangeNotifier {
     }
     board!.syncHoleGrowth(feeding.growths);
     board!.enableAutomaticCoins();
-    board!.starBubbles = _newBubbles(board!)..populate(0);
+    board!.starBubbles = _newBubbles(board!)..populateImmediate();
     board!.bubbleGravity = debugEnabled && debugBubbleGravity;
     board!.bubbleBlackHole = debugEnabled && debugBubbleBlackHole;
     _debugMaxCombo = 1;
@@ -585,8 +622,23 @@ class GameSession extends ChangeNotifier {
     board!.syncHoleGrowth(feeding.growths);
     for (final quota in completedQuotas) {
       feedback.emit(FeedbackEvent.quota);
-      _changeStars(meta.starLedger.award(quota, board!.starBubbles!.config));
-      board!.starBubbles?.populate(0);
+      // The ledger high-water mark is checked before drawing: no repeated rolls.
+      if (quota > meta.starLedger.quota) {
+        var duplicate = false;
+        if (meta.owns(PermanentSkill.astral)) {
+          _eventRandomState =
+              (1664525 * _eventRandomState + 1013904223) & 0xffffffff;
+          duplicate = _eventRandomState < 0x80000000;
+        }
+        _changeStars(
+          meta.starLedger.award(
+            quota,
+            board!.starBubbles!.config,
+            duplicate: duplicate,
+          ),
+        );
+        board!.starBubbles?.populateImmediate();
+      }
     }
     final bubbles = board!.starBubbles;
     if (bubbles != null && bubbles.broken.isNotEmpty) {
@@ -981,6 +1033,7 @@ class GameSession extends ChangeNotifier {
   void debugReset() {
     if (!debugEnabled || running || !canPlayRun) return;
     _changeStars(const StarLedger());
+    permanentRun = PermanentRun();
     _debugReports.clear();
     _debugFeedingTrials = false;
     feeding = FeedingProgress(startDay: 1, target: feedingInitialQuota);
@@ -1007,6 +1060,9 @@ class GameSession extends ChangeNotifier {
       return 'Mejora retirada';
     }
     if (!canPlayRun || !prestigeReady) return 'Partida no disponible';
+    if (!normalShopAvailable && !debugEnabled) {
+      return 'Completa la primera jornada';
+    }
     if (running) return 'Disponible durante la noche';
     final level = levels[definition.id] ?? 0;
     if (level >= definition.levels.length) return 'Completado';
@@ -1050,6 +1106,7 @@ class GameSession extends ChangeNotifier {
   String snapshot() => jsonEncode({
     'version': 14,
     'meta': meta.toJson(),
+    'permanentRun': permanentRun.toJson(),
     'feeding': feeding.toJson(),
     'eventRandom': _eventRandomState,
     'launcherPose': {
@@ -1114,6 +1171,9 @@ class GameSession extends ChangeNotifier {
         json['meta']['starLedger'] is! Map<String, dynamic>) {
       throw const FormatException('Falta el registro de estrellas');
     }
+    final restoredPermanentRun = json['permanentRun'] == null
+        ? PermanentRun()
+        : PermanentRun.fromJson(json['permanentRun'] as Map<String, dynamic>);
     final restoredMeta = (json['version'] as int) >= 10
         ? MetaProgress.fromJson(json['meta'] as Map<String, dynamic>)
         : MetaProgress();
@@ -1519,7 +1579,37 @@ class GameSession extends ChangeNotifier {
     final savedSound = json['sound'] as bool;
     final savedHaptics = json['haptics'] as bool? ?? true;
     final savedVisualFeedback = json['visualFeedback'] as bool? ?? false;
+    if (json['permanentRun'] != null) {
+      if ((!restoredMeta.owns(PermanentSkill.echo) &&
+              (restoredPermanentRun.cycles != 0 ||
+                  restoredPermanentRun.pendingEcho != 0)) ||
+          (!restoredMeta.owns(PermanentSkill.gold) &&
+              (restoredPermanentRun.goldenAt != null ||
+                  restoredPermanentRun.goldenSpawned)) ||
+          (restoredMeta.phase != PrestigePhase.playing &&
+              (restoredPermanentRun.cycles != 0 ||
+                  restoredPermanentRun.pendingEcho != 0 ||
+                  restoredPermanentRun.goldenAt != null ||
+                  restoredPermanentRun.elapsed != 0))) {
+        throw const FormatException('Habilidades temporales incoherentes');
+      }
+      if (restoredBoard != null && restoredPermanentRun.goldenAt != null) {
+        final duration = restoredBoard.settings['production_duration'];
+        final elapsed =
+            duration + restoredCycle!.closing - restoredCycle.remaining;
+        if (restoredPermanentRun.goldenAt! >= duration ||
+            (restoredPermanentRun.elapsed - elapsed).abs() > 1e-6 ||
+            (restoredPermanentRun.goldenSpawned &&
+                restoredPermanentRun.elapsed + 1e-9 <
+                    restoredPermanentRun.goldenAt!)) {
+          throw const FormatException('Reloj de Fiebre dorada incoherente');
+        }
+      }
+    }
     meta = restoredMeta;
+    permanentRun = restoredPermanentRun;
+    restoredBoard?.permanentRun = permanentRun;
+    restoredBoard?.productionEcho = meta.owns(PermanentSkill.echo);
     _metaFloor = restoredMeta;
     progress.day = day;
     progress.record = record;

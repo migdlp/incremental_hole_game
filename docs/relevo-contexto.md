@@ -1,5 +1,15 @@
 # Relevo de contexto — Feed the Hole
 
+## P02 · Tienda permanente (0.21.0+34)
+
+Cuatro compras únicas con estrellas: Herencia (2), Eco de producción (6), Fiebre
+dorada (8) y Lluvia astral (12). Confirmación y checkpoint íntegro de compra;
+contadores de partida separados. Continuar prepara la nueva partida y comienza
+su primera jornada. La tienda normal queda bloqueada hasta terminar el día 1.
+Burbujas de cuotas nuevas inmediatas; se conservan sus reglas de rotura y cobro.
+[Implementación, pruebas y límites](p02-tienda-permanente.md). Android físico y saturación extrema pendientes.
+
+
 ## AJ-009 · Pilas de monedas de la jornada (0.20.0+33)
 
 El gameplay sustituye el saldo numérico por pilas 2D superpuestas, con perspectiva

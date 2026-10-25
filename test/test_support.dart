@@ -1,3 +1,4 @@
+import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/features/feedback/domain/feedback_controller.dart';
 import 'package:incremental_hole_game/features/feedback/domain/feedback_config.dart';
 import 'dart:io';
@@ -98,4 +99,12 @@ class RecordingFeedbackBackend implements FeedbackBackend {
 
   @override
   void dispose() => stop();
+}
+
+/// Existing shop/control fixtures start after P02's mandatory opening day.
+/// Clear only the last-results presentation so tests can inspect the shop directly.
+void prepareNormalShop(GameSession session) {
+  session.startDay();
+  session.finishDay();
+  session.progress.last = null;
 }

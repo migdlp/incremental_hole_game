@@ -161,6 +161,8 @@ void main() {
     tester,
   ) async {
     final session = GameSession(testCatalog(), MemoryStore());
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     session.economy.balance = 500;
     for (final id in ['hand', 'hand', 'broom', 'paddle', 'broom_v']) {
       session.purchase(

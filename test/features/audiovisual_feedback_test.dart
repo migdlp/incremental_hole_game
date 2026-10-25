@@ -297,6 +297,8 @@ void main() {
       final fx = FeedbackController(backend: b);
       final s = GameSession(testCatalog(), MemoryStore(), feedback: fx)
         ..economy.balance = 100;
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(s);
       final d = s.catalog.definitions.firstWhere((d) => d.id == 'hand');
       expect(s.purchase(d), isTrue);
       fx.advance(.05);

@@ -115,6 +115,8 @@ void main() {
     final hand = catalog.definitions.firstWhere((d) => d.id == 'hand');
     expect(hand.levels.first.cost, 13);
     final session = GameSession(catalog, MemoryStore())..economy.balance = 13;
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     expect(session.purchase(hand), isTrue);
     expect(session.economy.balance, 0);
     var previous = 1;

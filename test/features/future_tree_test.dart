@@ -65,6 +65,8 @@ void main() {
   test('session enforces every path and crossing, and purchases persist', () {
     final session = GameSession(catalog, MemoryStore())
       ..economy.balance = 100000;
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     for (final id in [
       'generator',
       'reward',
@@ -290,6 +292,8 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final session = GameSession(catalog, MemoryStore());
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       await tester.pumpWidget(
         MaterialApp(home: SkillTreeScreen(session: session)),
       );
@@ -331,6 +335,8 @@ void main() {
     tester,
   ) async {
     final session = GameSession(catalog, MemoryStore())..levels['hand'] = 1;
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     await tester.pumpWidget(
       MaterialApp(home: SkillTreeScreen(session: session)),
     );

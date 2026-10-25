@@ -129,6 +129,8 @@ void main() {
     'voluntary node is visible immediately, advanced, configurable and requires confirmation',
     () async {
       final tree = SkillTree(catalog), s = session();
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(s);
       expect(tree.visible({}).any((n) => n.id == 'prestige:1'), isTrue);
       final node = tree.byId('prestige:1');
       expect(node.parents.toSet(), {'generator:5', 'reward:5', 'duration:5'});
@@ -398,10 +400,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('prestige-shop')), findsOneWidget);
     expect(find.text('37'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const ValueKey('prestige-new-run')));
     await tester.tap(find.byKey(const ValueKey('prestige-new-run')));
     await s.pendingWrites;
-    await tester.pumpAndSettle();
-    expect(find.text('Comenzar día'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(s.running, isTrue);
+    expect(find.text('Tienda'), findsNothing);
     expect(s.progress.day, 1);
     expect(s.meta.stars, 37);
     await tester.pumpWidget(const SizedBox());
@@ -444,6 +448,8 @@ void main() {
       'voluntary diamond confirms, cancels and closes the tree (DEBUG=$debug)',
       (tester) async {
         final s = session();
+        // Fixture after the mandatory opening jornada (P02).
+        prepareNormalShop(s);
         if (debug) {
           s.enterDebug();
         } else {

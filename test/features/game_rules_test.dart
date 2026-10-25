@@ -117,6 +117,8 @@ void main() {
     'purchases enforce phase, funds, prerequisite and level cap atomically',
     () {
       final session = GameSession(catalog, MemoryStore());
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       final robot = catalog.definitions.firstWhere((d) => d.id == 'robot');
       final paddle = catalog.definitions.firstWhere((d) => d.id == 'paddle');
       session.economy.balance = 1000;

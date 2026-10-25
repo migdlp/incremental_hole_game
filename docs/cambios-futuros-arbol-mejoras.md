@@ -23,7 +23,7 @@ Combinar un incremental con físicas arcade y una fábrica sencilla y configurab
 
 La automatización puede agrupar, empujar, orientar y preparar bolas, pero la participación manual debe seguir mejorando claramente el resultado. Los cuatro ejes son generar más bolas, capturar un porcentaje mayor, conseguir bolas de mayor tier/valor y aprovechar las recompensas y romper burbujas de estrellas.
 
-Inicio: capturas individuales y mejora de capacidad. Fase temprana: transporte y lanzamiento de grupos y descubrimiento de combos. Juego medio propuesto: tiers, potenciación y sinergias físicas. Juego avanzado propuesto: configurar mecanismos mientras se sigue apuntando y activando manualmente. Las elecciones de habilidades siguen abiertas. S03 implementa la infraestructura de prestigio; P01 aporta burbujas de estrellas; P02 y BAL01 deben definir catálogo y balance.
+Inicio: capturas individuales y mejora de capacidad. Fase temprana: transporte y lanzamiento de grupos y descubrimiento de combos. Juego medio propuesto: tiers, potenciación y sinergias físicas. Juego avanzado propuesto: configurar mecanismos mientras se sigue apuntando y activando manualmente. Las elecciones de habilidades siguen abiertas. S03 implementa la infraestructura de prestigio; P01 aporta burbujas de estrellas; P02 ya incorpora cuatro habilidades permanentes; BAL01 conserva el balance pendiente. [Estado de P02](p02-tienda-permanente.md).
 
 ## CF-16 · Sustituir Valor I–V por tiers individuales
 
@@ -187,13 +187,14 @@ y amortiguación. Probar bloqueo, tacto y acumulación real en Android físico.
 No son balance aprobado; no ampliar a múltiples cañones, nuevas bolas, retroceso
 ni mejoras de potencia.
 
-## Integración pendiente S01/S03
+## Integración S01/S03/P02
 
-S03 ya activa derrota, reinicio y tienda con cuotas provisionales también en normal,
-autorizado expresamente por el usuario. Quedan BAL01 (cantidades, recompensas y
-coste/posición/requisitos del nodo), P01 (calibración de estrellas/burbujas e interacciones experimentales), P02 (catálogo y
-efectos permanentes, narrativa y secretos) y S02 (personalidad). No inventar esos
-contenidos. P01 ya define que las burbujas pendientes se conservan entre jornadas y se pierden al terminar la partida, sin convertirse en saldo.
+AJ-005B conserva cuotas infinitas por bolas, sin vencimiento ni derrota. S03 aporta
+el prestigio voluntario; P02 incorpora Herencia, Eco de producción, Fiebre dorada y
+Lluvia astral, con precios iniciales aprobados y compras únicas. La tienda normal
+se habilita al terminar la primera jornada de cada partida. [Detalles](p02-tienda-permanente.md).
+Quedan BAL01 (balance y coste/posición/requisitos del nodo normal), calibración
+P01, S02 y el diseño visual/narrativo futuro. No inventar esos contenidos.
 
 ## Validación pendiente C01
 

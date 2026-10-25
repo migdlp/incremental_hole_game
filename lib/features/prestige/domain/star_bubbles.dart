@@ -94,6 +94,17 @@ class StarBubbles {
     entryClock = config['star_reentry_interval'];
   }
 
+  /// New quota rewards appear together. P02 overrides the old visual quota cap.
+  void populateImmediate() {
+    final ids = bodies.map((b) => b.reward.id).toSet()..addAll(broken);
+    for (final reward in ledger.pending) {
+      if (!ids.add(reward.id)) continue;
+      final b = StarBubble(reward, hole, Vec.zero);
+      _eject(b);
+      bodies.add(b);
+    }
+  }
+
   bool grab(Vec point) {
     for (final b in bodies.reversed) {
       if ((b.position - point).length <= radius(b) + 5) {
@@ -207,7 +218,7 @@ class StarBubbles {
         clock < 0 ||
         clock > 3 ||
         rows is! List ||
-        rows.length > system.config['star_active_limit']) {
+        rows.length > ledger.pending.length) {
       throw const FormatException('Burbujas inválidas');
     }
     system.entryClock = clock.toDouble();

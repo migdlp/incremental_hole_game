@@ -744,15 +744,16 @@ class NightScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => SkillTreeScreen(session: session),
+                if (session.normalShopAvailable || session.debugEnabled)
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => SkillTreeScreen(session: session),
+                      ),
                     ),
+                    icon: const Icon(Icons.storefront_outlined),
+                    label: const Text('Tienda'),
                   ),
-                  icon: const Icon(Icons.storefront_outlined),
-                  label: const Text('Tienda'),
-                ),
                 if (last == null) ...[
                   const SizedBox(height: 8),
                   FilledButton.icon(

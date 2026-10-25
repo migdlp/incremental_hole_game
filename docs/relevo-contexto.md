@@ -8,6 +8,11 @@ masiva permanecen idénticos. Una sola voz precargada por tintineo, con los lím
 de mezcla y háptica de AJ-007. Sin cambios visuales, económicos ni de guardado.
 Recurso `coincascade.wav`, regenerable con `tool/generate_feedback_audio.py`.
 
+Validación: 20 pruebas de audio locales y pipeline completa correcta.
+Código compilado `595a2db`.
+[APK 0.19.2+32 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40145151929/artifacts/12581060597).
+La escucha final en móvil queda pendiente de la valoración del jugador.
+
 
 ## BUG-002 · Expulsión secuencial (0.19.1+31)
 

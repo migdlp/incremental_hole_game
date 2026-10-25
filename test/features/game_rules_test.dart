@@ -1,3 +1,4 @@
+import 'package:incremental_hole_game/features/feeding/domain/feeding_progress.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,6 +88,8 @@ void main() {
         testCatalog(automaticSpawns: false),
         MemoryStore(),
       )..levels.addAll({'hand': 1, 'reward': 1});
+      // This accounting fixture disables quota defeat; four-day survival has its own tests.
+      session.feeding = FeedingProgress(startDay: 1, target: null);
       for (var day = 1; day <= 10; day++) {
         session.startDay();
         expect(session.board!.coins, isEmpty);
@@ -109,7 +112,7 @@ void main() {
         expect(session.economy.balance, day * 4);
         await session.pendingWrites;
       }
-      expect(session.progress.day, 11);
+      expect(session.progress.day, 10);
       expect(session.progress.record, 4);
     },
   );

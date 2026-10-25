@@ -1,5 +1,14 @@
 # Historial de cambios
 
+## 0.22.0+35 — Cuatro jornadas por cuota
+
+- Cuotas por bolas con cuatro jornadas independientes, incluyendo la jornada de activación.
+- Derrota directa al cuarto cierre sin cumplir; acceso a la misma tienda P02.
+- Plazo únicamente en resultados; día siguiente al iniciar su producción.
+- JSON v15 y migración de partidas anteriores sin derrota retroactiva.
+- Catálogo P02, coste del nodo voluntario, economía y crecimiento conservados.
+
+
 ## 0.21.0+34 — P02: mejoras permanentes
 
 - Herencia, Eco de producción, Fiebre dorada y Lluvia astral, con compra única y confirmación.

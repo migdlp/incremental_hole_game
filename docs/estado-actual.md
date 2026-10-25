@@ -1,5 +1,17 @@
 # Estado actual de Feed the Hole
 
+## S03 / AJ-005B · Cuotas de cuatro jornadas (0.22.0+35)
+
+Cada cuota dispone de cuatro jornadas; la siguiente comienza inmediatamente y
+cuenta como primera la jornada en que se activa. Al cerrar la cuarta sin cumplir,
+DERROTA directa sin resultados → tienda P02. Crecimiento y premios se procesan
+antes de evaluar el vencimiento. Plazo visible únicamente en el resumen.
+Día siguiente al comenzar producción; migración segura sin derrota retroactiva.
+JSON v15, balance v20, catálogo/precios P02 y nodo voluntario sin cambios.
+[Especificación](s03-aj005b-cuotas-4-jornadas.md) · [Implementación y pruebas](cuotas-4-jornadas-implementacion.md).
+Esta regla sustituye los textos históricos de cuotas sin vencimiento.
+
+
 ## P02 · Tienda permanente (0.21.0+34)
 
 Cuatro compras únicas con estrellas: Herencia (2), Eco de producción (6), Fiebre

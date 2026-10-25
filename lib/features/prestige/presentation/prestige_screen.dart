@@ -27,7 +27,9 @@ class PrestigeScreen extends StatelessWidget {
                     letterSpacing: 3,
                   ),
                 ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 12),
+                const Text('No has completado la cuota.'),
+                const SizedBox(height: 24),
                 FilledButton(
                   key: const ValueKey('prestige-continue'),
                   onPressed: session.prestigeReady

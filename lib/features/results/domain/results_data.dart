@@ -25,13 +25,15 @@ class ResultsData {
            ? feeding.points - feeding.runBalls
            : BigInt.zero,
        quotaLevel = feeding.period,
+       quotaDay = feeding.quotaDay(result.day),
+       futureDays = feeding.futureDays(result.day),
        target = feeding.target,
        stacks = _stacks(result) {
     if (stacks.fold<int>(0, (sum, s) => sum + s.amount) != income) {
       throw ArgumentError('Desglose distinto del ingreso real');
     }
   }
-  final int income, balance, captured, quotaLevel;
+  final int income, balance, captured, quotaLevel, quotaDay, futureDays;
   final BigInt foodBefore, foodAfter;
   final BigInt? target;
   final List<ResultStack> stacks;

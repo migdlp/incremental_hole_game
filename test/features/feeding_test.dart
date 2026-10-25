@@ -154,7 +154,7 @@ void main() {
       expect(s.feeding.points, BigInt.from(90));
       s.resume();
       s.finishDay();
-      for (var i = 0; i < 30; i++) {
+      for (var i = 0; i < 1; i++) {
         s.startDay();
         s.finishDay();
       }

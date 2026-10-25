@@ -21,8 +21,8 @@ void main() {
     s.tick(1 / 60);
   }
 
-  Future<void> nextPeriod(GameSession s) async {
-    for (var i = 0; i < 5; i++) {
+  Future<void> nextDay(GameSession s) async {
+    for (var i = 0; i < 1; i++) {
       s.finishDay();
       await s.pendingWrites;
       s.startDay();
@@ -42,7 +42,7 @@ void main() {
       capture(s, 30);
       s.tick(.1);
       expect(s.feeding.growths, 1);
-      await nextPeriod(s);
+      await nextDay(s);
       expect(s.feeding.period, 2);
       expect(s.board!.captureRadius / base, closeTo(math.sqrt(1.16), 1e-12));
       capture(s, s.feeding.remaining!.toInt());

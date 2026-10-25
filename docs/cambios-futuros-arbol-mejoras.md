@@ -1,5 +1,10 @@
 # Cambios futuros: mecánicas y árbol de mejoras
 
+Regla vigente S03/AJ-005B: cuotas infinitas con plazo de **cuatro jornadas por cuota**,
+derrota al cuarto cierre sin cumplir y entrada a P02. Sustituye la variante sin
+vencimiento. [Especificación](s03-aj005b-cuotas-4-jornadas.md).
+
+
 ## Límite de tamaño del agujero pendiente de decisión
 
 AJ-005A ya implementa el crecimiento del área un 16 % por cuota completada,
@@ -189,8 +194,8 @@ ni mejoras de potencia.
 
 ## Integración S01/S03/P02
 
-AJ-005B conserva cuotas infinitas por bolas, sin vencimiento ni derrota. S03 aporta
-el prestigio voluntario; P02 incorpora Herencia, Eco de producción, Fiebre dorada y
+AJ-005B conserva cuotas infinitas por bolas con cuatro jornadas por cuota. S03
+aporta derrota al vencimiento y prestigio voluntario; P02 incorpora Herencia, Eco de producción, Fiebre dorada y
 Lluvia astral, con precios iniciales aprobados y compras únicas. La tienda normal
 se habilita al terminar la primera jornada de cada partida. [Detalles](p02-tienda-permanente.md).
 Quedan BAL01 (balance y coste/posición/requisitos del nodo normal), calibración

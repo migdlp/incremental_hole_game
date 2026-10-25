@@ -1,17 +1,25 @@
 import 'legacy_feeding_progress.dart';
 
-/// Capturable balls only. Money and day deadlines never enter this ledger.
+/// Capturable balls only, with a four-production-day deadline per active quota.
 class FeedingProgress {
   static const initialQuota = 100;
   FeedingProgress({required this.startDay, int? target = initialQuota})
-    : initialTarget = target == null ? null : BigInt.from(target),
+    : quotaStartDay = startDay,
+      initialTarget = target == null ? null : BigInt.from(target),
       target = target == null ? null : BigInt.from(target) {
     if (startDay < 1 || (target != null && target < 1)) {
       throw ArgumentError('Inicio u objetivo de alimentación inválido');
     }
   }
 
-  int startDay;
+  static const quotaDays = 4;
+  int startDay, quotaStartDay;
+  bool dayClosed = false;
+  int quotaDay(int day) => (day - quotaStartDay + 1).clamp(1, quotaDays);
+  int futureDays(int day) => quotaDays - quotaDay(day);
+  bool expiresAt(int day) =>
+      target != null && day >= quotaStartDay + quotaDays - 1;
+
   int period = 1, completedDays = 0;
   BigInt normalPoints = BigInt.zero, instantPoints = BigInt.zero;
   int runCapturedBaseline = 0;
@@ -23,12 +31,13 @@ class FeedingProgress {
   BigInt? get nextTarget => target == null ? null : target! * BigInt.from(10);
   double? get fraction => target == null ? null : ratio(points, target!);
 
-  // Day bookkeeping validates snapshots without evaluating any deadline.
+  // Bookkeeping advances only for actual production days.
   bool beginDay(int day) {
     if (day < startDay) return false;
     if (day != startDay + completedDays) {
       throw StateError('Jornada de alimentación incoherente');
     }
+    dayClosed = false;
     runBalls = BigInt.zero;
     runCapturedBaseline = 0;
     return true;
@@ -69,6 +78,7 @@ class FeedingProgress {
       growths++;
       growthPeriod = period;
       period++;
+      quotaStartDay = day;
       target = nextTarget;
     }
     return events;
@@ -81,11 +91,14 @@ class FeedingProgress {
       throw StateError('Jornada de alimentación incoherente');
     }
     completedDays++;
+    dayClosed = true;
     return true;
   }
 
   Map<String, dynamic> toJson() => {
-    'rules': 'balls-v1',
+    'rules': 'balls-four-days-v2',
+    'quotaStartDay': quotaStartDay,
+    'dayClosed': dayClosed,
     'startDay': startDay,
     'period': period,
     'completedDays': completedDays,
@@ -120,7 +133,8 @@ class FeedingProgress {
       return BigInt.parse(s);
     }
 
-    if (json['rules'] != 'balls-v1') {
+    final deadlines = json['rules'] == 'balls-four-days-v2';
+    if (!deadlines && json['rules'] != 'balls-v1') {
       throw const FormatException('Reglas de alimentación inválidas');
     }
     final state = FeedingProgress(startDay: number('startDay', minimum: 1))
@@ -136,12 +150,34 @@ class FeedingProgress {
           ? null
           : big('initialTarget')
       ..target = json['target'] == null ? null : big('target');
+    if (deadlines) {
+      if (json['dayClosed'] is! bool) {
+        throw const FormatException('Cierre de jornada inválido');
+      }
+      state.dayClosed = json['dayClosed'] as bool;
+      state.quotaStartDay = number('quotaStartDay', minimum: 1);
+    } else {
+      // Old saves stored the *next* day between production days. Start a safe
+      // fresh deadline on their current/just-finished day, never retroactively.
+      state.dayClosed = !running && state.completedDays > 0;
+      state.quotaStartDay = day - (state.dayClosed ? 1 : 0);
+    }
     final migratedRun =
         running &&
         state.startDay == day + 1 &&
         state.completedDays == 0 &&
         state.runBalls == BigInt.zero;
-    if ((!migratedRun && state.startDay + state.completedDays != day) ||
+    final expectedDay =
+        state.startDay +
+        state.completedDays -
+        (deadlines && state.dayClosed ? 1 : 0);
+    if ((!migratedRun && expectedDay != day) ||
+        (running && state.dayClosed) ||
+        (state.dayClosed && state.completedDays == 0) ||
+        (deadlines &&
+            state.target != null &&
+            day > state.quotaStartDay + quotaDays - 1) ||
+        state.quotaStartDay > (migratedRun ? state.startDay : day) ||
         state.growths > state.growthPeriod ||
         state.growthPeriod != state.completed ||
         (state.target == null
@@ -178,7 +214,9 @@ class FeedingProgress {
           ..completedDays = old.completedDays
           ..growths = old.growths
           ..growthPeriod = completed
-          ..runCapturedBaseline = capturedBaseline;
+          ..runCapturedBaseline = capturedBaseline
+          ..dayClosed = !running && old.completedDays > 0
+          ..quotaStartDay = day - (!running && old.completedDays > 0 ? 1 : 0);
     state.target = state.initialTarget! * BigInt.from(10).pow(completed);
     return state;
   }

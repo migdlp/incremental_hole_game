@@ -66,24 +66,32 @@ void main() {
     s.restore(jsonEncode(j));
   }
 
-  test('empty days never defeat or erase run progress', () async {
-    final s = session();
-    seedPermanent(s);
-    s.economy.balance = 900;
-    s.levels['hand'] = 1;
-    for (var i = 0; i < 30; i++) {
+  test(
+    'empty days defeat at the fourth close and preserve only permanent progress',
+    () async {
+      final s = session();
+      seedPermanent(s);
+      s.economy.balance = 900;
+      s.levels['hand'] = 1;
+      for (var i = 0; i < 3; i++) {
+        s.startDay();
+        s.finishDay();
+      }
+      expect(s.canPlayRun, isTrue);
+      expect(s.progress.day, 3);
       s.startDay();
       s.finishDay();
-    }
-    expect(s.canPlayRun, isTrue);
-    expect(s.progress.day, 31);
-    expect(s.economy.balance, 900);
-    expect(s.levels['hand'], 1);
-    expect(s.meta.firstDefeatSeen, isFalse);
-    expect(s.feeding.target, BigInt.from(100));
-    await s.pendingWrites;
-    s.dispose();
-  });
+      await s.pendingWrites;
+      expect(s.meta.phase, PrestigePhase.defeat);
+      expect(s.meta.stars, 37);
+      expect(s.meta.upgrades, {'future-p02-record': 2});
+      expect(s.economy.balance, 0);
+      expect(s.levels, isEmpty);
+      expect(s.meta.firstDefeatSeen, isTrue);
+      expect(s.feeding.target, BigInt.from(100));
+      s.dispose();
+    },
+  );
   test(
     'defeat to shop to new run is idempotent and preserves permanent state every time',
     () async {
@@ -522,9 +530,12 @@ void main() {
       },
     );
   }
-  testWidgets('DEBUG empty days do not trigger a defeat', (tester) async {
+  testWidgets('DEBUG can disable quota trials without triggering defeat', (
+    tester,
+  ) async {
     final store = MemoryStore();
     final s = session(store: store)..enterDebug();
+    s.debugConfigureFeeding(quotas: false);
     await s.pendingWrites;
     await tester.pumpWidget(GardenApp(session: s));
     await tester.pump();
@@ -539,6 +550,7 @@ void main() {
     expect(find.text('DERROTA'), findsNothing);
     expect(find.byKey(const ValueKey('skill-tree-viewer')), findsOneWidget);
     expect(store.prestigeCandidates, isEmpty);
+    await tester.ensureVisible(find.byKey(const ValueKey('debug-exit')));
     await tester.tap(find.byKey(const ValueKey('debug-exit')));
     await tester.pumpAndSettle();
     expect(s.canPlayRun, isTrue);

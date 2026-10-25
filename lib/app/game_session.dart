@@ -210,7 +210,8 @@ class GameSession extends ChangeNotifier {
       debugEnabled ||
       (meta.revision <= _durableMetaRevision && saveError == null);
   PermanentRun permanentRun = PermanentRun();
-  bool get normalShopAvailable => canPlayRun && progress.day > 1;
+  bool get normalShopAvailable =>
+      canPlayRun && (progress.day > 1 || feeding.dayClosed);
   bool canBuyPermanent(String id) {
     final skill = PermanentSkill.find(id);
     return meta.phase == PrestigePhase.shop &&
@@ -386,7 +387,8 @@ class GameSession extends ChangeNotifier {
                 data['version'] != 11 &&
                 data['version'] != 12 &&
                 data['version'] != 13 &&
-                data['version'] != 14) {
+                data['version'] != 14 &&
+                data['version'] != 15) {
               throw const FormatException('Checkpoint incompatible');
             }
             final state = MetaProgress.fromJson(
@@ -450,6 +452,7 @@ class GameSession extends ChangeNotifier {
   void startDay() {
     if (running || !canPlayRun || !prestigeReady) return;
     _rewardTransitionRemaining = 0;
+    if (feeding.dayClosed || progress.last?.day == progress.day) progress.day++;
     feeding.beginDay(progress.day);
     _retiredRunLevels.clear();
     final settings = catalog.settings(levels);
@@ -717,6 +720,12 @@ class GameSession extends ChangeNotifier {
         ),
       );
       if (_debugReports.length > 20) _debugReports.removeAt(0);
+    }
+    // All confirmed captures, quota transitions and P01/P02 events were handled
+    // in _step before reaching this boundary. Never give moving balls extra time.
+    if (feeding.expiresAt(progress.day)) {
+      _endRun(voluntary: false);
+      return;
     }
     final result = DayResult(
       day: progress.day,
@@ -1007,10 +1016,15 @@ class GameSession extends ChangeNotifier {
         pending: meta.starLedger.pending,
       ),
     );
+    final closed = feeding.dayClosed || progress.last?.day == progress.day;
     feeding = FeedingProgress(
       startDay: progress.day,
       target: quotas ? amount : null,
     );
+    if (closed) {
+      feeding.dayClosed = true;
+      feeding.completedDays = 1;
+    }
     notifyListeners();
   }
 
@@ -1104,7 +1118,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 14,
+    'version': 15,
     'meta': meta.toJson(),
     'permanentRun': permanentRun.toJson(),
     'feeding': feeding.toJson(),
@@ -1160,7 +1174,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 11 &&
         json['version'] != 12 &&
         json['version'] != 13 &&
-        json['version'] != 14) {
+        json['version'] != 14 &&
+        json['version'] != 15) {
       throw const FormatException('Versión de guardado no compatible');
     }
     if ((json['version'] as int) >= 10 &&
@@ -1263,7 +1278,10 @@ class GameSession extends ChangeNotifier {
         ? null
         : DayResult.fromJson(json['last'] as Map<String, dynamic>);
     if (last != null &&
-        (last.day != day - 1 ||
+        (last.day !=
+                ((json['version'] as int) >= 15 && json['run'] == null
+                    ? day
+                    : day - 1) ||
             last.income < 0 ||
             last.generated < last.income ||
             last.captured < 0 ||
@@ -1466,6 +1484,10 @@ class GameSession extends ChangeNotifier {
       if (savedFeeding is! Map<String, dynamic>) {
         throw const FormatException('Falta la alimentación');
       }
+      if ((json['version'] as int) >= 15 &&
+          savedFeeding['rules'] != 'balls-four-days-v2') {
+        throw const FormatException('Falta el plazo de cuota');
+      }
       if ((json['version'] as int) >= 14) {
         restoredFeeding = FeedingProgress.fromJson(
           savedFeeding,
@@ -1504,9 +1526,37 @@ class GameSession extends ChangeNotifier {
     } else {
       // Historical captures cannot be reconstructed without guessing ability use.
       restoredFeeding = FeedingProgress(
-        startDay: day,
+        startDay: run == null && last != null ? day - 1 : day,
         target: feedingInitialQuota,
       )..runCapturedBaseline = restoredBoard?.captured ?? 0;
+      if (run == null && last != null) {
+        restoredFeeding.completedDays = 1;
+        restoredFeeding.dayClosed = true;
+      }
+    }
+    final migratedClosedDay =
+        (json['version'] as int) < 15 &&
+        run == null &&
+        restoredMeta.phase == PrestigePhase.playing &&
+        (last != null || restoredFeeding.dayClosed);
+    final restoredDay = day - (migratedClosedDay ? 1 : 0);
+    if (migratedClosedDay) {
+      // Historical monetary periods could already point at a fresh period with
+      // zero completed days. Align that bookkeeping with the actual closed day.
+      restoredFeeding.startDay = math.min(
+        restoredFeeding.startDay,
+        restoredDay,
+      );
+      restoredFeeding.completedDays =
+          restoredDay - restoredFeeding.startDay + 1;
+      restoredFeeding.dayClosed = true;
+      restoredFeeding.quotaStartDay = restoredDay;
+    }
+    if ((json['version'] as int) >= 15 &&
+        restoredMeta.phase == PrestigePhase.playing &&
+        restoredFeeding.dayClosed &&
+        restoredFeeding.expiresAt(day)) {
+      throw const FormatException('Cuota vencida sin transición de derrota');
     }
     if (restoredMeta.phase != PrestigePhase.playing &&
         (restoredFeeding.points != BigInt.zero ||
@@ -1611,7 +1661,7 @@ class GameSession extends ChangeNotifier {
     restoredBoard?.permanentRun = permanentRun;
     restoredBoard?.productionEcho = meta.owns(PermanentSkill.echo);
     _metaFloor = restoredMeta;
-    progress.day = day;
+    progress.day = restoredDay;
     progress.record = record;
     progress.last = last;
     final retiredGrip = savedLevels['hand_grip'] ?? 0;

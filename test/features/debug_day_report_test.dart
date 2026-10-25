@@ -59,6 +59,7 @@ void main() {
 
   test('reports are bounded, read only and discarded on debug exit', () {
     final session = GameSession(testCatalog(), MemoryStore())..enterDebug();
+    session.debugConfigureFeeding(quotas: false);
     for (var i = 0; i < 25; i++) {
       session.startDay();
       session.finishDay();

@@ -316,7 +316,7 @@ void main() {
     },
   );
   test(
-    'empty days preserve pending bubbles and earned stars indefinitely',
+    'pending bubbles survive allowed days and are lost on fourth-day defeat',
     () async {
       final c = testCatalog();
       c.base['star_count'] = 2;
@@ -324,30 +324,24 @@ void main() {
       await complete(s);
       smash(s);
       await s.pendingWrites;
-      expect(s.meta.starLedger.pending, hasLength(1));
-      // First quota satisfied; second period deliberately fails.
       s.finishDay();
       await s.pendingWrites;
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < 2; i++) {
         s.startDay();
         s.finishDay();
         await s.pendingWrites;
+        expect(s.meta.starLedger.pending, hasLength(1));
+        expect(s.meta.stars, 1);
+        expect(s.canPlayRun, isTrue);
       }
       s.startDay();
-      s.board!.balls.add(Ball(s.board!.nextId++, Board.hole, Vec.zero));
-      s.tick(1 / 60);
       s.finishDay();
       await s.pendingWrites;
-      // A pending reward can also be present when voluntary prestige ends the run.
-      for (var i = 0; i < 4; i++) {
-        s.startDay();
-        s.finishDay();
-        await s.pendingWrites;
-      }
-      expect(s.meta.phase, PrestigePhase.playing);
+      expect(s.meta.phase, PrestigePhase.defeat);
       expect(s.meta.stars, 1);
-      expect(s.meta.starLedger.pending, hasLength(1));
-      expect(s.continueToPrestigeShop(), isFalse);
+      expect(s.meta.starLedger.pending, isEmpty);
+      expect(s.continueToPrestigeShop(), isTrue);
+      await s.pendingWrites;
       s.dispose();
     },
   );

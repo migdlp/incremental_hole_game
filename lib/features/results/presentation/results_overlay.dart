@@ -364,6 +364,21 @@ class _ResultsOverlayState extends State<ResultsOverlay>
                               'Restante: ${ballNumber(target - food)}',
                               style: const TextStyle(fontSize: 13),
                             ),
+                          if (target != null) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              'Jornada ${d.quotaDay} de 4',
+                              key: const ValueKey('results-quota-day'),
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                            Text(
+                              d.futureDays == 1
+                                  ? 'Queda 1 jornada'
+                                  : 'Quedan ${d.futureDays} jornadas',
+                              key: const ValueKey('results-quota-future-days'),
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ],
                         ],
                       ),
                     ),

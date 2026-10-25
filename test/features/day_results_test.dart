@@ -81,7 +81,7 @@ void main() {
       expect(board.spawnClock, spawn);
       expect(session.selectedTool, BallTool.hand);
       expect(session.economy.balance, 104);
-      expect(session.progress.day, 2);
+      expect(session.progress.day, 1);
       await tester.tap(find.text('Tienda'));
       await tester.pumpAndSettle();
       expect(popup, findsNothing);

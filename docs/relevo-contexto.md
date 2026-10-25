@@ -9,6 +9,13 @@ su primera jornada. La tienda normal queda bloqueada hasta terminar el día 1.
 Burbujas de cuotas nuevas inmediatas; se conservan sus reglas de rotura y cobro.
 [Implementación, pruebas y límites](p02-tienda-permanente.md). Android físico y saturación extrema pendientes.
 
+Validado en GitHub Actions: **441 pruebas correctas**, formato, análisis,
+compilación Android y firma. Código `e43a6522af09d573dc72340a5865dd9b6b631993`.
+[APK 0.21.0+34 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40208961570/artifacts/12605207063) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40208961570) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40208961570/artifacts/12604148738).
+`046ebb0` conservado. Comparación de actualización sobre APK anterior omitida;
+no se certifica compatibilidad de instalación entre APKs en esta ejecución.
+Saturación extrema y bloqueo total de Fiebre dorada siguen pendientes según el documento.
+
 
 ## AJ-009 · Pilas de monedas de la jornada (0.20.0+33)
 

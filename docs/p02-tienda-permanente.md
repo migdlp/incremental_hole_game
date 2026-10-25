@@ -107,7 +107,15 @@ habilidades, fase y tiempo de producción antes de mutar la sesión.
 ## Validación y límites
 
 Suite completa final: **441 pruebas correctas**, incluidas 17 nuevas de P02.
-Formato y análisis sin incidencias. La pipeline valida además la compilación Android.
+Formato y análisis sin incidencias. Pipeline de Android correcta.
+
+Validado en GitHub Actions: **441 pruebas correctas**, formato, análisis,
+compilación Android y firma. Código `e43a6522af09d573dc72340a5865dd9b6b631993`.
+[APK 0.21.0+34 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40208961570/artifacts/12605207063) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40208961570) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40208961570/artifacts/12604148738).
+`046ebb0` conservado. Comparación de actualización sobre APK anterior omitida;
+no se certifica compatibilidad de instalación entre APKs en esta ejecución.
+Saturación extrema y bloqueo total de Fiebre dorada siguen pendientes según el documento.
+
 Se cubren precios, saldo exacto/insuficiente, cancelación, compras repetidas,
 restauración, guardado fallido, varias partidas, árbol bloqueado, extras, contador
 entre jornadas, lanzador independiente, dorada/pausa, tiradas por cuota y cuerpos

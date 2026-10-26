@@ -5,6 +5,13 @@ Catálogo de doce habilidades, cinco niveles, sin costes, rarezas, rerolls ni
 relación con las cuatro compras de P02. Parámetros y tablas centralizados en
 `EvolutionSkill.catalogue` bajo `lib/features/evolution/domain/evolution.dart`.
 
+Entrega validada: **486 pruebas correctas**, formato, análisis, compilación Android
+y firma. Fuente `a385b8592d37b88121c87f72abf1ced21a876204`.
+[APK 0.23.0+36 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40327063421/artifacts/12652625160) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40327063421) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40327063421/artifacts/12651519034).
+Validación y perfil de simulación: ejecución `40325929678`. Pendiente Android físico.
+`046ebb0` conservado en el historial. Comparación de actualización con APK anterior
+omitida; compatibilidad de instalación entre APKs no verificada en esta ejecución.
+
 ## Elecciones y persistencia
 
 Cada cuota nueva de una partida registra una elección. Primero se procesan todas

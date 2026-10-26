@@ -9,6 +9,13 @@ contadores se reinician por partida. Compatible con cuotas de cuatro jornadas,
 P01, P02 y AJ-009; JSON v16 y balance v20. Sin costes ni cambios en el catálogo P02.
 [Especificación](docs/e03-cartas-evolucion-especificacion.md) · [Implementación, archivos y pruebas](docs/e03-evolucion-implementacion.md).
 
+Entrega validada: **486 pruebas correctas**, formato, análisis, compilación Android
+y firma. Fuente `a385b8592d37b88121c87f72abf1ced21a876204`.
+[APK 0.23.0+36 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40327063421/artifacts/12652625160) · [Pipeline](https://github.com/migdlp/incremental_hole_game/actions/runs/40327063421) · [Registros](https://github.com/migdlp/incremental_hole_game/actions/runs/40327063421/artifacts/12651519034).
+Validación y perfil de simulación: ejecución `40325929678`. Pendiente Android físico.
+`046ebb0` conservado en el historial. Comparación de actualización con APK anterior
+omitida; compatibilidad de instalación entre APKs no verificada en esta ejecución.
+
 
 ## S03 / AJ-005B · Cuotas de cuatro jornadas (0.22.0+35)
 

@@ -486,10 +486,7 @@ class GardenGame extends FlameGame {
     final hole = offset(board.holePosition);
     final radius = board.captureRadius;
     final multiplier=board.evolution?.moneyMultiplier??1;
-    if(multiplier>1) {
-      final label=TextPainter(text:TextSpan(text:'×$multiplier',style:const TextStyle(color:Color(0xffffd45a),fontSize:16,fontWeight:FontWeight.w800)),textDirection:TextDirection.ltr)..layout();
-      label.paint(canvas,Offset(hole.dx+radius+12,hole.dy-label.height/2));
-    }
+    if(multiplier>1) label(canvas,'×$multiplier',Offset(hole.dx+radius+25,hole.dy),color:const Color(0xffffd45a),fontSize:16);
 
     canvas.drawOval(
       Rect.fromCenter(

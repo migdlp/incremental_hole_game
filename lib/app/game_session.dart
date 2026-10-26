@@ -41,6 +41,7 @@ class GameSession extends ChangeNotifier {
            feedback ?? FeedbackController(backend: PlatformFeedbackBackend()),
        _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000) {
     feeding = FeedingProgress(startDay: 1, target: feedingInitialQuota);
+    evolution=EvolutionRun(randomState:_eventRandomState,cardRandom:(_eventRandomState^0x7951)&0xffffffff);
   }
   final FeedbackController feedback;
   final MotionInput motion;
@@ -1631,7 +1632,11 @@ class GameSession extends ChangeNotifier {
       }
     }
     restoredBoard?.syncHoleGrowth(restoredFeeding.growths);
-    if(json['evolution']==null) restoredEvolution.lastQuota=restoredFeeding.completed;
+    if(json['evolution']==null) {
+      restoredEvolution.lastQuota=restoredFeeding.completed;
+      restoredEvolution.dayElapsed=restoredCycle==null?0:
+        (restoredCycle.production+restoredCycle.closing-restoredCycle.remaining).clamp(0,restoredCycle.production);
+    }
     if(restoredEvolution.lastQuota!=restoredFeeding.completed ||
         (restoredEvolution.hasChoices && restoredBoard==null) ||
         (restoredEvolution.closingPending && (restoredCycle==null || restoredCycle.phase!=DayPhase.night)) ||

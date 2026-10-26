@@ -492,10 +492,12 @@ class EvolutionRun {
       }
     }
 
-    if((s.level(EvolutionId.ram)==0 && (s.ramCycles!=0 || s.pendingRam!=0)) ||
-       (s.level(EvolutionId.ration)==0 && (s.rationCycles!=0 || s.pendingRation!=0)) ||
-       (s.level(EvolutionId.pulse)==0 && s.pulseClock!=0) ||
-       (s.level(EvolutionId.gravity)==0 && s.gravityClock!=0)) {
+    if ((s.level(EvolutionId.ram) == 0 &&
+            (s.ramCycles != 0 || s.pendingRam != 0)) ||
+        (s.level(EvolutionId.ration) == 0 &&
+            (s.rationCycles != 0 || s.pendingRation != 0)) ||
+        (s.level(EvolutionId.pulse) == 0 && s.pulseClock != 0) ||
+        (s.level(EvolutionId.gravity) == 0 && s.gravityClock != 0)) {
       throw const FormatException('Contadores de habilidad no adquirida');
     }
     readEffect('whirlpool', EvolutionId.whirlpool, s.whirlpool);

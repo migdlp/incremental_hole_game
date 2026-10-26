@@ -50,7 +50,7 @@ void main() {
         expect(s.feeding.points, BigInt.from(100));
         expect(s.rewardVisuals.activeCount, lessThanOrEqualTo(budget));
         await resolveEvolutionFixture(s);
-      s.finishDay();
+        s.finishDay();
         expect(s.economy.balance, expected);
         expect(s.progress.last!.lost, 0);
         s.exitDebug();

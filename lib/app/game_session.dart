@@ -762,8 +762,18 @@ class GameSession extends ChangeNotifier {
       feedback.setPlaying(false);
       // The confirmed capture/quota remain audible once as UI feedback while
       // gameplay loops and timers are suspended by the selector.
-      if(events.captured>0) feedback.emit(FeedbackEvent.capture,count:events.captured,gameplay:false);
-      if(completedQuotas.isNotEmpty) feedback.emit(FeedbackEvent.quota,count:completedQuotas.length,gameplay:false);
+      if (events.captured > 0)
+        feedback.emit(
+          FeedbackEvent.capture,
+          count: events.captured,
+          gameplay: false,
+        );
+      if (completedQuotas.isNotEmpty)
+        feedback.emit(
+          FeedbackEvent.quota,
+          count: completedQuotas.length,
+          gameplay: false,
+        );
       _syncMotion();
       save();
       notifyListeners();
@@ -1094,7 +1104,10 @@ class GameSession extends ChangeNotifier {
         pending: meta.starLedger.pending,
       ),
     );
-    evolution.lastQuota=0;evolution.pending=0;evolution.options=[];evolution.closingPending=false;
+    evolution.lastQuota = 0;
+    evolution.pending = 0;
+    evolution.options = [];
+    evolution.closingPending = false;
     final closed = feeding.dayClosed || progress.last?.day == progress.day;
     feeding = FeedingProgress(
       startDay: progress.day,

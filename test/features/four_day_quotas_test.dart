@@ -25,7 +25,7 @@ void main() {
   GameSession game([MemoryStore? store]) =>
       GameSession(catalog, store ?? MemoryStore(), eventSeed: 42);
   Future<void> capture(GameSession s, int n) async {
-    s.evolution.cardRandom=0;
+    s.evolution.cardRandom = 0;
     for (var i = 0; i < n; i++) {
       s.board!.balls.add(
         Ball(

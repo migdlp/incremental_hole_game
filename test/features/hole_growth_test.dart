@@ -14,7 +14,7 @@ void main() {
   GameSession start([MemoryStore? store]) =>
       GameSession(catalog, store ?? MemoryStore())..startDay();
   Future<void> capture(GameSession s, int amount) async {
-    s.evolution.cardRandom=0;
+    s.evolution.cardRandom = 0;
     final b = s.board!;
     for (var i = 0; i < amount; i++) {
       b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
@@ -58,7 +58,7 @@ void main() {
     },
   );
 
-  test('new capture zone catches a ball outside the original radius', () {
+  test('new capture zone catches a ball outside the original radius', () async {
     final s = start();
     final base = s.board!.captureRadius;
     await capture(s, 100);
@@ -128,7 +128,7 @@ void main() {
     }
   });
 
-  test('invalid growth records reject restoration atomically', () {
+  test('invalid growth records reject restoration atomically', () async {
     final s = start();
     await capture(s, 100);
     final original = s.snapshot();

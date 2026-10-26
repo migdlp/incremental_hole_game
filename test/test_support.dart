@@ -113,17 +113,31 @@ void prepareNormalShop(GameSession session) {
 /// Prefer delayed/non-economic choices so these fixtures keep their original focus.
 Future<void> resolveEvolutionFixture(GameSession session) async {
   await session.pendingWrites;
-  const priority=['E03-03','E03-11','E03-09','E03-05','E03-01','E03-04','E03-08','E03-07','E03-06','E03-02','E03-12','E03-10'];
-  while(session.evolution.hasChoices) {
-    final id=priority.firstWhere(session.evolution.options.contains);
-    if(!session.chooseEvolution(id,serial:session.evolution.serial)) throw StateError('Fixture E03 sin guardar');
+  const priority = [
+    'E03-03',
+    'E03-11',
+    'E03-09',
+    'E03-05',
+    'E03-01',
+    'E03-04',
+    'E03-08',
+    'E03-07',
+    'E03-06',
+    'E03-02',
+    'E03-12',
+    'E03-10',
+  ];
+  while (session.evolution.hasChoices) {
+    final id = priority.firstWhere(session.evolution.options.contains);
+    if (!session.chooseEvolution(id, serial: session.evolution.serial))
+      throw StateError('Fixture E03 sin guardar');
     await session.pendingWrites;
   }
 }
 
 /// Advance real simulation, rather than forging only one of its synchronized clocks.
-void advanceToProductionBoundary(GameSession session,double remaining) {
-  while(session.running && session.cycle!.remaining>remaining+1e-8) {
-    session.tick((session.cycle!.remaining-remaining).clamp(0,.1));
+void advanceToProductionBoundary(GameSession session, double remaining) {
+  while (session.running && session.cycle!.remaining > remaining + 1e-8) {
+    session.tick((session.cycle!.remaining - remaining).clamp(0, .1));
   }
 }

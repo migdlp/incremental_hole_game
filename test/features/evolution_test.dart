@@ -90,19 +90,14 @@ void main() {
     );
   }
   test('rolling window, luck order and integer rewards', () {
-    final r = EvolutionRun(
-      levels: {
-        ...levels(EvolutionId.millionaire, 5),
-
-      },
-    );
+    final r = EvolutionRun(levels: {...levels(EvolutionId.millionaire, 5)});
     for (var i = 0; i < 9; i++) {
       r.capture(7);
     }
     r.advance(3.1);
     expect(r.capture(7), 7);
     // Known LCG seed giving a first draw below 5%.
-    r.levels={...r.levels,...levels(EvolutionId.luck,5)};
+    r.levels = {...r.levels, ...levels(EvolutionId.luck, 5)};
     r.randomState = 1972;
     r.millionaire.level = 5;
     r.millionaire.remaining = 1;
@@ -244,7 +239,7 @@ void main() {
         await s.pendingWrites;
       }
       s.startDay();
-      advanceToProductionBoundary(s,1/60);
+      advanceToProductionBoundary(s, 1 / 60);
       capture(s, 100);
       await s.pendingWrites;
       expect(s.running, isTrue);

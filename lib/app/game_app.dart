@@ -17,6 +17,7 @@ import '../features/upgrades/presentation/skill_tree_screen.dart';
 import 'game_session.dart';
 import '../features/feedback/domain/feedback_controller.dart';
 import '../features/prestige/presentation/prestige_screen.dart';
+import '../features/evolution/presentation/evolution_selector.dart';
 
 const ink = Color(0xff111c2e);
 const surface = Color(0xff23334b);
@@ -188,6 +189,8 @@ class _SessionScreenState extends State<SessionScreen>
                                 ),
                               ),
                             ),
+                            if (widget.session.evolutionBlocked)
+                              Positioned.fill(child:EvolutionSelector(key:const ValueKey('evolution-selector'),session:widget.session)),
                             if (!widget.session.running)
                               Positioned.fill(
                                 child: ResultsOverlay(

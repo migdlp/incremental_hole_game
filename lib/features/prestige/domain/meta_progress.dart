@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'star_rewards.dart';
 import 'permanent_skills.dart';
+import '../../evolution/domain/evolution.dart';
 
 enum PrestigePhase { playing, defeat, shop }
 
@@ -13,6 +14,7 @@ class MetaProgress {
     this.phase = PrestigePhase.playing,
     this.stars = 0,
     this.upgrades = const {},
+    this.evolutionLevels = const {},
     this.discoveries = const [],
     this.pendingStarObjects = const [],
     this.starLedger = const StarLedger(),
@@ -23,6 +25,7 @@ class MetaProgress {
   final int revision, runId, lastEndedRun, stars;
   final PrestigePhase phase;
   final Map<String, int> upgrades;
+  final Map<String, int> evolutionLevels;
   final List<String> discoveries;
   final StarLedger starLedger;
   // Legacy opaque extension: retained in active saves, discarded on run end.
@@ -42,6 +45,7 @@ class MetaProgress {
     phase: next,
     stars: stars,
     upgrades: upgrades,
+    evolutionLevels: evolutionLevels,
     discoveries: discoveries,
     pendingStarObjects: const [],
     starLedger: const StarLedger(),
@@ -56,12 +60,20 @@ class MetaProgress {
     phase: phase,
     stars: stars + paid,
     upgrades: upgrades,
+    evolutionLevels: evolutionLevels,
     discoveries: discoveries,
     pendingStarObjects: pendingStarObjects,
     starLedger: ledger,
     extensions: extensions,
     firstDefeatSeen: firstDefeatSeen,
     endCause: endCause,
+  );
+
+  MetaProgress withEvolution(Map<String,int> levels) => MetaProgress(
+    revision: revision+1,runId:runId,lastEndedRun:lastEndedRun,phase:phase,
+    stars:stars,upgrades:upgrades,evolutionLevels:Map.unmodifiable(levels),
+    discoveries:discoveries,pendingStarObjects:pendingStarObjects,starLedger:starLedger,
+    extensions:extensions,firstDefeatSeen:firstDefeatSeen,endCause:endCause,
   );
 
   bool owns(String id) => (upgrades[id] ?? 0) > 0;
@@ -80,6 +92,7 @@ class MetaProgress {
       phase: phase,
       stars: stars - skill.price,
       upgrades: Map.unmodifiable({...upgrades, id: 1}),
+      evolutionLevels: evolutionLevels,
       discoveries: discoveries,
       pendingStarObjects: pendingStarObjects,
       starLedger: starLedger,
@@ -119,6 +132,7 @@ class MetaProgress {
     'stars': stars,
     'starLedger': starLedger.toJson(),
     'upgrades': upgrades,
+    'evolution': evolutionLevels,
     'discoveries': discoveries,
     'pendingStarObjects': pendingStarObjects,
     'extensions': extensions,
@@ -172,6 +186,7 @@ class MetaProgress {
           ? const StarLedger()
           : StarLedger.fromJson(json['starLedger'] as Map<String, dynamic>),
       upgrades: Map.unmodifiable(upgrades.cast<String, int>()),
+      evolutionLevels: EvolutionSkill.readLevels(json['evolution'] ?? <String,dynamic>{}),
       discoveries: List.unmodifiable(discoveries.cast<String>()),
       pendingStarObjects: List.unmodifiable(clone['pending']),
       extensions: Map.unmodifiable(clone['extensions']),

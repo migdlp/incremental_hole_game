@@ -1,0 +1,40 @@
+name: Flutter - Validacion sin Android
+on:
+  workflow_dispatch:
+    inputs:
+      test_target:
+        description: 'Pruebas a ejecutar (directorio o archivo)'
+        default: 'test'
+        type: string
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar Flutter verificado
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/check-logs"
+          curl -fL --retry 3 https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.35.7-stable.tar.xz -o "$RUNNER_TEMP/flutter.tar.xz"
+          printf '%s  %s\n' 146df531f9ac6a11a918013c1a70faafc053d4811c8cb69a413fd70748d51c3d "$RUNNER_TEMP/flutter.tar.xz" | sha256sum -c -
+          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - run: flutter pub get --enforce-lockfile
+      - name: Formatear y preparar parche revisable
+        run: |
+          dart format lib test tool 2>&1 | tee "$RUNNER_TEMP/check-logs/format.log"
+          git diff --binary > "$RUNNER_TEMP/check-logs/format.patch"
+      - name: Analizar
+        run: flutter analyze --no-pub 2>&1 | tee "$RUNNER_TEMP/check-logs/analyze.log"
+      - name: Pruebas
+        env:
+          TEST_TARGET: ${{ inputs.test_target }}
+        run: flutter test --no-pub --reporter expanded "$TEST_TARGET" 2>&1 | tee "$RUNNER_TEMP/check-logs/test.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flutter-check-logs
+          path: ${{ runner.temp }}/check-logs

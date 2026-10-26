@@ -129,8 +129,9 @@ Future<void> resolveEvolutionFixture(GameSession session) async {
   ];
   while (session.evolution.hasChoices) {
     final id = priority.firstWhere(session.evolution.options.contains);
-    if (!session.chooseEvolution(id, serial: session.evolution.serial))
+    if (!session.chooseEvolution(id, serial: session.evolution.serial)) {
       throw StateError('Fixture E03 sin guardar');
+    }
     await session.pendingWrites;
   }
 }

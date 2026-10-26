@@ -129,6 +129,9 @@ void main() {
   test(
     'capture at final valid instant avoids death and grants no extra simulation',
     () async {
+      final oldDuration=catalog.base['production_duration']!;
+      catalog.base['production_duration']=15.005;
+      addTearDown(()=>catalog.base['production_duration']=oldDuration);
       final s = game();
       for (var i = 0; i < 3; i++) {
         await closeEmpty(s);
@@ -141,6 +144,7 @@ void main() {
       );
       s.tick(.1);
       await s.pendingWrites;
+      await resolveEvolutionFixture(s);
       expect(s.meta.phase, PrestigePhase.playing);
       expect(s.progress.last!.captured, 100);
       expect(s.feeding.period, 2);
@@ -153,6 +157,9 @@ void main() {
   test(
     'moving balls outside the hole at timeout never save an expired quota',
     () async {
+      final oldDuration=catalog.base['production_duration']!;
+      catalog.base['production_duration']=15.005;
+      addTearDown(()=>catalog.base['production_duration']=oldDuration);
       final s = game();
       for (var i = 0; i < 3; i++) {
         await closeEmpty(s);

@@ -72,11 +72,12 @@ void main() {
     () {
       Board board(bool enhanced) {
         final b = Board(catalog.settings({}));
-        if (enhanced)
+        if (enhanced) {
           b.evolution = EvolutionRun(
             levels: one(EvolutionId.directed, 5),
             randomState: 0,
           );
+        }
         b.balls.add(
           Ball(b.nextId++, Vec(b.radius - .1, 300), const Vec(-100, 20)),
         );
@@ -158,8 +159,9 @@ void main() {
     () {
       Board create(bool enhanced) {
         final b = Board(catalog.settings({}), randomState: 66);
-        if (enhanced)
+        if (enhanced) {
           b.evolution = EvolutionRun(levels: one(EvolutionId.midas, 5));
+        }
         b.spawnClock = b.settings['spawn_interval'];
         return b;
       }

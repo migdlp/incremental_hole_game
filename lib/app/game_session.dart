@@ -479,6 +479,7 @@ class GameSession extends ChangeNotifier {
       if (recoveredPrestige) {
         recoveryMessage = 'Prestigio recuperado desde su checkpoint.';
       }
+      if(_evolutionCommitPending && prestigeReady) { _finishEvolutionCommit(); await pendingWrites; }
       return;
     }
     for (var i = 0; i < candidates.length; i++) {
@@ -489,6 +490,7 @@ class GameSession extends ChangeNotifier {
         if (i > 0) {
           recoveryMessage = 'Partida recuperada desde la copia de seguridad.';
         }
+        if(_evolutionCommitPending && prestigeReady) { _finishEvolutionCommit(); await pendingWrites; }
         return;
       } on Object {
         // Try the previous complete snapshot before offering an explicit reset.
@@ -497,6 +499,7 @@ class GameSession extends ChangeNotifier {
     if (recoveredPrestige) {
       recoveryMessage =
           'Prestigio recuperado: la partida anterior ya había terminado.';
+      if(_evolutionCommitPending && prestigeReady) { _finishEvolutionCommit(); await pendingWrites; }
       return;
     }
     throw const FormatException(
@@ -751,7 +754,7 @@ class GameSession extends ChangeNotifier {
       rewardVisuals.receipt();
     }
     cycle!.advance(dt);
-    if (producing && cycle!.phase == DayPhase.closing) {
+    if (producing && cycle!.phase != DayPhase.production) {
       board!.enterClosing();
       _syncMotion();
     }
@@ -762,18 +765,20 @@ class GameSession extends ChangeNotifier {
       feedback.setPlaying(false);
       // The confirmed capture/quota remain audible once as UI feedback while
       // gameplay loops and timers are suspended by the selector.
-      if (events.captured > 0)
+      if (events.captured > 0) {
         feedback.emit(
           FeedbackEvent.capture,
           count: events.captured,
           gameplay: false,
         );
-      if (completedQuotas.isNotEmpty)
+      }
+      if (completedQuotas.isNotEmpty) {
         feedback.emit(
           FeedbackEvent.quota,
           count: completedQuotas.length,
           gameplay: false,
         );
+      }
       _syncMotion();
       save();
       notifyListeners();
@@ -1488,7 +1493,7 @@ class GameSession extends ChangeNotifier {
           settings['production_duration'] + restoredCycle.closing - remaining,
         );
         if ((restoredBoard.gravity.elapsed - elapsed).abs() > 1e-6 ||
-            (restoredCycle.phase == DayPhase.closing &&
+            (restoredCycle.phase != DayPhase.production &&
                 (restoredBoard.gravity.hasObject ||
                     restoredBoard.gravity.active))) {
           throw const FormatException('Tiempo de Gravedad incoherente');
@@ -1501,12 +1506,12 @@ class GameSession extends ChangeNotifier {
           settings['production_duration'] + restoredCycle.closing - remaining,
         );
         if ((event.elapsed - elapsed).abs() > 1e-6 ||
-            event.ended != (restoredCycle.phase == DayPhase.closing)) {
+            event.ended != (restoredCycle.phase != DayPhase.production)) {
           throw const FormatException('Tiempo de Agujero negro incoherente');
         }
       }
       restoredBoard.tool = restoredTool;
-      if (restoredCycle.phase == DayPhase.closing) {
+      if (restoredCycle.phase != DayPhase.production) {
         restoredBoard.enterClosing();
       }
       collected = run['collected'] as int;

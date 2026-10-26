@@ -384,6 +384,7 @@ void main() {
         }
         s.tick(1 / 60);
         expect(s.meta.starLedger.pending, isNotEmpty);
+        await resolveEvolutionFixture(s);
         s.finishDay();
         await s.pendingWrites;
         for (final d in catalog.definitions.where((d) => d.id != 'prestige')) {

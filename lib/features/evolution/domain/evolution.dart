@@ -247,8 +247,9 @@ class EvolutionRun {
   }
 
   Map<String, int> resolve(String id, {required int expectedSerial}) {
-    if (!hasChoices || serial != expectedSerial || !options.contains(id))
+    if (!hasChoices || serial != expectedSerial || !options.contains(id)) {
       throw StateError('Elección E03 no disponible');
+    }
     final next = {...levels, id: (levels[id] ?? 0) + 1};
     levels = Map.unmodifiable(next);
     pending--;
@@ -390,15 +391,17 @@ class EvolutionRun {
   }) {
     int integer(String key, {int max = 0x1fffffffffffff}) {
       final n = j[key];
-      if (n is! int || n < 0 || n > max)
+      if (n is! int || n < 0 || n > max) {
         throw const FormatException('Contador E03 inválido');
+      }
       return n;
     }
 
     double number(Map m, String key, {double max = 1e12}) {
       final n = m[key];
-      if (n is! num || !n.isFinite || n < 0 || n > max)
+      if (n is! num || !n.isFinite || n < 0 || n > max) {
         throw const FormatException('Tiempo E03 inválido');
+      }
       return n.toDouble();
     }
 
@@ -427,8 +430,9 @@ class EvolutionRun {
               (levels[v] ?? 0) >= 5,
         ) ||
         raw.toSet().length != raw.length ||
-        j['closingPending'] is! bool)
+        j['closingPending'] is! bool) {
       throw const FormatException('Selector E03 inválido');
+    }
     s.options = List.unmodifiable(raw.cast<String>());
     s.closingPending = j['closingPending'] as bool;
     final eligible = EvolutionSkill.catalogue
@@ -437,13 +441,15 @@ class EvolutionRun {
     if ((s.pending == 0
             ? s.options.isNotEmpty
             : s.options.length != math.min(3, eligible)) ||
-        s.pending > s.lastQuota ||
-        (s.pending > 0 && eligible == 0))
+        s.pending + s.serial > s.lastQuota ||
+        (s.pending > 0 && eligible == 0)) {
       throw const FormatException('Elecciones E03 incoherentes');
+    }
     void readEffect(String key, EvolutionId id, EvolutionEffect effect) {
       final m = j[key];
-      if (m is! Map<String, dynamic>)
+      if (m is! Map<String, dynamic>) {
         throw const FormatException('Efecto E03 inválido');
+      }
       final l = m['level'], count = m['count'], captures = m['captures'];
       final skill = EvolutionSkill.of(id);
       if (l is! int ||
@@ -453,8 +459,9 @@ class EvolutionRun {
           count < 0 ||
           count >= math.max(1, skill.threshold) ||
           captures is! List ||
-          captures.length > 9)
+          captures.length > 9) {
         throw const FormatException('Activación E03 inválida');
+      }
       effect.level = l;
       effect.count = count;
       effect.remaining = number(
@@ -464,24 +471,33 @@ class EvolutionRun {
       );
       effect.cooldown = number(m, 'cooldown', max: skill.cooldown);
       if ((effect.remaining > 0 && (l == 0 || effect.cooldown > 0)) ||
-          (l == 0 && effect.remaining > 0))
+          (l == 0 && effect.remaining > 0)) {
         throw const FormatException('Recarga E03 inválida');
+      }
       double previous = -1;
       for (final t in captures) {
         if (t is! num ||
             !t.isFinite ||
             t < 0 ||
             t > s.dayElapsed ||
-            t < previous)
+            t < previous) {
           throw const FormatException('Ventana E03 inválida');
+        }
         effect.captures.add(t.toDouble());
         previous = t.toDouble();
       }
       if ((!effect.ready && (count != 0 || captures.isNotEmpty)) ||
-          (skill.window > 0 && effect.count != captures.length))
+          (skill.window > 0 && effect.count != captures.length)) {
         throw const FormatException('Capturas E03 inválidas');
+      }
     }
 
+    if((s.level(EvolutionId.ram)==0 && (s.ramCycles!=0 || s.pendingRam!=0)) ||
+       (s.level(EvolutionId.ration)==0 && (s.rationCycles!=0 || s.pendingRation!=0)) ||
+       (s.level(EvolutionId.pulse)==0 && s.pulseClock!=0) ||
+       (s.level(EvolutionId.gravity)==0 && s.gravityClock!=0)) {
+      throw const FormatException('Contadores de habilidad no adquirida');
+    }
     readEffect('whirlpool', EvolutionId.whirlpool, s.whirlpool);
     readEffect('hunger', EvolutionId.hunger, s.hunger);
     readEffect('millionaire', EvolutionId.millionaire, s.millionaire);

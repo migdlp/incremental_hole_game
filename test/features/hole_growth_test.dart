@@ -13,12 +13,14 @@ void main() {
   final catalog = testCatalog(automaticSpawns: false);
   GameSession start([MemoryStore? store]) =>
       GameSession(catalog, store ?? MemoryStore())..startDay();
-  void capture(GameSession s, int amount) {
+  Future<void> capture(GameSession s, int amount) async {
+    s.evolution.cardRandom=0;
     final b = s.board!;
     for (var i = 0; i < amount; i++) {
       b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
     }
     s.tick(1 / 60);
+    await resolveEvolutionFixture(s);
   }
 
   Future<void> nextDay(GameSession s) async {
@@ -34,18 +36,18 @@ void main() {
     () async {
       final s = start();
       final base = s.board!.captureRadius;
-      capture(s, 99);
+      await capture(s, 99);
       expect(s.board!.captureRadius, base);
-      capture(s, 1);
+      await capture(s, 1);
       expect(s.feeding.growths, 1);
       expect(s.board!.captureRadius / base, closeTo(math.sqrt(1.16), 1e-12));
-      capture(s, 30);
+      await capture(s, 30);
       s.tick(.1);
       expect(s.feeding.growths, 1);
       await nextDay(s);
       expect(s.feeding.period, 2);
       expect(s.board!.captureRadius / base, closeTo(math.sqrt(1.16), 1e-12));
-      capture(s, s.feeding.remaining!.toInt());
+      await capture(s, s.feeding.remaining!.toInt());
       expect(s.feeding.growths, 2);
       expect(s.board!.captureRadius / base, closeTo(1.16, 1e-12));
       expect(
@@ -59,7 +61,7 @@ void main() {
   test('new capture zone catches a ball outside the original radius', () {
     final s = start();
     final base = s.board!.captureRadius;
-    capture(s, 100);
+    await capture(s, 100);
     final b = s.board!;
     final before = b.captured;
     final distance = (base + b.captureRadius) / 2;
@@ -83,7 +85,7 @@ void main() {
     () async {
       final store = MemoryStore();
       final s = start(store);
-      capture(s, 100);
+      await capture(s, 100);
       await s.pendingWrites;
       final saved = store.candidates.first;
       final restored = GameSession(catalog, store);
@@ -128,7 +130,7 @@ void main() {
 
   test('invalid growth records reject restoration atomically', () {
     final s = start();
-    capture(s, 100);
+    await capture(s, 100);
     final original = s.snapshot();
     for (final mutate in <void Function(Map<String, dynamic>)>[
       (j) => j['feeding']['growths'] = -1,
@@ -149,7 +151,7 @@ void main() {
     final baseline = s.snapshot();
     s.enterDebug();
     s.startDay();
-    capture(s, 100);
+    await capture(s, 100);
     expect(s.feeding.growths, 1);
     s.finishDay();
     s.debugBuyAll();
@@ -165,7 +167,7 @@ void main() {
 
   test('visible dark hole and real capture radius grow together', () async {
     final s = start();
-    capture(s, 100);
+    await capture(s, 100);
     final game = GardenGame(s)..onGameResize(Vector2(360, 560));
     final recorder = ui.PictureRecorder();
     game.render(ui.Canvas(recorder));

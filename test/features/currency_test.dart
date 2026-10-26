@@ -73,11 +73,12 @@ void main() {
   );
   test(
     'end of production settles late captures before results without collection phase',
-    () {
+    () async {
       final s = start();
       tick(s, 14.8);
       capture(s, count: 200);
       expect(s.rewards.outstanding, 200);
+      await resolveEvolutionFixture(s);
       tick(s, .3);
       expect(s.running, isFalse);
       expect(s.progress.last!.income, 200);
@@ -211,7 +212,7 @@ void main() {
   );
   test(
     'visual pool reuses objects, groups bursts and can be disabled without losing income',
-    () {
+    () async {
       final pool = RewardVisuals(4, 1);
       final objects = List.of(pool.coins);
       for (var i = 1; i <= 200; i++) {
@@ -236,6 +237,7 @@ void main() {
       s.startDay();
       capture(s, count: 200);
       expect(s.rewardVisuals.activeCount, 0);
+      await resolveEvolutionFixture(s);
       s.finishDay();
       expect(s.economy.balance, 200);
       s.exitDebug();

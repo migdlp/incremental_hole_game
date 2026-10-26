@@ -763,8 +763,9 @@ class Board {
         final point =
             generator +
             Vec((column - 3) * radius * 2.4, -30 - row * radius * 2.4);
-        if (_emitMain(point, forceGolden: forceGolden, heavy: heavy))
+        if (_emitMain(point, forceGolden: forceGolden, heavy: heavy)) {
           return true;
+        }
       }
     }
     return false;
@@ -934,10 +935,11 @@ class Board {
                 settings['gravity_acceleration'] *
                 EvolutionSkill.gravityFraction;
           }
-          if (evo.gravity.remaining > 0)
+          if (evo.gravity.remaining > 0) {
             acceleration +=
                 settings['gravity_acceleration'] *
                 EvolutionSkill.of(EvolutionId.gravity).value(evo.gravity.level);
+          }
           ball.velocity = ball.velocity + toHole.unit * (acceleration * step);
           if (evo.pulseNow && toHole.length <= captureRadius * 3) {
             ball.velocity =
@@ -1739,8 +1741,9 @@ class Board {
 
   factory Board.fromJson(DaySettings settings, Map<String, dynamic> json) {
     final bonus = json['evolutionBonus'] ?? 0;
-    if (bonus is! int || bonus < 0)
+    if (bonus is! int || bonus < 0) {
       throw const FormatException('Bonus E03 inválido');
+    }
     final goldenCaptured = json['goldenCaptured'] ?? 0;
     if (goldenCaptured is! int) {
       throw const FormatException('Capturas doradas inválidas');
@@ -1896,8 +1899,9 @@ class Board {
     final ordinary =
         (board.captured + 9 * board.goldenCaptured + board.combo.bonusUnits) *
         settings['ball_value'].toInt();
-    if (board.evolutionBonus > ordinary * 5)
+    if (board.evolutionBonus > ordinary * 5) {
       throw const FormatException('Bonus E03 fuera de rango');
+    }
     final ids = [
       ...board.balls.map((b) => b.id),
       ...board.coins.map((c) => c.id),

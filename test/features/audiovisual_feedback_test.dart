@@ -179,6 +179,7 @@ void main() {
         backend.played.where((c) => c.sample.startsWith('plop')).length,
         1,
       );
+      await resolveEvolutionFixture(s);
       s.pause();
       final age = s.board!.absorption.balls.first.age;
       s.tick(.1);

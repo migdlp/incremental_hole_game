@@ -119,6 +119,12 @@ jobs:
           TEST_TARGET: ${{ inputs.test_target || 'test' }}
         run: flutter test --no-pub "$TEST_TARGET" 2>&1 | tee "$RUNNER_TEMP/flutter-logs/test.log"
 
+      - name: Medir simulación E03
+        if: ${{ inputs.validation_only && hashFiles('tool/benchmark_evolution.dart') != '' }}
+        run: |
+          dart compile exe tool/benchmark_evolution.dart -o "$RUNNER_TEMP/evolution-benchmark"
+          "$RUNNER_TEMP/evolution-benchmark" | tee "$RUNNER_TEMP/flutter-logs/evolution-benchmark.json"
+
       - name: Compilar APK de depuración
         if: ${{ !inputs.validation_only }}
         run: flutter build apk --debug --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/build-apk.log"

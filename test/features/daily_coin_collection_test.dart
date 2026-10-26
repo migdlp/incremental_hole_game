@@ -155,6 +155,7 @@ void main() {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..startDay();
       capture(s, 100);
+      await resolveEvolutionFixture(s);
       advance(s, .4);
       final reserved = s.rewardVisuals.collection.coins.length;
       expect(reserved, greaterThan(0));

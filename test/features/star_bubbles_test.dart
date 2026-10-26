@@ -30,6 +30,7 @@ void main() {
 
   Future<void> complete(GameSession s) async {
     s.startDay();
+    s.evolution.cardRandom=0;
     for (var i = 0; i < 100; i++) {
       s.board!.balls.add(
         Ball(s.board!.nextId++, s.board!.holePosition, Vec.zero),
@@ -37,6 +38,7 @@ void main() {
     }
     s.tick(1 / 60);
     await s.pendingWrites;
+    await resolveEvolutionFixture(s);
   }
 
   void smash(GameSession s) {

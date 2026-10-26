@@ -14,7 +14,7 @@ import '../test_support.dart';
 void main() {
   test(
     '200-ball Capture total preserves every golden and combo reward at any visual budget',
-    () {
+    () async {
       for (final budget in [0, 1, 24]) {
         final s = GameSession(
           testCatalog(automaticSpawns: false),
@@ -49,7 +49,8 @@ void main() {
         expect(s.economy.generated, expected);
         expect(s.feeding.points, BigInt.from(100));
         expect(s.rewardVisuals.activeCount, lessThanOrEqualTo(budget));
-        s.finishDay();
+        await resolveEvolutionFixture(s);
+      s.finishDay();
         expect(s.economy.balance, expected);
         expect(s.progress.last!.lost, 0);
         s.exitDebug();

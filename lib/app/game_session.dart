@@ -229,8 +229,9 @@ class GameSession extends ChangeNotifier {
   bool chooseEvolution(String id, {required int serial}) {
     if (!evolutionChoiceReady ||
         serial != evolution.serial ||
-        !evolution.options.contains(id))
+        !evolution.options.contains(id)) {
       return false;
+    }
     final levels = evolution.resolve(id, expectedSerial: serial);
     meta = meta.withEvolution(levels);
     _metaFloor = meta;
@@ -598,8 +599,9 @@ class GameSession extends ChangeNotifier {
 
   int _frameEmissionStart = 0;
   void tick(double dt) {
-    if (_disposed || !running || paused || evolutionBlocked || !dt.isFinite)
+    if (_disposed || !running || paused || evolutionBlocked || !dt.isFinite) {
       return;
+    }
     final generatedBefore = economy.generated;
     final metaBefore = meta.revision;
     _frameEmissionStart = rewardVisuals.emittedObjects;
@@ -758,6 +760,10 @@ class GameSession extends ChangeNotifier {
       _accumulator = 0;
       release(cancel: true);
       feedback.setPlaying(false);
+      // The confirmed capture/quota remain audible once as UI feedback while
+      // gameplay loops and timers are suspended by the selector.
+      if(events.captured>0) feedback.emit(FeedbackEvent.capture,count:events.captured,gameplay:false);
+      if(completedQuotas.isNotEmpty) feedback.emit(FeedbackEvent.quota,count:completedQuotas.length,gameplay:false);
       _syncMotion();
       save();
       notifyListeners();
@@ -1088,6 +1094,7 @@ class GameSession extends ChangeNotifier {
         pending: meta.starLedger.pending,
       ),
     );
+    evolution.lastQuota=0;evolution.pending=0;evolution.options=[];evolution.closingPending=false;
     final closed = feeding.dayClosed || progress.last?.day == progress.day;
     feeding = FeedingProgress(
       startDay: progress.day,
@@ -1905,8 +1912,9 @@ class GameSession extends ChangeNotifier {
       if (!_disposed && previousError != saveError) notifyListeners();
     }
     _saving = false;
-    if (_evolutionCommitPending && prestigeReady && !_disposed)
+    if (_evolutionCommitPending && prestigeReady && !_disposed) {
       _finishEvolutionCommit();
+    }
   }
 
   Future<void> get pendingWrites => _writes;

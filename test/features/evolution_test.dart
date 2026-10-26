@@ -93,7 +93,7 @@ void main() {
     final r = EvolutionRun(
       levels: {
         ...levels(EvolutionId.millionaire, 5),
-        ...levels(EvolutionId.luck, 5),
+
       },
     );
     for (var i = 0; i < 9; i++) {
@@ -102,12 +102,13 @@ void main() {
     r.advance(3.1);
     expect(r.capture(7), 7);
     // Known LCG seed giving a first draw below 5%.
+    r.levels={...r.levels,...levels(EvolutionId.luck,5)};
     r.randomState = 1972;
     r.millionaire.level = 5;
     r.millionaire.remaining = 1;
     final value = r.capture(7);
     expect(value, isA<int>());
-    expect(value == 21 || value == 42, isTrue);
+    expect(value, 42);
   });
   test(
     'effects cancel at day end, preserve counters and cooldown, windows never span days',
@@ -243,7 +244,7 @@ void main() {
         await s.pendingWrites;
       }
       s.startDay();
-      s.cycle!.remaining = 1 / 60;
+      advanceToProductionBoundary(s,1/60);
       capture(s, 100);
       await s.pendingWrites;
       expect(s.running, isTrue);

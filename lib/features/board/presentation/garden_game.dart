@@ -486,7 +486,7 @@ class GardenGame extends FlameGame {
     final hole = offset(board.holePosition);
     final radius = board.captureRadius;
     final multiplier = board.evolution?.moneyMultiplier ?? 1;
-    if (multiplier > 1)
+    if (multiplier > 1) {
       label(
         canvas,
         '×$multiplier',
@@ -494,6 +494,7 @@ class GardenGame extends FlameGame {
         color: const Color(0xffffd45a),
         fontSize: 16,
       );
+    }
 
     canvas.drawOval(
       Rect.fromCenter(

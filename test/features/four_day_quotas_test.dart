@@ -24,7 +24,8 @@ void main() {
   final catalog = testCatalog(automaticSpawns: false);
   GameSession game([MemoryStore? store]) =>
       GameSession(catalog, store ?? MemoryStore(), eventSeed: 42);
-  void capture(GameSession s, int n) {
+  Future<void> capture(GameSession s, int n) async {
+    s.evolution.cardRandom=0;
     for (var i = 0; i < n; i++) {
       s.board!.balls.add(
         Ball(
@@ -36,6 +37,7 @@ void main() {
       );
     }
     s.tick(1 / 60);
+    await resolveEvolutionFixture(s);
   }
 
   Future<void> closeEmpty(GameSession s) async {
@@ -54,7 +56,7 @@ void main() {
         }
         s.startDay();
         expect(s.progress.day, day);
-        capture(s, 100);
+        await capture(s, 100);
         expect(s.feeding.period, 2);
         expect(s.feeding.quotaStartDay, day);
         expect(s.feeding.quotaDay(day), 1);
@@ -95,7 +97,7 @@ void main() {
         await closeEmpty(s);
       }
       s.startDay();
-      capture(s, 99);
+      await capture(s, 99);
       s.finishDay();
       await s.pendingWrites;
       expect(s.meta.phase, PrestigePhase.defeat);
@@ -132,8 +134,8 @@ void main() {
         await closeEmpty(s);
       }
       s.startDay();
-      capture(s, 99);
-      s.cycle!.remaining = .005;
+      await capture(s, 99);
+      advanceToProductionBoundary(s, .005);
       s.board!.balls.add(
         Ball(s.board!.nextId++, s.board!.holePosition, Vec.zero),
       );
@@ -156,8 +158,8 @@ void main() {
         await closeEmpty(s);
       }
       s.startDay();
-      capture(s, 99);
-      s.cycle!.remaining = .005;
+      await capture(s, 99);
+      advanceToProductionBoundary(s, .005);
       s.board!.balls.add(
         Ball(
           s.board!.nextId++,
@@ -181,8 +183,8 @@ void main() {
       final s = game();
       await closeEmpty(s);
       s.startDay();
-      s.cycle!.remaining = 1 / 60;
-      capture(s, 11200);
+      advanceToProductionBoundary(s, 1 / 60);
+      await capture(s, 11200);
       await s.pendingWrites;
       expect(s.meta.phase, PrestigePhase.playing);
       expect(s.progress.day, 2);
@@ -218,7 +220,7 @@ void main() {
       await closeEmpty(s);
       await closeEmpty(s);
       s.startDay();
-      capture(s, 100);
+      await capture(s, 100);
       s.finishDay();
       await s.pendingWrites;
       expect(s.feeding.quotaStartDay, 3);
@@ -240,7 +242,7 @@ void main() {
       await closeEmpty(s);
       await closeEmpty(s);
       s.startDay();
-      capture(s, 90);
+      await capture(s, 90);
       s.pause();
       final raw = s.snapshot();
       s.tick(1000);
@@ -259,7 +261,7 @@ void main() {
       expect(fourth.progress.day, 4);
       expect(fourth.feeding.quotaDay(4), 4);
       fourth.resume();
-      capture(fourth, 10);
+      await capture(fourth, 10);
       fourth.finishDay();
       await fourth.pendingWrites;
       expect(fourth.canPlayRun, isTrue);
@@ -272,7 +274,7 @@ void main() {
     'legacy balls save gets safe deadline without re-awarding progress or money',
     () async {
       final s = game()..startDay();
-      capture(s, 1200);
+      await capture(s, 1200);
       s.finishDay();
       await s.pendingWrites;
       final j = jsonDecode(s.snapshot());

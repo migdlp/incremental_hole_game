@@ -129,9 +129,9 @@ void main() {
   test(
     'capture at final valid instant avoids death and grants no extra simulation',
     () async {
-      final oldDuration=catalog.base['production_duration']!;
-      catalog.base['production_duration']=15.005;
-      addTearDown(()=>catalog.base['production_duration']=oldDuration);
+      final oldDuration = catalog.base['production_duration']!;
+      catalog.base['production_duration'] = 15.005;
+      addTearDown(() => catalog.base['production_duration'] = oldDuration);
       final s = game();
       for (var i = 0; i < 3; i++) {
         await closeEmpty(s);
@@ -157,9 +157,9 @@ void main() {
   test(
     'moving balls outside the hole at timeout never save an expired quota',
     () async {
-      final oldDuration=catalog.base['production_duration']!;
-      catalog.base['production_duration']=15.005;
-      addTearDown(()=>catalog.base['production_duration']=oldDuration);
+      final oldDuration = catalog.base['production_duration']!;
+      catalog.base['production_duration'] = 15.005;
+      addTearDown(() => catalog.base['production_duration'] = oldDuration);
       final s = game();
       for (var i = 0; i < 3; i++) {
         await closeEmpty(s);

@@ -479,7 +479,10 @@ class GameSession extends ChangeNotifier {
       if (recoveredPrestige) {
         recoveryMessage = 'Prestigio recuperado desde su checkpoint.';
       }
-      if(_evolutionCommitPending && prestigeReady) { _finishEvolutionCommit(); await pendingWrites; }
+      if (_evolutionCommitPending && prestigeReady) {
+        _finishEvolutionCommit();
+        await pendingWrites;
+      }
       return;
     }
     for (var i = 0; i < candidates.length; i++) {
@@ -490,7 +493,10 @@ class GameSession extends ChangeNotifier {
         if (i > 0) {
           recoveryMessage = 'Partida recuperada desde la copia de seguridad.';
         }
-        if(_evolutionCommitPending && prestigeReady) { _finishEvolutionCommit(); await pendingWrites; }
+        if (_evolutionCommitPending && prestigeReady) {
+          _finishEvolutionCommit();
+          await pendingWrites;
+        }
         return;
       } on Object {
         // Try the previous complete snapshot before offering an explicit reset.
@@ -499,7 +505,10 @@ class GameSession extends ChangeNotifier {
     if (recoveredPrestige) {
       recoveryMessage =
           'Prestigio recuperado: la partida anterior ya había terminado.';
-      if(_evolutionCommitPending && prestigeReady) { _finishEvolutionCommit(); await pendingWrites; }
+      if (_evolutionCommitPending && prestigeReady) {
+        _finishEvolutionCommit();
+        await pendingWrites;
+      }
       return;
     }
     throw const FormatException(

@@ -1,5 +1,14 @@
 # Historial de cambios
 
+## 0.23.0+36 — E03: cartas de evolución
+
+- Elección por cuota, hasta tres opciones y doce habilidades permanentes de cinco niveles.
+- Pausa del tablero y guardado protegido de cada carta, incluida la última captura del día.
+- Efectos físicos, producción, masa y economía enteros integrados con P01/P02/AJ-009.
+- JSON v16, migración sin cartas retroactivas y contadores reiniciados al prestigiar.
+- Validación remota opcional y mediciones de simulación; Android físico pendiente.
+
+
 ## 0.22.0+35 — Cuatro jornadas por cuota
 
 - Cuotas por bolas con cuatro jornadas independientes, incluyendo la jornada de activación.

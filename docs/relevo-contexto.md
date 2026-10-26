@@ -1,5 +1,15 @@
 # Relevo de contexto — Feed the Hole
 
+## E03 · Cartas de evolución permanente (0.23.0+36)
+
+Cada cuota concede una elección persistente entre hasta tres habilidades elegibles,
+con doce habilidades de cinco niveles. Tablero y relojes congelados hasta resolver
+la secuencia y guardar cada subida; los niveles sobreviven a muerte/prestigio y los
+contadores se reinician por partida. Compatible con cuotas de cuatro jornadas,
+P01, P02 y AJ-009; JSON v16 y balance v20. Sin costes ni cambios en el catálogo P02.
+[Especificación](e03-cartas-evolucion-especificacion.md) · [Implementación, archivos y pruebas](e03-evolucion-implementacion.md).
+
+
 ## S03 / AJ-005B · Cuotas de cuatro jornadas (0.22.0+35)
 
 Cada cuota dispone de cuatro jornadas; la siguiente comienza inmediatamente y

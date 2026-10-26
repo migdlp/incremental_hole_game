@@ -1,5 +1,10 @@
 # Cambios futuros: mecánicas y árbol de mejoras
 
+E03 ya implementa el catálogo aprobado de doce habilidades permanentes por cartas,
+cinco niveles y una elección por cuota. Se mantiene independiente de P02 y de las
+ideas CF sin reglas cerradas. [E03 vigente](e03-evolucion-implementacion.md).
+
+
 Regla vigente S03/AJ-005B: cuotas infinitas con plazo de **cuatro jornadas por cuota**,
 derrota al cuarto cierre sin cumplir y entrada a P02. Sustituye la variante sin
 vencimiento. [Especificación](s03-aj005b-cuotas-4-jornadas.md).

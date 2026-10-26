@@ -1831,13 +1831,13 @@ class Board {
                 (board.captured +
                         9 * board.goldenCaptured +
                         board.combo.bonusUnits) *
-                    settings['ball_value'].toInt() ||
+                    settings['ball_value'].toInt() + board.evolutionBonus ||
             board.normalFood % settings['ball_value'].toInt() != 0 ||
             board.instantFood % settings['ball_value'].toInt() != 0)) {
       throw const FormatException('Contabilidad de alimentación inválida');
     }
     final ordinary=(board.captured+9*board.goldenCaptured+board.combo.bonusUnits)*settings['ball_value'].toInt();
-    if(board.evolutionBonus>ordinary*5) throw const FormatException('Bonus E03 hors limites');
+    if(board.evolutionBonus>ordinary*5) throw const FormatException('Bonus E03 fuera de rango');
     final ids = [
       ...board.balls.map((b) => b.id),
       ...board.coins.map((c) => c.id),

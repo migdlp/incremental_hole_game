@@ -3,6 +3,16 @@ name: Flutter - APK manual
 on:
   workflow_dispatch:
     inputs:
+      validation_only:
+        description: 'Solo formato, análisis y pruebas (sin Android)'
+        required: false
+        default: false
+        type: boolean
+      test_target:
+        description: 'Archivo o directorio de pruebas'
+        required: false
+        default: 'test'
+        type: string
       previous_apk_run_id:
         description: 'Ejecución anterior para comprobar actualización (opcional)'
         required: false
@@ -47,18 +57,21 @@ jobs:
           fi
 
       - name: Instalar JDK completo
+        if: ${{ !inputs.validation_only }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
       - name: Preparar Android SDK
+        if: ${{ !inputs.validation_only }}
         uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
 
       - name: Preparar herramientas Android
+        if: ${{ !inputs.validation_only }}
         run: |
           sdkmanager --sdk_root="$ANDROID_HOME" \
             'platforms;android-35' 'platforms;android-36' \
@@ -77,13 +90,22 @@ jobs:
 
       - name: Comprobar SDK y entorno
         run: |
-          flutter config --no-analytics --jdk-dir "$JAVA_HOME" --android-sdk "$ANDROID_HOME"
+          flutter config --no-analytics
+          if [[ "${{ inputs.validation_only }}" != "true" ]]; then
+            flutter config --jdk-dir "$JAVA_HOME" --android-sdk "$ANDROID_HOME"
+          fi
           flutter --version | tee "$RUNNER_TEMP/flutter-logs/version.log"
           dart --version 2>&1 | tee "$RUNNER_TEMP/flutter-logs/dart.log"
           flutter doctor -v 2>&1 | tee "$RUNNER_TEMP/flutter-logs/doctor.log"
 
       - name: Resolver dependencias
         run: flutter pub get --enforce-lockfile 2>&1 | tee "$RUNNER_TEMP/flutter-logs/pub-get.log"
+
+      - name: Preparar parche de formato para revisión
+        if: ${{ inputs.validation_only }}
+        run: |
+          dart format lib test tool 2>&1 | tee "$RUNNER_TEMP/flutter-logs/format-prepare.log"
+          git diff --binary > "$RUNNER_TEMP/flutter-logs/format.patch"
 
       - name: Comprobar formato
         run: dart format --output=none --set-exit-if-changed lib test 2>&1 | tee "$RUNNER_TEMP/flutter-logs/format.log"
@@ -92,12 +114,16 @@ jobs:
         run: flutter analyze --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/analyze.log"
 
       - name: Ejecutar pruebas
-        run: flutter test --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/test.log"
+        env:
+          TEST_TARGET: ${{ inputs.test_target || 'test' }}
+        run: flutter test --no-pub "$TEST_TARGET" 2>&1 | tee "$RUNNER_TEMP/flutter-logs/test.log"
 
       - name: Compilar APK de depuración
+        if: ${{ !inputs.validation_only }}
         run: flutter build apk --debug --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/build-apk.log"
 
       - name: Verificar firma y preparar descarga
+        if: ${{ !inputs.validation_only }}
         run: |
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs \
             build/app/outputs/flutter-apk/app-debug.apk \
@@ -113,7 +139,7 @@ jobs:
           sha256sum feed-the-hole-debug.apk > feed-the-hole-debug.apk.sha256
 
       - name: Comprobar actualización sobre APK anterior
-        if: ${{ inputs.previous_apk_run_id != '' }}
+        if: ${{ !inputs.validation_only && inputs.previous_apk_run_id != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
           PREVIOUS_RUN: ${{ inputs.previous_apk_run_id }}
@@ -145,6 +171,7 @@ jobs:
             | tee "$RUNNER_TEMP/flutter-logs/apk-update-check.log"
 
       - name: Guardar APK descargable
+        if: ${{ !inputs.validation_only }}
         id: apk
         uses: actions/upload-artifact@v4
         with:
@@ -155,6 +182,7 @@ jobs:
           retention-days: 14
 
       - name: Mostrar enlace de descarga
+        if: ${{ !inputs.validation_only }}
         env:
           APK_URL: ${{ steps.apk.outputs.artifact-url }}
         run: |

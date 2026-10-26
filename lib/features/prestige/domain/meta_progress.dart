@@ -69,11 +69,20 @@ class MetaProgress {
     endCause: endCause,
   );
 
-  MetaProgress withEvolution(Map<String,int> levels) => MetaProgress(
-    revision: revision+1,runId:runId,lastEndedRun:lastEndedRun,phase:phase,
-    stars:stars,upgrades:upgrades,evolutionLevels:Map.unmodifiable(levels),
-    discoveries:discoveries,pendingStarObjects:pendingStarObjects,starLedger:starLedger,
-    extensions:extensions,firstDefeatSeen:firstDefeatSeen,endCause:endCause,
+  MetaProgress withEvolution(Map<String, int> levels) => MetaProgress(
+    revision: revision + 1,
+    runId: runId,
+    lastEndedRun: lastEndedRun,
+    phase: phase,
+    stars: stars,
+    upgrades: upgrades,
+    evolutionLevels: Map.unmodifiable(levels),
+    discoveries: discoveries,
+    pendingStarObjects: pendingStarObjects,
+    starLedger: starLedger,
+    extensions: extensions,
+    firstDefeatSeen: firstDefeatSeen,
+    endCause: endCause,
   );
 
   bool owns(String id) => (upgrades[id] ?? 0) > 0;
@@ -186,7 +195,9 @@ class MetaProgress {
           ? const StarLedger()
           : StarLedger.fromJson(json['starLedger'] as Map<String, dynamic>),
       upgrades: Map.unmodifiable(upgrades.cast<String, int>()),
-      evolutionLevels: EvolutionSkill.readLevels(json['evolution'] ?? <String,dynamic>{}),
+      evolutionLevels: EvolutionSkill.readLevels(
+        json['evolution'] ?? <String, dynamic>{},
+      ),
       discoveries: List.unmodifiable(discoveries.cast<String>()),
       pendingStarObjects: List.unmodifiable(clone['pending']),
       extensions: Map.unmodifiable(clone['extensions']),

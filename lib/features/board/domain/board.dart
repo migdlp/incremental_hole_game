@@ -18,7 +18,13 @@ import 'wall_impact.dart';
 import '../../upgrades/domain/catalog.dart';
 
 class Ball {
-  Ball(this.id, this.position, this.velocity, {this.golden = false, this.heavy = false});
+  Ball(
+    this.id,
+    this.position,
+    this.velocity, {
+    this.golden = false,
+    this.heavy = false,
+  });
   final int id;
   final bool golden, heavy;
   double get mass => heavy ? EvolutionSkill.ramMass : 1;
@@ -109,9 +115,16 @@ class Board {
   double? _grownCaptureRadius;
   int _holeGrowths = 0;
   int get holeGrowths => _holeGrowths;
-  double get baseCaptureRadius => _grownCaptureRadius ?? settings['hole_capture_radius'];
-  double get captureRadius => baseCaptureRadius * (1 +
-      ((evolution?.hunger.remaining ?? 0) > 0 ? EvolutionSkill.of(EvolutionId.hunger).value(evolution!.hunger.level) : 0));
+  double get baseCaptureRadius =>
+      _grownCaptureRadius ?? settings['hole_capture_radius'];
+  double get captureRadius =>
+      baseCaptureRadius *
+      (1 +
+          ((evolution?.hunger.remaining ?? 0) > 0
+              ? EvolutionSkill.of(
+                  EvolutionId.hunger,
+                ).value(evolution!.hunger.level)
+              : 0));
   void syncHoleGrowth(int growths) {
     if (growths < 0) throw ArgumentError('Crecimiento negativo');
     if (growths == _holeGrowths) return;
@@ -213,20 +226,32 @@ class Board {
     var vx = ball.velocity.x, vy = ball.velocity.y;
     var wallContacts = 0;
     if (position.x <= radius && vx < 0) {
-      if (_audioWalls.add((ball.id, 0))) { wallContacts++; _soundContact(-vx); }
+      if (_audioWalls.add((ball.id, 0))) {
+        wallContacts++;
+        _soundContact(-vx);
+      }
       _wallImpact(WallSide.left, position.y, -vx);
       vx = -vx * wallRestitution;
     } else if (position.x >= width - radius && vx > 0) {
-      if (_audioWalls.add((ball.id, 1))) { wallContacts++; _soundContact(vx); }
+      if (_audioWalls.add((ball.id, 1))) {
+        wallContacts++;
+        _soundContact(vx);
+      }
       _wallImpact(WallSide.right, position.y, vx);
       vx = -vx * wallRestitution;
     }
     if (position.y <= radius && vy < 0) {
-      if (_audioWalls.add((ball.id, 2))) { wallContacts++; _soundContact(-vy); }
+      if (_audioWalls.add((ball.id, 2))) {
+        wallContacts++;
+        _soundContact(-vy);
+      }
       _wallImpact(WallSide.top, position.x, -vy);
       vy = -vy * wallRestitution;
     } else if (position.y >= height - radius && vy > 0) {
-      if (_audioWalls.add((ball.id, 3))) { wallContacts++; _soundContact(vy); }
+      if (_audioWalls.add((ball.id, 3))) {
+        wallContacts++;
+        _soundContact(vy);
+      }
       _wallImpact(WallSide.bottom, position.x, vy);
       vy = -vy * wallRestitution;
     }
@@ -234,12 +259,16 @@ class Board {
     // to the whole vector. Inward/stationary contacts only get position correction.
     ball.velocity = Vec(vx, vy).limit(maximumSpeed);
     final evo = evolution;
-    if(evo != null && evo.level(EvolutionId.directed)>0) {
-      for(var wall=0;wall<wallContacts;wall++) {
-        if(evo.random()<evo.value(EvolutionId.directed)) {
-          final speed=ball.velocity.length;
-          ball.velocity=(ball.velocity.unit*(1-EvolutionSkill.steering)+
-              (holePosition-ball.position).unit*EvolutionSkill.steering).unit*speed;
+    if (evo != null && evo.level(EvolutionId.directed) > 0) {
+      for (var wall = 0; wall < wallContacts; wall++) {
+        if (evo.random() < evo.value(EvolutionId.directed)) {
+          final speed = ball.velocity.length;
+          ball.velocity =
+              (ball.velocity.unit * (1 - EvolutionSkill.steering) +
+                      (holePosition - ball.position).unit *
+                          EvolutionSkill.steering)
+                  .unit *
+              speed;
         }
       }
     }
@@ -716,7 +745,10 @@ class Board {
         nextId++,
         spawn,
         Vec((random() - .5) * 36, -EvolutionSkill.standardLaunchSpeed),
-        golden: forceGolden || random() < (.01+(evolution?.value(EvolutionId.midas)??0)).clamp(0,1),
+        golden:
+            forceGolden ||
+            random() <
+                (.01 + (evolution?.value(EvolutionId.midas) ?? 0)).clamp(0, 1),
         heavy: heavy,
       ),
     );
@@ -731,7 +763,8 @@ class Board {
         final point =
             generator +
             Vec((column - 3) * radius * 2.4, -30 - row * radius * 2.4);
-        if (_emitMain(point, forceGolden: forceGolden, heavy: heavy)) return true;
+        if (_emitMain(point, forceGolden: forceGolden, heavy: heavy))
+          return true;
       }
     }
     return false;
@@ -755,8 +788,10 @@ class Board {
       final acceleratedTime = math.min(dt, specials.boostRemaining);
       final evo = evolution;
       final duration = settings['production_duration'];
-      spawnClock += (evo?.productionTime(dt,duration) ?? dt) +
-          (evo?.productionTime(acceleratedTime,duration) ?? acceleratedTime) * (specials.generationMultiplier - 1);
+      spawnClock +=
+          (evo?.productionTime(dt, duration) ?? dt) +
+          (evo?.productionTime(acceleratedTime, duration) ?? acceleratedTime) *
+              (specials.generationMultiplier - 1);
       specials.advance(dt);
       while (spawnClock + 1e-9 >= settings['spawn_interval']) {
         spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
@@ -788,9 +823,9 @@ class Board {
       }
     }
     if (producing && !coinOnly && evolution != null) {
-      final evo=evolution!;
-      if(evo.pendingRam>0 && _emitExtra(heavy:true)) evo.pendingRam--;
-      if(evo.pendingRation>0 && _emitExtra()) evo.pendingRation--;
+      final evo = evolution!;
+      if (evo.pendingRam > 0 && _emitExtra(heavy: true)) evo.pendingRam--;
+      if (evo.pendingRation > 0 && _emitExtra()) evo.pendingRation--;
     }
     if (paddle != null && target != null) {
       final start = paddle!;
@@ -848,9 +883,10 @@ class Board {
         }
         captures++;
         if (ball.golden) goldenCaptures++;
-        final baseReward = settings['ball_value'].toInt() * combo.capture(golden: ball.golden);
+        final baseReward =
+            settings['ball_value'].toInt() * combo.capture(golden: ball.golden);
         final reward = evolution?.capture(baseReward) ?? baseReward;
-        evolutionBonus += reward-baseReward;
+        evolutionBonus += reward - baseReward;
         if (_captureAllIds.contains(ball.id)) {
           instantFeeding += reward;
         } else {
@@ -865,7 +901,7 @@ class Board {
     final steps = math.max(1, (dt / (1 / 240)).ceil());
     final step = dt / steps;
     for (var i = 0; i < steps; i++) {
-      if(producing) evolution?.advance(step);
+      if (producing) evolution?.advance(step);
       final gravityImpulse = gravity.advance(
         step,
         producing: producing,
@@ -884,17 +920,31 @@ class Board {
       for (final ball in balls) {
         if (_heldBalls.containsKey(ball)) continue;
         ball.velocity = ball.velocity + gravityImpulse;
-        final evo=evolution;
+        final evo = evolution;
         final toHole = holePosition - ball.position;
-        if(producing && evo != null) {
-          var acceleration=0.0;
-          if(evo.whirlpool.remaining>0 && toHole.length<=captureRadius*EvolutionSkill.of(EvolutionId.whirlpool).value(evo.whirlpool.level)) {
-            acceleration += settings['gravity_acceleration']*EvolutionSkill.gravityFraction;
+        if (producing && evo != null) {
+          var acceleration = 0.0;
+          if (evo.whirlpool.remaining > 0 &&
+              toHole.length <=
+                  captureRadius *
+                      EvolutionSkill.of(
+                        EvolutionId.whirlpool,
+                      ).value(evo.whirlpool.level)) {
+            acceleration +=
+                settings['gravity_acceleration'] *
+                EvolutionSkill.gravityFraction;
           }
-          if(evo.gravity.remaining>0) acceleration += settings['gravity_acceleration']*EvolutionSkill.of(EvolutionId.gravity).value(evo.gravity.level);
-          ball.velocity=ball.velocity+toHole.unit*(acceleration*step);
-          if(evo.pulseNow && toHole.length<=captureRadius*3) {
-            ball.velocity=ball.velocity+toHole.unit*(EvolutionSkill.standardLaunchSpeed*evo.value(EvolutionId.pulse));
+          if (evo.gravity.remaining > 0)
+            acceleration +=
+                settings['gravity_acceleration'] *
+                EvolutionSkill.of(EvolutionId.gravity).value(evo.gravity.level);
+          ball.velocity = ball.velocity + toHole.unit * (acceleration * step);
+          if (evo.pulseNow && toHole.length <= captureRadius * 3) {
+            ball.velocity =
+                ball.velocity +
+                toHole.unit *
+                    (EvolutionSkill.standardLaunchSpeed *
+                        evo.value(EvolutionId.pulse));
           }
         }
         final baseAttraction = toHole.length < captureRadius + 15 ? 220.0 : 0.0;
@@ -1606,8 +1656,9 @@ class Board {
                 heldB = _heldBalls.containsKey(other);
             if (heldA && heldB) continue;
             final distance = overlap + .01;
-            final inverseA=heldA?0.0:1/ball.mass, inverseB=heldB?0.0:1/other.mass;
-            final inverseSum=inverseA+inverseB;
+            final inverseA = heldA ? 0.0 : 1 / ball.mass,
+                inverseB = heldB ? 0.0 : 1 / other.mass;
+            final inverseSum = inverseA + inverseB;
             if (!heldA) {
               ball.position =
                   (ball.position - n * (distance * inverseA / inverseSum))
@@ -1620,14 +1671,18 @@ class Board {
             }
             final relative = ball.velocity - other.velocity;
             final impulse =
-                math.max(0.0, relative.x * n.x + relative.y * n.y) * 1.3 / inverseSum;
+                math.max(0.0, relative.x * n.x + relative.y * n.y) *
+                1.3 /
+                inverseSum;
             if (!heldA) {
-              ball.velocity = (ball.velocity - n * impulse * inverseA)
-                  .limit(maximumSpeed);
+              ball.velocity = (ball.velocity - n * impulse * inverseA).limit(
+                maximumSpeed,
+              );
             }
             if (!heldB) {
-              other.velocity = (other.velocity + n * impulse * inverseB)
-                  .limit(maximumSpeed);
+              other.velocity = (other.velocity + n * impulse * inverseB).limit(
+                maximumSpeed,
+              );
             }
           }
         }
@@ -1643,7 +1698,7 @@ class Board {
     'random': randomState,
     'nextId': nextId,
     'captured': captured,
-    if(evolutionBonus>0) 'evolutionBonus':evolutionBonus,
+    if (evolutionBonus > 0) 'evolutionBonus': evolutionBonus,
     'goldenCaptured': goldenCaptured,
     'combo': combo.toJson(),
     if (settings.balanceVersion >= 8) ...{
@@ -1684,7 +1739,8 @@ class Board {
 
   factory Board.fromJson(DaySettings settings, Map<String, dynamic> json) {
     final bonus = json['evolutionBonus'] ?? 0;
-    if(bonus is! int || bonus<0) throw const FormatException('Bonus E03 inválido');
+    if (bonus is! int || bonus < 0)
+      throw const FormatException('Bonus E03 inválido');
     final goldenCaptured = json['goldenCaptured'] ?? 0;
     if (goldenCaptured is! int) {
       throw const FormatException('Capturas doradas inválidas');
@@ -1701,7 +1757,7 @@ class Board {
       randomState: json['random'] as int,
       combosEnabled: combo.enabled,
     );
-    board.evolutionBonus=bonus;
+    board.evolutionBonus = bonus;
     board.combo
       ..streak = combo.streak
       ..remaining = combo.remaining
@@ -1829,15 +1885,19 @@ class Board {
     if (settings.balanceVersion >= 14 &&
         (board.normalFood + board.instantFood !=
                 (board.captured +
-                        9 * board.goldenCaptured +
-                        board.combo.bonusUnits) *
-                    settings['ball_value'].toInt() + board.evolutionBonus ||
+                            9 * board.goldenCaptured +
+                            board.combo.bonusUnits) *
+                        settings['ball_value'].toInt() +
+                    board.evolutionBonus ||
             board.normalFood % settings['ball_value'].toInt() != 0 ||
             board.instantFood % settings['ball_value'].toInt() != 0)) {
       throw const FormatException('Contabilidad de alimentación inválida');
     }
-    final ordinary=(board.captured+9*board.goldenCaptured+board.combo.bonusUnits)*settings['ball_value'].toInt();
-    if(board.evolutionBonus>ordinary*5) throw const FormatException('Bonus E03 fuera de rango');
+    final ordinary =
+        (board.captured + 9 * board.goldenCaptured + board.combo.bonusUnits) *
+        settings['ball_value'].toInt();
+    if (board.evolutionBonus > ordinary * 5)
+      throw const FormatException('Bonus E03 fuera de rango');
     final ids = [
       ...board.balls.map((b) => b.id),
       ...board.coins.map((c) => c.id),

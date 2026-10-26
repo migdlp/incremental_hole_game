@@ -23,7 +23,13 @@ class EvolutionSelector extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(skill.name, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700)),
+                Text(
+                  skill.name,
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Text(skill.description),
                 const SizedBox(height: 10),
@@ -52,11 +58,20 @@ class EvolutionSelector extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('¡ELIGE UNA MEJORA!', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800)),
+                    const Text(
+                      '¡ELIGE UNA MEJORA!',
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 18),
                     for (final id in run.options) _card(id, run.serial),
                     if (!session.evolutionChoiceReady)
-                      const Padding(padding: EdgeInsets.all(12), child: Text('Guardando…')),
+                      const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Text('Guardando…'),
+                      ),
                   ],
                 ),
               ),

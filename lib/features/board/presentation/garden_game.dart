@@ -485,8 +485,15 @@ class GardenGame extends FlameGame {
     _renderElasticWalls(canvas, board);
     final hole = offset(board.holePosition);
     final radius = board.captureRadius;
-    final multiplier=board.evolution?.moneyMultiplier??1;
-    if(multiplier>1) label(canvas,'×$multiplier',Offset(hole.dx+radius+25,hole.dy),color:const Color(0xffffd45a),fontSize:16);
+    final multiplier = board.evolution?.moneyMultiplier ?? 1;
+    if (multiplier > 1)
+      label(
+        canvas,
+        '×$multiplier',
+        Offset(hole.dx + radius + 25, hole.dy),
+        color: const Color(0xffffd45a),
+        fontSize: 16,
+      );
 
     canvas.drawOval(
       Rect.fromCenter(

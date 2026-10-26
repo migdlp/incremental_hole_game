@@ -41,7 +41,10 @@ class GameSession extends ChangeNotifier {
            feedback ?? FeedbackController(backend: PlatformFeedbackBackend()),
        _eventRandomState = eventSeed ?? math.Random().nextInt(0x100000000) {
     feeding = FeedingProgress(startDay: 1, target: feedingInitialQuota);
-    evolution=EvolutionRun(randomState:_eventRandomState,cardRandom:(_eventRandomState^0x7951)&0xffffffff);
+    evolution = EvolutionRun(
+      randomState: _eventRandomState,
+      cardRandom: (_eventRandomState ^ 0x7951) & 0xffffffff,
+    );
   }
   final FeedbackController feedback;
   final MotionInput motion;
@@ -96,7 +99,11 @@ class GameSession extends ChangeNotifier {
   }
 
   void _syncMotion() => motion.setActive(
-    running && !paused && !evolutionBlocked && !_backgrounded && phase == DayPhase.production,
+    running &&
+        !paused &&
+        !evolutionBlocked &&
+        !_backgrounded &&
+        phase == DayPhase.production,
   );
 
   final UpgradeCatalog catalog;
@@ -214,26 +221,41 @@ class GameSession extends ChangeNotifier {
   EvolutionRun evolution = EvolutionRun();
   bool _evolutionCommitPending = false;
   bool get evolutionBlocked => evolution.hasChoices || _evolutionCommitPending;
-  bool get evolutionChoiceReady => evolution.hasChoices && !_evolutionCommitPending && prestigeReady && !_backgrounded;
+  bool get evolutionChoiceReady =>
+      evolution.hasChoices &&
+      !_evolutionCommitPending &&
+      prestigeReady &&
+      !_backgrounded;
   bool chooseEvolution(String id, {required int serial}) {
-    if (!evolutionChoiceReady || serial != evolution.serial || !evolution.options.contains(id)) return false;
+    if (!evolutionChoiceReady ||
+        serial != evolution.serial ||
+        !evolution.options.contains(id))
+      return false;
     final levels = evolution.resolve(id, expectedSerial: serial);
-    meta = meta.withEvolution(levels); _metaFloor = meta;
+    meta = meta.withEvolution(levels);
+    _metaFloor = meta;
     _evolutionCommitPending = true;
-    feedback.emit(FeedbackEvent.upgrade, gameplay:false);
-    save().then((_) { if(!_disposed) _finishEvolutionCommit(); });
-    notifyListeners(); return true;
+    feedback.emit(FeedbackEvent.upgrade, gameplay: false);
+    save().then((_) {
+      if (!_disposed) _finishEvolutionCommit();
+    });
+    notifyListeners();
+    return true;
   }
+
   void _finishEvolutionCommit() {
     if (!prestigeReady || !canPlayRun || _disposed) return;
     _evolutionCommitPending = false;
     if (!evolution.hasChoices && evolution.closingPending) {
-      evolution.closingPending=false;finishDay();
+      evolution.closingPending = false;
+      finishDay();
     } else {
       feedback.setPlaying(running && !paused && !evolutionBlocked);
-      _syncMotion();notifyListeners();
+      _syncMotion();
+      notifyListeners();
     }
   }
+
   PermanentRun permanentRun = PermanentRun();
   bool get normalShopAvailable =>
       canPlayRun && (progress.day > 1 || feeding.dayClosed);
@@ -260,8 +282,12 @@ class GameSession extends ChangeNotifier {
 
   void _clearRun() {
     permanentRun = PermanentRun();
-    evolution = EvolutionRun(levels:meta.evolutionLevels,randomState:(_eventRandomState ^ meta.runId)&0xffffffff,cardRandom:(_eventRandomState ^ (meta.runId*7919))&0xffffffff);
-    _evolutionCommitPending=false;
+    evolution = EvolutionRun(
+      levels: meta.evolutionLevels,
+      randomState: (_eventRandomState ^ meta.runId) & 0xffffffff,
+      cardRandom: (_eventRandomState ^ (meta.runId * 7919)) & 0xffffffff,
+    );
+    _evolutionCommitPending = false;
     _rewardTransitionRemaining = 0;
     feedback.setPlaying(false);
     feedback.reset();
@@ -415,7 +441,8 @@ class GameSession extends ChangeNotifier {
                 data['version'] != 12 &&
                 data['version'] != 13 &&
                 data['version'] != 14 &&
-                data['version'] != 15 && data['version'] != 16) {
+                data['version'] != 15 &&
+                data['version'] != 16) {
               throw const FormatException('Checkpoint incompatible');
             }
             final state = MetaProgress.fromJson(
@@ -506,8 +533,9 @@ class GameSession extends ChangeNotifier {
       forcedBlackHoles: debugEnabled ? debugBlackHoleObjects : 0,
       forceGravity: debugEnabled && debugForceGravity,
     );
-    evolution.levels=meta.evolutionLevels; evolution.beginDay();
-    board!.evolution=evolution;
+    evolution.levels = meta.evolutionLevels;
+    evolution.beginDay();
+    board!.evolution = evolution;
     board!.permanentRun = permanentRun;
     board!.productionEcho = meta.owns(PermanentSkill.echo);
     debugForceGravity = false;
@@ -570,7 +598,8 @@ class GameSession extends ChangeNotifier {
 
   int _frameEmissionStart = 0;
   void tick(double dt) {
-    if (_disposed || !running || paused || evolutionBlocked || !dt.isFinite) return;
+    if (_disposed || !running || paused || evolutionBlocked || !dt.isFinite)
+      return;
     final generatedBefore = economy.generated;
     final metaBefore = meta.revision;
     _frameEmissionStart = rewardVisuals.emittedObjects;
@@ -672,7 +701,9 @@ class GameSession extends ChangeNotifier {
         board!.starBubbles?.populateImmediate();
       }
     }
-    for(final quota in completedQuotas) { evolution.grant(quota); }
+    for (final quota in completedQuotas) {
+      evolution.grant(quota);
+    }
     final bubbles = board!.starBubbles;
     if (bubbles != null && bubbles.broken.isNotEmpty) {
       final transaction = meta.starLedger.redeem(bubbles.broken);
@@ -722,11 +753,17 @@ class GameSession extends ChangeNotifier {
       board!.enterClosing();
       _syncMotion();
     }
-    if(evolution.hasChoices) {
+    if (evolution.hasChoices) {
       evolution.closingPending = cycle!.phase == DayPhase.night;
-      _accumulator=0; release(cancel:true); feedback.setPlaying(false); _syncMotion();
-      save();notifyListeners();
-    } else if (cycle!.phase == DayPhase.night) { finishDay(); }
+      _accumulator = 0;
+      release(cancel: true);
+      feedback.setPlaying(false);
+      _syncMotion();
+      save();
+      notifyListeners();
+    } else if (cycle!.phase == DayPhase.night) {
+      finishDay();
+    }
   }
 
   void finishDay() {
@@ -886,7 +923,8 @@ class GameSession extends ChangeNotifier {
 
   bool activateSpecial(SpecialAbility ability) {
     if (!running ||
-        paused || evolutionBlocked ||
+        paused ||
+        evolutionBlocked ||
         phase != DayPhase.production ||
         !board!.activateSpecial(ability)) {
       return false;
@@ -1082,8 +1120,8 @@ class GameSession extends ChangeNotifier {
     if (!debugEnabled || running || !canPlayRun) return;
     _changeStars(const StarLedger());
     permanentRun = PermanentRun();
-    evolution=EvolutionRun(levels:meta.evolutionLevels);
-    _evolutionCommitPending=false;
+    evolution = EvolutionRun(levels: meta.evolutionLevels);
+    _evolutionCommitPending = false;
     _debugReports.clear();
     _debugFeedingTrials = false;
     feeding = FeedingProgress(startDay: 1, target: feedingInitialQuota);
@@ -1212,7 +1250,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 12 &&
         json['version'] != 13 &&
         json['version'] != 14 &&
-        json['version'] != 15 && json['version'] != 16) {
+        json['version'] != 15 &&
+        json['version'] != 16) {
       throw const FormatException('Versión de guardado no compatible');
     }
     if ((json['version'] as int) >= 10 &&
@@ -1230,10 +1269,18 @@ class GameSession extends ChangeNotifier {
         ? MetaProgress.fromJson(json['meta'] as Map<String, dynamic>)
         : MetaProgress();
     final floor = _metaFloor;
-    if((json['version'] as int)>=16 && (json['evolution'] is! Map<String,dynamic> || !(json['meta'] as Map).containsKey('evolution'))) {
+    if ((json['version'] as int) >= 16 &&
+        (json['evolution'] is! Map<String, dynamic> ||
+            !(json['meta'] as Map).containsKey('evolution'))) {
       throw const FormatException('Falta evolución E03');
     }
-    final restoredEvolution = json['evolution'] == null ? EvolutionRun(levels:restoredMeta.evolutionLevels) : EvolutionRun.fromJson(json['evolution'] as Map<String,dynamic>,levels:restoredMeta.evolutionLevels);
+    final hasEvolution = (json['version'] as int) >= 16;
+    final restoredEvolution = !hasEvolution
+        ? EvolutionRun(levels: restoredMeta.evolutionLevels)
+        : EvolutionRun.fromJson(
+            json['evolution'] as Map<String, dynamic>,
+            levels: restoredMeta.evolutionLevels,
+          );
     if (!_allowPrestigeRollback &&
         floor != null &&
         (restoredMeta.revision < floor.revision ||
@@ -1455,9 +1502,10 @@ class GameSession extends ChangeNotifier {
               generated != collected + restoredBoard.pending) ||
           generated !=
               (restoredBoard.captured +
-                      9 * restoredBoard.goldenCaptured +
-                      restoredBoard.combo.bonusUnits) *
-                  settings['ball_value'].toInt() + restoredBoard.evolutionBonus) {
+                          9 * restoredBoard.goldenCaptured +
+                          restoredBoard.combo.bonusUnits) *
+                      settings['ball_value'].toInt() +
+                  restoredBoard.evolutionBonus) {
         throw const FormatException('Contabilidad inválida');
       }
     }
@@ -1632,18 +1680,34 @@ class GameSession extends ChangeNotifier {
       }
     }
     restoredBoard?.syncHoleGrowth(restoredFeeding.growths);
-    if(json['evolution']==null) {
-      restoredEvolution.lastQuota=restoredFeeding.completed;
-      restoredEvolution.dayElapsed=restoredCycle==null?0:
-        (restoredCycle.production+restoredCycle.closing-restoredCycle.remaining).clamp(0,restoredCycle.production);
+    if (!hasEvolution) {
+      restoredEvolution.lastQuota = restoredFeeding.completed;
+      restoredEvolution.dayElapsed = restoredCycle == null
+          ? 0
+          : (restoredCycle.production +
+                    restoredCycle.closing -
+                    restoredCycle.remaining)
+                .clamp(0, restoredCycle.production);
     }
-    if(restoredEvolution.lastQuota!=restoredFeeding.completed ||
-        (restoredEvolution.hasChoices && restoredBoard==null) ||
-        (restoredEvolution.closingPending && (restoredCycle==null || restoredCycle.phase!=DayPhase.night)) ||
-        (restoredBoard!=null && (restoredEvolution.dayElapsed > restoredBoard.settings['production_duration']+1e-6)) ||
-        (restoredBoard!=null && restoredBoard.evolutionBonus>0 &&
-          (restoredMeta.evolutionLevels[EvolutionSkill.of(EvolutionId.millionaire).id]??0)==0 &&
-          (restoredMeta.evolutionLevels[EvolutionSkill.of(EvolutionId.luck).id]??0)==0)) {
+    if (restoredEvolution.lastQuota != restoredFeeding.completed ||
+        (restoredEvolution.hasChoices && restoredBoard == null) ||
+        (restoredEvolution.closingPending &&
+            (restoredCycle == null || restoredCycle.phase != DayPhase.night)) ||
+        (restoredBoard != null &&
+            (restoredEvolution.dayElapsed >
+                restoredBoard.settings['production_duration'] + 1e-6)) ||
+        (restoredBoard != null &&
+            restoredBoard.evolutionBonus > 0 &&
+            (restoredMeta.evolutionLevels[EvolutionSkill.of(
+                      EvolutionId.millionaire,
+                    ).id] ??
+                    0) ==
+                0 &&
+            (restoredMeta.evolutionLevels[EvolutionSkill.of(
+                      EvolutionId.luck,
+                    ).id] ??
+                    0) ==
+                0)) {
       throw const FormatException('Integración E03 incoherente');
     }
     // Commit only after validating every module; a failed load leaves no partial state.
@@ -1713,9 +1777,9 @@ class GameSession extends ChangeNotifier {
       }
     }
     meta = restoredMeta;
-    evolution=restoredEvolution;
-    _evolutionCommitPending=evolution.closingPending && !evolution.hasChoices;
-    restoredBoard?.evolution=evolution;
+    evolution = restoredEvolution;
+    _evolutionCommitPending = evolution.closingPending && !evolution.hasChoices;
+    restoredBoard?.evolution = evolution;
     permanentRun = restoredPermanentRun;
     restoredBoard?.permanentRun = permanentRun;
     restoredBoard?.productionEcho = meta.owns(PermanentSkill.echo);
@@ -1841,7 +1905,8 @@ class GameSession extends ChangeNotifier {
       if (!_disposed && previousError != saveError) notifyListeners();
     }
     _saving = false;
-    if(_evolutionCommitPending && prestigeReady && !_disposed) _finishEvolutionCommit();
+    if (_evolutionCommitPending && prestigeReady && !_disposed)
+      _finishEvolutionCommit();
   }
 
   Future<void> get pendingWrites => _writes;

@@ -190,7 +190,12 @@ class _SessionScreenState extends State<SessionScreen>
                               ),
                             ),
                             if (widget.session.evolutionBlocked)
-                              Positioned.fill(child:EvolutionSelector(key:const ValueKey('evolution-selector'),session:widget.session)),
+                              Positioned.fill(
+                                child: EvolutionSelector(
+                                  key: const ValueKey('evolution-selector'),
+                                  session: widget.session,
+                                ),
+                              ),
                             if (!widget.session.running)
                               Positioned.fill(
                                 child: ResultsOverlay(

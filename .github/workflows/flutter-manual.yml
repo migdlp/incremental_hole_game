@@ -104,6 +104,7 @@ jobs:
       - name: Preparar parche de formato para revisión
         if: ${{ inputs.validation_only }}
         run: |
+          dart fix --apply --code=curly_braces_in_flow_control_structures 2>&1 | tee "$RUNNER_TEMP/flutter-logs/style-fix.log"
           dart format lib test tool 2>&1 | tee "$RUNNER_TEMP/flutter-logs/format-prepare.log"
           git diff --binary > "$RUNNER_TEMP/flutter-logs/format.patch"
 

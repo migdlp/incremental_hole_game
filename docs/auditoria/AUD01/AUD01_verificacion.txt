@@ -1,0 +1,197 @@
+OK: CSV y labels contienen las mismas 22 familias
+OK: 22 familias activas
+OK: nivel consecutivo: launcher:1
+OK: ID único: launcher:1
+OK: nivel consecutivo: launcher_rate:1
+OK: ID único: launcher_rate:1
+OK: nivel consecutivo: launcher_rate:2
+OK: ID único: launcher_rate:2
+OK: nivel consecutivo: launcher_rate:3
+OK: ID único: launcher_rate:3
+OK: nivel consecutivo: hand:1
+OK: ID único: hand:1
+OK: nivel consecutivo: hand:2
+OK: ID único: hand:2
+OK: nivel consecutivo: hand:3
+OK: ID único: hand:3
+OK: nivel consecutivo: hand:4
+OK: ID único: hand:4
+OK: nivel consecutivo: hand:5
+OK: ID único: hand:5
+OK: nivel consecutivo: generator:1
+OK: ID único: generator:1
+OK: nivel consecutivo: generator:2
+OK: ID único: generator:2
+OK: nivel consecutivo: generator:3
+OK: ID único: generator:3
+OK: nivel consecutivo: generator:4
+OK: ID único: generator:4
+OK: nivel consecutivo: generator:5
+OK: ID único: generator:5
+OK: nivel consecutivo: reward:1
+OK: ID único: reward:1
+OK: nivel consecutivo: reward:2
+OK: ID único: reward:2
+OK: nivel consecutivo: reward:3
+OK: ID único: reward:3
+OK: nivel consecutivo: reward:4
+OK: ID único: reward:4
+OK: nivel consecutivo: reward:5
+OK: ID único: reward:5
+OK: nivel consecutivo: broom:1
+OK: ID único: broom:1
+OK: nivel consecutivo: paddle:1
+OK: ID único: paddle:1
+OK: nivel consecutivo: paddle:2
+OK: ID único: paddle:2
+OK: nivel consecutivo: paddle:3
+OK: ID único: paddle:3
+OK: nivel consecutivo: paddle:4
+OK: ID único: paddle:4
+OK: nivel consecutivo: paddle:5
+OK: ID único: paddle:5
+OK: nivel consecutivo: broom_v:1
+OK: ID único: broom_v:1
+OK: nivel consecutivo: duration:1
+OK: ID único: duration:1
+OK: nivel consecutivo: duration:2
+OK: ID único: duration:2
+OK: nivel consecutivo: duration:3
+OK: ID único: duration:3
+OK: nivel consecutivo: duration:4
+OK: ID único: duration:4
+OK: nivel consecutivo: duration:5
+OK: ID único: duration:5
+OK: nivel consecutivo: robot:1
+OK: ID único: robot:1
+OK: nivel consecutivo: robot_speed:1
+OK: ID único: robot_speed:1
+OK: nivel consecutivo: robot_speed:2
+OK: ID único: robot_speed:2
+OK: nivel consecutivo: robot_speed:3
+OK: ID único: robot_speed:3
+OK: nivel consecutivo: robot_speed:4
+OK: ID único: robot_speed:4
+OK: nivel consecutivo: robot_speed:5
+OK: ID único: robot_speed:5
+OK: nivel consecutivo: double_spawn:1
+OK: ID único: double_spawn:1
+OK: nivel consecutivo: combo:1
+OK: ID único: combo:1
+OK: nivel consecutivo: capture_all:1
+OK: ID único: capture_all:1
+OK: nivel consecutivo: capture_recharge:1
+OK: ID único: capture_recharge:1
+OK: nivel consecutivo: capture_recharge:2
+OK: ID único: capture_recharge:2
+OK: nivel consecutivo: boost:1
+OK: ID único: boost:1
+OK: nivel consecutivo: boost_power:1
+OK: ID único: boost_power:1
+OK: nivel consecutivo: boost_duration:1
+OK: ID único: boost_duration:1
+OK: nivel consecutivo: boost_duration:2
+OK: ID único: boost_duration:2
+OK: nivel consecutivo: boost_recharge:1
+OK: ID único: boost_recharge:1
+OK: nivel consecutivo: boost_recharge:2
+OK: ID único: boost_recharge:2
+OK: nivel consecutivo: walls:1
+OK: ID único: walls:1
+OK: nivel consecutivo: walls:2
+OK: ID único: walls:2
+OK: nivel consecutivo: walls:3
+OK: ID único: walls:3
+OK: nivel consecutivo: bat:1
+OK: ID único: bat:1
+OK: nivel consecutivo: bat:2
+OK: ID único: bat:2
+OK: nivel consecutivo: bat:3
+OK: ID único: bat:3
+OK: nivel consecutivo: prestige:1
+OK: ID único: prestige:1
+OK: 55 nodos y 57 aristas dibujadas distintas
+OK: ninguna referencia de arista rota
+OK: ningún requisito inexistente
+OK: infracción de máximo4 documentada exactamente: hand:1 tiene6
+OK: sin nodos aislados
+OK: una componente conectada de55 nodos
+OK: requisitos alcanzables sin ciclos con recursos ilimitados
+OK: CSV de entrega incluye exactamente todos los nodos activos
+OK: 70 IDs únicos incluyendo15 niveles obsoletos
+OK: precio/efecto/vecinos fieles al código: launcher:1
+OK: precio/efecto/vecinos fieles al código: launcher_rate:1
+OK: precio/efecto/vecinos fieles al código: launcher_rate:2
+OK: precio/efecto/vecinos fieles al código: launcher_rate:3
+OK: precio/efecto/vecinos fieles al código: hand:1
+OK: precio/efecto/vecinos fieles al código: hand:2
+OK: precio/efecto/vecinos fieles al código: hand:3
+OK: precio/efecto/vecinos fieles al código: hand:4
+OK: precio/efecto/vecinos fieles al código: hand:5
+OK: precio/efecto/vecinos fieles al código: generator:1
+OK: precio/efecto/vecinos fieles al código: generator:2
+OK: precio/efecto/vecinos fieles al código: generator:3
+OK: precio/efecto/vecinos fieles al código: generator:4
+OK: precio/efecto/vecinos fieles al código: generator:5
+OK: precio/efecto/vecinos fieles al código: reward:1
+OK: precio/efecto/vecinos fieles al código: reward:2
+OK: precio/efecto/vecinos fieles al código: reward:3
+OK: precio/efecto/vecinos fieles al código: reward:4
+OK: precio/efecto/vecinos fieles al código: reward:5
+OK: precio/efecto/vecinos fieles al código: broom:1
+OK: precio/efecto/vecinos fieles al código: paddle:1
+OK: precio/efecto/vecinos fieles al código: paddle:2
+OK: precio/efecto/vecinos fieles al código: paddle:3
+OK: precio/efecto/vecinos fieles al código: paddle:4
+OK: precio/efecto/vecinos fieles al código: paddle:5
+OK: precio/efecto/vecinos fieles al código: broom_v:1
+OK: precio/efecto/vecinos fieles al código: duration:1
+OK: precio/efecto/vecinos fieles al código: duration:2
+OK: precio/efecto/vecinos fieles al código: duration:3
+OK: precio/efecto/vecinos fieles al código: duration:4
+OK: precio/efecto/vecinos fieles al código: duration:5
+OK: precio/efecto/vecinos fieles al código: robot:1
+OK: precio/efecto/vecinos fieles al código: robot_speed:1
+OK: precio/efecto/vecinos fieles al código: robot_speed:2
+OK: precio/efecto/vecinos fieles al código: robot_speed:3
+OK: precio/efecto/vecinos fieles al código: robot_speed:4
+OK: precio/efecto/vecinos fieles al código: robot_speed:5
+OK: precio/efecto/vecinos fieles al código: double_spawn:1
+OK: precio/efecto/vecinos fieles al código: combo:1
+OK: precio/efecto/vecinos fieles al código: capture_all:1
+OK: precio/efecto/vecinos fieles al código: capture_recharge:1
+OK: precio/efecto/vecinos fieles al código: capture_recharge:2
+OK: precio/efecto/vecinos fieles al código: boost:1
+OK: precio/efecto/vecinos fieles al código: boost_power:1
+OK: precio/efecto/vecinos fieles al código: boost_duration:1
+OK: precio/efecto/vecinos fieles al código: boost_duration:2
+OK: precio/efecto/vecinos fieles al código: boost_recharge:1
+OK: precio/efecto/vecinos fieles al código: boost_recharge:2
+OK: precio/efecto/vecinos fieles al código: walls:1
+OK: precio/efecto/vecinos fieles al código: walls:2
+OK: precio/efecto/vecinos fieles al código: walls:3
+OK: precio/efecto/vecinos fieles al código: bat:1
+OK: precio/efecto/vecinos fieles al código: bat:2
+OK: precio/efecto/vecinos fieles al código: bat:3
+OK: precio/efecto/vecinos fieles al código: prestige:1
+OK: rutas definen una posición para cada nodo actual
+OK: posicionesCSV coinciden con rutasDart y spacing64
+OK: centros sin posiciones duplicadas
+OK: CSV de aristas coincide con reconstrucción
+OK: coste total19493, sin prestigio9493
+OK: camino de requisitos de prestigio12603
+OK: ejemplo aritmético34=3x10+4x1 (no testDart)
+OK: suma ideal de cuotas hasta 1
+OK: suma ideal de cuotas hasta 2
+OK: suma ideal de cuotas hasta 3
+OK: suma ideal de cuotas hasta 4
+OK: suma ideal de cuotas hasta 5
+OK: suma ideal de cuotas hasta 6
+OK: suma ideal de cuotas hasta 7
+OK: crecimiento16% de área equivale a radioxsqrt(1.16)
+OK: manifest de evidencias no vacío
+OK: hashes de todas las fuentes siguen intactos
+
+193 comprobaciones de extracción/consistencia correctas.
+Regla de diseño 0–4: INCUMPLIDA por hand:1; auditoría la detecta, no la corrige.
+No ejecutado: Flutter/Dart, juego Android, tasas humanas de captura o benchmark nuevo.

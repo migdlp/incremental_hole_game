@@ -88,7 +88,7 @@ void main() {
       expect(s.economy.balance, 0);
       expect(s.levels, isEmpty);
       expect(s.meta.firstDefeatSeen, isTrue);
-      expect(s.feeding.target, BigInt.from(100));
+      expect(s.feeding.target, BigInt.from(25));
       s.dispose();
     },
   );

@@ -207,7 +207,7 @@ void main() {
       await tester.tap(find.text('Resultados del día'));
       await tester.pump();
       expect(find.byKey(const ValueKey('results-shop')), findsOneWidget);
-      expect(find.text('CUOTA 1'), findsOneWidget);
+      expect(find.text('CUOTA 2'), findsOneWidget);
       expect(s.economy.balance, 1661);
       expect(s.snapshot(), saved);
       await tester.tap(find.text('Tienda'));

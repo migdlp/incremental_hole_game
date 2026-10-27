@@ -2,9 +2,20 @@ import 'legacy_feeding_progress.dart';
 
 /// Capturable balls only, with a four-production-day deadline per active quota.
 class FeedingProgress {
-  static const initialQuota = 100;
+  static const initialQuota = 25;
+  static const _opening = [25, 50, 100, 500, 1000];
+  static BigInt quotaAt(int level) {
+    if (level < 1) throw ArgumentError.value(level, 'level');
+    return level <= _opening.length
+        ? BigInt.from(_opening[level - 1])
+        : BigInt.from(1000) * BigInt.from(10).pow(level - _opening.length);
+  }
+
+  // Custom DEBUG targets retain their independent decimal progression.
+  String _curve;
   FeedingProgress({required this.startDay, int? target = initialQuota})
-    : quotaStartDay = startDay,
+    : _curve = target == initialQuota ? 'opening-25-v1' : 'decimal-v1',
+      quotaStartDay = startDay,
       initialTarget = target == null ? null : BigInt.from(target),
       target = target == null ? null : BigInt.from(target) {
     if (startDay < 1 || (target != null && target < 1)) {
@@ -28,7 +39,14 @@ class FeedingProgress {
   BigInt get points => normalPoints + instantPoints;
   int get completed => period - 1;
   BigInt? get remaining => target == null ? null : target! - points;
-  BigInt? get nextTarget => target == null ? null : target! * BigInt.from(10);
+  BigInt? get nextTarget => target == null
+      ? null
+      : _curve == 'opening-25-v1'
+      ? quotaAt(period + 1)
+      : target! * BigInt.from(10);
+  BigInt _expectedTarget() => _curve == 'opening-25-v1'
+      ? quotaAt(period)
+      : initialTarget! * BigInt.from(10).pow(completed);
   double? get fraction => target == null ? null : ratio(points, target!);
 
   // Bookkeeping advances only for actual production days.
@@ -63,6 +81,13 @@ class FeedingProgress {
     if (day != startDay + completedDays) {
       throw StateError('Captura fuera de jornada');
     }
+    // Upgrade old 100 × 10^n saves only inside the capture transaction. Existing
+    // excess completes the new objectives through the same unique reward events.
+    if (_curve == 'upgrade-from-100') {
+      _curve = 'opening-25-v1';
+      initialTarget = BigInt.from(initialQuota);
+      target = quotaAt(period);
+    }
     normalPoints += normal;
     instantPoints += instant;
     // Per-day counters use BigInt as well; no conversion through double.
@@ -77,9 +102,9 @@ class FeedingProgress {
       events.add(period);
       growths++;
       growthPeriod = period;
+      target = nextTarget;
       period++;
       quotaStartDay = day;
-      target = nextTarget;
     }
     return events;
   }
@@ -97,6 +122,7 @@ class FeedingProgress {
 
   Map<String, dynamic> toJson() => {
     'rules': 'balls-four-days-v2',
+    'curve': _curve,
     'quotaStartDay': quotaStartDay,
     'dayClosed': dayClosed,
     'startDay': startDay,
@@ -150,6 +176,22 @@ class FeedingProgress {
           ? null
           : big('initialTarget')
       ..target = json['target'] == null ? null : big('target');
+    final curve = json['curve'];
+    if (curve != null &&
+        !['opening-25-v1', 'decimal-v1', 'upgrade-from-100'].contains(curve)) {
+      throw const FormatException('Curva de cuotas inválida');
+    }
+    state._curve =
+        curve as String? ??
+        (state.initialTarget == BigInt.from(100)
+            ? 'upgrade-from-100'
+            : 'decimal-v1');
+    if ((state._curve == 'opening-25-v1' &&
+            state.initialTarget != BigInt.from(initialQuota)) ||
+        (state._curve == 'upgrade-from-100' &&
+            state.initialTarget != BigInt.from(100))) {
+      throw const FormatException('Origen de curva inválido');
+    }
     if (deadlines) {
       if (json['dayClosed'] is! bool) {
         throw const FormatException('Cierre de jornada inválido');
@@ -184,9 +226,7 @@ class FeedingProgress {
             ? state.initialTarget != null
             : state.initialTarget == null ||
                   state.initialTarget! <= BigInt.zero ||
-                  state.target !=
-                      state.initialTarget! *
-                          BigInt.from(10).pow(state.completed) ||
+                  state.target != state._expectedTarget() ||
                   state.points >= state.target!)) {
       throw const FormatException('Progreso de cuotas incoherente');
     }
@@ -217,7 +257,7 @@ class FeedingProgress {
           ..runCapturedBaseline = capturedBaseline
           ..dayClosed = !running && old.completedDays > 0
           ..quotaStartDay = day - (!running && old.completedDays > 0 ? 1 : 0);
-    state.target = state.initialTarget! * BigInt.from(10).pow(completed);
+    state.target = quotaAt(state.period);
     return state;
   }
 }

@@ -1,5 +1,10 @@
 # AJ-005B — Cuotas infinitas por bolas capturadas
 
+> **27/10/2026 — Cuotas vigentes:** 25 → 50 → 100 → 500 → 1.000 → 10.000
+> → 100.000 → 1.000.000 → ×10. [Curva y migración](cuotas-progresion-inicial.md).
+> JSON v17; se conservan el plazo de cuatro jornadas y las cartas E03 actuales.
+
+
 Implementado sobre `build/apk-0.6.0+13` (base `7d5266f`) e integrado con
 AJ-007 y su banco de audio offline (`46b623a`). Sustituye las reglas
 monetarias y los vencimientos de S01/S03; conserva economía C01, estrellas P01

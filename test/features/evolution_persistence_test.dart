@@ -89,7 +89,7 @@ void main() {
     'permanent evolution survives death, resets transient state, and repeated quotas grant another choice',
     () async {
       final s = game()..startDay();
-      capture(s, 100);
+      capture(s, 25);
       await s.pendingWrites;
       final id = s.evolution.options.first;
       expect(s.chooseEvolution(id, serial: 0), isTrue);
@@ -111,7 +111,7 @@ void main() {
       s.beginNewRun();
       await s.pendingWrites;
       expect(s.meta.evolutionLevels[id], 1);
-      capture(s, 100);
+      capture(s, 25);
       await s.pendingWrites;
       expect(s.evolution.pending, 1);
       expect(s.evolution.lastQuota, 1);
@@ -129,7 +129,7 @@ void main() {
       };
       s.restore(jsonEncode(j));
       s.startDay();
-      capture(s, 100);
+      capture(s, 25);
       await s.pendingWrites;
       expect(s.evolution.pending, 0);
       expect(s.evolutionBlocked, isFalse);
@@ -148,7 +148,7 @@ void main() {
     () async {
       final store = EvolutionFaultStore();
       final s = game(store)..startDay();
-      capture(s, 100);
+      capture(s, 25);
       await s.pendingWrites;
       final id = s.evolution.options.first, serial = s.evolution.serial;
       store.failMain = true;
@@ -179,7 +179,7 @@ void main() {
       final store = EvolutionFaultStore();
       final s = game(store)..startDay();
       advanceToProductionBoundary(s, 1 / 60);
-      capture(s, 100);
+      capture(s, 25);
       await s.pendingWrites;
       final beforeChoice = s.snapshot();
       store.failMain = true;
@@ -192,7 +192,7 @@ void main() {
       await r.load();
       await r.pendingWrites;
       expect(r.running, isFalse);
-      expect(r.progress.last!.captured, 100);
+      expect(r.progress.last!.captured, 25);
       expect(r.meta.phase, PrestigePhase.playing);
       expect(r.evolution.pending, 0);
       expect(r.evolution.closingPending, isFalse);
@@ -204,7 +204,7 @@ void main() {
     'legacy v15 initializes zero levels and no retroactive cards, preserving the quota deadline',
     () async {
       final s = game()..startDay();
-      capture(s, 100);
+      capture(s, 25);
       await resolveEvolutionFixture(s);
       final j = jsonDecode(s.snapshot());
       j['version'] = 15;
@@ -231,7 +231,7 @@ void main() {
       final baseline = s.snapshot();
       s.enterDebug();
       s.startDay();
-      capture(s, 100);
+      capture(s, 25);
       await resolveEvolutionFixture(s);
       expect(s.meta.evolutionLevels, isNotEmpty);
       s.exitDebug();

@@ -36,7 +36,7 @@ void main() {
     () async {
       final s = start();
       final base = s.board!.captureRadius;
-      await capture(s, 99);
+      await capture(s, 24);
       expect(s.board!.captureRadius, base);
       await capture(s, 1);
       expect(s.feeding.growths, 1);
@@ -61,7 +61,7 @@ void main() {
   test('new capture zone catches a ball outside the original radius', () async {
     final s = start();
     final base = s.board!.captureRadius;
-    await capture(s, 100);
+    await capture(s, 25);
     final b = s.board!;
     final before = b.captured;
     final distance = (base + b.captureRadius) / 2;
@@ -75,7 +75,7 @@ void main() {
     );
     s.tick(1 / 60);
     expect(b.captured, before + 1);
-    expect(s.economy.generated, 110);
+    expect(s.economy.generated, 35);
     expect(s.feeding.growths, 1);
     s.dispose();
   });
@@ -85,7 +85,7 @@ void main() {
     () async {
       final store = MemoryStore();
       final s = start(store);
-      await capture(s, 100);
+      await capture(s, 25);
       await s.pendingWrites;
       final saved = store.candidates.first;
       final restored = GameSession(catalog, store);
@@ -130,7 +130,7 @@ void main() {
 
   test('invalid growth records reject restoration atomically', () async {
     final s = start();
-    await capture(s, 100);
+    await capture(s, 25);
     final original = s.snapshot();
     for (final mutate in <void Function(Map<String, dynamic>)>[
       (j) => j['feeding']['growths'] = -1,
@@ -151,7 +151,7 @@ void main() {
     final baseline = s.snapshot();
     s.enterDebug();
     s.startDay();
-    await capture(s, 100);
+    await capture(s, 25);
     expect(s.feeding.growths, 1);
     s.finishDay();
     s.debugBuyAll();
@@ -167,7 +167,7 @@ void main() {
 
   test('visible dark hole and real capture radius grow together', () async {
     final s = start();
-    await capture(s, 100);
+    await capture(s, 25);
     final game = GardenGame(s)..onGameResize(Vector2(360, 560));
     final recorder = ui.PictureRecorder();
     game.render(ui.Canvas(recorder));

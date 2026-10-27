@@ -443,7 +443,8 @@ class GameSession extends ChangeNotifier {
                 data['version'] != 13 &&
                 data['version'] != 14 &&
                 data['version'] != 15 &&
-                data['version'] != 16) {
+                data['version'] != 16 &&
+                data['version'] != 17) {
               throw const FormatException('Checkpoint incompatible');
             }
             final state = MetaProgress.fromJson(
@@ -1226,7 +1227,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 16,
+    'version': 17,
     'meta': meta.toJson(),
     'evolution': evolution.toJson(),
     'permanentRun': permanentRun.toJson(),
@@ -1285,7 +1286,8 @@ class GameSession extends ChangeNotifier {
         json['version'] != 13 &&
         json['version'] != 14 &&
         json['version'] != 15 &&
-        json['version'] != 16) {
+        json['version'] != 16 &&
+        json['version'] != 17) {
       throw const FormatException('Versión de guardado no compatible');
     }
     if ((json['version'] as int) >= 10 &&
@@ -1607,6 +1609,9 @@ class GameSession extends ChangeNotifier {
     if ((json['version'] as int) >= 8) {
       if (savedFeeding is! Map<String, dynamic>) {
         throw const FormatException('Falta la alimentación');
+      }
+      if ((json['version'] as int) >= 17 && savedFeeding['curve'] is! String) {
+        throw const FormatException('Falta la curva de cuotas');
       }
       if ((json['version'] as int) >= 15 &&
           savedFeeding['rules'] != 'balls-four-days-v2') {

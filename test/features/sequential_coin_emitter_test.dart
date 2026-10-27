@@ -192,6 +192,7 @@ void main() {
     () async {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..startDay();
+      s.evolution.cardRandom = 0;
       final b = s.board!;
       for (var i = 0; i < 50; i++) {
         b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
@@ -199,6 +200,7 @@ void main() {
       for (var i = 0; i < 20; i++) {
         final before = s.rewardVisuals.emittedObjects;
         s.tick(.1);
+        await resolveEvolutionFixture(s);
         expect(s.rewardVisuals.emittedObjects - before, lessThanOrEqualTo(1));
       }
       s.pause();

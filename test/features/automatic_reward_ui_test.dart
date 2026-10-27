@@ -47,7 +47,7 @@ void main() {
         s.tick(1 / 60);
         expect(b.captured, 200);
         expect(s.economy.generated, expected);
-        expect(s.feeding.points, BigInt.from(100));
+        expect(s.feeding.points, BigInt.from(25));
         expect(s.rewardVisuals.activeCount, lessThanOrEqualTo(budget));
         await resolveEvolutionFixture(s);
         s.finishDay();

@@ -31,7 +31,7 @@ void main() {
   Future<void> complete(GameSession s) async {
     s.startDay();
     s.evolution.cardRandom = 0;
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 25; i++) {
       s.board!.balls.add(
         Ball(s.board!.nextId++, s.board!.holePosition, Vec.zero),
       );
@@ -64,7 +64,7 @@ void main() {
       expect(s.meta.revision, revision);
       expect(s.meta.stars, 0);
       expect(s.feeding.points, BigInt.zero);
-      expect(s.economy.generated, 100);
+      expect(s.economy.generated, 25);
       s.dispose();
     },
   );

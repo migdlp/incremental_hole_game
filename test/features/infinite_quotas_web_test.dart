@@ -10,7 +10,7 @@ void main() {
     final events = f.creditBalls(1, normal: total, instant: BigInt.zero);
     final consumed = events.fold(
       BigInt.zero,
-      (n, level) => n + BigInt.from(100) * BigInt.from(10).pow(level - 1),
+      (n, level) => n + FeedingProgress.quotaAt(level),
     );
     expect(consumed + f.points, total);
     expect(f.target, BigInt.from(10).pow(500));

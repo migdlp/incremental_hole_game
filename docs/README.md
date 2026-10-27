@@ -1,5 +1,10 @@
 # Documentación de Feed the Hole
 
+> **27/10/2026 — Cuotas vigentes:** 25 → 50 → 100 → 500 → 1.000 → 10.000
+> → 100.000 → 1.000.000 → ×10. [Curva y migración](cuotas-progresion-inicial.md).
+> JSON v17; se conservan el plazo de cuatro jornadas y las cartas E03 actuales.
+
+
 > **AJ-005B:** [cuotas infinitas por bolas capturadas](aj-005b-cuotas-infinitas.md), sin vencimiento ni
 > derrota por cuotas, con excedentes, crecimiento AJ-005A y eventos P01. JSON v14.
 > Esta actualización prevalece sobre las reglas históricas de alimentación.

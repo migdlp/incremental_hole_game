@@ -203,7 +203,7 @@ void main() {
     'all quotas and star rewards process first, choices freeze and persist exact offers',
     () async {
       final s = game()..startDay();
-      capture(s, 1200);
+      capture(s, 125);
       await s.pendingWrites;
       expect(s.feeding.period, 3);
       expect(s.feeding.growths, 2);
@@ -224,7 +224,7 @@ void main() {
       await resolve(r);
       expect(r.meta.evolutionLevels.values.fold(0, (int n, int l) => n + l), 2);
       expect(r.evolutionBlocked, isFalse);
-      expect(r.economy.generated, 1200);
+      expect(r.economy.generated, 125);
       r.dispose();
       s.dispose();
     },
@@ -240,7 +240,7 @@ void main() {
       }
       s.startDay();
       advanceToProductionBoundary(s, 1 / 60);
-      capture(s, 100);
+      capture(s, 25);
       await s.pendingWrites;
       expect(s.running, isTrue);
       expect(s.cycle!.remaining, 0);
@@ -252,9 +252,9 @@ void main() {
       expect(r.running, isFalse);
       expect(r.meta.phase, PrestigePhase.playing);
       expect(r.progress.last!.day, 4);
-      expect(r.progress.last!.captured, 100);
+      expect(r.progress.last!.captured, 25);
       r.tick(10);
-      expect(r.progress.last!.captured, 100);
+      expect(r.progress.last!.captured, 25);
       r.dispose();
       s.dispose();
     },
@@ -297,7 +297,7 @@ void main() {
     'selector has descriptions and levels only, absorbs gameplay gestures',
     (tester) async {
       final s = game()..startDay();
-      capture(s, 100);
+      capture(s, 25);
       await s.pendingWrites;
       await tester.pumpWidget(GardenApp(session: s));
       await tester.pump();

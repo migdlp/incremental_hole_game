@@ -56,7 +56,7 @@ void main() {
         }
         s.startDay();
         expect(s.progress.day, day);
-        await capture(s, 100);
+        await capture(s, 25);
         expect(s.feeding.period, 2);
         expect(s.feeding.quotaStartDay, day);
         expect(s.feeding.quotaDay(day), 1);
@@ -85,7 +85,7 @@ void main() {
     );
   }
   test(
-    '99 at fourth close defeats immediately, clears run, preserves permanent resources',
+    '24 at fourth close defeats immediately, clears run, preserves permanent resources',
     () async {
       final s = game();
       final j = jsonDecode(s.snapshot());
@@ -97,7 +97,7 @@ void main() {
         await closeEmpty(s);
       }
       s.startDay();
-      await capture(s, 99);
+      await capture(s, 24);
       s.finishDay();
       await s.pendingWrites;
       expect(s.meta.phase, PrestigePhase.defeat);
@@ -119,7 +119,7 @@ void main() {
       expect(s.progress.day, 1);
       expect(s.feeding.quotaStartDay, 1);
       expect(s.feeding.points, BigInt.zero);
-      expect(s.feeding.target, BigInt.from(100));
+      expect(s.feeding.target, BigInt.from(25));
       expect(s.feeding.growths, 0);
       expect(s.economy.balance, 100);
       expect(s.normalShopAvailable, isFalse);
@@ -137,7 +137,7 @@ void main() {
         await closeEmpty(s);
       }
       s.startDay();
-      await capture(s, 99);
+      await capture(s, 24);
       advanceToProductionBoundary(s, .005);
       s.board!.balls.add(
         Ball(s.board!.nextId++, s.board!.holePosition, Vec.zero),
@@ -146,7 +146,7 @@ void main() {
       await s.pendingWrites;
       await resolveEvolutionFixture(s);
       expect(s.meta.phase, PrestigePhase.playing);
-      expect(s.progress.last!.captured, 100);
+      expect(s.progress.last!.captured, 25);
       expect(s.feeding.period, 2);
       expect(s.feeding.quotaStartDay, 4);
       expect(s.meta.starLedger.quota, 1);
@@ -165,7 +165,7 @@ void main() {
         await closeEmpty(s);
       }
       s.startDay();
-      await capture(s, 99);
+      await capture(s, 24);
       advanceToProductionBoundary(s, .005);
       s.board!.balls.add(
         Ball(
@@ -191,13 +191,13 @@ void main() {
       await closeEmpty(s);
       s.startDay();
       advanceToProductionBoundary(s, 1 / 60);
-      await capture(s, 11200);
+      await capture(s, 200);
       await s.pendingWrites;
       expect(s.meta.phase, PrestigePhase.playing);
       expect(s.progress.day, 2);
       expect(s.feeding.period, 4);
-      expect(s.feeding.target, BigInt.from(100000));
-      expect(s.feeding.points, BigInt.from(100));
+      expect(s.feeding.target, BigInt.from(500));
+      expect(s.feeding.points, BigInt.from(25));
       expect(s.feeding.quotaStartDay, 2);
       expect(s.feeding.growths, 3);
       expect(s.meta.starLedger.quota, 3);
@@ -227,7 +227,7 @@ void main() {
       await closeEmpty(s);
       await closeEmpty(s);
       s.startDay();
-      await capture(s, 100);
+      await capture(s, 25);
       s.finishDay();
       await s.pendingWrites;
       expect(s.feeding.quotaStartDay, 3);
@@ -249,7 +249,7 @@ void main() {
       await closeEmpty(s);
       await closeEmpty(s);
       s.startDay();
-      await capture(s, 90);
+      await capture(s, 20);
       s.pause();
       final raw = s.snapshot();
       s.tick(1000);
@@ -258,7 +258,7 @@ void main() {
       expect(r.paused, isTrue);
       expect(r.progress.day, 3);
       expect(r.feeding.quotaStartDay, 1);
-      expect(r.feeding.points, BigInt.from(90));
+      expect(r.feeding.points, BigInt.from(20));
       r.resume();
       r.finishDay();
       await r.pendingWrites;
@@ -268,7 +268,7 @@ void main() {
       expect(fourth.progress.day, 4);
       expect(fourth.feeding.quotaDay(4), 4);
       fourth.resume();
-      await capture(fourth, 10);
+      await capture(fourth, 5);
       fourth.finishDay();
       await fourth.pendingWrites;
       expect(fourth.canPlayRun, isTrue);
@@ -281,7 +281,7 @@ void main() {
     'legacy balls save gets safe deadline without re-awarding progress or money',
     () async {
       final s = game()..startDay();
-      await capture(s, 1200);
+      await capture(s, 125);
       s.finishDay();
       await s.pendingWrites;
       final j = jsonDecode(s.snapshot());
@@ -295,7 +295,7 @@ void main() {
       final r = game()..restore(jsonEncode(j));
       expect(r.progress.day, 29);
       expect(r.feeding.quotaStartDay, 29);
-      expect(r.feeding.points, BigInt.from(100));
+      expect(r.feeding.points, BigInt.from(50));
       expect(r.feeding.period, 3);
       expect(r.feeding.growths, 2);
       expect(r.meta.starLedger.toJson(), s.meta.starLedger.toJson());
@@ -390,7 +390,7 @@ void main() {
       expect(r.progress.day, 5);
       expect(r.feeding.quotaStartDay, 5);
       expect(r.feeding.growths, 1);
-      expect(r.feeding.target, BigInt.from(1000));
+      expect(r.feeding.target, BigInt.from(50));
       expect(r.meta.starLedger.pending, isEmpty);
       final rr = game()..restore(r.snapshot());
       await rr.save();

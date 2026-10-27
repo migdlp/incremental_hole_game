@@ -1,5 +1,10 @@
 # Cuotas de cuatro jornadas — integración S03 / AJ-005B
 
+> **27/10/2026 — Cuotas vigentes:** 25 → 50 → 100 → 500 → 1.000 → 10.000
+> → 100.000 → 1.000.000 → ×10. [Curva y migración](cuotas-progresion-inicial.md).
+> JSON v17; se conservan el plazo de cuatro jornadas y las cartas E03 actuales.
+
+
 Versión **0.22.0+35**. [Especificación aprobada](s03-aj005b-cuotas-4-jornadas.md).
 Esta actualización sustituye la regla anterior sin vencimiento. Las cuotas siguen
 siendo infinitas: 100, 1000, 10000… bolas; los objetivos, progreso y excedentes

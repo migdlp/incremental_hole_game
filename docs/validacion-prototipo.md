@@ -1,5 +1,20 @@
 # Registro de validación
 
+## Curva inicial de cuotas — 27 de octubre de 2026
+
+Base `0778d13`, con E03, P02 y cuotas de cuatro jornadas. Nuevos objetivos
+25/50/100/500/1.000, seguidos de ×10 indefinidamente. JSON v17, balance v20.
+Formato correcto, análisis sin avisos, **489 pruebas** superadas, prueba de
+500 dígitos y JSON exacto en Chromium correcta, compilación web correcta.
+
+Se prueba la migración de una cuota antigua con 90/100: al reanudar quedan dos
+cuotas completadas y 15/100 en la tercera, con dos eventos P01/E03 y crecimientos,
+sin repetirlos al guardar/restaurar. Se preservan cuotas ya completadas, progreso
+parcial, dinero, evolución permanente y vencimientos actuales.
+[Contrato y migración](cuotas-progresion-inicial.md). No se ha generado una APK
+para este ajuste ni realizado validación en Android físico.
+
+
 ## Integración de AJ-005B con AJ-007 — 24 de octubre de 2026
 
 Se conserva AJ-007 y su banco de audio offline (`46b623a`) al integrar las cuotas.

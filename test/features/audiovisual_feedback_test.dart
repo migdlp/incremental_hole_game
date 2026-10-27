@@ -223,7 +223,7 @@ void main() {
       fx.advance(.2);
     }
 
-    capture(99, golden: true);
+    capture(24, golden: true);
     expect(backend.played.where((c) => c.sample == 'quota'), isEmpty);
     capture(1);
     expect(s.feeding.period, 2);

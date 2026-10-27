@@ -47,20 +47,101 @@ void main() {
     return j;
   }
 
-  test('90 plus 30 rolls 20 into the next target immediately', () {
-    final f = FeedingProgress(startDay: 1);
-    expect(f.credit(1, normal: 90, instant: 0), isEmpty);
-    expect(f.credit(1, normal: 30, instant: 0), [1]);
-    expect(f.period, 2);
-    expect(f.target, BigInt.from(1000));
-    expect(f.points, BigInt.from(20));
-    expect(f.remaining, BigInt.from(980));
+  test(
+    'opening quotas and all later decimal steps round-trip without precision loss',
+    () {
+      final f = FeedingProgress(startDay: 1);
+      final goals = [25, 50, 100, 500, 1000, 10000, 100000, 1000000, 10000000];
+      for (var i = 0; i < goals.length; i++) {
+        expect(f.period, i + 1);
+        expect(f.target, BigInt.from(goals[i]));
+        expect(f.credit(1, normal: goals[i], instant: 0), [i + 1]);
+        expect(f.points, BigInt.zero);
+        final restored = FeedingProgress.fromJson(
+          f.toJson(),
+          day: 1,
+          running: true,
+        );
+        expect(restored.toJson(), f.toJson());
+      }
+      expect(f.target, BigInt.from(100000000));
+    },
+  );
+  test(
+    'legacy ball progress completes the cheaper goals once in the capture transaction',
+    () async {
+      final s = session();
+      s.feeding = FeedingProgress(startDay: 1, target: 100);
+      s.startDay();
+      capture(s, 90);
+      final old = jsonDecode(s.snapshot()) as Map<String, dynamic>;
+      old['version'] = 16;
+      old['feeding'].remove('curve');
+      final r = session()..restore(jsonEncode(old));
+      expect(r.feeding.points, BigInt.from(90));
+      // Saving while paused retains the pending migration, including across restarts.
+      final rr = session()
+        ..restore(r.snapshot())
+        ..resume();
+      rr.evolution.cardRandom = 0;
+      rr.tick(1 / 60);
+      expect(rr.feeding.period, 3);
+      expect(rr.feeding.target, BigInt.from(100));
+      expect(rr.feeding.points, BigInt.from(15));
+      expect(rr.feeding.growths, 2);
+      expect(rr.meta.starLedger.quota, 2);
+      expect(rr.meta.starLedger.pending, hasLength(2));
+      expect(rr.evolution.pending, 2);
+      expect(rr.economy.generated, 90);
+      await resolveEvolutionFixture(rr);
+      final once = rr.snapshot();
+      rr.restore(once);
+      rr.resume();
+      rr.tick(1 / 60);
+      expect(rr.feeding.growths, 2);
+      expect(rr.evolution.pending, 0);
+      expect(rr.meta.starLedger.pending, hasLength(2));
+      expect(rr.feeding.points, BigInt.from(15));
+      s.dispose();
+      r.dispose();
+      rr.dispose();
+    },
+  );
+  test('migration keeps completed quotas and custom DEBUG curves', () {
+    final old = FeedingProgress(startDay: 1, target: 100);
+    old.credit(1, normal: 1180, instant: 0);
+    final json = old.toJson()..remove('curve');
+    final r = FeedingProgress.fromJson(json, day: 1, running: true);
+    expect(r.completed, 2);
+    expect(r.growths, 2);
+    expect(r.credit(1, normal: 0, instant: 0), isEmpty);
+    expect(r.target, BigInt.from(100));
+    expect(r.points, BigInt.from(80));
+    expect(r.growths, 2);
+    final custom = FeedingProgress(startDay: 1, target: 1);
+    expect(custom.credit(1, normal: 12, instant: 0), [1, 2]);
+    expect(custom.target, BigInt.from(100));
+    final restored = FeedingProgress.fromJson(
+      custom.toJson(),
+      day: 1,
+      running: true,
+    );
+    expect(restored.toJson(), custom.toJson());
   });
-  test('1200 emits two ordered events and retains all excess', () {
+  test('20 plus 10 rolls 5 into the next target immediately', () {
     final f = FeedingProgress(startDay: 1);
-    expect(f.credit(1, normal: 1200, instant: 0), [1, 2]);
-    expect(f.target, BigInt.from(10000));
-    expect(f.points, BigInt.from(100));
+    expect(f.credit(1, normal: 20, instant: 0), isEmpty);
+    expect(f.credit(1, normal: 10, instant: 0), [1]);
+    expect(f.period, 2);
+    expect(f.target, BigInt.from(50));
+    expect(f.points, BigInt.from(5));
+    expect(f.remaining, BigInt.from(45));
+  });
+  test('125 emits two ordered events and retains all excess', () {
+    final f = FeedingProgress(startDay: 1);
+    expect(f.credit(1, normal: 125, instant: 0), [1, 2]);
+    expect(f.target, BigInt.from(100));
+    expect(f.points, BigInt.from(50));
     expect(f.growths, 2);
     expect(f.credit(1, normal: 0, instant: 0), isEmpty);
   });
@@ -70,7 +151,7 @@ void main() {
     final events = f.creditBalls(1, normal: amount, instant: BigInt.zero);
     var consumed = BigInt.zero;
     for (final n in events) {
-      consumed += BigInt.from(100) * BigInt.from(10).pow(n - 1);
+      consumed += FeedingProgress.quotaAt(n);
     }
     expect(f.points + consumed, amount);
     final j = jsonDecode(jsonEncode(f.toJson())) as Map<String, dynamic>;
@@ -103,9 +184,9 @@ void main() {
     () async {
       final s = session()..startDay();
       final base = s.board!.captureRadius;
-      capture(s, 1200);
+      capture(s, 125);
       expect(s.feeding.period, 3);
-      expect(s.feeding.points, BigInt.from(100));
+      expect(s.feeding.points, BigInt.from(50));
       expect(s.board!.captureRadius / base, closeTo(math.pow(1.16, 1), 1e-12));
       expect(s.meta.starLedger.quota, 2);
       expect(s.meta.starLedger.pending.map((p) => p.id).toSet().length, 2);
@@ -137,10 +218,10 @@ void main() {
       }
       expect(s.activateSpecial(SpecialAbility.captureAll), isTrue);
       s.tick(1 / 60);
-      expect(s.feeding.points, BigInt.from(50));
+      expect(s.feeding.points, BigInt.from(25));
       expect(b.captured, 50);
       s.tick(.1);
-      expect(s.feeding.points, BigInt.from(50));
+      expect(s.feeding.points, BigInt.from(25));
       s.dispose();
     },
   );
@@ -148,10 +229,10 @@ void main() {
     'empty days, pause, store and restart preserve partial feeding',
     () async {
       final s = session()..startDay();
-      capture(s, 90);
+      capture(s, 20);
       s.pause();
       capture(s, 1);
-      expect(s.feeding.points, BigInt.from(90));
+      expect(s.feeding.points, BigInt.from(20));
       s.resume();
       s.finishDay();
       for (var i = 0; i < 1; i++) {
@@ -159,7 +240,7 @@ void main() {
         s.finishDay();
       }
       expect(s.canPlayRun, isTrue);
-      expect(s.feeding.points, BigInt.from(90));
+      expect(s.feeding.points, BigInt.from(20));
       s.economy.balance = 1000;
       expect(
         s.purchase(catalog.definitions.firstWhere((d) => d.id == 'hand')),
@@ -169,7 +250,7 @@ void main() {
       final restored = session()
         ..restore(s.snapshot())
         ..startDay();
-      capture(restored, 10);
+      capture(restored, 5);
       expect(restored.feeding.period, 2);
       expect(restored.feeding.points, BigInt.zero);
       s.dispose();
@@ -185,7 +266,7 @@ void main() {
       final r = session()..restore(jsonEncode(old));
       expect(r.feeding.period, 3);
       expect(r.feeding.points, BigInt.zero);
-      expect(r.feeding.target, BigInt.from(10000));
+      expect(r.feeding.target, BigInt.from(100));
       expect(r.feeding.growths, 2);
       expect(r.economy.balance, 789);
       r.startDay();
@@ -203,7 +284,7 @@ void main() {
       ..restore(jsonEncode(old))
       ..startDay();
     expect(r.feeding.period, 2);
-    expect(r.feeding.target, BigInt.from(1000));
+    expect(r.feeding.target, BigInt.from(50));
     r.tick(.1);
     expect(r.feeding.growths, 1);
     expect(r.meta.starLedger.pending, isEmpty);
@@ -244,7 +325,7 @@ void main() {
       (j) => j['feeding']['normal'] = 1,
       (j) => j['feeding']['normal'] = '-1',
       (j) => j['feeding']['target'] = '1001',
-      (j) => j['feeding']['growths'] = 2,
+      (j) => j['feeding']['growths'] = 3,
       (j) => j['feeding']['growthPeriod'] = 0,
       (j) => j['feeding']['runBalls'] = '99',
     ]) {
@@ -259,13 +340,13 @@ void main() {
     'summary shows exact balls, current quota and remaining without deadlines',
     (tester) async {
       final s = session();
-      s.feeding.credit(1, normal: 3550, instant: 0);
+      s.feeding.credit(1, normal: 4125, instant: 0);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(body: FeedingSummary(session: s)),
         ),
       );
-      expect(find.text('CUOTA 3'), findsOneWidget);
+      expect(find.text('CUOTA 6'), findsOneWidget);
       expect(find.text('2.450 / 10.000 bolas'), findsOneWidget);
       expect(find.text('Faltan 7.550.'), findsOneWidget);
       expect(find.textContaining('jornada'), findsNothing);

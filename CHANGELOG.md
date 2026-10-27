@@ -1,5 +1,13 @@
 # Historial de cambios
 
+## Cuotas iniciales — 27/10/2026
+
+- Objetivos 25, 50, 100, 500, 1.000, 10.000, 100.000, 1.000.000 y ×10 sucesivo.
+- JSON v17 con curva identificada; migración de progreso antiguo al reanudar,
+  conservando excedentes y sin repetir crecimiento, estrellas ni cartas E03.
+- Plazos de cuatro jornadas, economía y duración de producción conservados.
+
+
 ## 0.23.0+36 — E03: cartas de evolución
 
 - Elección por cuota, hasta tres opciones y doce habilidades permanentes de cinco niveles.

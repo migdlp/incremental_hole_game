@@ -1,5 +1,10 @@
 # Referencia de guardado y recuperación
 
+> **27/10/2026 — Cuotas vigentes:** 25 → 50 → 100 → 500 → 1.000 → 10.000
+> → 100.000 → 1.000.000 → ×10. [Curva y migración](cuotas-progresion-inicial.md).
+> JSON v17; se conservan el plazo de cuatro jornadas y las cartas E03 actuales.
+
+
 ## Vigente — AJ-005B · JSON v14
 
 La alimentación usa BigInt serializados como cadenas decimales, cuotas inmediatas

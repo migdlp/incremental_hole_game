@@ -20,12 +20,14 @@ void advance(GameSession s, double seconds) {
   }
 }
 
-void capture(GameSession s, int count) {
+Future<void> capture(GameSession s, int count) async {
+  s.evolution.cardRandom = 0;
   final b = s.board!;
   for (var i = 0; i < count; i++) {
     b.balls.add(Ball(b.nextId++, b.holePosition, Vec.zero));
   }
   s.tick(1 / 60);
+  await resolveEvolutionFixture(s);
 }
 
 void main() {
@@ -106,7 +108,7 @@ void main() {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..economy.balance = 1000
         ..startDay();
-      capture(s, 34);
+      await capture(s, 34);
       advance(s, .8);
       final state = jsonEncode(s.rewardVisuals.collection.toJson());
       final clock = s.rewardVisuals.clock;
@@ -130,6 +132,7 @@ void main() {
       advance(r, 3);
       expect(r.economy.collected, before);
       r.finishDay();
+      await r.pendingWrites;
       expect(r.economy.balance, 1034);
       final collection = jsonEncode(r.rewardVisuals.collection.toJson());
       final hand = r.catalog.definitions.firstWhere((d) => d.id == 'hand');
@@ -139,7 +142,7 @@ void main() {
       r.startDay();
       expect(r.rewardVisuals.collection.coins, isEmpty);
       expect(r.economy.balance, balance);
-      capture(r, 1);
+      await capture(r, 1);
       advance(r, 3);
       expect(r.rewardVisuals.collection.placed, 1);
       expect(r.rewardVisuals.collection.day, '1:2');
@@ -154,7 +157,7 @@ void main() {
     () async {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..startDay();
-      capture(s, 100);
+      await capture(s, 100);
       await resolveEvolutionFixture(s);
       advance(s, .4);
       final reserved = s.rewardVisuals.collection.coins.length;
@@ -179,7 +182,7 @@ void main() {
     () async {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..startDay();
-      capture(s, 34);
+      await capture(s, 34);
       advance(s, 1);
       final r = GameSession(s.catalog, MemoryStore());
       for (final mutate in <void Function(Map<String, dynamic>)>[
@@ -200,7 +203,7 @@ void main() {
       expect(r.economy.collected, 34);
       expect(r.rewardVisuals.collection.coins, isEmpty);
       r.resume();
-      capture(r, 1);
+      await capture(r, 1);
       advance(r, 3);
       final again = GameSession(s.catalog, MemoryStore())
         ..restore(r.snapshot());
@@ -242,7 +245,7 @@ void main() {
         ),
       );
       final originalRect = tester.getRect(board);
-      capture(s, 34);
+      await capture(s, 34);
       advance(s, 2);
       await tester.pump();
       expect(tester.getRect(board), originalRect);
@@ -300,7 +303,7 @@ void main() {
     () async {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..startDay();
-      capture(s, 4);
+      await capture(s, 4);
       advance(s, .4);
       s.finishDay();
       expect(s.rewardTransitionActive, isTrue);
@@ -333,7 +336,7 @@ void main() {
       final s = GameSession(testCatalog(automaticSpawns: false), MemoryStore())
         ..enterDebug()
         ..startDay();
-      capture(s, 34);
+      await capture(s, 34);
       advance(s, 3);
       s.finishDay();
       expect(s.rewardVisuals.collection.placed, greaterThan(0));

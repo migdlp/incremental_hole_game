@@ -1,3 +1,4 @@
+import 'package:incremental_hole_game/features/feeding/domain/feeding_progress.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
@@ -306,7 +307,9 @@ void main() {
     'capture checkpoints coalesce while disk is busy without losing any reward',
     () async {
       final store = SlowStore();
-      final s = GameSession(catalog, store)..startDay();
+      final s = GameSession(catalog, store)
+        ..feeding = FeedingProgress(startDay: 1, target: 1000000)
+        ..startDay();
       for (var i = 0; i < 100; i++) {
         capture(s);
       }
@@ -321,7 +324,7 @@ void main() {
       final restored = GameSession(catalog, MemoryStore())
         ..restore(store.writes.last);
       expect(restored.economy.collected, 100);
-      expect(restored.feeding.points, BigInt.zero);
+      expect(restored.feeding.points, BigInt.from(100));
       s.dispose();
       restored.dispose();
     },

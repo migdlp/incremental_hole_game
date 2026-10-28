@@ -1,5 +1,15 @@
 # Documentación de Feed the Hole
 
+## BAL-TOOLS — Preparación de tareas (28/10/2026)
+
+[Plan, dependencias y tickets #21–#26](balance/BAL-TOOLS/README.md) ·
+[Inventario y contrato propuesto de métricas](balance/BAL-TOOLS/metricas-propuesta.md).
+01 lista para iniciar; 02–06 bloqueadas por sus dependencias. Hito tras 03:
+BAL01 habilitado para mediciones reales. Entrega documental, sin instrumentación
+ni cambios de gameplay/balance. AUD01 es histórico de 0.23.0+36; base actual
+verificada 0.23.1+37, JSON v17.
+
+
 > **27/10/2026 — Cuotas vigentes:** 25 → 50 → 100 → 500 → 1.000 → 10.000
 > → 100.000 → 1.000.000 → ×10. [Curva y migración](cuotas-progresion-inicial.md).
 > JSON v17; se conservan el plazo de cuatro jornadas y las cartas E03 actuales.

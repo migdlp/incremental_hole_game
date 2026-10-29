@@ -44,8 +44,9 @@ void main() {
       }
       final events = <Object>[];
       for (var i = 0; i < 1200; i++) {
-        if (i % 120 == 0 && b.balls.isNotEmpty)
+        if (i % 120 == 0 && b.balls.isNotEmpty) {
           b.touch(b.balls.first.position, time: i / 60);
+        }
         if (i % 120 < 90) b.drag(Vec(180, 490 - i % 120 * 4.0), time: i / 60);
         if (i % 120 == 90) b.releasePointer(time: i / 60);
         if (i % 300 == 0) b.activateSpecial(SpecialAbility.captureAll);

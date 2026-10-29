@@ -1,0 +1,977 @@
+{
+  "schema_version": "bal_comparison/1.0.0",
+  "warnings": [],
+  "by_scenario": {
+    "capture": {
+      "schema_version": "bal_comparison/1.0.0",
+      "warnings": [],
+      "by_scenario": {},
+      "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+      "before_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "after_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "metrics": {
+        "sessions": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "peak_population": {
+          "before": "19",
+          "after": "19",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_covered": {
+          "before": "0.81390977443609022556390977443609022556390977443609022556390977443609022556390977",
+          "after": "0.81390977443609022556390977443609022556390977443609022556390977443609022556390977",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "quota_defeats": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "instant": {
+          "before": "433",
+          "after": "433",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "emitted": {
+          "before": "532",
+          "after": "532",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "slow_frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "captured_per_session_std_population": {
+          "before": "0.47140452079103168293389624140323269285655729179231602439222657933024415948736901",
+          "after": "0.47140452079103168293389624140323269285655729179231602439222657933024415948736901",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "quotas_completed": {
+          "before": "6",
+          "after": "6",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "captured_per_session_mean": {
+          "before": "144.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "after": "144.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "days": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_collected": {
+          "before": "496",
+          "after": "496",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_earned": {
+          "before": "496",
+          "after": "496",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "ordinary": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "stars_redeemed": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "captured": {
+          "before": "433",
+          "after": "433",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_days_covered": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        }
+      }
+    },
+    "curve-b-hypothesis": {
+      "schema_version": "bal_comparison/1.0.0",
+      "warnings": [],
+      "by_scenario": {},
+      "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+      "before_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "after_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "metrics": {
+        "sessions": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "peak_population": {
+          "before": "12",
+          "after": "12",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_covered": {
+          "before": "0.53731343283582089552238805970149253731343283582089552238805970149253731343283582",
+          "after": "0.53731343283582089552238805970149253731343283582089552238805970149253731343283582",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "quota_defeats": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "instant": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "emitted": {
+          "before": "536",
+          "after": "536",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "slow_frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "captured_per_session_std_population": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "quotas_completed": {
+          "before": "9",
+          "after": "9",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "captured_per_session_mean": {
+          "before": "96",
+          "after": "96",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "days": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_collected": {
+          "before": "288",
+          "after": "288",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_earned": {
+          "before": "288",
+          "after": "288",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "ordinary": {
+          "before": "288",
+          "after": "288",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "stars_redeemed": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "captured": {
+          "before": "288",
+          "after": "288",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_days_covered": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        }
+      }
+    },
+    "economy": {
+      "schema_version": "bal_comparison/1.0.0",
+      "warnings": [],
+      "by_scenario": {},
+      "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+      "before_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "after_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "metrics": {
+        "sessions": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "peak_population": {
+          "before": "11",
+          "after": "11",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_covered": {
+          "before": "0.54545454545454545454545454545454545454545454545454545454545454545454545454545455",
+          "after": "0.54545454545454545454545454545454545454545454545454545454545454545454545454545455",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "quota_defeats": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "instant": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "emitted": {
+          "before": "396",
+          "after": "396",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "slow_frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "captured_per_session_std_population": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "quotas_completed": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "captured_per_session_mean": {
+          "before": "72",
+          "after": "72",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "days": {
+          "before": "18",
+          "after": "18",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_collected": {
+          "before": "432",
+          "after": "432",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_earned": {
+          "before": "432",
+          "after": "432",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "ordinary": {
+          "before": "216",
+          "after": "216",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "stars_redeemed": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "captured": {
+          "before": "216",
+          "after": "216",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_days_covered": {
+          "before": "18",
+          "after": "18",
+          "absolute": "0",
+          "percent": "0"
+        }
+      }
+    },
+    "generation": {
+      "schema_version": "bal_comparison/1.0.0",
+      "warnings": [],
+      "by_scenario": {},
+      "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+      "before_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "after_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "metrics": {
+        "sessions": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "peak_population": {
+          "before": "53",
+          "after": "53",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_covered": {
+          "before": "0.20447284345047923322683706070287539936102236421725239616613418530351437699680511",
+          "after": "0.20447284345047923322683706070287539936102236421725239616613418530351437699680511",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "quota_defeats": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "instant": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "emitted": {
+          "before": "939",
+          "after": "939",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "slow_frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "captured_per_session_std_population": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "quotas_completed": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "captured_per_session_mean": {
+          "before": "64",
+          "after": "64",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "days": {
+          "before": "15",
+          "after": "15",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_collected": {
+          "before": "192",
+          "after": "192",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_earned": {
+          "before": "192",
+          "after": "192",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "ordinary": {
+          "before": "192",
+          "after": "192",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "stars_redeemed": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "captured": {
+          "before": "192",
+          "after": "192",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_days_covered": {
+          "before": "15",
+          "after": "15",
+          "absolute": "0",
+          "percent": "0"
+        }
+      }
+    },
+    "mixed-p02": {
+      "schema_version": "bal_comparison/1.0.0",
+      "warnings": [],
+      "by_scenario": {},
+      "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+      "before_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "after_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "metrics": {
+        "sessions": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "peak_population": {
+          "before": "34",
+          "after": "34",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_covered": {
+          "before": "0.68013468013468013468013468013468013468013468013468013468013468013468013468013468",
+          "after": "0.68013468013468013468013468013468013468013468013468013468013468013468013468013468",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "quota_defeats": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "instant": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "emitted": {
+          "before": "1188",
+          "after": "1188",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "slow_frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "captured_per_session_std_population": {
+          "before": "6.2360956446232356426395812205275821695933663462978782438395757788667252605115651",
+          "after": "6.2360956446232356426395812205275821695933663462978782438395757788667252605115651",
+          "absolute": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "quotas_completed": {
+          "before": "9",
+          "after": "9",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "captured_per_session_mean": {
+          "before": "269.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "after": "269.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "days": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_collected": {
+          "before": "1684",
+          "after": "1684",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_earned": {
+          "before": "1684",
+          "after": "1684",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "ordinary": {
+          "before": "808",
+          "after": "808",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "stars_redeemed": {
+          "before": "10",
+          "after": "10",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "captured": {
+          "before": "808",
+          "after": "808",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_days_covered": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        }
+      }
+    },
+    "new-hand": {
+      "schema_version": "bal_comparison/1.0.0",
+      "warnings": [],
+      "by_scenario": {},
+      "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+      "before_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "after_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "metrics": {
+        "sessions": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "peak_population": {
+          "before": "11",
+          "after": "11",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_covered": {
+          "before": "0.75389408099688473520249221183800623052959501557632398753894080996884735202492212",
+          "after": "0.75389408099688473520249221183800623052959501557632398753894080996884735202492212",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "quota_defeats": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "instant": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "emitted": {
+          "before": "642",
+          "after": "642",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "slow_frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "captured_per_session_std_population": {
+          "before": "0.47140452079103168293389624140323269285655729179231602439222657933024415948736901",
+          "after": "0.47140452079103168293389624140323269285655729179231602439222657933024415948736901",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "quotas_completed": {
+          "before": "6",
+          "after": "6",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "captured_per_session_mean": {
+          "before": "161.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "after": "161.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "percent": "0"
+        },
+        "days": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_collected": {
+          "before": "493",
+          "after": "493",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_earned": {
+          "before": "493",
+          "after": "493",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "ordinary": {
+          "before": "484",
+          "after": "484",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "stars_redeemed": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "captured": {
+          "before": "484",
+          "after": "484",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_days_covered": {
+          "before": "24",
+          "after": "24",
+          "absolute": "0",
+          "percent": "0"
+        }
+      }
+    },
+    "new-idle": {
+      "schema_version": "bal_comparison/1.0.0",
+      "warnings": [],
+      "by_scenario": {},
+      "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+      "before_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "after_commits": [
+        "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+      ],
+      "metrics": {
+        "sessions": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "peak_population": {
+          "before": "22",
+          "after": "22",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "capture_rate_covered": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "quota_defeats": {
+          "before": "3",
+          "after": "3",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "instant": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "emitted": {
+          "before": "264",
+          "after": "264",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "slow_frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "captured_per_session_std_population": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "frames": {
+          "before": null,
+          "after": null,
+          "absolute": null,
+          "percent": null
+        },
+        "quotas_completed": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "captured_per_session_mean": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "days": {
+          "before": "12",
+          "after": "12",
+          "absolute": "0",
+          "percent": "0"
+        },
+        "coins_collected": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "coins_earned": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "ordinary": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "stars_redeemed": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "captured": {
+          "before": "0",
+          "after": "0",
+          "absolute": "0",
+          "percent": null
+        },
+        "capture_rate_days_covered": {
+          "before": "12",
+          "after": "12",
+          "absolute": "0",
+          "percent": "0"
+        }
+      }
+    }
+  },
+  "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+  "before_commits": [
+    "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+  ],
+  "after_commits": [
+    "c5733216a887eb6da3fbb0121d0bd94fc72fb33b"
+  ],
+  "metrics": {
+    "sessions": {
+      "before": "21",
+      "after": "21",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "peak_population": {
+      "before": "53",
+      "after": "53",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "capture_rate_covered": {
+      "before": "0.53835890593729152768512341561040693795863909272848565710473649099399599733155437",
+      "after": "0.53835890593729152768512341561040693795863909272848565710473649099399599733155437",
+      "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "percent": "0"
+    },
+    "quota_defeats": {
+      "before": "15",
+      "after": "15",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "instant": {
+      "before": "433",
+      "after": "433",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "emitted": {
+      "before": "4497",
+      "after": "4497",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "slow_frames": {
+      "before": null,
+      "after": null,
+      "absolute": null,
+      "percent": null
+    },
+    "captured_per_session_std_population": {
+      "before": "80.089915456461366224097637117850982703765448657201317106024045582767614531156265",
+      "after": "80.089915456461366224097637117850982703765448657201317106024045582767614531156265",
+      "absolute": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "percent": "0"
+    },
+    "frames": {
+      "before": null,
+      "after": null,
+      "absolute": null,
+      "percent": null
+    },
+    "quotas_completed": {
+      "before": "36",
+      "after": "36",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "captured_per_session_mean": {
+      "before": "115.28571428571428571428571428571428571428571428571428571428571428571428571428571",
+      "after": "115.28571428571428571428571428571428571428571428571428571428571428571428571428571",
+      "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "percent": "0"
+    },
+    "days": {
+      "before": "141",
+      "after": "141",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "coins_collected": {
+      "before": "3585",
+      "after": "3585",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "coins_earned": {
+      "before": "3585",
+      "after": "3585",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "ordinary": {
+      "before": "1988",
+      "after": "1988",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "stars_redeemed": {
+      "before": "10",
+      "after": "10",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "captured": {
+      "before": "2421",
+      "after": "2421",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "capture_rate_days_covered": {
+      "before": "141",
+      "after": "141",
+      "absolute": "0",
+      "percent": "0"
+    }
+  }
+}

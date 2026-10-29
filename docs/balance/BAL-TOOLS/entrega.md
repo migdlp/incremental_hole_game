@@ -32,7 +32,12 @@ completa500 pruebas verdes; nueve pruebas específicas finales verifican tambié
 recuperación de métricas activas dañadas y hash. Seis escenarios contra176502d
 coinciden byte a byte en fingerprints jugables: generaciones, recompensas, RNG,
 controles, P02 y E03 (`tool/balance_physics_fingerprint.dart`).
-Los archivos de ejemplo se adjuntan después de validar el commit de implementación. Comandos reproducibles en uso.md. Comparar estado de
+Referencias generadas en el commit limpio
+`c5733216a887eb6da3fbb0121d0bd94fc72fb33b`:21 sesiones/141 jornadas;
+63 archivos idénticos en dos ejecuciones completas; validador sin incidencias y
+comparador con diferencias cero y sin advertencias. ZIP, manifiesto SHA-256,
+CSV y resultados en [results/](results/README.md). Dos pruebas Chromium pasaron
+(hash VM/web y cuotas de500 dígitos). Comandos reproducibles en uso.md. Comparar estado de
 Board con observer activado/desactivado incluye RNG, recompensas y serialización
 jugable; el campo de métricas se excluye de esa igualdad.
 

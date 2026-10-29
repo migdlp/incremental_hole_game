@@ -44,6 +44,16 @@ class ComparisonTests(unittest.TestCase):
         with self.assertRaises(ValueError): bal.compare([a], [b])
         self.assertTrue(bal.compare([a], [b], True)['warnings'])
 
+    def test_duplicate_star_payment_and_events_are_detected(self):
+        data = session()
+        before = {'quota': 1, 'nextId': 2, 'pending': [{'id': 1, 'value': 1}]}
+        after = {'quota': 1, 'nextId': 2, 'pending': []}
+        event = {'seq': 1, 'type': 'stars_transaction', 'run_id': '1', 'paid': '1', 'before': before, 'after': after}
+        data['events'] = [event, dict(event, seq=2)]
+        self.assertIn('stars transaction chain', bal.validate(data))
+        data['events'] = [event, event]
+        self.assertIn('duplicate event sequence', bal.validate(data))
+
     def test_missing_fields_not_silently_zero(self):
         data = session(); del data['days'][0]['coins_earned']
         with self.assertRaises(KeyError): bal.validate(data)

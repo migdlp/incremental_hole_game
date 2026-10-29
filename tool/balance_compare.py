@@ -43,7 +43,21 @@ def validate(session):
         if earned != collected + pending:
             issues.append(f"{day['id']}: coins outstanding")
         issues.extend(f"{day['id']}: {x}" for x in b.get('validation', []))
+    sequences = set(); star_states = {}
     for event in session.get('events', []):
+        seq = event['seq']
+        if seq in sequences: issues.append('duplicate event sequence')
+        sequences.add(seq)
+        if event['type'] == 'stars_transaction':
+            before, after = event['before'], event['after']
+            paid = integer(event['paid'])
+            value = lambda ledger: sum(int(p['value']) for p in ledger.get('pending', []))
+            if paid and value(before) - value(after) != paid:
+                issues.append('stars redemption equation')
+            run = event['run_id']
+            if event.get('test_kind') != 'human_debug' and run in star_states and star_states[run] != before:
+                issues.append('stars transaction chain')
+            star_states[run] = after
         if event['type'] == 'normal_purchase':
             if integer(event['balance_before']) - integer(event['cost']) != integer(event['balance_after']):
                 issues.append('purchase wallet equation')
@@ -93,9 +107,26 @@ def aggregate(sessions):
               'capture_rate_days_covered': len(observed),
               'frames': sum(f['frames'] for f in frames) if frames else None,
               'slow_frames': sum(f['slow_frames_gt16667us'] for f in frames) if frames else None}
+    events = [e for s in sessions for e in s.get('events', [])]
+    ledger_value = lambda ledger: sum(int(p['value']) for p in ledger.get('pending', []))
+    result.update({
+        'main_cycles': total('main_cycles'),
+        'blocked_attempts': sum(integer(v) for d in days for k, v in d['board']['counts'].items() if k.startswith('blocked.')),
+        'live_discarded': sum(integer(d.get('discarded_live_at_close', '0')) for d in days),
+        'stars_awarded_potential': sum(max(0, ledger_value(e['after']) - ledger_value(e['before']) + integer(e['paid'])) for e in events if e['type'] == 'stars_transaction'),
+        'stars_discarded': sum(ledger_value(e['pending_stars_discarded']) for e in events if e['type'] == 'run_end'),
+        'normal_spent': sum(integer(e['cost']) for e in events if e['type'] == 'normal_purchase'),
+        'p02_purchases': sum(e['type'] == 'p02_purchase' for e in events),
+        'p02_stars_spent': sum(integer(e['stars_before']) - integer(e['stars_after']) for e in events if e['type'] == 'p02_purchase'),
+        'e03_choices': sum(e['type'] == 'e03_choice' for e in events),
+        'voluntary_prestiges': sum(e['type'] == 'run_end' and e['cause'] == 'voluntary' for e in events),
+        'zero_income_complete_days': sum(d['coins_earned'] == '0' and d['end_reason'] in ['day_complete', 'quota_defeat'] for d in days),
+    })
     per_session = [sum(integer(d['board']['counts'].get('captured', '0')) for d in s['days']) for s in sessions]
     if per_session:
         mean = Decimal(sum(per_session)) / len(per_session)
+        ordered = sorted(per_session); middle = len(ordered) // 2
+        result['captured_per_session_median'] = Decimal(ordered[middle]) if len(ordered) % 2 else Decimal(ordered[middle-1] + ordered[middle]) / 2
         result['captured_per_session_mean'] = mean
         result['captured_per_session_std_population'] = (sum((Decimal(x) - mean)**2 for x in per_session) / len(per_session)).sqrt()
     return result

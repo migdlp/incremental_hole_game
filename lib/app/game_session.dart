@@ -1,3 +1,4 @@
+import '../features/balance/domain/balance_metrics.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -109,6 +110,171 @@ class GameSession extends ChangeNotifier {
   final UpgradeCatalog catalog;
   final SaveStore store;
   final economy = Economy();
+  BalanceLab balanceLab = BalanceLab();
+
+  /// Only the internal runner sets this, before any day. No game UI changes it.
+  String? balanceTestKind;
+  Map<String, dynamic> _balanceContext() => {
+    'run_id': '${meta.runId}',
+    'day': progress.day,
+    'test_kind':
+        balanceTestKind ?? (debugEnabled ? 'human_debug' : 'human_normal'),
+  };
+  late final Map<String, dynamic> balanceRules = {
+    'base': catalog.base,
+    'normal_upgrades': [
+      for (final d in catalog.definitions)
+        {
+          'id': d.id,
+          'levels': [
+            for (final l in d.levels)
+              {
+                'cost': '${l.cost}',
+                'value': l.value,
+                'requirement': l.requirement,
+              },
+          ],
+        },
+    ],
+    'p02': [
+      for (final skill in PermanentSkill.catalogue)
+        {'id': skill.id, 'price': '${skill.price}'},
+    ],
+    'e03': [
+      for (final skill in EvolutionSkill.catalogue)
+        {
+          'id': skill.id,
+          'values': skill.values,
+          'duration': skill.duration,
+          'cooldown': skill.cooldown,
+          'window': skill.window,
+          'threshold': skill.threshold,
+          'period': skill.period,
+        },
+    ],
+    'star_config_base': StarConfig(catalog.base).toJson(),
+  };
+  late final String _balanceRulesHash = configurationHash(balanceRules);
+  Map<String, Object?> get balanceExportContext => {
+    'platform': defaultTargetPlatform.name,
+    'rules': balanceRules,
+    'rules_sha256': _balanceRulesHash,
+    'source_dirty': BalanceLab.commit == 'unknown'
+        ? null
+        : BalanceLab.commit.endsWith('-dirty'),
+    'web': kIsWeb,
+    'build_mode': kReleaseMode
+        ? 'release'
+        : kProfileMode
+        ? 'profile'
+        : 'debug',
+    'wall_time': null,
+    'device_context': null,
+  };
+  void _balanceBegin({bool partial = false}) {
+    if (board == null) return;
+    final config = {
+      'rules_sha256': _balanceRulesHash,
+      'settings': board!.settings.toJson(),
+      'balance_version': board!.settings.balanceVersion,
+      'normal_levels': Map.of(levels),
+      'p02_owned': Map.of(meta.upgrades),
+      'e03_levels': Map.of(meta.evolutionLevels),
+      'quota_rules': {
+        for (final key in ['rules', 'curve', 'initialTarget'])
+          key: feeding.toJson()[key],
+        'quota_days': FeedingProgress.quotaDays,
+      },
+      'star_config': starConfig.toJson(),
+      'tool': selectedTool.name,
+      'gravity_available': gravityAvailable,
+      'debug_tilt': debugGravityTilt,
+      'bubble_gravity': board!.bubbleGravity,
+      'bubble_black_hole': board!.bubbleBlackHole,
+    };
+    balanceLab.active = {
+      'id': '${meta.runId}:${progress.day}:${++balanceLab.sequence}',
+      ..._balanceContext(),
+      'app_version': BalanceLab.version,
+      'source_commit': BalanceLab.commit,
+      'configuration': config,
+      'configuration_sha256': configurationHash(config),
+      'capture_radius_start': board!.captureRadius,
+      'partial_start': partial,
+      'observed_only': true,
+      'coins_balance_start': '${economy.balance}',
+      'quota_start': feeding.toJson(),
+      'stars_start': meta.toJson(),
+      'rng_initial': {
+        'board': board!.randomState,
+        'launcher': board!.launcher.randomState,
+        'session_events': _eventRandomState,
+        'gravity': board!.gravity.toJson(),
+        'black_hole': board!.blackHole.toJson(),
+        'evolution': evolution.toJson(),
+      },
+      'ideal_main_balls_full_day':
+          '${(board!.settings['production_duration'] / board!.settings['spawn_interval'] + 1e-9).floor() * math.max(1, board!.settings['balls_per_spawn'].toInt())}',
+      'pending_extras_start': permanentRun.toJson(),
+      'ideal_assumptions':
+          'full production duration; no blockers, extras, boost or E03 acceleration',
+    };
+  }
+
+  Map<String, dynamic>? balanceCurrent({String endReason = 'in_progress'}) {
+    final b = board;
+    if (b == null || balanceLab.active == null) return null;
+    return {
+      ...balanceLab.active!,
+      'board': b.metrics.report(b.balls.length),
+      'capture_radius_end': b.captureRadius,
+      'coins_earned': '${economy.generated}',
+      'coins_collected': '${economy.collected}',
+      'coins_pending': '${rewards.outstanding}',
+      'coins_balance_end_before_bank': '${economy.balance}',
+      'coins_balance_end':
+          endReason == 'quota_defeat' || endReason == 'voluntary'
+          ? '0'
+          : '${economy.balance + economy.collected}',
+      'quota_end': feeding.toJson(),
+      'quota_completed':
+          '${feeding.completed - ((balanceLab.active!['quota_start'] as Map)['period'] as int) + 1}',
+      'stars_end': meta.toJson(),
+      'e03_end': evolution.toJson(),
+      'discarded_live_at_close': endReason == 'in_progress'
+          ? '0'
+          : '${b.balls.length}',
+      'pending_extras_end': {
+        'echo': permanentRun.pendingEcho,
+        'ram': evolution.pendingRam,
+        'ration': evolution.pendingRation,
+        'golden': permanentRun.goldenAt != null && !permanentRun.goldenSpawned,
+      },
+      'performance': rewardFrameMetrics.toJson(),
+      'end_reason': endReason,
+      'rng_end': {
+        'board': b.randomState,
+        'launcher': b.launcher.randomState,
+        'session_events': _eventRandomState,
+        'evolution': evolution.toJson(),
+      },
+    };
+  }
+
+  void _balanceFinish(String reason) {
+    final row = balanceCurrent(endReason: reason);
+    if (row != null) balanceLab.finish(row);
+  }
+
+  Map<String, String> get balanceExportFiles => {
+    'session.json': balanceLab.json(
+      current: balanceCurrent(),
+      context: balanceExportContext,
+    ),
+    'days.csv': balanceLab.csv,
+    'summary.txt': balanceLab.summary,
+  };
+
   final _debugRewardParameters = <String, double>{};
   RewardVisualConfig get rewardConfig =>
       RewardVisualConfig.fromMap({...catalog.base, ..._debugRewardParameters});
@@ -199,6 +365,12 @@ class GameSession extends ChangeNotifier {
   }
 
   void _changeStars(StarLedger ledger, {int paid = 0}) {
+    balanceLab.event('stars_transaction', {
+      ..._balanceContext(),
+      'paid': '$paid',
+      'before': meta.starLedger.toJson(),
+      'after': ledger.toJson(),
+    });
     meta = meta.withStars(ledger, paid: paid);
     _metaFloor = meta;
     board?.starBubbles?.sync(ledger);
@@ -232,6 +404,12 @@ class GameSession extends ChangeNotifier {
         !evolution.options.contains(id)) {
       return false;
     }
+    balanceLab.event('e03_choice', {
+      ..._balanceContext(),
+      'serial': serial,
+      'options': List.of(evolution.options),
+      'chosen': id,
+    });
     final levels = evolution.resolve(id, expectedSerial: serial);
     meta = meta.withEvolution(levels);
     _metaFloor = meta;
@@ -271,7 +449,14 @@ class GameSession extends ChangeNotifier {
 
   bool buyPermanent(String id) {
     if (!canBuyPermanent(id)) return false;
+    final before = meta.stars;
     meta = meta.purchase(id);
+    balanceLab.event('p02_purchase', {
+      ..._balanceContext(),
+      'id': id,
+      'stars_before': '$before',
+      'stars_after': '${meta.stars}',
+    });
     _metaFloor = meta;
     save();
     feedback.emit(FeedbackEvent.upgrade, gameplay: false);
@@ -325,6 +510,13 @@ class GameSession extends ChangeNotifier {
 
   bool _endRun({required bool voluntary}) {
     if (!canPlayRun) return false;
+    if (running) _balanceFinish(voluntary ? 'voluntary' : 'quota_defeat');
+    balanceLab.event('run_end', {
+      ..._balanceContext(),
+      'cause': voluntary ? 'voluntary' : 'quota_defeat',
+      'discarded_wallet': '${economy.balance}',
+      'pending_stars_discarded': meta.starLedger.toJson(),
+    });
     meta = meta.end(voluntary: voluntary);
     _metaFloor = meta;
     _clearRun();
@@ -345,6 +537,7 @@ class GameSession extends ChangeNotifier {
   bool beginNewRun() {
     if (meta.phase != PrestigePhase.shop || !prestigeReady) return false;
     meta = meta.newRun();
+    balanceLab.event('run_start', {..._balanceContext()});
     _metaFloor = meta;
     _clearRun();
     if (meta.owns(PermanentSkill.inheritance)) economy.balance = 100;
@@ -575,6 +768,16 @@ class GameSession extends ChangeNotifier {
     board!.starBubbles = _newBubbles(board!)..populateImmediate();
     board!.bubbleGravity = debugEnabled && debugBubbleGravity;
     board!.bubbleBlackHole = debugEnabled && debugBubbleBlackHole;
+    board!.metrics.add('debug_injected', board!.balls.length);
+    board!.metrics.peak = board!.balls.length;
+    if (permanentRun.goldenAt != null) {
+      board!.metrics.add('requests.p02_golden');
+    }
+    _balanceBegin();
+    balanceLab.event('quota_active_at_day_start', {
+      ..._balanceContext(),
+      'state': feeding.toJson(),
+    });
     _debugMaxCombo = 1;
     paused = false;
     _accumulator = 0;
@@ -697,6 +900,18 @@ class GameSession extends ChangeNotifier {
     );
     board!.syncHoleGrowth(feeding.growths);
     for (final quota in completedQuotas) {
+      balanceLab.event('quota_completed', {
+        ..._balanceContext(),
+        'quota': '$quota',
+        'growth_ordinal':
+            '${feeding.growths - completedQuotas.length + completedQuotas.indexOf(quota) + 1}',
+        'sim_s': board!.metrics.elapsed,
+      });
+      balanceLab.event('quota_activated', {
+        ..._balanceContext(),
+        'level': '${quota + 1}',
+        'after_batch': feeding.toJson(),
+      });
       feedback.emit(FeedbackEvent.quota);
       // The ledger high-water mark is checked before drawing: no repeated rolls.
       if (quota > meta.starLedger.quota) {
@@ -718,6 +933,11 @@ class GameSession extends ChangeNotifier {
     }
     for (final quota in completedQuotas) {
       evolution.grant(quota);
+      balanceLab.event('e03_offer', {
+        ..._balanceContext(),
+        'quota': '$quota',
+        'evolution': evolution.toJson(),
+      });
     }
     final bubbles = board!.starBubbles;
     if (bubbles != null && bubbles.broken.isNotEmpty) {
@@ -813,7 +1033,7 @@ class GameSession extends ChangeNotifier {
       _debugReports.add(
         DebugDayReport(
           day: progress.day,
-          spawned: board!.spawned,
+          spawned: board!.metrics.emitted,
           captured: board!.captured,
           goldenCaptured: board!.goldenCaptured,
           maxCombo: _debugMaxCombo,
@@ -823,6 +1043,13 @@ class GameSession extends ChangeNotifier {
       );
       if (_debugReports.length > 20) _debugReports.removeAt(0);
     }
+    _balanceFinish(
+      feeding.expiresAt(progress.day)
+          ? 'quota_defeat'
+          : cycle!.remaining > 0
+          ? 'manual_finish'
+          : 'day_complete',
+    );
     // All confirmed captures, quota transitions and P01/P02 events were handled
     // in _step before reaching this boundary. Never give moving balls extra time.
     if (feeding.expiresAt(progress.day)) {
@@ -933,6 +1160,7 @@ class GameSession extends ChangeNotifier {
 
   void pause() {
     if (!running || paused) return;
+    balanceLab.event('pause', {..._balanceContext()});
     paused = true;
     feedback.setPlaying(false);
     _syncMotion();
@@ -1210,7 +1438,17 @@ class GameSession extends ChangeNotifier {
     if (purchaseBlock(definition) != null) return false;
     if (definition.id == 'prestige' && !confirmPrestige) return false;
     final level = levels[definition.id] ?? 0;
+    final before = economy.balance;
     if (!economy.spend(definition.levels[level].cost)) return false;
+    balanceLab.event('normal_purchase', {
+      ..._balanceContext(),
+      'id': definition.id,
+      'level': level + 1,
+      'cost': '${definition.levels[level].cost}',
+      'balance_before': '$before',
+      'balance_after': '${economy.balance}',
+      'applies_from_day': progress.day + 1,
+    });
     if (definition.id == 'prestige') {
       final ended = _endRun(voluntary: true);
       if (ended) feedback.emit(FeedbackEvent.upgrade, gameplay: false);
@@ -1226,47 +1464,54 @@ class GameSession extends ChangeNotifier {
     return true;
   }
 
-  String snapshot() => jsonEncode({
-    'version': 17,
-    'meta': meta.toJson(),
-    'evolution': evolution.toJson(),
-    'permanentRun': permanentRun.toJson(),
-    'feeding': feeding.toJson(),
-    'eventRandom': _eventRandomState,
-    'launcherPose': {
-      'position': (board?.launcher.position ?? _launcherPosition).toJson(),
-      'angle': board?.launcher.angle ?? _launcherAngle,
-    },
-    'grandfathered': _grandfathered,
-    'previousTree': _previousTree,
-    'tool': selectedTool.name,
-    'day': progress.day,
-    'balance': economy.balance,
-    'record': progress.record,
-    'levels': levels,
-    'sound': sound,
-    'haptics': haptics,
-    'effectsVolume': effectsVolume,
-    'visualFeedback': visualFeedback,
-    'last': progress.last?.toJson(),
-    'run': !running
-        ? null
-        : {
-            'remaining': cycle!.remaining,
-            'rewards': rewards.toJson(),
-            'rewardPresentation': rewardVisuals.toJson(),
-            'rewardCounts': _countsFor(
-              economy.generated,
-            ).map((key, value) => MapEntry('$key', value)),
-            'retiredLevels': _retiredRunLevels,
-            'collected': economy.collected,
-            'generated': economy.generated,
-            'settings': board!.settings.toJson(),
-            'balanceVersion': board!.settings.balanceVersion,
-            'board': board!.toJson(),
-            'starBubbles': (board!.starBubbles ?? _newBubbles(board!)).toJson(),
-          },
-  });
+  String snapshot() {
+    final game = jsonEncode({
+      'version': 17,
+      'meta': meta.toJson(),
+      'evolution': evolution.toJson(),
+      'permanentRun': permanentRun.toJson(),
+      'feeding': feeding.toJson(),
+      'eventRandom': _eventRandomState,
+      'launcherPose': {
+        'position': (board?.launcher.position ?? _launcherPosition).toJson(),
+        'angle': board?.launcher.angle ?? _launcherAngle,
+      },
+      'grandfathered': _grandfathered,
+      'previousTree': _previousTree,
+      'tool': selectedTool.name,
+      'day': progress.day,
+      'balance': economy.balance,
+      'record': progress.record,
+      'levels': levels,
+      'sound': sound,
+      'haptics': haptics,
+      'effectsVolume': effectsVolume,
+      'visualFeedback': visualFeedback,
+      'last': progress.last?.toJson(),
+      'run': !running
+          ? null
+          : {
+              'remaining': cycle!.remaining,
+              'rewards': rewards.toJson(),
+              'rewardPresentation': rewardVisuals.toJson(),
+              'rewardCounts': _countsFor(
+                economy.generated,
+              ).map((key, value) => MapEntry('$key', value)),
+              'retiredLevels': _retiredRunLevels,
+              'collected': economy.collected,
+              'generated': economy.generated,
+              'settings': board!.settings.toJson(),
+              'balanceVersion': board!.settings.balanceVersion,
+              'board': board!.toJson(),
+              'starBubbles': (board!.starBubbles ?? _newBubbles(board!))
+                  .toJson(),
+            },
+    });
+    // Historical metrics JSON is cached until a transaction/day changes it.
+    // Appending valid JSON avoids re-encoding hundreds of historical days on
+    // each existing capture checkpoint. No new persistence write is scheduled.
+    return '${game.substring(0, game.length - 1)},"balanceLab":${balanceLab.checkpoint()}}';
+  }
 
   void restore(String raw) {
     final json = jsonDecode(raw) as Map<String, dynamic>;
@@ -1893,6 +2138,15 @@ class GameSession extends ChangeNotifier {
       );
     }
     cycle = restoredCycle;
+    balanceLab = BalanceLab.restore(json['balanceLab']);
+    if (balanceLab.active != null &&
+        (!running ||
+            balanceLab.active!['run_id'] != '${meta.runId}' ||
+            balanceLab.active!['day'] != progress.day)) {
+      balanceLab.active = null;
+      balanceLab.recovered = true;
+    }
+    if (running && balanceLab.active == null) _balanceBegin(partial: true);
     sound = savedSound;
     haptics = savedHaptics;
     effectsVolume = savedVolume.toDouble();

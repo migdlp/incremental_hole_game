@@ -1,0 +1,22 @@
+{
+  "schema_version": "bal_human_conditions/1.0.0",
+  "session_id": "replace-with-local-id",
+  "conditions": [],
+  "app_version": "0.24.0+38",
+  "source_commit": null,
+  "device_model": null,
+  "android_version": null,
+  "refresh_rate_hz": null,
+  "build_mode": null,
+  "battery_saver": null,
+  "thermal_observation": null,
+  "player_experience": null,
+  "starting_p02": [],
+  "starting_e03": {},
+  "debug_intervention": false,
+  "strategy": null,
+  "stopped_reason": null,
+  "performance_observations": null,
+  "export_files": [],
+  "notes": null
+}

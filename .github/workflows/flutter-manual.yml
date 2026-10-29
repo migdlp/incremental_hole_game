@@ -119,6 +119,9 @@ jobs:
           TEST_TARGET: ${{ inputs.test_target || 'test' }}
         run: flutter test --no-pub "$TEST_TARGET" 2>&1 | tee "$RUNNER_TEMP/flutter-logs/test.log"
 
+      - name: Verificar comparador de balance (sin aprobar cambios de balance)
+        run: python3 -m unittest discover -s test/tool -v 2>&1 | tee "$RUNNER_TEMP/flutter-logs/balance-compare-test.log"
+
       - name: Medir simulación E03
         if: ${{ inputs.validation_only && hashFiles('tool/benchmark_evolution.dart') != '' }}
         run: |
@@ -127,7 +130,8 @@ jobs:
 
       - name: Compilar APK de depuración
         if: ${{ !inputs.validation_only }}
-        run: flutter build apk --debug --no-pub 2>&1 | tee "$RUNNER_TEMP/flutter-logs/build-apk.log"
+        run: |
+          flutter build apk --debug --no-pub --dart-define="SOURCE_COMMIT=$GITHUB_SHA" --dart-define="APP_VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" 2>&1 | tee "$RUNNER_TEMP/flutter-logs/build-apk.log"
 
       - name: Verificar firma y preparar descarga
         if: ${{ !inputs.validation_only }}

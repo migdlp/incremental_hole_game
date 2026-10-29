@@ -261,9 +261,9 @@ class _DayScreenState extends State<DayScreen> {
         );
       }
     }
-    if (widget.session.debugEnabled &&
-        widget.session.running &&
-        !widget.session.paused) {
+    if (widget.session.running &&
+        !widget.session.paused &&
+        !widget.session.evolutionBlocked) {
       widget.session.rewardFrameMetrics.add(timings);
     }
   }

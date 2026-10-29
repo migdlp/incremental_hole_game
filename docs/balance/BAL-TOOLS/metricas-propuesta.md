@@ -1,7 +1,8 @@
 # BAL-TOOLS-01 — Borrador del contrato de métricas
 
-Estado: **propuesta técnica para revisar y cerrar en BAL-TOOLS-01**. No es un
-esquema implementado ni acredita mediciones humanas. Fecha: 28/10/2026.
+Estado: **borrador histórico del28/10/2026**. El contrato normativo implementado
+es [contrato-v1.md](contrato-v1.md); algunas ampliaciones aquí propuestas no se
+miden en v1. Este borrador no acredita mediciones humanas.
 Fuente actual inspeccionada: `720c4a0fd4f0c1460fcf334c08fa5cddd8ee555b`.
 
 ## Identidad y vocabulario

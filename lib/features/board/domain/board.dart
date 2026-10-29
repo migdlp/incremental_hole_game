@@ -1,3 +1,4 @@
+import '../../balance/domain/balance_metrics.dart';
 import 'dart:math' as math;
 import '../../prestige/domain/star_bubbles.dart';
 import '../../evolution/domain/evolution.dart';
@@ -70,6 +71,7 @@ class Board {
   Board(
     this.settings, {
     this.randomState = 42,
+    bool metricsEnabled = true,
     this.tool = BallTool.hand,
     bool? combosEnabled,
     this.gravitySupported = false,
@@ -80,7 +82,8 @@ class Board {
     Vec? launcherPosition,
     double? launcherAngle,
     AbsorptionEffects? absorption,
-  }) : absorption = absorption ?? AbsorptionEffects(),
+  }) : metrics = BoardMetrics(enabled: metricsEnabled),
+       absorption = absorption ?? AbsorptionEffects(),
        specials = SpecialAbilities(settings),
        combo = CaptureCombo(
          enabled:
@@ -276,10 +279,12 @@ class Board {
   }
 
   bool activateSpecial(SpecialAbility ability) {
+    metrics.add('ability_attempts.${ability.name}');
     if (coinOnly || (ability == SpecialAbility.captureAll && balls.isEmpty)) {
       return false;
     }
     if (!specials.activate(ability)) return false;
+    metrics.add('ability_activations.${ability.name}');
     if (ability == SpecialAbility.captureAll) {
       _captureAllIds.addAll(balls.map((ball) => ball.id));
     }
@@ -453,6 +458,7 @@ class Board {
     if (!canUse(value)) return;
     releasePointer(cancel: true);
     tool = value;
+    metrics.add('tool_selected.${value.name}');
   }
 
   int nextId = 1;
@@ -460,6 +466,7 @@ class Board {
   int captured = 0;
   int normalFood = 0, instantFood = 0;
   int spawned = 0;
+  BoardMetrics metrics;
   int goldenCaptured = 0;
   double spawnClock = 0;
   double get radius => settings['ball_radius'];
@@ -475,6 +482,7 @@ class Board {
   }
 
   int releasePointer({bool cancel = false, double? time}) {
+    metrics.add(cancel ? 'input_cancelled_releases' : 'input_releases');
     var collected = 0;
     final velocity = cancel ? Vec.zero : _releaseVelocity(time ?? _clock);
     if (_gravityTap &&
@@ -551,6 +559,7 @@ class Board {
   }
 
   int touch(Vec point, {double? time}) {
+    metrics.add('input_touches');
     if (target != null) return 0;
     paddle = point.inside(0);
     target = paddle;
@@ -649,6 +658,7 @@ class Board {
   }
 
   int drag(Vec point, {double? time}) {
+    metrics.add('input_drags');
     if (target == null) return 0;
     final destination = point.inside(0);
     if ((destination - _downPoint!).length > 8) _dragged = true;
@@ -727,16 +737,31 @@ class Board {
     }
   }
 
-  bool _emitMain(Vec spawn, {bool forceGolden = false, bool heavy = false}) {
+  bool _emitMain(
+    Vec spawn, {
+    bool forceGolden = false,
+    bool heavy = false,
+    String source = 'main',
+    bool probe = false,
+  }) {
+    metrics.add(probe ? 'outlet_probes' : 'attempts.$source');
+    String? reason;
+    // Preserve the original short-circuit order and evaluate geometry once.
     if (balls.length >=
-            (forceGolden ? settings['ball_limit'] : ordinaryBallLimit) ||
-        (starBubbles?.bodies.any(
-              (b) =>
-                  (b.position - spawn).length < radius + starBubbles!.radius(b),
-            ) ??
-            false) ||
-        launcher.contact(spawn, radius) != null ||
-        balls.any((b) => (b.position - spawn).length <= radius * 2.2)) {
+        (forceGolden ? settings['ball_limit'] : ordinaryBallLimit)) {
+      reason = 'population';
+    } else if (starBubbles?.bodies.any(
+          (b) => (b.position - spawn).length < radius + starBubbles!.radius(b),
+        ) ??
+        false) {
+      reason = 'bubble';
+    } else if (launcher.contact(spawn, radius) != null) {
+      reason = 'launcher';
+    } else if (balls.any((b) => (b.position - spawn).length <= radius * 2.2)) {
+      reason = 'ball';
+    }
+    if (reason != null) {
+      metrics.add(probe ? 'probe_blocked.$reason' : 'blocked.$source.$reason');
       return false;
     }
     spawned++;
@@ -752,10 +777,17 @@ class Board {
         heavy: heavy,
       ),
     );
+    metrics.birth(balls.last.id, source, balls.length);
+    if (!probe) metrics.add('successful.$source');
     return true;
   }
 
-  bool _emitExtra({bool forceGolden = false, bool heavy = false}) {
+  bool _emitExtra({
+    bool forceGolden = false,
+    bool heavy = false,
+    required String source,
+  }) {
+    metrics.add('attempts.$source');
     // Same factory and probabilities as ordinary production. Probe a small
     // deterministic grid at its outlet; no overlapping bodies or off-board spawn.
     for (var row = 0; row < 3; row++) {
@@ -763,15 +795,24 @@ class Board {
         final point =
             generator +
             Vec((column - 3) * radius * 2.4, -30 - row * radius * 2.4);
-        if (_emitMain(point, forceGolden: forceGolden, heavy: heavy)) {
+        if (_emitMain(
+          point,
+          forceGolden: forceGolden,
+          heavy: heavy,
+          source: source,
+          probe: true,
+        )) {
+          metrics.add('successful.$source');
           return true;
         }
       }
     }
+    metrics.add('blocked.$source.outlet_exhausted');
     return false;
   }
 
   BoardEvents update(double dt, {required bool producing}) {
+    metrics.advance(dt, captureRadius, tool.name, balls.length);
     var collected = 0;
     for (final impact in batImpacts) {
       impact.age += dt;
@@ -796,9 +837,26 @@ class Board {
       specials.advance(dt);
       while (spawnClock + 1e-9 >= settings['spawn_interval']) {
         spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
+        metrics.add('main_cycles');
+        final echoBefore = permanentRun?.pendingEcho ?? 0;
+        final ramBefore = evolution?.pendingRam ?? 0;
+        final rationBefore = evolution?.pendingRation ?? 0;
         permanentRun?.cycle(echo: productionEcho);
         evolution?.cycle();
+        metrics.add(
+          'requests.p02_echo',
+          (permanentRun?.pendingEcho ?? 0) - echoBefore,
+        );
+        metrics.add(
+          'requests.e03_ram',
+          (evolution?.pendingRam ?? 0) - ramBefore,
+        );
+        metrics.add(
+          'requests.e03_ration',
+          (evolution?.pendingRation ?? 0) - rationBefore,
+        );
         final count = math.max(1, settings['balls_per_spawn'].toInt());
+        metrics.add('requests.main', count);
         final center = generator + Vec((random() - .5) * 42, -30);
         for (var index = 0; index < count; index++) {
           _emitMain(
@@ -812,12 +870,15 @@ class Board {
         if (!permanent.goldenSpawned &&
             permanent.goldenAt != null &&
             permanent.elapsed + 1e-9 >= permanent.goldenAt!) {
-          permanent.goldenSpawned = _emitExtra(forceGolden: true);
+          permanent.goldenSpawned = _emitExtra(
+            forceGolden: true,
+            source: 'p02_golden',
+          );
         }
         // Retry blocked extras safely, without turning them into normal cycles.
         var emitted = 0;
         while (permanent.pendingEcho > 0 && emitted < 5) {
-          if (!_emitExtra()) break;
+          if (!_emitExtra(source: 'p02_echo')) break;
           permanent.pendingEcho--;
           emitted++;
         }
@@ -825,8 +886,12 @@ class Board {
     }
     if (producing && !coinOnly && evolution != null) {
       final evo = evolution!;
-      if (evo.pendingRam > 0 && _emitExtra(heavy: true)) evo.pendingRam--;
-      if (evo.pendingRation > 0 && _emitExtra()) evo.pendingRation--;
+      if (evo.pendingRam > 0 && _emitExtra(heavy: true, source: 'e03_ram')) {
+        evo.pendingRam--;
+      }
+      if (evo.pendingRation > 0 && _emitExtra(source: 'e03_ration')) {
+        evo.pendingRation--;
+      }
     }
     if (paddle != null && target != null) {
       final start = paddle!;
@@ -888,6 +953,15 @@ class Board {
             settings['ball_value'].toInt() * combo.capture(golden: ball.golden);
         final reward = evolution?.capture(baseReward) ?? baseReward;
         evolutionBonus += reward - baseReward;
+        metrics.capture(
+          ball.id,
+          instant: _captureAllIds.contains(ball.id),
+          golden: ball.golden,
+          heavy: ball.heavy,
+          base: settings['ball_value'].toInt(),
+          combo: baseReward,
+          reward: reward,
+        );
         if (_captureAllIds.contains(ball.id)) {
           instantFeeding += reward;
         } else {
@@ -1168,7 +1242,12 @@ class Board {
     while (launcher.clock + 1e-9 >= launcher.interval) {
       launcher.clock = math.max(0.0, launcher.clock - launcher.interval);
       launcher.attempts++;
-      if (balls.length >= ordinaryBallLimit) continue;
+      metrics.add('requests.launcher');
+      metrics.add('attempts.launcher');
+      if (balls.length >= ordinaryBallLimit) {
+        metrics.add('blocked.launcher.population');
+        continue;
+      }
       final exit =
           launcher.muzzle +
           launcher.axis * (launcher.barrelRadius + radius + .5);
@@ -1194,6 +1273,7 @@ class Board {
                       radius + batThickness ||
                   segmentDistance(batSegment.b, launcher.muzzle, exit) <
                       radius + batThickness))) {
+        metrics.add('blocked.launcher.geometry');
         continue;
       }
       if (starBubbles?.bodies.any(
@@ -1202,6 +1282,7 @@ class Board {
                 radius + starBubbles!.radius(b),
           ) ??
           false) {
+        metrics.add('blocked.launcher.bubble');
         continue;
       }
       final blockers = balls
@@ -1220,6 +1301,7 @@ class Board {
                     .limit(maximumSpeed);
           }
         }
+        metrics.add('blocked.launcher.ball');
         continue; // Consume the attempt; never queue a delayed volley.
       }
       balls.add(
@@ -1232,6 +1314,8 @@ class Board {
       );
       spawned++;
       launcher.shots++;
+      metrics.add('successful.launcher');
+      metrics.birth(balls.last.id, 'launcher', balls.length);
       launcher.flash = .15;
     }
   }
@@ -1700,6 +1784,7 @@ class Board {
     'random': randomState,
     'nextId': nextId,
     'captured': captured,
+    'balanceMetrics': metrics.toJson(),
     if (evolutionBonus > 0) 'evolutionBonus': evolutionBonus,
     'goldenCaptured': goldenCaptured,
     'combo': combo.toJson(),
@@ -1952,6 +2037,12 @@ class Board {
       }
       board.enableAutomaticCoins();
     }
+    board.metrics = BoardMetrics.restore(
+      json['balanceMetrics'],
+      liveIds: board.balls.map((b) => b.id).toList(),
+      captured: board.captured,
+    );
+    board.spawned = board.metrics.emitted;
     return board;
   }
 }

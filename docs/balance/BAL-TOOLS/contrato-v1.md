@@ -35,7 +35,7 @@ Cada jornada contiene:
 | `discarded_live_at_close` | cuerpos vivos que se retirarán al cerrar; no sumarlos otra vez a `board.live` |
 | `performance` | FrameTiming: frames/slow_frames >16667us, máximo jornada, p95/p99 de ventana última de hasta240; null sin muestras |
 
-La metadata de exportación identifica plataforma y modo de build, catálogo
+La metadata de exportación identifica plataforma objetivo Flutter y modo de build, catálogo
 completo (precios normales, reglas P02/E03/estrellas), su digest y estado dirty
 cuando se conoce. La versión de cada día histórico se conserva; el exportador
 puede ser posterior. El runner añade escenario, semillas, estrategia v1, dt,
@@ -89,6 +89,9 @@ No guardar posiciones/trazas ilimitadas. `normalFood/instantFood` siguen siendo
 monedas históricas y no se usan como contadores de bolas.
 
 ## Eventos y coherencia
+
+Los snapshots de evento/inicio/fin se copian profundamente al observarlos: las
+ventanas mutables de E03 no pueden cambiar la historia.
 
 Eventos con secuencia persistida: cuotas completadas/activadas (orden de cuotas,
 ordinal de crecimiento, estado final del lote), cuota activa al comenzar día,

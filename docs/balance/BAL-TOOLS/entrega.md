@@ -33,7 +33,7 @@ recuperación de métricas activas dañadas y hash. Seis escenarios contra176502
 coinciden byte a byte en fingerprints jugables: generaciones, recompensas, RNG,
 controles, P02 y E03 (`tool/balance_physics_fingerprint.dart`).
 Referencias generadas en el commit limpio
-`c5733216a887eb6da3fbb0121d0bd94fc72fb33b`:21 sesiones/141 jornadas;
+`e9ae413494fab80f3f8599e0b384679e50dae5ad`:21 sesiones/141 jornadas;
 63 archivos idénticos en dos ejecuciones completas; validador sin incidencias y
 comparador con diferencias cero y sin advertencias. ZIP, manifiesto SHA-256,
 CSV y resultados en [results/](results/README.md). Dos pruebas Chromium pasaron
@@ -65,3 +65,17 @@ benchmark mide Board AOT, no coste de guardar historial/render/compartir.
   de salir/cerrar. La sesión normal sí persiste entre jornadas/tienda/restauración.
 - No cambios de curva/precios/valores P02/E03, nuevos poderes, ventilador/embudo,
   narrativa, estrellas ni correcciones AUD-F01/AUD-F03.
+
+## Revisión final de integridad
+
+Los registros copian las estructuras mutables de E03 al observarlas. Prueba
+específica verifica que avanzar/limpiar una ventana posterior no modifica una
+jornada/evento guardado. CSV y resumen identifican también esquema, configuración
+y RNG; los CSV se han leído con Python csv/JSON independiente. Se añade fixture
+exportado de cinco jornadas, una restauración y dos partidas: reexportar dos veces
+conserva exactamente el estado.
+
+La primera pipeline40796598843 se detuvo en estilo de una herramienta añadida;
+se corrigió. Las ejecuciones intermedias se sustituyeron por la revisión final,
+no son APK de entrega. Pipeline final40798127327, fuente e9ae413. El estado final,
+pruebas CI y enlace APK se documentan al terminarla.

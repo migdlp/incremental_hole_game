@@ -18,6 +18,18 @@
     "capture_rate_days_covered": "141",
     "frames": null,
     "slow_frames": null,
+    "main_cycles": "3832",
+    "blocked_attempts": "123",
+    "live_discarded": "2076",
+    "stars_awarded_potential": "63",
+    "stars_discarded": "18",
+    "normal_spent": "2557",
+    "p02_purchases": "0",
+    "p02_stars_spent": "0",
+    "e03_choices": "36",
+    "voluntary_prestiges": "0",
+    "zero_income_complete_days": "12",
+    "captured_per_session_median": "96",
     "captured_per_session_mean": "115.28571428571428571428571428571428571428571428571428571428571428571428571428571",
     "captured_per_session_std_population": "80.089915456461366224097637117850982703765448657201317106024045582767614531156265"
   }

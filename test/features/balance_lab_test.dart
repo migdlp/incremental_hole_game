@@ -178,6 +178,26 @@ void main() {
       expect(lab.droppedEvents, 10);
     },
   );
+  test('historical metrics freeze nested mutable gameplay snapshots', () {
+    final lab = BalanceLab();
+    final captures = [1.0];
+    lab.active = {'captures': captures};
+    final start = lab.active;
+    lab.event('observed', {'captures': captures});
+    lab.finish({
+      'id': 'day',
+      'captures': captures,
+      'test_kind': 'human_normal',
+      'coins_earned': '0',
+      'board': BoardMetrics().report(0),
+    });
+    final checkpoint = lab.checkpoint();
+    captures.clear();
+    expect(start!['captures'], [1.0]);
+    expect(lab.events.single['captures'], [1.0]);
+    expect(lab.days.single['captures'], [1.0]);
+    expect(lab.checkpoint(), checkpoint);
+  });
   test(
     'corrupt optional active metrics cannot invalidate playable save',
     () async {

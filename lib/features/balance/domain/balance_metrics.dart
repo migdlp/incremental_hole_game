@@ -208,7 +208,7 @@ class BalanceLab {
   String? _encoded;
   Map<String, dynamic>? get active => _active;
   set active(Map<String, dynamic>? value) {
-    _active = value;
+    _active = value == null ? null : _freeze(value);
     _encoded = null;
   }
 
@@ -216,6 +216,8 @@ class BalanceLab {
   int sequence = 0, droppedDays = 0, droppedEvents = 0;
   bool recovered = false;
   int _dayBytes = 0, _eventBytes = 0;
+  static Map<String, dynamic> _freeze(Map<String, dynamic> value) =>
+      jsonDecode(jsonEncode(value)) as Map<String, dynamic>;
   static int _bytes(Object? value) => utf8.encode(jsonEncode(value)).length;
   void _trim() {
     // Keep histories under 4 MiB, reserving 1 MiB for an active row/metadata.
@@ -233,7 +235,7 @@ class BalanceLab {
 
   void event(String type, Map<String, dynamic> data) {
     _encoded = null;
-    events.add({'seq': ++sequence, 'type': type, ...data});
+    events.add(_freeze({'seq': ++sequence, 'type': type, ...data}));
     _eventBytes += _bytes(events.last);
     if (events.length > maxEvents) {
       _eventBytes -= _bytes(events.removeAt(0));
@@ -244,8 +246,9 @@ class BalanceLab {
 
   void finish(Map<String, dynamic> row) {
     if (days.any((d) => d['id'] == row['id'])) return;
-    days.add(row);
-    _dayBytes += _bytes(row);
+    final frozen = _freeze(row);
+    days.add(frozen);
+    _dayBytes += _bytes(frozen);
     if (days.length > maxDays) {
       _dayBytes -= _bytes(days.removeAt(0));
       droppedDays++;

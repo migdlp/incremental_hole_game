@@ -79,3 +79,27 @@ La primera pipeline40796598843 se detuvo en estilo de una herramienta añadida;
 se corrigió. Las ejecuciones intermedias se sustituyeron por la revisión final,
 no son APK de entrega. Pipeline final40798127327, fuente e9ae413. El estado final,
 pruebas CI y enlace APK se documentan al terminarla.
+
+## APK y verificación CI final
+
+[Pipeline40798127327](https://github.com/migdlp/incremental_hole_game/actions/runs/40798127327)
+correcta sobree9ae413: **502 pruebas Flutter y7 pruebas Python**, análisis y formato
+correctos, APK compilada y firma verificada. [Descarga0.24.0+38 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/40798127327/artifacts/12864484189).
+Paquete/versionCode/certificado y enlaces en `results/apk-0.24.0+38.json`.
+Las publicaciones posteriores ae9ae413 solo añaden documentación/evidencias.
+
+**Instalación de pruebas:** el certificado debug difiere del APK0.23.1+37
+anteriormente entregado. Usar otro perfil Android o dispositivo para probar esta
+build, conservando la instalación actual y su partida. El formato lógico sigue
+v17, pero la firma diferente impide actualizar directamente esa instalación.
+Los archivos de métricas son informes de análisis; no constituyen un backup
+importable de la partida. No se ha instalado ni desinstalado nada en un teléfono.
+
+Se adjunta también experimento pareado de curvas con tres semillas, misma mano,
+mismas prioridades de compra y horizonte, y6 sesiones. `controlled-curves-*`
+contiene comparación/exportaciones/configuración: hipótesis B aislada, sin cambiar
+los valores aprobados. No permite inferir experiencia humana ni aprobar balance.
+
+Pendiente humano/dispositivo:04, smoke de compartir/instalación de03, rendimiento
+Android y aceptación final de06 con referencias humanas. El presupuesto CPU
+provisional no se declara certificado; ver las muestras AOT y sus límites.

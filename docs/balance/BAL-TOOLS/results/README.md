@@ -47,3 +47,10 @@ el test de repetición solo comprueba determinismo. Referencia humana pendiente0
 - `scenarios/controlled-curves.json` (en carpeta hermana):experimento pareado de
   tres semillas con misma interacción, compras y horizonte; solo cambia curva de
   cuotas. Es hipótesis sintética, no autoriza valores en el juego ni sustituye04.
+
+- `controlled-curves-4762617.zip`, manifiesto y comparación JSON/CSV/Markdown:
+  seis sesiones pareadas con **misma política de compra**, tres semillas ysolo
+  curva distinta. Resultado sintético de hipótesis, no aprobación de diseño.
+- `apk-0.24.0+38.json`:CI correcta,502+7 pruebas, artefacto y firma. APK de pruebas
+  con firma distinta de la build37 entregada; seguir las condiciones de instalación
+  de entrega.md para conservar la instalación/partida anterior.

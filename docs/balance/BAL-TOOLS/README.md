@@ -26,15 +26,16 @@ balance ni cierra04/06: los datos incluidos son sintéticos, etiquetados como ta
 Los tests y builds concretos, commit de fuente y limitaciones constan en entrega.
 No cerrar04 con un bot ni06 solo con referencias sintéticas.
 
-## Mensaje para AG01
+## Disponibilidad para AG01
 
-La exportación del laboratorio está preparada para comenzar mediciones reales de
+[APK de pruebas0.24.0+38](https://github.com/migdlp/incremental_hole_game/actions/runs/40798127327/artifacts/12864484189) disponible;
+la exportación del laboratorio está preparada para comenzar mediciones reales de
 BAL01. Compartir los archivos desde DEBUG al terminar cada sesión, con la plantilla
 de condiciones. Los primeros ejemplos proceden del runner automático y sirven
 para revisar el formato, no para proponer cuotas definitivas. Revisar los datos
 humanos antes de decidir precios, estrellas o progresión.
 
-## Base verificada
+## Base histórica verificada antes de implementar
 
 - Rama activa del producto: `build/apk-0.6.0+13`.
 - HEAD de producto inspeccionado: `720c4a0fd4f0c1460fcf334c08fa5cddd8ee555b`.

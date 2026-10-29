@@ -348,6 +348,10 @@ class BalanceLab {
     'end_reason',
     'partial',
     'capture_rate',
+    'schema_version',
+    'seed_set_json',
+    'build_mode',
+    'platform',
   ];
   static List<Object?> _cells(Map<String, dynamic> d) {
     final b = d['board'] as Map, c = b['counts'] as Map;
@@ -378,6 +382,10 @@ class BalanceLab {
       full && emitted > BigInt.zero
           ? captured.toDouble() / emitted.toDouble()
           : null,
+      schema,
+      jsonEncode(d['rng_initial']),
+      d['build_mode'],
+      d['platform'],
     ];
   }
 
@@ -403,9 +411,13 @@ class BalanceLab {
       values[2] += BigInt.parse('${c['captured'] ?? 0}');
       values[3] += BigInt.parse('${d['coins_earned']}');
     }
+    final last = days.isEmpty ? null : days.last;
+    final rng = last?['rng_initial'] as Map?;
     return '${days.length} jornadas retenidas\n'
         '${groups.entries.map((e) => '${e.key}: ${e.value[0]} jornadas · ${e.value[1]} emitidas · ${e.value[2]} capturadas · ${e.value[3]} monedas').join('\n')}\n'
         'Esquema $schema · exportador $version / $commit\n'
+        'Última jornada: ${last?['id'] ?? 'ninguna'} · config ${last?['configuration_sha256'] ?? 'unknown'}\n'
+        'RNG inicial última jornada: Board ${rng?['board'] ?? 'unknown'}, Launcher ${rng?['launcher'] ?? 'unknown'}, sesión ${rng?['session_events'] ?? 'unknown'}. Estados completos en JSON/CSV.\n'
         'Descartadas por retención: $droppedDays jornadas, $droppedEvents eventos.\n'
         'Cobertura recuperada/legacy: $recovered. Ver validación por jornada.\n'
         'Los contactos y usos observados no prueban efectos causales.';

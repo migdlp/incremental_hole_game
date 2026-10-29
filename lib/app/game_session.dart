@@ -197,6 +197,12 @@ class GameSession extends ChangeNotifier {
       ..._balanceContext(),
       'app_version': BalanceLab.version,
       'source_commit': BalanceLab.commit,
+      'build_mode': kReleaseMode
+          ? 'release'
+          : kProfileMode
+          ? 'profile'
+          : 'debug',
+      'platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
       'configuration': config,
       'configuration_sha256': configurationHash(config),
       'capture_radius_start': board!.captureRadius,

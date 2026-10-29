@@ -1,3 +1,4 @@
+import '../../balance/presentation/balance_export_panel.dart';
 import '../../feedback/domain/feedback_config.dart';
 import '../../feedback/domain/feedback_controller.dart';
 import '../../feeding/presentation/feeding_summary.dart';
@@ -525,6 +526,12 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                       session.exitDebug();
                     },
                     child: const Text('Salir de depuración'),
+                  ),
+                  ExpansionTile(
+                    key: const ValueKey('debug-balance-tools'),
+                    title: const Text('Laboratorio de balance'),
+                    tilePadding: EdgeInsets.zero,
+                    children: [BalanceExportPanel(session: session)],
                   ),
                   ExpansionTile(
                     key: const ValueKey('debug-gravity-tools'),

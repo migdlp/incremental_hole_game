@@ -26,6 +26,27 @@ class RewardFrameMetrics {
     }
   }
 
+  Map<String, Object?> toJson() {
+    int? percentile(List<int> source, double p) {
+      if (count == 0) return null;
+      final values = source.take(count).toList()..sort();
+      return values[((count - 1) * p).round()];
+    }
+
+    return {
+      'frames': totalFrames,
+      'slow_frames_gt16667us': slowFrames,
+      'max_total_us': count == 0 ? null : maximumTotal,
+      'window_samples': count,
+      'window_capacity': 240,
+      'build_p95_us': percentile(_build, .95),
+      'raster_p95_us': percentile(_raster, .95),
+      'total_p95_us': percentile(_total, .95),
+      'total_p99_us': percentile(_total, .99),
+      'gpu_hardware_us': null,
+    };
+  }
+
   String get report {
     if (count == 0) return 'Sin muestras de frames todavía.';
     double percentile(List<int> source, [double p = .95]) {

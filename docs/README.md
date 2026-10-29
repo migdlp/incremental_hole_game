@@ -1,14 +1,14 @@
 # Documentación de Feed the Hole
 
-## BAL-TOOLS — Preparación de tareas (28/10/2026)
+## BAL-TOOLS — Laboratorio de balance (29/10/2026)
 
-[Plan, dependencias y tickets #21–#26](balance/BAL-TOOLS/README.md) ·
-[Inventario y contrato propuesto de métricas](balance/BAL-TOOLS/metricas-propuesta.md).
-01 lista para iniciar; 02–06 bloqueadas por sus dependencias. Hito tras 03:
-BAL01 habilitado para mediciones reales. Entrega documental, sin instrumentación
-ni cambios de gameplay/balance. AUD01 es histórico de 0.23.0+36; base actual
-verificada 0.23.1+37, JSON v17.
-
+[Estado y tickets #21–#26](balance/BAL-TOOLS/README.md) ·
+[Contrato v1](balance/BAL-TOOLS/contrato-v1.md) · [Uso](balance/BAL-TOOLS/uso.md) ·
+[Entrega y evidencias](balance/BAL-TOOLS/entrega.md).
+Build instrumentada0.24.0+38, JSON v17/balance20. Exportación local DEBUG,
+runner de GameSession y comparador disponibles. BAL01 puede iniciar recogida;
+04 y referencia humana de06 pendientes de testers Android. Sin cambios de
+cuotas/precios/físicas. AUD01 sigue siendo histórico de0.23.0+36.
 
 > **27/10/2026 — Cuotas vigentes:** 25 → 50 → 100 → 500 → 1.000 → 10.000
 > → 100.000 → 1.000.000 → ×10. [Curva y migración](cuotas-progresion-inicial.md).

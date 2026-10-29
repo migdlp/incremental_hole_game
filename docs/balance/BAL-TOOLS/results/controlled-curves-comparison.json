@@ -1,0 +1,197 @@
+{
+  "schema_version": "bal_comparison/1.0.0",
+  "warnings": [
+    "Effective configurations or reached horizons differ; inspect per-day snapshots.",
+    "Intentional experiment: scenario or seeds changed; not a strict regression comparison."
+  ],
+  "by_scenario": {},
+  "interpretation": "Observed differences; no automatic approval or gameplay changes.",
+  "before_commits": [
+    "47626176fd8332be670129fb3f3a87604df7a5a5"
+  ],
+  "after_commits": [
+    "47626176fd8332be670129fb3f3a87604df7a5a5"
+  ],
+  "metrics": {
+    "stars_awarded_potential": {
+      "before": "6",
+      "after": "36",
+      "absolute": "30",
+      "percent": "500"
+    },
+    "coins_earned": {
+      "before": "493",
+      "after": "496",
+      "absolute": "3",
+      "percent": "0.60851926977687626774847870182555780933062880324543610547667342799188640973630832"
+    },
+    "captured_per_session_std_population": {
+      "before": "0.47140452079103168293389624140323269285655729179231602439222657933024415948736901",
+      "after": "0.47140452079103168293389624140323269285655729179231602439222657933024415948736901",
+      "absolute": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "percent": "0"
+    },
+    "frames": {
+      "before": null,
+      "after": null,
+      "absolute": null,
+      "percent": null
+    },
+    "quota_defeats": {
+      "before": "3",
+      "after": "0",
+      "absolute": "-3",
+      "percent": "-100"
+    },
+    "p02_purchases": {
+      "before": "0",
+      "after": "0",
+      "absolute": "0",
+      "percent": null
+    },
+    "captured": {
+      "before": "484",
+      "after": "487",
+      "absolute": "3",
+      "percent": "0.61983471074380165289256198347107438016528925619834710743801652892561983471074380"
+    },
+    "stars_redeemed": {
+      "before": "0",
+      "after": "15",
+      "absolute": "15",
+      "percent": null
+    },
+    "slow_frames": {
+      "before": null,
+      "after": null,
+      "absolute": null,
+      "percent": null
+    },
+    "live_discarded": {
+      "before": "158",
+      "after": "157",
+      "absolute": "-1",
+      "percent": "-0.63291139240506329113924050632911392405063291139240506329113924050632911392405063"
+    },
+    "stars_discarded": {
+      "before": "6",
+      "after": "0",
+      "absolute": "-6",
+      "percent": "-100"
+    },
+    "main_cycles": {
+      "before": "640",
+      "after": "641",
+      "absolute": "1",
+      "percent": "0.15625"
+    },
+    "e03_choices": {
+      "before": "6",
+      "after": "12",
+      "absolute": "6",
+      "percent": "100"
+    },
+    "normal_spent": {
+      "before": "369",
+      "after": "449",
+      "absolute": "80",
+      "percent": "21.680216802168021680216802168021680216802168021680216802168021680216802168021680"
+    },
+    "captured_per_session_median": {
+      "before": "161",
+      "after": "162",
+      "absolute": "1",
+      "percent": "0.62111801242236024844720496894409937888198757763975155279503105590062111801242236"
+    },
+    "voluntary_prestiges": {
+      "before": "0",
+      "after": "0",
+      "absolute": "0",
+      "percent": null
+    },
+    "emitted": {
+      "before": "642",
+      "after": "644",
+      "absolute": "2",
+      "percent": "0.31152647975077881619937694704049844236760124610591900311526479750778816199376947"
+    },
+    "ordinary": {
+      "before": "484",
+      "after": "487",
+      "absolute": "3",
+      "percent": "0.61983471074380165289256198347107438016528925619834710743801652892561983471074380"
+    },
+    "capture_rate_days_covered": {
+      "before": "24",
+      "after": "24",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "coins_collected": {
+      "before": "493",
+      "after": "496",
+      "absolute": "3",
+      "percent": "0.60851926977687626774847870182555780933062880324543610547667342799188640973630832"
+    },
+    "p02_stars_spent": {
+      "before": "0",
+      "after": "0",
+      "absolute": "0",
+      "percent": null
+    },
+    "zero_income_complete_days": {
+      "before": "0",
+      "after": "0",
+      "absolute": "0",
+      "percent": null
+    },
+    "blocked_attempts": {
+      "before": "0",
+      "after": "0",
+      "absolute": "0",
+      "percent": null
+    },
+    "capture_rate_covered": {
+      "before": "0.75389408099688473520249221183800623052959501557632398753894080996884735202492212",
+      "after": "0.75621118012422360248447204968944099378881987577639751552795031055900621118012422",
+      "absolute": "0.00231709912733886728197983785143476325922486020007352798900950059015885915520210",
+      "percent": "0.30735075201478363533699502078948719264924798521636466300497921051280735075201409"
+    },
+    "quotas_completed": {
+      "before": "6",
+      "after": "12",
+      "absolute": "6",
+      "percent": "100"
+    },
+    "captured_per_session_mean": {
+      "before": "161.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+      "after": "162.33333333333333333333333333333333333333333333333333333333333333333333333333333",
+      "absolute": "1.00000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "percent": "0.61983471074380165289256198347107438016528925619834710743801652892561983471074381"
+    },
+    "instant": {
+      "before": "0",
+      "after": "0",
+      "absolute": "0",
+      "percent": null
+    },
+    "days": {
+      "before": "24",
+      "after": "24",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "peak_population": {
+      "before": "11",
+      "after": "11",
+      "absolute": "0",
+      "percent": "0"
+    },
+    "sessions": {
+      "before": "3",
+      "after": "3",
+      "absolute": "0",
+      "percent": "0"
+    }
+  }
+}

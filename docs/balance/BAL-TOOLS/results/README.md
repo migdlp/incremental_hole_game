@@ -40,3 +40,10 @@ el test de repetición solo comprueba determinismo. Referencia humana pendiente0
   e9ae413: incluye campos de trazabilidad CSV y copia de snapshots E03. En la
   revisión inicial algunas listas de ventanas E03 podían cambiar tras observarse;
   no usar sus snapshots históricos E03 para inferir efectos temporales.
+
+- `historical-comparison-c573321-e9ae413.json/csv/md`:dos commits compatibles,
+  mismos21 experimentos. Indicadores observados idénticos. No compara ventanas E03
+  de la primera revisión, cuya limitación se documenta arriba.
+- `scenarios/controlled-curves.json` (en carpeta hermana):experimento pareado de
+  tres semillas con misma interacción, compras y horizonte; solo cambia curva de
+  cuotas. Es hipótesis sintética, no autoriza valores en el juego ni sustituye04.

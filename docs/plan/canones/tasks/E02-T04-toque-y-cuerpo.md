@@ -2,7 +2,7 @@
 id: E02-T04
 title: Toque prioritario y cuerpo sólido del cañón
 epic: E02
-status: todo
+status: done
 depends_on: [E02-T02]
 requirements: [RF-05, RF-08, RF-09, RF-21, RF-22, RF-25, RF-26, RNF-01, RNF-05]
 size: M
@@ -79,8 +79,8 @@ Tocar a ≤ 28 unidades del centro de un cañón activo durante la producción l
 
 ## Criterios de aceptación
 
-- [ ] Las seis pruebas nuevas y la suite completa pasan.
-- [ ] El bucle de obstáculo no crea listas ni mapas (RNF-05).
+- [x] Las seis pruebas nuevas y la suite completa pasan.
+- [x] El bucle de obstáculo no crea listas ni mapas (RNF-05).
 
 ## Verificación
 
@@ -98,3 +98,8 @@ flutter test
 ## Si te bloqueas
 
 - Si `Ball` no permite crear una bola agarrada en la prueba de RF-09 sin tocarla, agárrala con `board.touch` sobre su posición y avanza un paso antes de lanzar la otra.
+
+## Notas de implementación
+
+- En `board.dart`: `_cannonGesture`, disparo prioritario en `touch`, `drag` sin cobro ni agarre durante el gesto, reinicio en `releasePointer`, imán desactivado durante el gesto y rebote en el cuerpo del cañón dentro del subpaso (sin listas ni mapas nuevos).
+- Ocho pruebas nuevas en `cannon_test.dart`: las seis pedidas más los casos límite de 28/29 unidades y de arrastre que empieza en el cañón. Total: 145 pruebas. Sin desviaciones.

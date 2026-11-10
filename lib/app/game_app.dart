@@ -263,6 +263,9 @@ class _DayScreenState extends State<DayScreen> {
                         ? 'Jornada finalizada'
                         : closing
                         ? 'ÚLTIMOS SEGUNDOS · Recoge las monedas'
+                        : session.economy.generated == 0 &&
+                              session.board!.balls.isEmpty
+                        ? 'Toca el cañón para disparar bolas'
                         : session.economy.generated > 0
                         ? (session.board!.sweepEnabled
                               ? 'Toca o desliza para recoger las monedas'
@@ -519,7 +522,7 @@ class NightScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Agarra una bola, llévala al hoyo y recoge sus monedas.',
+                  'Dispara con el cañón, lleva las bolas al hoyo y recoge sus monedas.',
                   style: TextStyle(color: Color(0xffb5bdc9), height: 1.4),
                 ),
               ],

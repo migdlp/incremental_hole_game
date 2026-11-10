@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import '../../../core/vec.dart';
 import '../../automation/domain/robot.dart';
+import 'cannon.dart';
 import 'tool.dart';
 import 'coin_denomination.dart';
 import '../../upgrades/domain/catalog.dart';
@@ -40,10 +41,10 @@ class BoardEvents {
 class Board {
   Board(this.settings, {this.randomState = 42, this.tool = BallTool.hand}) {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
+    cannons.add(Cannon(cannonSlots[0]));
   }
   static const width = 360.0, height = 560.0;
   static const hole = Vec(180, 412);
-  static const generator = Vec(180, 60);
   final DaySettings settings;
   final balls = <Ball>[];
   final coins = <Coin>[];
@@ -82,7 +83,7 @@ class Board {
   bool get broomUnlocked => settings['broom_unlocked'] > 0;
   Vec _grabOffset = Vec.zero;
   Vec? _downPoint, _directionAnchor;
-  bool _dragged = false, _heldDuringGesture = false;
+  bool _dragged = false, _heldDuringGesture = false, _cannonGesture = false;
   double _clock = 0;
   final _samples = <({double time, Vec point})>[];
   double toolAngle = math.pi / 2, _desiredAngle = math.pi / 2;
@@ -109,7 +110,8 @@ class Board {
   int randomState;
   int captured = 0;
   int goldenCaptured = 0;
-  double spawnClock = 0;
+  final cannons = <Cannon>[];
+  double cannonClock = 0;
   double get radius => settings['ball_radius'];
   int get pending =>
       coins.fold(0, (sum, coin) => sum + coin.value) +
@@ -139,6 +141,7 @@ class Board {
     _manualBall = null;
     _slippedBalls.clear();
     holdingBroom = false;
+    _cannonGesture = false;
     paddle = null;
     target = null;
     _downPoint = null;
@@ -192,6 +195,13 @@ class Board {
     _heldDuringGesture = false;
     _samples.clear();
     _sample(paddle!, time ?? _clock);
+    final cannon = coinOnly ? null : cannonAt(paddle!);
+    if (cannon != null) {
+      _cannonGesture = true;
+      _heldDuringGesture = true; // release must not count as a coin tap
+      fireCannon(cannon);
+      return 0;
+    }
     _desiredAngle = toolAngle;
     final onCoin = coins.any(
       (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
@@ -234,6 +244,10 @@ class Board {
 
   int drag(Vec point, {double? time}) {
     if (target == null) return 0;
+    if (_cannonGesture) {
+      target = point.inside(0);
+      return 0;
+    }
     final destination = point.inside(0);
     if ((destination - _downPoint!).length > 8) _dragged = true;
     final direction = destination - _directionAnchor!;
@@ -313,6 +327,61 @@ class Board {
     }
   }
 
+  double cannonAngle(Cannon cannon) => cannon.angleAt(
+    cannonClock,
+    arcDegrees: settings['g${cannon.slot.index}_arc'],
+    period: settings['cannon_sweep_period'],
+  );
+
+  bool cannonAutomatic(Cannon cannon) =>
+      settings['g${cannon.slot.index}_automatic'] > 0;
+
+  /// Manual shot. Returns false when it is not allowed or the muzzle is blocked.
+  bool fireCannon(Cannon cannon) {
+    if (coinOnly || cannon.cooldown > 0) return false;
+    return _shoot(cannon);
+  }
+
+  Cannon? cannonAt(Vec point) {
+    Cannon? nearest;
+    var best = Cannon.touchRadius;
+    for (final cannon in cannons) {
+      final distance = (point - cannon.slot.position).length;
+      if (distance <= best) {
+        best = distance;
+        nearest = cannon;
+      }
+    }
+    return nearest;
+  }
+
+  bool _shoot(Cannon cannon) {
+    final angle = cannonAngle(cannon);
+    final muzzle = cannon.muzzle(angle);
+    if (balls.length >= settings['ball_limit'] ||
+        balls.any((b) => (b.position - muzzle).length < radius * 2.2)) {
+      cannon.blockedFlash = Cannon.blockedSeconds;
+      return false;
+    }
+    balls.add(
+      Ball(
+        nextId++,
+        muzzle,
+        Vec(math.cos(angle), math.sin(angle)) * settings['cannon_shot_speed'],
+        golden: random() < .01,
+      ),
+    );
+    cannon.cooldown = cannonAutomatic(cannon)
+        ? math.min(
+            settings['cannon_cooldown'],
+            settings['g${cannon.slot.index}_auto_interval'],
+          )
+        : settings['cannon_cooldown'];
+    cannon.autoClock = 0;
+    cannon.recoil = Cannon.recoilSeconds;
+    return true;
+  }
+
   BoardEvents update(double dt, {required bool producing}) {
     var collected = 0;
     _flushCoins();
@@ -320,31 +389,21 @@ class Board {
       coin.landing = math.max(0, coin.landing - dt);
     }
     if (producing && !coinOnly) {
-      spawnClock += dt;
-      if (spawnClock + 1e-9 >= settings['spawn_interval']) {
-        spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
-        final count = math.max(1, settings['balls_per_spawn'].toInt());
-        final center = generator + Vec((random() - .5) * 42, 30);
-        for (var index = 0; index < count; index++) {
-          final spawn =
-              center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0);
-          if (balls.length < settings['ball_limit'] &&
-              balls.every((b) => (b.position - spawn).length > radius * 2.2)) {
-            balls.add(
-              Ball(
-                nextId++,
-                spawn,
-                Vec((random() - .5) * 36, 85),
-                golden: random() < .01,
-              ),
-            );
-          }
+      cannonClock += dt;
+      for (final cannon in cannons) {
+        cannon.tick(dt);
+        if (!cannonAutomatic(cannon)) continue;
+        cannon.autoClock += dt;
+        if (cannon.autoClock + 1e-9 >=
+                settings['g${cannon.slot.index}_auto_interval'] &&
+            cannon.cooldown <= 0) {
+          _shoot(cannon); // on failure autoClock is kept, so it retries
         }
       }
     }
     if (paddle != null && target != null) {
       final start = paddle!;
-      if (canCollectCoins && settings['magnet_radius'] > 0) {
+      if (!_cannonGesture && canCollectCoins && settings['magnet_radius'] > 0) {
         for (final coin in coins) {
           if (coin.landing <= 0 &&
               (coin.position - start).length <= settings['magnet_radius']) {
@@ -398,6 +457,25 @@ class Board {
           );
         }
         ball.position = bounded;
+        for (final cannon in cannons) {
+          final d = ball.position - cannon.slot.position;
+          final minDistance = Cannon.bodyRadius + radius;
+          if (d.length >= minDistance) continue;
+          final n = d.length < .0001
+              ? Vec(
+                  math.cos(cannon.slot.baseAngle),
+                  math.sin(cannon.slot.baseAngle),
+                )
+              : d.unit;
+          ball.position = (cannon.slot.position + n * minDistance).inside(
+            radius,
+          );
+          final vn = ball.velocity.x * n.x + ball.velocity.y * n.y;
+          if (vn < 0) {
+            ball.velocity =
+                ball.velocity - n * (vn * (1 + settings['wall_restitution']));
+          }
+        }
       }
       _collide();
       _contactBroom(Vec.zero, 0);
@@ -619,7 +697,8 @@ class Board {
     'nextId': nextId,
     'captured': captured,
     'goldenCaptured': goldenCaptured,
-    'spawnClock': spawnClock,
+    'cannonClock': cannonClock,
+    'cannons': [for (final c in cannons) c.toJson()],
     'broomPosition': broomPosition.toJson(),
     'broomAngle': toolAngle,
     'balls': balls
@@ -662,7 +741,17 @@ class Board {
       throw const FormatException('Capturas doradas inválidas');
     }
     board.goldenCaptured = goldenCaptured;
-    board.spawnClock = (json['spawnClock'] as num).toDouble();
+    board.cannonClock = (json['cannonClock'] as num).toDouble();
+    final savedCannons = json['cannons'] as List;
+    if (savedCannons.length != board.cannons.length) {
+      throw const FormatException('Tablero guardado inválido');
+    }
+    for (var i = 0; i < savedCannons.length; i++) {
+      board.cannons[i] = Cannon.fromJson(
+        board.cannons[i].slot,
+        savedCannons[i] as Map<String, dynamic>,
+      );
+    }
     for (final row in json['balls'] as List) {
       final golden = row['golden'] ?? false;
       if (golden is! bool) throw const FormatException('Bola dorada inválida');
@@ -703,8 +792,9 @@ class Board {
               c.landing < 0 ||
               c.landing > .2,
         ) ||
-        !board.spawnClock.isFinite ||
-        board.spawnClock < 0 ||
+        !board.cannonClock.isFinite ||
+        board.cannonClock < 0 ||
+        board.cannons.any((c) => c.cooldown > settings['cannon_cooldown']) ||
         board.captured < 0 ||
         board.goldenCaptured < 0 ||
         board.goldenCaptured > board.captured) {

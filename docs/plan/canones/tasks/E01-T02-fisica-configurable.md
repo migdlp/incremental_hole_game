@@ -50,7 +50,7 @@ La velocidad máxima de las bolas libres, el rebote en paredes y la velocidad m�
       }
       ```
       Mantén el resto del cuerpo (limpiar `_heldBalls`, `_manualBall`, `_slippedBalls` y los contadores).
-4. En `_collide()`, sustituye los cuatro `.limit(380)` por `.limit(settings['max_ball_speed'])`.
+4. En `_collide()`, sustituye los `.limit(380)` (en el código real eran **dos**, no cuatro: corrección posterior del plan) por `.limit(settings['max_ball_speed'])`.
 5. Crea `test/features/physics_test.dart` con estas pruebas (usa `testCatalog().settings({})` y `Board(settings)`, y crea las bolas con `board.balls.add(Ball(board.nextId++, pos, vel))`):
    - `fast free ball crosses the hole without being captured`: bola en `Board.hole - Vec(40, 0)` con velocidad `Vec(400, 0)`. Tras 10 pasos de `board.update(1 / 60, producing: false)`, `board.captured == 0`.
    - `slow free ball inside the hole is captured`: bola en `Board.hole` con `Vec.zero`. Tras un paso, `board.captured == 1`.

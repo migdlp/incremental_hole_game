@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/features/day_cycle/domain/day_cycle.dart';
@@ -19,61 +18,23 @@ void main() {
     advance(session, 600);
     expect(session.phase, DayPhase.closing);
     expect(session.cycle!.remaining, closeTo(3, .001));
-    expect(session.board!.balls.length, 15);
+    expect(session.board!.balls, isEmpty); // no taps, no shots
     advance(session, 179);
     expect(session.running, isTrue);
-    expect(session.board!.balls.length, 15); // no production during closing
+    expect(session.board!.balls, isEmpty);
     advance(session, 1);
     expect(session.running, isFalse);
   });
 
-  test(
-    'generation starts at 1.5 balls per second and every upgrade is faster',
-    () {
-      for (var level = 0; level <= 5; level++) {
-        final levels = {'generator': level};
-        final current = catalog.settings(levels);
-        expect(
-          current['spawn_interval'],
-          closeTo(1 / (1.5 * pow(1.25, level)), 1e-9),
-        );
-        expect(current['production_duration'], 10);
-        if (level == 0) {
-          expect(1 / current['spawn_interval'], closeTo(1.5, 1e-9));
-        }
-        if (level > 0) {
-          expect(
-            current['spawn_interval'],
-            lessThan(
-              catalog.settings({'generator': level - 1})['spawn_interval'],
-            ),
-          );
-        }
-      }
-      for (var level = 1; level <= 3; level++) {
-        expect(
-          catalog.settings({
-            'generator': 1,
-            'duration': level,
-          })['production_duration'],
-          10 + level * 3,
-        );
-      }
-    },
-  );
-
-  test(
-    'first ball waits two thirds of a second, then three spawn every two seconds',
-    () {
-      final session = GameSession(catalog, MemoryStore())..startDay();
-      advance(session, 39);
-      expect(session.board!.balls, isEmpty);
-      advance(session, 1);
-      expect(session.board!.balls.length, 1);
-      advance(session, 80);
-      expect(session.board!.balls.length, 3);
-    },
-  );
+  test('every duration level adds three seconds', () {
+    expect(catalog.settings({})['production_duration'], 10);
+    for (var level = 1; level <= 3; level++) {
+      expect(
+        catalog.settings({'duration': level})['production_duration'],
+        10 + level * 3,
+      );
+    }
+  });
 
   test(
     'unknown balance and unpurchased configuration are rejected atomically',

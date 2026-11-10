@@ -394,7 +394,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               : widget.session.catalog.base[node.definition.effect] ?? 0)
         : node.definition.levels[node.level - 2].value;
     final next = node.upgrade.value;
-    final isInterval = node.definition.effect == 'spawn_interval';
+    final isInterval = node.definition.effect.endsWith('_interval');
     final percentage = current > 0
         ? ((isInterval ? current / next : next / current) - 1) * 100
         : null;
@@ -541,7 +541,6 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 }
 
 Color _typeColor(SkillNode node) => switch (node.definition.id) {
-  'generator' || 'double_spawn' => const Color(0xff22c55e),
   'reward' => const Color(0xffeab308),
   'sweep' ||
   'collection' ||
@@ -562,8 +561,6 @@ const _icons = {
   'collection': Icons.touch_app_outlined,
   'magnet': Icons.sensors,
   'attraction': Icons.radar,
-  'double_spawn': Icons.filter_2_outlined,
-  'generator': Icons.speed,
   'reward': Icons.toll_outlined,
   'duration': Icons.more_time,
   'robot': Icons.smart_toy_outlined,
@@ -582,8 +579,6 @@ String _description(SkillNode node) => switch (node.definition.id) {
   'collection' => 'Recoge varias monedas cercanas en cada pulsación, sin imán',
   'magnet' => 'Atrae monedas cerca del dedo solo con la mano vacía',
   'attraction' => 'Amplía el alcance del imán de monedas',
-  'double_spawn' => 'Emite dos bolas a la vez sin cambiar la cadencia',
-  'generator' => 'El generador lanza bolas más rápido',
   'reward' => 'Obtén más monedas por cada bola',
   'duration' => 'Aumenta el tiempo de producción del día',
   'robot' => 'Un robot empuja bolas hacia el hoyo',
@@ -601,15 +596,9 @@ TextSpan _summary(SkillNode node) {
     'paddle' => ('La escoba abarca ', number(value * 4), ' u.'),
     'collection' => ('Recoge monedas a ', number(value), ' u de distancia.'),
     'magnet' || 'attraction' => ('El imán alcanza ', number(value), ' u.'),
-    'generator' => ('Genera ', number(1 / value), ' bolas/s.'),
     'reward' => ('Cada bola da ', number(value), '.'),
     'duration' => ('Produce durante ', number(value), ' s.'),
     'robot_speed' => ('El robot avanza a ', number(value), ' u/s.'),
-    'double_spawn' => (
-      'El generador emite ',
-      number(value),
-      ' bolas a la vez.',
-    ),
     'robot' => ('', '1 robot', ' empuja bolas al hoyo.'),
     'broom' => ('', 'Desbloquea la escoba', ' para empujar bolas.'),
     'broom_v' => ('', 'Transforma la escoba en V', ' para reunir bolas.'),
@@ -645,7 +634,6 @@ String _value(SkillNode node, double value) {
     'unlock' => value > 0 ? 'Desbloqueada' : 'Sin desbloquear',
     'seconds' => '${number(value)} s',
     'coins' => '${number(value)} monedas/bola',
-    'balls_per_spawn' => '${number(value)} bolas/emisión',
     'balls' => '${number(value)} bolas',
     'robots' => '${number(value)} robot',
     'broom_width' => '${number(value * 4)} u',

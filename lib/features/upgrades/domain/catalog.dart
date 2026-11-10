@@ -45,8 +45,6 @@ class UpgradeCatalog {
     'collection': ['Área de recogida', 'Recolección'],
     'magnet': ['Imán', 'Recolección'],
     'attraction': ['Alcance del imán', 'Recolección'],
-    'double_spawn': ['Doble emisión', 'Producción'],
-    'generator': ['Generador rápido', 'Producción'],
     'reward': ['Mayor recompensa', 'Valor'],
     'duration': ['Día más largo', 'Tiempo'],
     'robot': ['Robot ayudante', 'Automatización'],
@@ -110,7 +108,6 @@ class UpgradeCatalog {
     for (final key in [
       'production_duration',
       'closing_duration',
-      'spawn_interval',
       'ball_value',
       'paddle_radius',
       'collection_radius',
@@ -121,10 +118,13 @@ class UpgradeCatalog {
       'coin_pile_limit',
       'particle_limit',
       'hand_capacity',
-      'balls_per_spawn',
       'max_ball_speed',
       'wall_restitution',
       'hole_capture_speed',
+      'cannon_cooldown',
+      'cannon_sweep_period',
+      'cannon_shot_speed',
+      'g1_arc',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }

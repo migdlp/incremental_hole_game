@@ -57,7 +57,7 @@ void main() {
       expect(ball.velocity.length, 0);
       final position = ball.position;
       final robot = board.robot.position;
-      final spawn = board.spawnClock;
+      final spawn = board.cannonClock;
       final captured = board.captured;
       final generated = session.economy.generated;
       session.touch(position);
@@ -66,7 +66,7 @@ void main() {
       session.release();
       expect(ball.position, position);
       expect(board.robot.position, robot);
-      expect(board.spawnClock, spawn);
+      expect(board.cannonClock, spawn);
       expect(board.captured, captured);
       expect(session.economy.generated, generated);
     },
@@ -140,7 +140,7 @@ void main() {
       board.enterClosing();
       final events = board.update(1, producing: true);
       expect(events.captured, 0);
-      expect(board.spawnClock, 0);
+      expect(board.cannonClock, 0);
       expect(board.balls, hasLength(1));
     },
   );

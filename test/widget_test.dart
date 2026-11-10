@@ -40,6 +40,31 @@ void main() {
       session.dispose();
     },
   );
+  testWidgets('first hint tells the player to tap the cannon', (tester) async {
+    final session = GameSession(testCatalog(), MemoryStore());
+    await tester.pumpWidget(GardenApp(session: session));
+    await tester.tap(find.text('Comenzar día 1'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Toca el cañón para disparar bolas'), findsOneWidget);
+    expect(find.text('GENERADOR'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+    await session.pendingWrites;
+    session.dispose();
+  });
+  testWidgets('intro text mentions the cannon', (tester) async {
+    final session = GameSession(testCatalog(), MemoryStore());
+    await tester.pumpWidget(GardenApp(session: session));
+    expect(
+      find.text(
+        'Dispara con el cañón, lleva las bolas al hoyo y recoge sus monedas.',
+      ),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
+    await session.pendingWrites;
+    session.dispose();
+  });
   testWidgets(
     'real pointer distinguishes tapping coins from dragging over them',
     (tester) async {

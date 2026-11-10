@@ -8,6 +8,7 @@ Se registran entregas y cambios observables. La versión actual del paquete se d
 - Mejoras por cañón: Automático, Ritmo automático y Puntería. Se pueden comprar los cañones 2, 3 y 4 en huecos fijos. El árbol pasa a 28 tipos y 74 nodos, con un lienzo de 864 × 1120. «Día más largo» exige «Cañón 1 · Ritmo automático I». Precios provisionales.
 - El hoyo solo captura bolas libres a ≤ 140 u/s (las agarradas se capturan por posición). Rebote en paredes de 0,55 y velocidad máxima de bola de 600 u/s, configurables en `docs/balance.csv`.
 - Guardado v6 sin migraciones: las partidas anteriores se descartan sin aviso y se borran el código de migración y los balances congelados. Balance 7.
+- Código `52e3fab523df0b97e76054e3ad3f86d633d4e4d6` (merge de la PR #32). [Pipeline manual 42779376477](https://github.com/migdlp/incremental_hole_game/actions/runs/42779376477) correcta: formato, análisis, 169 pruebas, compilación del APK y firma v2 verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/42779376477/artifacts/13746015999), disponible hasta el 24 de noviembre de 2026.
 - 169 pruebas correctas, análisis sin incidencias y compilación web. Validación en Android físico y ajuste de precios jugando pendientes. Las PR son #28 a #31 y la PR 5 de cierre.
 
 ## UI, monedas y economía CF-09 a CF-15 — 2026-10-19 · 0.5.0+10

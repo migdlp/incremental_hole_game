@@ -312,4 +312,89 @@ void main() {
       expect(board.coins.length, 1);
     });
   });
+
+  group('automatic fire', () {
+    Board automatic({double? interval}) {
+      final settings = catalog.settings({});
+      settings.values['g1_automatic'] = 1;
+      if (interval != null) settings.values['g1_auto_interval'] = interval;
+      return Board(settings);
+    }
+
+    void run(Board board, double seconds) {
+      for (var i = 0; i < (seconds * 60).round(); i++) {
+        board.update(1 / 60, producing: true);
+      }
+    }
+
+    test('automatic cannon fires every interval', () {
+      final board = automatic();
+      run(board, 3);
+      expect(board.balls.length, 2);
+    });
+
+    test('manual tap resets the automatic clock', () {
+      final board = automatic();
+      run(board, 1);
+      expect(board.fireCannon(board.cannons.first), isTrue);
+      expect(board.balls.length, 1);
+      var shotAt = -1.0;
+      for (var step = 0; step < 300 && shotAt < 0; step++) {
+        final before = board.balls.length;
+        board.update(1 / 60, producing: true);
+        if (board.balls.length > before) shotAt = 1 + (step + 1) / 60;
+      }
+      expect(shotAt, inInclusiveRange(2.48, 2.52));
+    });
+
+    test('automatic shot sets the shared cooldown', () {
+      double cooldownAfterFirstShot(Board board) {
+        while (board.balls.isEmpty) {
+          board.update(1 / 60, producing: true);
+        }
+        return board.cannons.first.cooldown;
+      }
+
+      expect(cooldownAfterFirstShot(automatic()), closeTo(1, 1e-9));
+      expect(
+        cooldownAfterFirstShot(automatic(interval: .8)),
+        closeTo(.8, 1e-9),
+      );
+    });
+
+    test('blocked automatic shot retries without losing its turn', () {
+      final board = automatic();
+      run(board, 1.45);
+      final cannon = board.cannons.first;
+      final muzzle = cannon.muzzle(board.cannonAngle(cannon));
+      final blocker = Ball(board.nextId++, muzzle, Vec.zero);
+      board.balls.add(blocker);
+      // The sweep keeps moving, so pin the aim by freezing the clock reading.
+      for (var i = 0; i < 9; i++) {
+        blocker.position = cannon.muzzle(board.cannonAngle(cannon));
+        blocker.velocity = Vec.zero;
+        board.update(1 / 60, producing: true);
+      }
+      expect(board.balls.length, 1);
+      expect(cannon.autoClock, greaterThanOrEqualTo(1.5));
+      board.balls.clear();
+      board.update(1 / 60, producing: true);
+      expect(board.balls.length, 1);
+    });
+
+    test('manual cannon never fires on its own', () {
+      final board = Board(catalog.settings({}));
+      run(board, 5);
+      expect(board.balls, isEmpty);
+    });
+
+    test('automatic clock freezes during closing', () {
+      final board = automatic();
+      run(board, .5);
+      board.enterClosing();
+      final clock = board.cannons.first.autoClock;
+      board.update(1, producing: true);
+      expect(board.cannons.first.autoClock, clock);
+    });
+  });
 }

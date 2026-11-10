@@ -2,7 +2,7 @@
 id: E03-T01
 title: Disparo automático con recarga compartida
 epic: E03
-status: todo
+status: done
 depends_on: [E02-T05]
 requirements: [RF-10, RF-23, RF-28]
 size: M
@@ -45,7 +45,7 @@ Un cañón con `settings['gN_automatic'] > 0` dispara solo cada `settings['gN_au
 
 ## Criterios de aceptación
 
-- [ ] Las seis pruebas nuevas y la suite completa pasan.
+- [x] Las seis pruebas nuevas y la suite completa pasan.
 
 ## Verificación
 
@@ -62,3 +62,8 @@ flutter test
 ## Si te bloqueas
 
 - Si el disparo automático cae un paso antes o después por error de coma flotante, conserva el `+ 1e-9` de la comparación y ajusta solo la tolerancia de la prueba a un paso (1/60 s).
+
+## Notas de implementación
+
+- Añadida la base `g1_auto_interval` (1,5) al CSV y a `fromCsv`. El bucle de `update` y `_shoot` de E02-T02 ya coincidían con la arquitectura (incluido el `min(...)` de la recarga), así que `board.dart` no cambia.
+- Seis pruebas nuevas en `cannon_test.dart`. En la del bloqueo se recoloca la bola tapadora en la boca en cada paso, porque el cañón sigue oscilando. Total: 153 pruebas. Sin desviaciones.

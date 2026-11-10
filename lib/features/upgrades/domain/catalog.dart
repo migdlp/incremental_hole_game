@@ -125,6 +125,7 @@ class UpgradeCatalog {
       'cannon_sweep_period',
       'cannon_shot_speed',
       'g1_arc',
+      'g1_auto_interval',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }

@@ -17,7 +17,7 @@ void main() {
   test(
     'map has six initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(53));
+      expect(tree.nodes, hasLength(74));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -137,6 +137,37 @@ void main() {
       session.board!.cannonAutomatic(session.board!.cannons.first),
       isTrue,
     );
+  });
+
+  test('cannon unlocks follow G2 then G3 then G4', () {
+    UpgradeDefinition find(String id) =>
+        catalog.definitions.firstWhere((d) => d.id == id);
+    expect(find('g2_unlock').levels.first.requirements, ['g1_auto:1']);
+    expect(find('g3_unlock').levels.first.requirements, ['g2_unlock:1']);
+    expect(find('g4_unlock').levels.first.requirements, ['g3_unlock:1']);
+  });
+
+  test('per cannon upgrades are independent', () {
+    final settings = catalog.settings({
+      'hand': 1,
+      'g1_auto': 1,
+      'g1_aim': 1,
+      'g2_unlock': 1,
+    });
+    expect(settings['g1_arc'], 135);
+    expect(settings['g2_arc'], 150);
+  });
+
+  test('buying cannon 2 adds it to the next day', () {
+    final session = GameSession(catalog, MemoryStore())
+      ..economy.balance = 1000
+      ..levels.addAll({'hand': 1, 'g1_auto': 1});
+    expect(buy(session, 'g2_unlock'), isTrue);
+    session.startDay();
+    expect(session.board!.cannons.length, 2);
+    final restored = GameSession(catalog, MemoryStore())
+      ..restore(session.snapshot());
+    expect(restored.board!.cannons.length, 2);
   });
 
   test('attraction increases coin reach only while the pointer is active', () {

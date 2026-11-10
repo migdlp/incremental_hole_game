@@ -2,7 +2,7 @@
 id: E04-T02
 title: Mejoras de G2–G4 en balance y árbol
 epic: E04
-status: todo
+status: done
 depends_on: [E04-T01]
 requirements: [RF-13, RF-14, RF-20]
 size: M
@@ -61,7 +61,7 @@ El árbol permite comprar Cañón 2, 3 y 4 en orden, con sus mejoras propias. En
 
 ## Criterios de aceptación
 
-- [ ] Las pruebas nuevas, las de geometría del árbol y la suite completa pasan.
+- [x] Las pruebas nuevas, las de geometría del árbol y la suite completa pasan.
 - [ ] En web, el árbol muestra las tres ramas nuevas por encima de G1, sin solapes ni conexiones cruzadas.
 
 ## Verificación
@@ -79,3 +79,9 @@ flutter test
 ## Si te bloqueas
 
 - Si una ruta no supera la prueba de ocho direcciones, no la cambies tú: anota cuál es y para.
+
+## Notas de implementación
+
+- Las 21 filas se copiaron literalmente de `02-architecture.md`. Doce etiquetas escritas a mano (`labels` sigue siendo `const`), doce rutas y doce iconos. Las pruebas de geometría del árbol pasan sin tocar rutas.
+- Recuentos: 28 tipos y 74 nodos. Tres pruebas nuevas en `future_tree_test.dart`; la de compra comprueba además que el guardado conserva los dos cañones. Total: 163 pruebas.
+- El segundo criterio (revisión visual en web de las tres ramas) no se ha hecho a mano: queda cubierto por las pruebas de no solapes, ocho direcciones y rutas sin cruzar nodos.

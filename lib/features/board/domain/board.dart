@@ -41,7 +41,11 @@ class BoardEvents {
 class Board {
   Board(this.settings, {this.randomState = 42, this.tool = BallTool.hand}) {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
-    cannons.add(Cannon(cannonSlots[0]));
+    for (final slot in cannonSlots) {
+      if (slot.index == 1 || settings['g${slot.index}_enabled'] > 0) {
+        cannons.add(Cannon(slot));
+      }
+    }
   }
   static const width = 360.0, height = 560.0;
   static const hole = Vec(180, 412);

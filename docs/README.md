@@ -7,6 +7,7 @@ Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` 
 | Quiero… | Leer |
 | --- | --- |
 | Saber qué está terminado y qué falta | [Estado actual](estado-actual.md) |
+| Implementar los generadores-cañón (plan por tareas) | [Plan generadores-cañón](plan/canones/README.md) |
 | Preparar los cambios de la siguiente iteración | [Seguimiento de agarre, escobas y balance](plan-cambios-agarre-escoba.md) |
 | Explorar herramientas para recoger y lanzar bolas | [Ideas de herramientas](ideas-herramientas-bolas.md) |
 | Ejecutar el proyecto y completar una primera partida | [Guía de desarrollo](guia-desarrollo.md) |

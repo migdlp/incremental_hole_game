@@ -1,0 +1,14 @@
+{
+  "source_commit": "47626176fd8332be670129fb3f3a87604df7a5a5",
+  "source_dirty": false,
+  "app_version": "0.24.0+38",
+  "test_kind": "automated_physics",
+  "paired_variable": "quota_curve only; same interaction and purchase policy",
+  "seeds": [
+    42,
+    79,
+    2026
+  ],
+  "sessions": 6,
+  "archive_sha256": "e522a5bc7e744fb396e33345c10c1bd12c6619430f80326e1130f7c1fd5da2af"
+}

@@ -1,3 +1,4 @@
+import '../../feedback/platform/absorption_painter.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient;
 import 'package:flame/game.dart';
@@ -5,12 +6,13 @@ import 'package:flutter/painting.dart';
 import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
-import '../domain/cannon.dart';
-import '../domain/coin_denomination.dart';
+import '../domain/wall_impact.dart';
 import 'coin_painter.dart';
+import '../domain/black_hole_event.dart';
+import '../domain/bat_impact.dart';
 
 class GardenGame extends FlameGame {
-  GardenGame(this.session)
+  GardenGame(this.session, {this.wallEffectsEnabled = true})
     : _displayBoard =
           session.board ?? Board(session.catalog.settings(session.levels));
   // Presentation only: the completed day has already been banked and discarded
@@ -39,8 +41,12 @@ class GardenGame extends FlameGame {
     super.onRemove();
   }
 
+  Offset prestigeTarget = const Offset(307, 65);
+  Offset walletTarget = const Offset(310, 28);
+  final Paint _rewardPaint = Paint();
   final GameSession session;
-  double _time = 0;
+  bool wallEffectsEnabled;
+  bool externalCoinLayer = false;
   final _labels = <String, TextPainter>{};
   double get scale => math.min(size.x / Board.width, size.y / Board.height);
   Offset get origin => Offset(
@@ -63,57 +69,6 @@ class GardenGame extends FlameGame {
     _displayBoard = session.board!;
     super.update(dt);
     session.tick(dt);
-    if (session.running && !session.paused && !session.board!.coinOnly) {
-      _time += dt;
-    }
-  }
-
-  void _drawCannon(Canvas canvas, Board board, Cannon cannon) {
-    final center = offset(cannon.slot.position);
-    final blocked = cannon.blockedFlash > 0;
-    final arc = board.settings['g${cannon.slot.index}_arc'] * math.pi / 180;
-    for (final side in [-1, 1]) {
-      final a = cannon.slot.baseAngle + side * arc / 2;
-      canvas.drawLine(
-        center,
-        center + Offset(math.cos(a), math.sin(a)) * 40,
-        paint(const Color(0x30247d73), stroke: 1.5),
-      );
-    }
-    canvas.drawCircle(
-      center + const Offset(0, 3),
-      18,
-      paint(const Color(0x30644c2d)),
-    );
-    final recoil = 4 * cannon.recoil / Cannon.recoilSeconds;
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(board.cannonAngle(cannon));
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(13 - recoil, 0), width: 26, height: 10),
-        const Radius.circular(4),
-      ),
-      paint(blocked ? const Color(0xff697583) : const Color(0xff172333)),
-    );
-    canvas.restore();
-    canvas.drawCircle(
-      center,
-      Cannon.bodyRadius,
-      paint(blocked ? const Color(0xff697583) : const Color(0xff247d73)),
-    );
-    if (cannon.cooldown > 0) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: 20),
-        -math.pi / 2,
-        2 * math.pi * (1 - cannon.cooldown / board.settings['cannon_cooldown']),
-        false,
-        paint(const Color(0xffd8e2dc), stroke: 3),
-      );
-    }
-    if (board.cannonAutomatic(cannon)) {
-      canvas.drawCircle(center, 23, paint(const Color(0xffe0a040), stroke: 2));
-    }
   }
 
   Paint paint(Color color, {double? stroke}) => Paint()
@@ -150,6 +105,352 @@ class GardenGame extends FlameGame {
     );
   }
 
+  void _renderElasticWalls(Canvas canvas, Board board) {
+    if (board.wallRestitution <= 1) return;
+    for (final wall in WallSide.values) {
+      final vertical = wall == WallSide.left || wall == WallSide.right;
+      final extent = vertical ? Board.height : Board.width;
+      final impacts = wallEffectsEnabled
+          ? board.wallImpacts.where((impact) => impact.wall == wall).toList()
+          : <WallImpact>[];
+      final path = Path();
+      for (var coordinate = 4.0; coordinate <= extent - 4; coordinate += 8) {
+        var deformation = 0.0;
+        for (final impact in impacts) {
+          deformation += impact.displacementAt(coordinate);
+        }
+        deformation = deformation.clamp(-10.0, 12.0);
+        final point = switch (wall) {
+          WallSide.left => Offset(4 + deformation, coordinate),
+          WallSide.right => Offset(Board.width - 4 - deformation, coordinate),
+          WallSide.top => Offset(coordinate, 4 + deformation),
+          WallSide.bottom => Offset(coordinate, Board.height - 4 - deformation),
+        };
+        if (coordinate == 4) {
+          path.moveTo(point.dx, point.dy);
+        } else {
+          path.lineTo(point.dx, point.dy);
+        }
+      }
+      canvas.drawPath(path, paint(const Color(0x40247d73), stroke: 6));
+      canvas.drawPath(path, paint(const Color(0xff247d73), stroke: 2.5));
+    }
+  }
+
+  void _renderGravity(Canvas canvas, Board board) {
+    final event = board.gravity;
+    if (board.gravityObjectVisible) {
+      final p = offset(event.position);
+      final flash = (event.damageFlash / .18).clamp(0.0, 1.0);
+      canvas.drawCircle(p, 24 + flash * 4, paint(const Color(0x3038bdf8)));
+      canvas.drawCircle(
+        p + const Offset(0, 3),
+        20,
+        paint(const Color(0x40644c2d)),
+      );
+      canvas.drawCircle(
+        p,
+        19,
+        paint(flash > .2 ? const Color(0xffc4f1fc) : const Color(0xff337eaa)),
+      );
+      canvas.drawCircle(p, 18, paint(const Color(0xff91e8f4), stroke: 2));
+      canvas.drawOval(
+        Rect.fromCenter(center: p, width: 30, height: 12),
+        paint(const Color(0xffc7f7fc), stroke: 1.5),
+      );
+      canvas.drawOval(
+        Rect.fromCenter(center: p, width: 12, height: 30),
+        paint(const Color(0xffc7f7fc), stroke: 1.5),
+      );
+      canvas.drawCircle(p, 5, paint(const Color(0xffe7fbff)));
+      if (event.hits > 0) {
+        final cracks = Path()
+          ..moveTo(p.dx - 2, p.dy - 18)
+          ..lineTo(p.dx + 3, p.dy - 9)
+          ..lineTo(p.dx - 3, p.dy - 2)
+          ..lineTo(p.dx + 4, p.dy + 7);
+        if (event.hits * 2 >= event.hitsRequired) {
+          cracks
+            ..moveTo(p.dx - 3, p.dy - 2)
+            ..lineTo(p.dx - 11, p.dy + 4)
+            ..lineTo(p.dx - 16, p.dy + 11)
+            ..moveTo(p.dx + 3, p.dy - 9)
+            ..lineTo(p.dx + 14, p.dy - 13);
+        }
+        canvas.drawPath(cracks, paint(const Color(0xff183349), stroke: 2));
+      }
+    }
+  }
+
+  void _renderEventAnnouncements(Canvas canvas, Board board) {
+    if (board.coinOnly) return;
+    final notices = [
+      if (board.gravity.announcement > 0)
+        ('GRAVEDAD', board.gravity.announcement, const Color(0xff91e8f4)),
+      if (board.blackHole.announcement > 0)
+        (
+          'AGUJERO NEGRO',
+          board.blackHole.announcement,
+          const Color(0xffc4b5fd),
+        ),
+    ];
+    if (notices.isEmpty) return;
+    final opacity = notices.map((n) => n.$2).reduce(math.max).clamp(0.0, 1.0);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 360, 560),
+      paint(Color.fromRGBO(145, 195, 244, .16 * opacity)),
+    );
+    for (var i = 0; i < notices.length; i++) {
+      final notice = notices[i];
+      final y = notices.length == 1 ? 230.0 : 192.0 + i * 76;
+      final intensity = notice.$2.clamp(0.0, 1.0);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(20, y, 320, 66),
+          const Radius.circular(12),
+        ),
+        paint(Color.fromRGBO(17, 28, 46, .9 * intensity)),
+      );
+      label(
+        canvas,
+        'HABILIDAD ESPECIAL:',
+        Offset(180, y + 20),
+        fontSize: 15,
+        color: Color.fromRGBO(231, 251, 255, intensity),
+      );
+      label(
+        canvas,
+        notice.$1,
+        Offset(180, y + 46),
+        fontSize: 22,
+        color: notice.$3.withValues(alpha: intensity),
+      );
+    }
+  }
+
+  void _renderBlackHoleSuction(Canvas canvas, Board board) {
+    final effect = board.blackHole;
+    if (!effect.active || board.coinOnly) return;
+    for (var i = 0; i < 3; i++) {
+      final phase = (effect.elapsed * .7 + i / 3) % 1;
+      final radius = 30 + (effect.reach - 30) * (1 - phase);
+      canvas.drawCircle(
+        offset(board.holePosition),
+        radius,
+        paint(
+          Color.fromRGBO(116, 81, 165, .14 * math.sin(phase * math.pi)),
+          stroke: 1.5,
+        ),
+      );
+    }
+  }
+
+  void _renderBlackHoleObjects(Canvas canvas, Board board) {
+    for (final object in board.blackHole.objects) {
+      final p = offset(object.position);
+      final damage = object.damageFlash / .18;
+      canvas.drawCircle(p, 23 + damage * 3, paint(const Color(0x407c3aed)));
+      canvas.drawOval(
+        Rect.fromCenter(center: p, width: 42, height: 19),
+        paint(const Color(0xffa78bfa), stroke: 2),
+      );
+      canvas.drawCircle(p, 17, paint(const Color(0xff1c1434)));
+      canvas.drawCircle(
+        p,
+        16,
+        paint(
+          damage > .2 ? const Color(0xffddd6fe) : const Color(0xff7c3aed),
+          stroke: 2,
+        ),
+      );
+      canvas.drawCircle(p, 11, paint(const Color(0xff080a14)));
+      if (object.hits > 0) {
+        final cracks = Path()
+          ..moveTo(p.dx - 1, p.dy - 17)
+          ..lineTo(p.dx + 4, p.dy - 7)
+          ..lineTo(p.dx - 3, p.dy + 1)
+          ..lineTo(p.dx + 3, p.dy + 14);
+        if (object.hits * 2 >= object.hitsRequired) {
+          cracks
+            ..moveTo(p.dx - 3, p.dy + 1)
+            ..lineTo(p.dx - 14, p.dy + 9);
+        }
+        canvas.drawPath(cracks, paint(const Color(0xffc4b5fd), stroke: 2));
+      }
+    }
+    for (final impact in board.blackHole.impacts) {
+      final progress = (impact.age / BlackHoleImpact.lifetime).clamp(0.0, 1.0);
+      canvas.drawCircle(
+        offset(impact.position),
+        20 + 10 * progress,
+        paint(Color.fromRGBO(167, 139, 250, .6 * (1 - progress)), stroke: 2),
+      );
+    }
+  }
+
+  void _renderLauncher(Canvas canvas, Board board) {
+    final launcher = board.launcher;
+    if (!launcher.unlocked) return;
+    if (launcher.boundaryFlash > 0) {
+      canvas.drawLine(
+        const Offset(0, 420),
+        const Offset(360, 420),
+        paint(const Color(0xffdc2626), stroke: 2),
+      );
+      canvas.drawRect(
+        const Rect.fromLTWH(2, 420, 356, 138),
+        paint(const Color(0xffdc2626), stroke: 2),
+      );
+    }
+    final center = offset(launcher.position), muzzle = offset(launcher.muzzle);
+    canvas.drawCircle(
+      center + const Offset(0, 4),
+      launcher.bodyRadius + 3,
+      paint(const Color(0x40644c2d)),
+    );
+    canvas.drawLine(
+      center,
+      muzzle,
+      paint(const Color(0xff172333), stroke: launcher.barrelRadius * 2 + 3),
+    );
+    canvas.drawLine(
+      center,
+      muzzle,
+      paint(const Color(0xff71858a), stroke: launcher.barrelRadius * 2),
+    );
+    canvas.drawCircle(
+      center,
+      launcher.bodyRadius,
+      paint(const Color(0xff344b50)),
+    );
+    canvas.drawCircle(
+      center,
+      launcher.bodyRadius - 4,
+      paint(const Color(0xff7b9692)),
+    );
+    canvas.drawCircle(center, 5, paint(const Color(0xff25383d)));
+    canvas.drawLine(
+      muzzle - offset(launcher.axis) * 3,
+      muzzle + offset(launcher.axis) * 2,
+      paint(const Color(0xff111c2e), stroke: launcher.barrelRadius * 2),
+    );
+    if (launcher.flash > 0) {
+      final intensity = launcher.flash / .15;
+      final tip = muzzle + offset(launcher.axis) * (launcher.barrelRadius + 5);
+      canvas.drawCircle(
+        tip,
+        8 * intensity + 3,
+        paint(Color.fromRGBO(255, 213, 125, intensity * .8)),
+      );
+      canvas.drawCircle(tip, 3 * intensity, paint(const Color(0xfffff1ce)));
+    }
+    if (board.holdingLauncher) {
+      for (final handle in launcher.handles) {
+        canvas.drawCircle(offset(handle), 5, paint(const Color(0xffdcebe7)));
+      }
+    }
+  }
+
+  static final Path _starShape = () {
+    final path = Path();
+    for (var i = 0; i < 10; i++) {
+      final angle = -math.pi / 2 + i * math.pi / 5;
+      final radius = i.isEven ? 1.0 : .45;
+      final p = Offset(math.cos(angle) * radius, math.sin(angle) * radius);
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+      } else {
+        path.lineTo(p.dx, p.dy);
+      }
+    }
+    return path..close();
+  }();
+  void _star(Canvas canvas, Offset point, double size, Color color) {
+    canvas.save();
+    canvas.translate(point.dx, point.dy);
+    canvas.scale(size);
+    _rewardPaint
+      ..style = PaintingStyle.fill
+      ..color = color;
+    canvas.drawPath(_starShape, _rewardPaint);
+    canvas.restore();
+  }
+
+  void _renderStarBubbles(Canvas canvas, Board board) {
+    final system = board.starBubbles;
+    if (system == null || board.coinOnly) return;
+    Color categoryColor(int category) => HSLColor.fromAHSL(
+      1,
+      (system.config['star_color'] + category * 100) % 360,
+      .7,
+      .55,
+    ).toColor();
+    for (final b in system.bodies) {
+      final p = offset(b.position), radius = system.radius(b);
+      _rewardPaint
+        ..style = PaintingStyle.fill
+        ..color = const Color(0x3066cbe8);
+      canvas.drawCircle(p, radius, _rewardPaint);
+      _rewardPaint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.3
+        ..color = const Color(0xdde9fcff);
+      canvas.drawCircle(p, radius, _rewardPaint);
+      _rewardPaint
+        ..color = const Color(0x90ffffff)
+        ..strokeWidth = 2;
+      canvas.drawArc(
+        Rect.fromCircle(center: p, radius: radius * .8),
+        -2.8,
+        1,
+        false,
+        _rewardPaint,
+      );
+      _star(canvas, p, radius * .53, categoryColor(b.reward.category));
+    }
+  }
+
+  void _renderStarFlights(Canvas canvas, Board board) {
+    final system = board.starBubbles;
+    if (system == null || board.coinOnly) return;
+    for (final flight in system.flights) {
+      if (!flight.active) continue;
+      final start = offset(flight.start);
+      if (flight.age < .22) {
+        final t = flight.age / .22;
+        _rewardPaint
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.4
+          ..color = Color.fromRGBO(232, 252, 255, 1 - t);
+        canvas.drawCircle(start, 12 + 15 * t, _rewardPaint);
+        for (var i = 0; i < 4; i++) {
+          final dir = Offset(i.isEven ? 1 : -1, i < 2 ? 1 : -1);
+          canvas.drawLine(
+            start + dir * (8 + t * 12),
+            start + dir * (11 + t * 18),
+            _rewardPaint,
+          );
+        }
+      }
+      final t = ((flight.age - .08) / .77).clamp(0.0, 1.0);
+      final ease = t * t * (3 - 2 * t);
+      final p =
+          Offset.lerp(start, prestigeTarget, ease)! +
+          Offset(24 * t * (1 - t), -55 * t * (1 - t));
+      _star(
+        canvas,
+        p,
+        7 * (1 - .3 * t),
+        HSLColor.fromAHSL(
+          1,
+          (system.config['star_color'] + flight.category * 100) % 360,
+          .7,
+          .55,
+        ).toColor(),
+      );
+    }
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -181,15 +482,20 @@ class GardenGame extends FlameGame {
       RRect.fromRectAndRadius(bounds.deflate(13), const Radius.circular(19)),
       paint(const Color(0x30766543), stroke: 2),
     );
-    label(
-      canvas,
-      'J A R D Í N   M E C Á N I C O',
-      const Offset(180, 525),
-      color: const Color(0xff756347),
-      fontSize: 10,
-    );
-    final hole = offset(Board.hole);
-    final radius = board.settings['hole_capture_radius'];
+    _renderElasticWalls(canvas, board);
+    final hole = offset(board.holePosition);
+    final radius = board.captureRadius;
+    final multiplier = board.evolution?.moneyMultiplier ?? 1;
+    if (multiplier > 1) {
+      label(
+        canvas,
+        '×$multiplier',
+        Offset(hole.dx + radius + 25, hole.dy),
+        color: const Color(0xffffd45a),
+        fontSize: 16,
+      );
+    }
+
     canvas.drawOval(
       Rect.fromCenter(
         center: hole + const Offset(0, 6),
@@ -213,15 +519,66 @@ class GardenGame extends FlameGame {
       false,
       paint(const Color(0xffeaddc2), stroke: 3),
     );
-    final pulse = (math.sin(_time * 3) + 1) / 2;
+    final feeding = session.feeding;
+    final feedingRadius = radius + 13;
     canvas.drawCircle(
       hole,
-      radius + 14 + pulse * 3,
-      paint(const Color(0x15247d73), stroke: 2),
+      feedingRadius,
+      paint(const Color(0x40247d73), stroke: 3),
     );
-    for (final cannon in board.cannons) {
-      _drawCannon(canvas, board, cannon);
+    final progress = feeding.fraction;
+    if (progress != null && progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: hole, radius: feedingRadius),
+        -math.pi / 2,
+        progress * math.pi * 2,
+        false,
+        paint(const Color(0xff247d73), stroke: 3),
+      );
     }
+    _renderBlackHoleSuction(canvas, board);
+    final generator = offset(Board.generator);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: generator + const Offset(0, 4),
+          width: 66,
+          height: 50,
+        ),
+        const Radius.circular(12),
+      ),
+      paint(const Color(0x30644c2d)),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: generator, width: 62, height: 48),
+        const Radius.circular(12),
+      ),
+      paint(const Color(0xff247d73)),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: generator + const Offset(0, 6),
+          width: 42,
+          height: 22,
+        ),
+        const Radius.circular(5),
+      ),
+      paint(const Color(0xff172333)),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: generator + const Offset(0, -21),
+          width: 26,
+          height: 12,
+        ),
+        const Radius.circular(4),
+      ),
+      paint(const Color(0xff697583)),
+    );
+    _renderLauncher(canvas, board);
     for (final ball in board.balls) {
       final p = offset(ball.position);
       canvas.drawCircle(
@@ -243,6 +600,14 @@ class GardenGame extends FlameGame {
         paint(ball.golden ? const Color(0xfffff4b0) : const Color(0xff97a2ad)),
       );
     }
+    paintAbsorption(
+      canvas,
+      board.absorption,
+      board.holePosition,
+      board.captureRadius,
+      _rewardPaint,
+    );
+    _renderStarBubbles(canvas, board);
     if (board.settings['robot_count'] > 0) {
       final p = offset(board.robot.position);
       canvas.drawCircle(
@@ -279,21 +644,10 @@ class GardenGame extends FlameGame {
         paint(const Color(0xfff1e5cd)),
       );
     }
-    if (board.paddle case final Vec point) {
+    if (session.visualFeedback && board.paddle != null) {
+      final point = board.paddle!;
       final p = offset(point);
-      if (board.canCollectCoins && board.settings['magnet_radius'] > 0) {
-        canvas.drawCircle(
-          p,
-          board.settings['magnet_radius'],
-          paint(const Color(0x12247d73)),
-        );
-        canvas.drawCircle(
-          p,
-          board.settings['magnet_radius'],
-          paint(const Color(0x50247d73), stroke: 1),
-        );
-      }
-      if (!board.holdingBroom) {
+      if (!board.holdingPhysicalTool) {
         final ball = board.heldBall;
         final center = ball == null ? p : offset(ball.position);
         canvas.drawCircle(
@@ -349,6 +703,13 @@ class GardenGame extends FlameGame {
             ..strokeCap = StrokeCap.round,
         );
       }
+      for (final handle in board.broomHandles) {
+        final color = board.hasSecondBroomPoint
+            ? const Color(0xff4ade80)
+            : const Color(0xfff8f3e8);
+        canvas.drawCircle(offset(handle), 8, paint(const Color(0xff172333)));
+        canvas.drawCircle(offset(handle), 6, paint(color, stroke: 2));
+      }
       final direction = Vec(
         math.cos(board.toolAngle),
         math.sin(board.toolAngle),
@@ -359,23 +720,140 @@ class GardenGame extends FlameGame {
         paint(const Color(0xff756347), stroke: 4)..strokeCap = StrokeCap.round,
       );
     }
+    if (board.batUnlocked) {
+      canvas.save();
+      canvas.translate(board.batPosition.x, board.batPosition.y);
+      canvas.rotate(board.batAngle);
+      final length = board.batHalfLength;
+      final thickness = board.batThickness;
+      // Narrow wrapped handle, tapered wooden barrel, rounded striking end.
+      final body = Path()
+        ..moveTo(-length, -thickness * .38)
+        ..lineTo(-length * .4, -thickness * .38)
+        ..cubicTo(
+          0,
+          -thickness * .45,
+          0,
+          -thickness,
+          length - thickness,
+          -thickness,
+        )
+        ..quadraticBezierTo(length, -thickness, length, 0)
+        ..quadraticBezierTo(length, thickness, length - thickness, thickness)
+        ..cubicTo(
+          0,
+          thickness,
+          0,
+          thickness * .45,
+          -length * .4,
+          thickness * .38,
+        )
+        ..lineTo(-length, thickness * .38)
+        ..close();
+      canvas.drawPath(
+        body.shift(const Offset(0, 3)),
+        paint(const Color(0x40644c2d)),
+      );
+      canvas.drawPath(body, paint(const Color(0xffc58c51)));
+      canvas.drawPath(body, paint(const Color(0xff67472e), stroke: 1));
+      canvas.drawLine(
+        Offset(-length, 0),
+        Offset(-length * .45, 0),
+        paint(const Color(0xff26344a), stroke: thickness * .9)
+          ..strokeCap = StrokeCap.round,
+      );
+      for (var x = -length + 3; x < -length * .45; x += 4) {
+        canvas.drawLine(
+          Offset(x, -thickness * .4),
+          Offset(x + 2, thickness * .4),
+          paint(const Color(0xffb9c1c9), stroke: 1),
+        );
+      }
+      canvas.drawLine(
+        Offset(-length, -thickness * .65),
+        Offset(-length, thickness * .65),
+        paint(const Color(0xff67472e), stroke: 3)..strokeCap = StrokeCap.round,
+      );
+      canvas.drawLine(
+        Offset(2, -thickness * .4),
+        Offset(length - thickness, -thickness * .4),
+        paint(const Color(0xfff2cb91), stroke: 1.5)
+          ..strokeCap = StrokeCap.round,
+      );
+      if (session.visualFeedback && board.holdingBat) {
+        for (final x in [-length, length]) {
+          canvas.drawCircle(
+            Offset(x, 0),
+            8,
+            paint(const Color(0xff247d73), stroke: 2),
+          );
+        }
+      }
+      canvas.restore();
+      if (session.visualFeedback) {
+        for (final impact in board.batImpacts) {
+          final progress = (impact.age / BatImpact.lifetime).clamp(0.0, 1.0);
+          final color = Color.fromRGBO(255, 244, 192, 1 - progress);
+          canvas.drawCircle(
+            offset(impact.position),
+            3 + progress * (5 + 6 * impact.intensity),
+            paint(color, stroke: 2),
+          );
+        }
+      }
+    }
+    _renderBlackHoleObjects(canvas, board);
     if (board.coinOnly) {
       canvas.drawRect(bounds, paint(const Color(0xa6000000)));
     }
-    for (final coin in board.coins) {
-      final t = (1 - coin.landing / .2).clamp(0.0, 1.0);
-      final p =
-          offset(Board.hole + (coin.position - Board.hole) * t) -
-          Offset(0, math.sin(t * math.pi) * 25);
-      paintCoin(
-        canvas,
-        p,
-        CoinDenomination.values.firstWhere(
-          (d) => d.amount == coin.value,
-          orElse: () => CoinDenomination.one,
-        ),
-      );
+    final visuals = session.rewardVisuals;
+    if (!externalCoinLayer) {
+      for (final coin in visuals.coins) {
+        if (!coin.active || coin.age < visuals.delay) continue;
+        final denomination = coin.denomination;
+        final center = Offset(
+          coin.x(
+            walletTarget.dx,
+            visuals.delay,
+            origin: board.holePosition.x,
+            simple: visuals.quality >= 2,
+          ),
+          coin.y(
+            walletTarget.dy,
+            visuals.delay,
+            origin: board.holePosition.y,
+            simple: visuals.quality >= 2,
+          ),
+        );
+        paintCoin(
+          canvas,
+          center,
+          denomination,
+          radius: 7,
+          paint: _rewardPaint,
+          details: visuals.quality < 2,
+        );
+      }
     }
+    if (!externalCoinLayer && visuals.receiptPulse > 0) {
+      _rewardPaint.color = Color.fromRGBO(
+        245,
+        184,
+        61,
+        visuals.receiptPulse / .25 * .6,
+      );
+      _rewardPaint.style = PaintingStyle.stroke;
+      _rewardPaint.strokeWidth = 2;
+      canvas.drawCircle(
+        walletTarget,
+        12 + (1 - visuals.receiptPulse / .25) * 7,
+        _rewardPaint,
+      );
+      _rewardPaint.style = PaintingStyle.fill;
+    }
+    _renderGravity(canvas, board);
+    _renderStarFlights(canvas, board);
+    _renderEventAnnouncements(canvas, board);
     canvas.restore();
   }
 }

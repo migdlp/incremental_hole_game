@@ -1,0 +1,77 @@
+{
+  "environment": "GitHub Actions Linux AOT; simulation only, no Android GPU/audio/render",
+  "reports": [
+    {
+      "balls_initial": 100,
+      "evolution_maxed": false,
+      "p50_us": 435,
+      "p95_us": 495,
+      "p99_us": 510,
+      "max_us": 519,
+      "warmup_max_us": 923,
+      "balls_final": 113,
+      "rss_bytes": 10670080,
+      "finite_velocities": true
+    },
+    {
+      "balls_initial": 100,
+      "evolution_maxed": true,
+      "p50_us": 250,
+      "p95_us": 395,
+      "p99_us": 453,
+      "max_us": 492,
+      "warmup_max_us": 528,
+      "balls_final": 66,
+      "rss_bytes": 10752000,
+      "finite_velocities": true
+    },
+    {
+      "balls_initial": 200,
+      "evolution_maxed": false,
+      "p50_us": 895,
+      "p95_us": 924,
+      "p99_us": 938,
+      "max_us": 1008,
+      "warmup_max_us": 1007,
+      "balls_final": 200,
+      "rss_bytes": 10838016,
+      "finite_velocities": true
+    },
+    {
+      "balls_initial": 200,
+      "evolution_maxed": true,
+      "p50_us": 672,
+      "p95_us": 946,
+      "p99_us": 1016,
+      "max_us": 1037,
+      "warmup_max_us": 1071,
+      "balls_final": 149,
+      "rss_bytes": 10944512,
+      "finite_velocities": true
+    },
+    {
+      "balls_initial": 500,
+      "evolution_maxed": false,
+      "p50_us": 2325,
+      "p95_us": 2424,
+      "p99_us": 2470,
+      "max_us": 2546,
+      "warmup_max_us": 2499,
+      "balls_final": 493,
+      "rss_bytes": 11595776,
+      "finite_velocities": true
+    },
+    {
+      "balls_initial": 500,
+      "evolution_maxed": true,
+      "p50_us": 2174,
+      "p95_us": 2746,
+      "p99_us": 2804,
+      "max_us": 2881,
+      "warmup_max_us": 2815,
+      "balls_final": 426,
+      "rss_bytes": 11640832,
+      "finite_velocities": true
+    }
+  ]
+}

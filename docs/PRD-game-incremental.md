@@ -1,8 +1,146 @@
-# PRD — Game Incremental
+# PRD — Feed the Hole
+
+> **AJ-005B vigente:** la alimentación cuenta exclusivamente bolas capturadas;
+> la recompensa monetaria sigue siendo independiente. Cuotas 100/1.000/10.000…
+> sin vencimiento, con excedentes y sin derrota.
+> [Reglas, crecimiento y migración](aj-005b-cuotas-infinitas.md). Las menciones
+> históricas inferiores a alimentación por dinero o derrota quedan sustituidas.
+
+
+## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
+
+Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
+conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con
+cara/canto/grabado y contador sin fondo. Hoyo en (180,414.4), aproximadamente al 75 % del tablero,
+con origen compartido por captura, succión, monedas y estrellas.
+
+JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
+jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
+rápidas automáticas: no se compensan cambiando otras mecánicas.
+**AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no
+existe todavía una rama de nivel del agujero. No inventar esa relación ni añadir
+funcionalidades futuras. [Estado y compatibilidad](ajustes-version-actual.md).
+
+## P01 · Estrellas y burbujas físicas (0.15.0+23)
+
+Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
+o herramientas permite romperlas y cobrar estrellas permanentes. Un premio por
+cuota y un cobro por identidad, separados del vuelo visual. Pendientes reaparecen
+entre jornadas, con un límite de cuerpos activos que no elimina recompensas.
+**Al morir o prestigiar se pierden las pendientes; las cobradas se conservan.**
+Esta regla P01 sustituye la conservación opaca provisional descrita en la entrega
+S03 inferior. No se convierten pendientes en saldo automáticamente.
+
+JSON v11 / balance v17 con v16 congelado. DEBUG permite forzar premios y ajustar
+todos los parámetros provisionales. Gravedad/succión se comparan mediante
+interruptores experimentales en DEBUG; su integración final sigue abierta.
+P02 y BAL01 continúan pendientes. [Contrato y pruebas](p01-estrellas-burbujas.md).
+
+## Entrega anterior S03 · Prestigio y derrota (0.14.0+22)
+
+**Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
+provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
+**DERROTA**, sin estadísticas. Continuar abre la tienda de prestigio; Nueva partida
+vuelve al día 1. Se reinician monedas, mejoras, herramientas y alimentación, y se
+conservan estrellas cobradas, compras permanentes, descubrimientos y datos P01 pendientes.
+
+Nodo Prestigio visible desde el comienzo al explorar, mayor y girado 45°, tanto en
+normal como DEBUG. Su compra exige confirmación y reinicia inmediatamente, sin
+botón posterior. Configuración de prueba: 10.000 monedas, Generador V + Valor V +
+Duración V, esquina avanzada (48,48). **No son decisiones finales de BAL01.**
+
+La tienda muestra estrellas y permite nueva partida, sin catálogo P02 ni premios
+P01 inventados. Morir no concede estrellas. JSON v10 / balance v16, con v15 congelado.
+Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
+una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
+[Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
+
+S03 sustituyó las cuotas sin derrota. P01 ya añade burbujas; P02 y BAL01 siguen pendientes.
+
+## C01 · Cobro automático vigente (0.13.0+21)
+
+Cada captura calcula una única recompensa completa (Valor, dorada y racha),
+alimenta inmediatamente y registra el importe garantizado. Tras aproximadamente
+1 s, una moneda decorativa salta del hoyo y vuela en curva al monedero; el saldo
+visible aumenta al recibirse. No hay colisiones, recogida manual ni fase final
+de recogida: producción base 15 s y cierre directo con liquidación íntegra.
+
+Barrido, Área, Imán y Atracción salen del catálogo activo. El usuario autorizó
+retirar sus compras **sin reembolso**; no se altera saldo ni otras mejoras.
+Robot conserva solo Escoba ancha II como requisito, confirmado por el usuario.
+JSON v9 / balance v15, con v14 congelado para física de jornadas antiguas.
+Registros económicos y pool visual independientes; agrupación u omisión visual
+no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
+[Implementación, DEBUG y medición pendiente](c01-cobro-automatico.md).
+
+Las referencias anteriores a recogida manual o fase final describen versiones
+históricas y quedan sustituidas por C01.
 
 Revisión: 18 de octubre de 2026 · Referencia: `0.2.1+3` · Reglas acordadas y objetivos pendientes del MVP
 
 Este documento recoge las reglas acordadas y propone el alcance del primer MVP. Los tiempos, costes, cantidades y límites indicados como provisionales deben ajustarse al probar el juego. Las decisiones propuestas no constituyen requisitos ya aprobados.
+
+## Objetivo central aprobado · S01, prototipo
+
+Cada captura alimenta con toda su recompensa, incluidos racha y dorada ×10.
+**Captura total sigue la misma regla**, por decisión expresa del usuario.
+No hace falta recoger las monedas y alimentar no descuenta dinero.
+Anillo alrededor del hoyo y resumen entre jornadas; períodos de cinco jornadas,
+sin cierre anticipado al cumplir; P01 añade las burbujas de estrellas. Al empezar el siguiente período
+se reinicia la alimentación y aumenta la cuota.
+
+El usuario aprobó **cuotas provisionales también en juego normal**: objetivo
+inicial 10 y aumento 10 por período, centralizados en `balance.csv`. Son valores
+para probar, pendientes de BAL01, no balance definitivo. S03 activa ahora la derrota al incumplir, también en juego normal por autorización
+expresa del usuario; los valores continúan provisionales hasta BAL01.
+DEBUG permite simular un fallo reversible sin modificar la partida real.
+JSON v8 / balance v14, con v13 congelado y sin inventar capturas históricas.
+S03 aporta ya derrota/reinicio; S02, P02 y BAL01 siguen pendientes; P01 aporta burbujas de estrellas.
+
+## Extensión funcional vigente · M03
+
+[Generador lanzador](m03-generador-lanzador.md): segundo productor físico,
+frecuencia independiente y potencia fija. Control de uno/dos dedos, franja
+inferior del 25 %, pose persistente, sin retroceso; solo suficiente presión
+de contactos lo desplaza lentamente y nunca lo gira. Emisiones obstruidas
+consumen intento sin superponer ni acumular. Pausa/recogida congelan; DEBUG
+aislado. Precios, requisitos y parámetros provisionales para experimentar.
+
+## Evento funcional vigente · E02
+
+[Agujero negro](e02-agujero-negro.md): sorteos periódicos independientes, varios
+objetos sin sensores y 3–6 toques. Amplía atracción sobre bolas libres durante
+hasta 10 s, sin ampliar captura ni afectar monedas/herramientas. Otra activación
+restablece duración sin acumular fuerza. Recogida retira objetos y efecto; pausa
+y restauración conservan el estado. DEBUG aislado; parámetros y estética provisionales.
+
+## Evento funcional vigente · E01
+
+[Gravedad](e01-gravedad.md) aparece aleatoriamente desde la primera jornada
+compatible, sin compra: 5 % inicial, un objeto y 3–6 toques para activarlo hasta
+10 s de producción mediante inclinación. Afecta bolas y herramientas libres,
+no agarres ni monedas. Estado temporal persistente dentro de la jornada, sin
+extenderla; DEBUG aislado. Fuerza/aspecto son provisionales; daño por bolas y
+composición de futuros eventos siguen abiertos.
+
+## Extensiones funcionales vigentes · M01 y M02
+
+[Paredes rebotadoras](m01-paredes-rebotadoras.md) y [Bate de béisbol](m02-bate-beisbol.md)
+son mejoras permanentes del árbol. El bate es independiente de la escoba y usa
+uno/dos dedos para trasladar/girar; sus tres niveles solo aumentan potencia activa.
+Impulso por movimiento y rotación, rebote pasivo constante y límite técnico
+compartido. Sin interacción con monedas ni activaciones especiales adicionales.
+No se incluyen otras mecánicas de pinball dentro de M02. Precios, dependencias y
+valores físicos de prototipo siguen pendientes de balance y prueba en móvil.
+
+## Identidad comercial — G01
+
+El nombre comercial y visible es **Feed the Hole**. Se aplica al nombre Android,
+la interfaz y la versión web. El repositorio sigue siendo
+`migdlp/incremental_hole_game` y el identificador Android sigue siendo
+`com.migdlp.incremental_hole_game`. No se rediseñan icono, gráficos ni paleta.
+Se conservan mecánicas, compras, progreso, claves de guardado y migraciones.
+Las referencias de versiones anteriores se conservan como historia.
 
 ## 1. Visión
 
@@ -32,7 +170,7 @@ Preparación → comenzar día → generar y empujar bolas → recoger monedas �
 
 El tablero muestra el hoyo, el generador, la herramienta, las bolas, las monedas y el robot cuando esté desbloqueado. La interfaz muestra tiempo restante, dinero recogido en ese día y acceso a pausa.
 
-Balance actual para probar: 15 segundos totales, 10 de producción y 5 finales de recogida; emisión inicial cada 3 segundos. En esos 5 segundos el generador se detiene, pero el jugador y el robot pueden seguir moviendo bolas y recogiendo monedas. Ambos tiempos son provisionales; los 5 segundos forman parte del día y se comunican claramente en pantalla.
+Balance actual para probar: 20 segundos totales, 15 de producción y 5 finales de recogida; emisión inicial cada ⅔ de segundo (1,5 bolas/s). En esos 5 segundos el generador se detiene, pero el jugador y el robot pueden seguir moviendo bolas y recogiendo monedas. Ambos tiempos son provisionales; los 5 segundos forman parte del día y se comunican claramente en pantalla.
 
 La mano transporta una sola bola; las escobas barren grupos con un frente perpendicular al arrastre y giro suavizado. La V reúne por contacto, sin aspirar. El hoyo tiene una pequeña zona de captura para evitar que acertar resulte frustrante. Al inicio hay que pulsar las monedas para cobrarlas: arrastrar para empujar bolas no las recoge. Tras comprar recogida por barrido, pasar el dedo sobre una moneda también la cobra; entonces recogida y empuje pueden compartir gesto, sin cambiar de herramienta.
 

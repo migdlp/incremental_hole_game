@@ -14,16 +14,16 @@ void main() {
     (tester) async {
       final session = GameSession(testCatalog(), MemoryStore());
       await tester.pumpWidget(GardenApp(session: session));
-      expect(find.text('JARDÍN MECÁNICO'), findsOneWidget);
-      expect(find.text('Comenzar día 1'), findsOneWidget);
-      await tester.tap(find.text('Comenzar día 1'));
+      expect(find.text('Feed the Hole'), findsOneWidget);
+      expect(find.text('Comenzar día'), findsOneWidget);
+      await tester.tap(find.text('Comenzar día'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       expect(session.running, isTrue);
       expect(find.byTooltip('Pausar'), findsOneWidget);
       await tester.tap(find.byTooltip('Pausar'));
       await tester.pump();
-      expect(find.text('Un pequeño descanso'), findsOneWidget);
+      expect(find.text('Juego pausado'), findsOneWidget);
       final remaining = session.cycle!.remaining;
       await tester.pump(const Duration(seconds: 2));
       expect(session.cycle!.remaining, remaining);
@@ -31,44 +31,22 @@ void main() {
       await tester.pump();
       expect(session.paused, isFalse);
       session.finishDay();
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('Comenzar día 2'), findsNothing);
-      expect(find.text('Ir al árbol de mejoras'), findsOneWidget);
+      expect(find.text('Tienda'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await session.pendingWrites;
       session.dispose();
     },
   );
-  testWidgets('first hint tells the player to tap the cannon', (tester) async {
-    final session = GameSession(testCatalog(), MemoryStore());
-    await tester.pumpWidget(GardenApp(session: session));
-    await tester.tap(find.text('Comenzar día 1'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('Toca el cañón para disparar bolas'), findsOneWidget);
-    expect(find.text('GENERADOR'), findsNothing);
-    await tester.pumpWidget(const SizedBox());
-    await session.pendingWrites;
-    session.dispose();
-  });
-  testWidgets('intro text mentions the cannon', (tester) async {
-    final session = GameSession(testCatalog(), MemoryStore());
-    await tester.pumpWidget(GardenApp(session: session));
-    expect(
-      find.text(
-        'Dispara con el cañón, lleva las bolas al hoyo y recoge sus monedas.',
-      ),
-      findsOneWidget,
-    );
-    await tester.pumpWidget(const SizedBox());
-    await session.pendingWrites;
-    session.dispose();
-  });
   testWidgets(
     'real pointer distinguishes tapping coins from dragging over them',
     (tester) async {
-      final session = GameSession(testCatalog(), MemoryStore())..startDay();
+      final session = GameSession(
+        testCatalog(automaticSpawns: false),
+        MemoryStore(),
+      )..startDay();
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pump(const Duration(milliseconds: 100));
       final gameFinder = find.byWidgetPredicate(
@@ -80,9 +58,8 @@ void main() {
           game.origin +
           Offset(point.x, point.y) * game.scale;
       final board = session.board!;
-      board.captured = 1;
-      session.economy.generated = 2;
-      board.coins.add(Coin(board.nextId++, const Vec(100, 300), 2, landing: 0));
+      board.balls.add(Ball(board.nextId++, Board.hole, Vec.zero));
+      session.tick(1 / 60);
       final drag = await tester.createGesture();
       await drag.down(
         screen(const Vec(100, 300)),
@@ -94,10 +71,13 @@ void main() {
       );
       await drag.up(timeStamp: const Duration(milliseconds: 1200));
       expect(session.economy.collected, 0);
-      expect(board.pending, 2);
+      expect(session.rewards.outstanding, 1);
       await tester.tapAt(screen(const Vec(100, 300)));
-      expect(session.economy.collected, 2);
-      expect(board.pending, 0);
+      expect(session.economy.collected, 0);
+      for (var i = 0; i < 180; i++) {
+        session.tick(1 / 60);
+      }
+      expect(session.economy.collected, 1);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await session.pendingWrites;
@@ -181,6 +161,8 @@ void main() {
     tester,
   ) async {
     final session = GameSession(testCatalog(), MemoryStore());
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     session.economy.balance = 500;
     for (final id in ['hand', 'hand', 'broom', 'paddle', 'broom_v']) {
       session.purchase(
@@ -225,15 +207,15 @@ void main() {
     await tester.pumpWidget(GardenApp(session: session));
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
-    session.cycle!.remaining = 3 + 1 / 60;
+    session.cycle!.remaining = 5 + 1 / 60;
     for (var i = 0; i < 10; i++) {
       session.tick(1 / 60);
     }
     await tester.pump();
-    expect(session.board!.coinOnly, isTrue);
+    expect(session.board!.coinOnly, isFalse);
     expect(find.byKey(const ValueKey('closing-hud-dim')), findsNothing);
-    expect(find.text('3 s'), findsOneWidget);
-    expect(tester.widget<Text>(find.text('3 s')).style!.color!.a, 1);
+    expect(find.text('5 s'), findsOneWidget);
+    expect(tester.widget<Text>(find.text('5 s')).style!.color!.a, 1);
     await tester.tap(find.byTooltip('Pausar'));
     await tester.pump();
     expect(session.paused, isTrue);

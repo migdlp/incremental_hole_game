@@ -1,0 +1,61 @@
+{
+  "environment": "Cloud Linux AOT; simulation only, no Android renderer/audio/GPU",
+  "reports": [
+    {
+      "initial_bubbles": 0,
+      "creation_us": 2,
+      "warmup_max_us": 1426,
+      "step_p50_us": 715,
+      "step_p95_us": 1220,
+      "step_p99_us": 1782,
+      "step_max_us": 3478,
+      "remaining_bubbles": 0,
+      "initial_ball_count": 100,
+      "rss_bytes": 9768960,
+      "frames": 600,
+      "max_ball_speed": 27.177950099388045
+    },
+    {
+      "initial_bubbles": 24,
+      "creation_us": 13,
+      "warmup_max_us": 1727,
+      "step_p50_us": 1041,
+      "step_p95_us": 1658,
+      "step_p99_us": 2237,
+      "step_max_us": 3846,
+      "remaining_bubbles": 24,
+      "initial_ball_count": 100,
+      "rss_bytes": 9883648,
+      "frames": 600,
+      "max_ball_speed": 27.177950099388045
+    },
+    {
+      "initial_bubbles": 100,
+      "creation_us": 14,
+      "warmup_max_us": 4451,
+      "step_p50_us": 2539,
+      "step_p95_us": 4810,
+      "step_p99_us": 7206,
+      "step_max_us": 18355,
+      "remaining_bubbles": 99,
+      "initial_ball_count": 100,
+      "rss_bytes": 9932800,
+      "frames": 600,
+      "max_ball_speed": 27.177950099388045
+    },
+    {
+      "initial_bubbles": 500,
+      "creation_us": 56,
+      "warmup_max_us": 66161,
+      "step_p50_us": 12992,
+      "step_p95_us": 23082,
+      "step_p99_us": 34556,
+      "step_max_us": 44443,
+      "remaining_bubbles": 494,
+      "initial_ball_count": 100,
+      "rss_bytes": 11165696,
+      "frames": 600,
+      "max_ball_speed": 6.482564620684343
+    }
+  ]
+}

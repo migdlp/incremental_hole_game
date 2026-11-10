@@ -1,0 +1,111 @@
+origen,destino,naturaleza,fuente_grafo,fuente_requisito
+generator:5,prestige:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:134
+reward:5,prestige:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:134
+duration:5,prestige:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:134
+hand:1,hand:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:85
+hand:2,hand:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:86
+hand:3,hand:4,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:87
+hand:4,hand:5,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:88
+hand:1,walls:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:128
+walls:1,walls:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:129
+walls:2,walls:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:130
+hand:1,bat:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:131
+bat:1,bat:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:132
+bat:2,bat:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:133
+hand:2,broom:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:99
+broom:1,paddle:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:100
+paddle:1,paddle:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:101
+paddle:2,paddle:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:102
+paddle:3,paddle:4,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:103
+paddle:4,paddle:5,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:104
+paddle:1,broom_v:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:105
+generator:3,double_spawn:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:117
+paddle:3,double_spawn:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:117
+hand:1,generator:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:89
+generator:1,generator:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:90
+generator:2,generator:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:91
+generator:3,generator:4,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:92
+generator:4,generator:5,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:93
+generator:2,launcher:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:80
+launcher:1,launcher_rate:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:81
+launcher_rate:1,launcher_rate:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:82
+launcher_rate:2,launcher_rate:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:83
+hand:1,reward:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:94
+reward:1,reward:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:95
+reward:2,reward:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:96
+reward:3,reward:4,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:97
+reward:4,reward:5,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:98
+generator:2,duration:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:106
+duration:1,duration:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:107
+duration:2,duration:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:108
+duration:3,duration:4,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:109
+duration:4,duration:5,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:110
+paddle:2,robot:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:111
+robot:1,robot_speed:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:112
+robot_speed:1,robot_speed:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:113
+robot_speed:2,robot_speed:3,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:114
+robot_speed:3,robot_speed:4,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:115
+robot_speed:4,robot_speed:5,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:116
+hand:1,combo:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:118
+combo:1,capture_all:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:119
+capture_all:1,capture_recharge:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:120
+capture_recharge:1,capture_recharge:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:121
+generator:1,boost:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:122
+boost:1,boost_power:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:123
+boost:1,boost_duration:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:124
+boost_duration:1,boost_duration:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:125
+boost:1,boost_recharge:1,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:126
+boost_recharge:1,boost_recharge:2,arista dibujada / padre,lib/features/upgrades/domain/skill_tree.dart:SkillTree,docs/balance.csv:127
+generator:5,prestige:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:134
+reward:5,prestige:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:134
+duration:5,prestige:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:134
+hand:1,walls:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:128
+hand:1,walls:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:129
+hand:1,walls:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:130
+hand:1,bat:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:131
+hand:1,bat:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:132
+hand:1,bat:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:133
+hand:2,broom:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:99
+broom:1,paddle:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:100
+broom:1,paddle:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:101
+broom:1,paddle:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:102
+broom:1,paddle:4,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:103
+broom:1,paddle:5,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:104
+paddle:1,broom_v:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:105
+generator:3,double_spawn:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:117
+paddle:3,double_spawn:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:117
+hand:1,generator:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:89
+hand:1,generator:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:90
+hand:1,generator:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:91
+hand:1,generator:4,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:92
+hand:1,generator:5,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:93
+generator:2,launcher:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:80
+launcher:1,launcher_rate:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:81
+launcher:1,launcher_rate:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:82
+launcher:1,launcher_rate:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:83
+hand:1,reward:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:94
+hand:1,reward:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:95
+hand:1,reward:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:96
+hand:1,reward:4,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:97
+hand:1,reward:5,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:98
+generator:2,duration:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:106
+generator:2,duration:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:107
+generator:2,duration:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:108
+generator:2,duration:4,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:109
+generator:2,duration:5,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:110
+paddle:2,robot:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:111
+robot:1,robot_speed:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:112
+robot:1,robot_speed:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:113
+robot:1,robot_speed:3,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:114
+robot:1,robot_speed:4,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:115
+robot:1,robot_speed:5,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:116
+hand:1,combo:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:118
+combo:1,capture_all:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:119
+capture_all:1,capture_recharge:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:120
+capture_all:1,capture_recharge:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:121
+generator:1,boost:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:122
+boost:1,boost_power:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:123
+boost:1,boost_duration:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:124
+boost:1,boost_duration:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:125
+boost:1,boost_recharge:1,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:126
+boost:1,boost_recharge:2,requisito de compra CSV (no implica arista adicional),,docs/balance.csv:127

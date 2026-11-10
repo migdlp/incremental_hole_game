@@ -14,7 +14,7 @@ void main() {
       for (var i = 0; i < nodes.length; i++) {
         final node = nodes[i];
         expect(node.x, inInclusiveRange(40, 840));
-        expect(node.y, inInclusiveRange(32, SkillTree.canvasHeight - 48));
+        expect(node.y, inInclusiveRange(32, 1056));
         for (final other in nodes.skip(i + 1)) {
           expect(
             (Offset(node.x, node.y) - Offset(other.x, other.y)).distance,
@@ -29,24 +29,19 @@ void main() {
     'discovery exposes only the root and purchased immediate successors',
     () {
       final tree = SkillTree(testCatalog());
-      expect(tree.visible({}).map((n) => n.id), ['hand:1']);
+      expect(tree.visible({}).map((n) => n.id), ['prestige:1', 'hand:1']);
       expect(
         tree.visible({'hand': 1}).map((n) => n.id),
-        containsAll(['hand:2', 'reward:1']),
+        containsAll(['hand:2', 'generator:1']),
       );
       final first = tree.visible({'hand': 1}).map((n) => n.id);
-      expect(
-        first,
-        containsAll(['g1_auto:1', 'reward:1', 'sweep:1', 'hand:2']),
-      );
+      expect(first, containsAll(['generator:1', 'reward:1', 'hand:2']));
       expect(first, isNot(contains('broom:1')));
-      expect(first, contains('collection:1'));
+      expect(first, isNot(contains('collection:1')));
       expect(first, isNot(contains('duration:1')));
       expect(tree.visible({'hand': 2}).map((n) => n.id), contains('broom:1'));
       expect(
-        tree
-            .visible({'hand': 1, 'g1_auto': 1, 'g1_auto_speed': 1})
-            .map((n) => n.id),
+        tree.visible({'generator': 2}).map((n) => n.id),
         contains('duration:1'),
       );
     },
@@ -76,14 +71,7 @@ void main() {
       final visible = tree.visible(legacy);
       expect(
         visible.map((n) => n.id),
-        containsAll([
-          'paddle:1',
-          'paddle:2',
-          'broom:1',
-          'magnet:1',
-          'collection:1',
-          'hand:1',
-        ]),
+        containsAll(['paddle:1', 'paddle:2', 'broom:1', 'hand:1']),
       );
       expect(legacy.containsKey('generator'), isFalse);
     },
@@ -96,10 +84,12 @@ void main() {
   }) async {
     final session = GameSession(testCatalog(), MemoryStore())
       ..economy.balance = balance;
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     await tester.pumpWidget(GardenApp(session: session));
-    await tester.scrollUntilVisible(find.text('Ir al árbol de mejoras'), 200);
+    await tester.scrollUntilVisible(find.text('Tienda'), 200);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Ir al árbol de mejoras'));
+    await tester.tap(find.text('Tienda'));
     await tester.pumpAndSettle();
     expect(find.byType(SkillTreeScreen), findsOneWidget);
     if (inspect) {
@@ -133,7 +123,7 @@ void main() {
     expect(session.levels['hand'], 1);
     expect(session.economy.balance, 487);
     expect(find.byKey(const ValueKey('node-hand:2')), findsOneWidget);
-    expect(find.byKey(const ValueKey('node-reward:3')), findsNothing);
+    expect(find.byKey(const ValueKey('node-generator:3')), findsNothing);
     await tester.pump(const Duration(seconds: 4));
     expect(session.economy.balance, 487);
     await gesture.up();

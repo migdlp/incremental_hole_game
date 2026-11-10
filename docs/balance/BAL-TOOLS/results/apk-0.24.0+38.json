@@ -1,0 +1,20 @@
+{
+  "app_version": "0.24.0+38",
+  "version_code": 38,
+  "package": "com.migdlp.incremental_hole_game",
+  "source_commit": "e9ae413494fab80f3f8599e0b384679e50dae5ad",
+  "workflow_run": 40798127327,
+  "workflow_conclusion": "success",
+  "flutter_tests_passed": 502,
+  "python_tests_passed": 7,
+  "apk_artifact_id": 12864484189,
+  "apk_zip_bytes": 150893124,
+  "logs_artifact_id": 12865187315,
+  "artifact_expires_at": "2026-11-12T01:13:05Z",
+  "apk_download": "https://github.com/migdlp/incremental_hole_game/actions/runs/40798127327/artifacts/12864484189",
+  "certificate_sha256": "e0a66714e09e6e5a4c498e0695f656d87d0c83098fe88e148934eb9c359dee3d",
+  "previous_delivered_0_23_1_37_certificate_sha256": "dfef1eacd44a782530ca8937cf120765745b1807edd1e5338e1cabbd1f731010",
+  "same_signature_as_previous_delivered_apk": false,
+  "apk_checksum": "Included in artifact as feed-the-hole-debug.apk.sha256; computed by successful CI",
+  "physical_android_install_share_test": "pending"
+}

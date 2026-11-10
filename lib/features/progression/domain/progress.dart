@@ -43,6 +43,6 @@ class Progress {
   void finish(DayResult result) {
     last = result;
     if (result.income > record) record = result.income;
-    day++;
+    // The next day starts only when the player begins production again.
   }
 }

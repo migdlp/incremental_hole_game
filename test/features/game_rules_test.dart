@@ -1,3 +1,4 @@
+import 'package:incremental_hole_game/features/feeding/domain/feeding_progress.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,11 +25,12 @@ void capture(GameSession session) {
 void main() {
   final catalog = testCatalog();
   test('balance source includes tool and coin unlocks with prerequisites', () {
-    expect(catalog.definitions.length, 28);
+    expect(catalog.definitions.length, 22);
     final levels = {for (final d in catalog.definitions) d.id: d.levels.length};
     final max = catalog.settings(levels);
-    expect(max['production_duration'], 25);
+    expect(max['production_duration'], 30);
     expect(max['ball_value'], 13);
+    expect(max['spawn_interval'], closeTo(1 / (1.5 * 3.0517578125), 1e-9));
     expect(
       () => UpgradeCatalog.fromCsv('invalid\nbase,x'),
       throwsFormatException,
@@ -51,16 +53,12 @@ void main() {
     expect(session.economy.balance, 0);
     advance(session, .3);
     expect(session.economy.generated, 1);
-    final coin = session.board!.coins.single;
-    session.touch(coin.position);
-    session.release();
-    session.touch(coin.position);
-    session.release();
+    advance(session, 3);
     expect(session.economy.collected, 1);
     expect(session.board!.pending, 0);
   });
   test('coin cap and queued denominations preserve every unit of value', () {
-    final settings = catalog.settings({});
+    final settings = catalog.settings({}, balanceVersion: 14);
     settings.values['coin_pile_limit'] = 2;
     final board = Board(settings);
     for (var i = 0; i < 1000; i++) {
@@ -72,7 +70,7 @@ void main() {
     expect(restored.pending, 5000);
   });
   test('fast pointer sweep collects between endpoints exactly once', () {
-    final board = Board(catalog.settings({'sweep': 1}));
+    final board = Board(catalog.settings({'sweep': 1}, balanceVersion: 14));
     board.coins.add(Coin(board.nextId++, const Vec(120, 300), 7, landing: 0));
     board.touch(const Vec(30, 300));
     var collected = board.drag(const Vec(240, 300));
@@ -83,55 +81,65 @@ void main() {
     expect(collected, 7);
     expect(board.coins, isEmpty);
   });
-  test('ten complete cycles bank once, discard pending and begin clean', () {
-    final session = GameSession(catalog, MemoryStore());
-    for (var day = 1; day <= 10; day++) {
-      session.startDay();
-      expect(session.board!.coins, isEmpty);
-      expect(session.board!.balls, isEmpty);
-      capture(session);
-      advance(session, .3);
-      session.touch(session.board!.coins.single.position);
-      session.release();
-      session.board!.balls.add(
-        Ball(session.board!.nextId++, const Vec(40, 450), Vec.zero),
-      );
-      capture(session);
-      advance(session, 66);
-      expect(session.running, isFalse);
-      expect(session.board, isNull);
-      expect(jsonDecode(session.snapshot())['run'], isNull);
-      expect(session.economy.balance, day);
-      expect(session.progress.last!.lost, 1);
-      expect(session.progress.last!.income, 1);
-      session.finishDay();
-      expect(session.economy.balance, day);
-    }
-    expect(session.progress.day, 11);
-    expect(session.progress.record, 1);
-  });
+  test(
+    'ten complete cycles bank once, discard pending and begin clean',
+    () async {
+      final session = GameSession(
+        testCatalog(automaticSpawns: false),
+        MemoryStore(),
+      )..levels.addAll({'hand': 1, 'reward': 1});
+      // This accounting fixture disables quota defeat; four-day survival has its own tests.
+      session.feeding = FeedingProgress(startDay: 1, target: null);
+      for (var day = 1; day <= 10; day++) {
+        session.startDay();
+        expect(session.board!.coins, isEmpty);
+        expect(session.board!.balls, isEmpty);
+        capture(session);
+        advance(session, .3);
+        advance(session, 2);
+        session.board!.balls.add(
+          Ball(session.board!.nextId++, const Vec(40, 450), Vec.zero),
+        );
+        capture(session);
+        advance(session, 66);
+        expect(session.running, isFalse);
+        expect(session.board, isNull);
+        expect(jsonDecode(session.snapshot())['run'], isNull);
+        expect(session.economy.balance, day * 4);
+        expect(session.progress.last!.lost, 0);
+        expect(session.progress.last!.income, 4);
+        session.finishDay();
+        expect(session.economy.balance, day * 4);
+        await session.pendingWrites;
+      }
+      expect(session.progress.day, 10);
+      expect(session.progress.record, 4);
+    },
+  );
   test(
     'purchases enforce phase, funds, prerequisite and level cap atomically',
     () {
       final session = GameSession(catalog, MemoryStore());
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       final robot = catalog.definitions.firstWhere((d) => d.id == 'robot');
       final paddle = catalog.definitions.firstWhere((d) => d.id == 'paddle');
       session.economy.balance = 1000;
       expect(session.purchase(robot), isFalse);
       expect(session.economy.balance, 1000);
-      for (final id in ['hand', 'hand', 'broom', 'paddle', 'paddle', 'sweep']) {
+      for (final id in ['hand', 'hand', 'broom', 'paddle', 'paddle']) {
         expect(
           session.purchase(catalog.definitions.firstWhere((d) => d.id == id)),
           isTrue,
         );
       }
       expect(session.purchase(robot), isTrue);
-      expect(session.economy.balance, 502);
+      expect(session.economy.balance, 527);
       expect(session.purchase(robot), isFalse);
       session.startDay();
       expect(session.board!.settings['robot_count'], 1);
       expect(session.purchase(paddle), isFalse);
-      expect(session.economy.balance, 502);
+      expect(session.economy.balance, 527);
       session.finishDay();
       session.economy.balance = 0;
       expect(session.purchase(paddle), isFalse);
@@ -164,13 +172,13 @@ void main() {
         ..restore(session.snapshot());
       expect(restored.paused, isTrue);
       expect(restored.board!.paddle, isNull);
-      expect(restored.board!.pending, 1);
-      expect(restored.board!.coins.single.landing, greaterThan(0));
+      expect(restored.rewards.outstanding, 0);
+      expect(restored.economy.collected, 1);
+      expect(restored.board!.coins, isEmpty);
       expect(restored.board!.randomState, session.board!.randomState);
       restored.resume();
       advance(restored, .3);
-      restored.touch(restored.board!.coins.single.position);
-      restored.release();
+
       restored.finishDay();
       restored.finishDay();
       expect(restored.economy.balance, 1);
@@ -281,11 +289,13 @@ void main() {
         expect(events.collected, 0);
       }
       expect(captured, 1);
-      expect(board.pending, 2);
+      expect(board.pending, 0);
     },
   );
-  test('magnet works only with pointer held near the coin', () {
-    final board = Board(catalog.settings({'collection': 1, 'magnet': 1}));
+  test('historical magnet works only with pointer held near the coin', () {
+    final board = Board(
+      catalog.settings({'collection': 1, 'magnet': 1}, balanceVersion: 14),
+    );
     board.coins.add(Coin(board.nextId++, const Vec(140, 300), 2, landing: 0));
     for (var i = 0; i < 60; i++) {
       board.update(1 / 60, producing: false);
@@ -297,77 +307,5 @@ void main() {
       collected += board.update(1 / 60, producing: false).collected;
     }
     expect(collected, 2);
-  });
-
-  group('save version 6', () {
-    test('old version saves are ignored and a new game starts', () async {
-      final store = MemoryStore()
-        ..candidates = ['{"version":5,"day":9,"balance":500}'];
-      final session = GameSession(catalog, store);
-      await session.load();
-      expect(session.progress.day, 1);
-      expect(session.economy.balance, 0);
-      expect(session.levels, isEmpty);
-      expect(session.recoveryMessage, isNull);
-    });
-
-    test('current version roundtrip keeps progress', () async {
-      final session = GameSession(catalog, MemoryStore());
-      session.economy.balance = 40;
-      session.progress.day = 3;
-      final store = MemoryStore()..candidates = [session.snapshot()];
-      final fresh = GameSession(catalog, store);
-      await fresh.load();
-      expect(fresh.economy.balance, 40);
-      expect(fresh.progress.day, 3);
-    });
-
-    test('damaged current save still raises the explicit reset error', () {
-      final store = MemoryStore()..candidates = ['{"version":6,"day":-1}'];
-      expect(GameSession(catalog, store).load(), throwsFormatException);
-    });
-
-    test('damaged main save falls back to a valid v6 backup', () async {
-      final good = GameSession(catalog, MemoryStore());
-      good.economy.balance = 7;
-      final store = MemoryStore()
-        ..candidates = ['{"version":6,"day":-1}', good.snapshot()];
-      final session = GameSession(catalog, store);
-      await session.load();
-      expect(session.economy.balance, 7);
-      expect(session.recoveryMessage, contains('copia de seguridad'));
-    });
-
-    test('valid main save wins over an old backup', () async {
-      final good = GameSession(catalog, MemoryStore());
-      good.economy.balance = 9;
-      final store = MemoryStore()
-        ..candidates = [good.snapshot(), '{"version":5,"day":2}'];
-      final session = GameSession(catalog, store);
-      await session.load();
-      expect(session.economy.balance, 9);
-      expect(session.recoveryMessage, isNull);
-    });
-
-    test('non-JSON text counts as a damaged current save', () {
-      final store = MemoryStore()..candidates = ['not json'];
-      expect(GameSession(catalog, store).load(), throwsFormatException);
-    });
-
-    test('a coin with an invalid value makes the board save invalid', () {
-      final board = Board(catalog.settings({}));
-      board.coins.add(Coin(board.nextId++, const Vec(100, 300), 3, landing: 0));
-      expect(
-        () => Board.fromJson(catalog.settings({}), board.toJson()),
-        throwsFormatException,
-      );
-    });
-
-    test('snapshot writes version 6 and balance version 7', () {
-      final session = GameSession(catalog, MemoryStore())..startDay();
-      final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
-      expect(json['version'], 6);
-      expect(json['run']['balanceVersion'], 7);
-    });
   });
 }

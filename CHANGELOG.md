@@ -1,15 +1,262 @@
 # Historial de cambios
 
+## Cuotas iniciales — 27/10/2026
+
+- Objetivos 25, 50, 100, 500, 1.000, 10.000, 100.000, 1.000.000 y ×10 sucesivo.
+- JSON v17 con curva identificada; migración de progreso antiguo al reanudar,
+  conservando excedentes y sin repetir crecimiento, estrellas ni cartas E03.
+- Plazos de cuatro jornadas, economía y duración de producción conservados.
+
+
+## 0.23.0+36 — E03: cartas de evolución
+
+- Elección por cuota, hasta tres opciones y doce habilidades permanentes de cinco niveles.
+- Pausa del tablero y guardado protegido de cada carta, incluida la última captura del día.
+- Efectos físicos, producción, masa y economía enteros integrados con P01/P02/AJ-009.
+- JSON v16, migración sin cartas retroactivas y contadores reiniciados al prestigiar.
+- Validación remota opcional y mediciones de simulación; Android físico pendiente.
+
+
+## 0.22.0+35 — Cuatro jornadas por cuota
+
+- Cuotas por bolas con cuatro jornadas independientes, incluyendo la jornada de activación.
+- Derrota directa al cuarto cierre sin cumplir; acceso a la misma tienda P02.
+- Plazo únicamente en resultados; día siguiente al iniciar su producción.
+- JSON v15 y migración de partidas anteriores sin derrota retroactiva.
+- Catálogo P02, coste del nodo voluntario, economía y crecimiento conservados.
+
+
+## 0.21.0+34 — P02: mejoras permanentes
+
+- Herencia, Eco de producción, Fiebre dorada y Lluvia astral, con compra única y confirmación.
+- Guardado protegido de compras y efectos temporales por partida/jornada.
+- La tienda normal se habilita tras la primera jornada de cada partida.
+- Burbujas de cuotas inmediatas y optimización de contactos para poblaciones altas.
+- Sin modificar costes del nodo de prestigio, economía de capturas ni cuotas AJ-005B.
+
+
+## 0.20.0+33
+
+- AJ-009: reemplaza el saldo del gameplay por pilas de monedas superpuestas de la jornada.
+- Caras ovaladas y capas alineadas, según el aspecto aprobado por el usuario.
+- Destinos reservados, orden de llegada y colección estática reutilizable.
+- Reinicio diario, cierre visual acotado y restauración sin repetir pagos.
+- Saldo en Tienda/resultados conservado; sin cambios económicos ni de denominaciones.
+- Balance v20 y JSON v14 con extensión visual opcional; Android físico pendiente.
+
+
+## 0.19.2+32
+
+- Monedas aisladas: sustituyen la nota suelta por un fragmento corto de la cascada.
+- La lluvia masiva conserva sus recursos y progresión musical; sin cambios económicos.
+
+
+## 0.19.1+31
+
+- BUG-002: un único emisor secuencial, con una salida máxima por fotograma real.
+- Dispersión angular variada y ola horaria con cadencia y giro suavizados según carga.
+- Orígenes y curvas adaptados al crecimiento y bordes; animación y pausa conservadas.
+- Presupuesto adaptable y agrupación por capacidad, sin cambiar plan ni recompensas.
+- Parámetros de presentación DEBUG; balance v20 y guardados sin modificaciones.
+- Validación y calibración en Android físico pendientes.
+
+## AJ-005B — Cuotas infinitas por bolas capturadas
+
+- Cada bola aporta una unidad, independientemente de dinero, dorada o racha.
+- Cuotas 100/1.000/10.000… inmediatas, con excedentes y eventos P01 por cuota.
+- Sin vencimientos, bloqueo DEBUG ni derrota por cuotas; prestigio voluntario conservado.
+- Crecimiento de área del 16 % por cuota, persistente y sin duplicados.
+- HUD, Tienda y resultados en bolas, sin jornadas restantes.
+- JSON v14 con BigInt decimales y migración segura: conserva cuotas y crecimientos,
+  sin convertir progreso monetario antiguo en bolas.
+- Proyección del agujero acotada al cubrir todo el tablero, sin limitar cuotas.
+
+## 0.19.0+30
+
+- AJ-007: mezcla centralizada offline, seis plops, capas suaves y cascadas musicales.
+- Háptica agrupada con prioridad, volumen persistente y ajustes DEBUG independientes.
+- Hundimiento de bolas con ocultación por el borde y reacción agrupada del hoyo.
+- Integración con monedas, estrellas y compras sin modificar la contabilidad.
+- Recursos originales/CC0 y scripts regenerables; calibración física/artística pendiente.
+
+
+## 0.18.1+29
+
+- BUG-001: microlotes de 200 ms y lluvia de monedas con denominaciones exactas y variadas.
+- Expulsión rápida, pooling, oleadas y agrupación progresiva conservando cantidad y valor.
+- Estadísticas por microlote compatibles con AJ-008A y restauración sin ingresos duplicados.
+- Parámetros y presets de captura DEBUG, diagnóstico de picos y benchmarks Cloud.
+- Balance v20 con v19 congelado. Calibración de rendimiento en Android físico pendiente.
+
+## 0.18.0+28
+
+- AJ-008A: resultados en dos bloques progresivos, sin cambiar ingresos ni cuotas.
+- Monedas por denominación vuelan desde cada fila al monedero global; alimentación animada después.
+- Saltos por bloque, movimiento reducido, scroll móvil y acceso final a Tienda.
+- Paleta de monedas bronce/plata/oro/verde/rojo para los cinco valores existentes.
+
+## 0.17.0+27
+
+- AJ-005A: cada cuota completada aumenta el área del hoyo un 16 %, una sola vez.
+- Dibujo y captura comparten el radio ampliado; persistencia entre jornadas y reinicios.
+- Guardado v13 con contador y cuota aplicada; migración segura desde versiones anteriores.
+- Las cuotas históricas no vuelven a premiarse; el prestigio reinicia el tamaño de la partida.
+
+## 0.16.2+26
+
+- Las monedas esperan inmóviles un segundo tras el salto, antes de volar al monedero.
+- El vuelo conserva su recorrido y estética; empieza más despacio y acelera.
+- Cobro sincronizado con la nueva duración, sin alterar importes ni liquidaciones.
+
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
-## Generadores-cañón — 2026-11-10 · 0.6.0+11
+## 0.16.1+25 — Posición del agujero al 22 %
 
-- El generador fijo y las mejoras «Generador rápido» y «Doble emisión» se sustituyen por cañones que oscilan en un arco de 150° (barrido de ida y vuelta en 2 s) y disparan a 520 u/s con recarga de 1 s. Al principio se toca el cañón para disparar; el cuerpo del cañón es sólido.
-- Mejoras por cañón: Automático, Ritmo automático y Puntería. Se pueden comprar los cañones 2, 3 y 4 en huecos fijos. El árbol pasa a 28 tipos y 74 nodos, con un lienzo de 864 × 1120. «Día más largo» exige «Cañón 1 · Ritmo automático I». Precios provisionales.
-- El hoyo solo captura bolas libres a ≤ 140 u/s (las agarradas se capturan por posición). Rebote en paredes de 0,55 y velocidad máxima de bola de 600 u/s, configurables en `docs/balance.csv`.
-- Guardado v6 sin migraciones: las partidas anteriores se descartan sin aviso y se borran el código de migración y los balances congelados. Balance 7.
-- Código `52e3fab523df0b97e76054e3ad3f86d633d4e4d6` (merge de la PR #32). [Pipeline manual 42779376477](https://github.com/migdlp/incremental_hole_game/actions/runs/42779376477) correcta: formato, análisis, 169 pruebas, compilación del APK y firma v2 verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/42779376477/artifacts/13746015999), disponible hasta el 24 de noviembre de 2026.
-- 169 pruebas correctas, análisis sin incidencias y compilación web. Validación en Android físico y ajuste de precios jugando pendientes. Las PR son #28 a #31 y la PR 5 de cierre.
+- Centro en (180,123.2), manteniendo la horizontal. Captura, succión, robot,
+  monedas y estrellas sincronizados. Sin cambio de tamaño ni nuevas mejoras.
+- Balance v19 con v18 congelado para conservar jornadas ya empezadas.
+
+## 0.16.0+24 — Ajustes AJ-001 a AJ-004
+
+- Fuerza alta base ×4 sin rama de fuerza; capacidad independiente conservada.
+  Devolución única del coste de los niveles de fuerza retirados.
+- Monedas con disco, canto y grabado, conservando toda la contabilidad C01.
+- Contador de monedas sin panel de fondo.
+- Hoyo aproximadamente al 75 % del tablero, configurable y sincronizado con captura, atracción,
+  robot, monedas y burbujas. No se cambia la emisión para compensar su proximidad.
+- JSON v12 / balance v18 con v17 congelado para jornadas interrumpidas.
+- AJ-005 pendiente de identificar qué compras deben activar el crecimiento.
+
+## 0.15.0+23 — P01: estrellas y burbujas físicas
+
+- Recompensa de cuota única con burbujas flotantes, categorías y valores provisionales.
+- Agarre/lanzamiento y colisiones con bolas, paredes y herramientas; rotura por
+  impacto relativo fuerte, efecto y vuelo al contador de prestigio.
+- Cobro permanente en la rotura, independiente de animaciones y protegido frente
+  a restauraciones antiguas. Pendientes reaparecen entre jornadas y se pierden
+  al morir o prestigiar, conforme a la decisión P01 que sustituye S03 provisional.
+- JSON v11 / balance v17 con v16 congelado; límites de cuerpos y pool visual separados
+  de premios. DEBUG ajusta parámetros y fuerza recompensas sin alterar la partida.
+- Gravedad y succión son experimentos DEBUG pendientes de decisión final.
+  BAL01, P02 y rendimiento en Android físico continúan pendientes.
+
+## 0.14.0+22 — S03: prestigio y metaprogresión
+
+- Incumplir cuota termina la partida en normal; DERROTA sencilla, tienda y nueva
+  partida. Autorización expresa para usar todavía las cuotas provisionales.
+- Nodo Prestigio visible desde el inicio, grande y girado 45°, con confirmación y
+  reinicio inmediato. Coste, posición y requisitos de prueba pendientes de BAL01.
+- Reset de partida separado de estrellas, compras y descubrimientos permanentes;
+  datos P01 pendientes conservados sin cobrar ni descartar. Sin catálogo P02 inventado.
+- JSON v10 / balance v16 con v15 congelado. Checkpoint independiente con dos copias
+  actuales, revisiones monotónicas y recuperación sin revivir partidas terminadas.
+- Pruebas DEBUG aisladas; Comprar todo excluye la acción para evitar reinicios accidentales.
+
+## 0.13.0+21 — C01: cobro automático
+
+- Recompensa completa garantizada al capturar; monedas decorativas salen del hoyo
+  tras ~1 s y vuelan en curva al monedero. Pool, agrupación y calidad adaptativa.
+- Sin recogida manual ni fase final; cierre liquida todo, pausa congela y restaurar
+  abona pendientes sin duplicados. Alimentación y multiplicadores conservados.
+- Barrido, Área, Imán y Atracción retirados sin reembolso, autorizado por el usuario.
+  Robot conserva Escoba ancha II como único requisito. Catálogo 59 nodos/22 tipos.
+- JSON v9 / balance v15 con v14 congelado. Migración de monedas físicas y reservas.
+- DEBUG permite comparar presupuestos y copiar métricas. Rendimiento real de
+  Android y presupuesto definitivo pendientes de medición física.
+
+## 0.12.0+20 — S01: prototipo de alimentación y cuotas
+
+- Alimentación con recompensa completa, incluidos combos, doradas y Captura total;
+  independiente de recoger monedas, sin descontar dinero.
+- Períodos de cinco jornadas, resumen y anillo bajo las bolas sin cambiar captura.
+  Cumplir antes no adelanta el período ni da recompensas.
+- Cuotas provisionales también en juego normal (10/+10, pendientes de BAL01).
+  Incumplimiento informado sin derrota ni pérdidas hasta S03; simulación DEBUG
+  y reinicio reversibles, aislados de la partida real.
+- JSON v8 / balance v14 con v13 congelado. Restauración sin repetir alimentación
+  y migración desde jornadas anteriores sin inventar capturas históricas.
+
+## 0.11.0+19 — M03: Generador lanzador
+
+- Segundo generador orientable con frecuencia propia, potencia fija y compra
+  independiente en Producción; valores configurables y provisionales.
+- Control de uno/dos dedos y franja inferior que limita cuerpo y cañón completos.
+  Sigue disparando agarrado, sin retroceso; línea roja al alcanzar el límite.
+- Contactos físicos con presión acumulada y resistencia a tres bolas, desplazamiento
+  lento sin giro; obstrucciones y límite global sin emisiones superpuestas ni ráfagas.
+- Pose persistente entre jornadas/reinicios y reloj/RNG guardados. Pausa y recogida
+  congelan; DEBUG aislado. JSON v7 / balance v13 con v12 congelado, 69 nodos/26 tipos.
+
+## 0.10.0+18 — E02: Agujero negro
+
+- Apariciones periódicas independientes, varios objetos simultáneos sin sensores,
+  3–6 toques y succión ampliada hasta 10 s sin cambiar captura ni recompensas.
+- Activación repetida restablece tiempo sin acumular radio/potencia; ondas bajo
+  bolas/herramientas, daño progresivo y sonido sujeto a ajustes.
+- Pausa/restauración conservan objetos y efecto sin duplicar activaciones.
+  Recogida elimina ambos; monedas, herramientas y agarres protegidos.
+- DEBUG fuerza 1–3 objetos sin sobrescribir la partida; JSON v7 / balance v12,
+  v11 congelado. Parámetros físicos, intervalo y presentación provisionales.
+
+## 0.9.0+17 — E01: Gravedad
+
+- Evento aleatorio de producción, 5 % por jornada compatible, un objeto como
+  máximo y 3–6 toques para activar hasta 10 s de gravedad por inclinación.
+- Sensor de gravedad Android con acelerómetro filtrado alternativo y comprobación
+  real de lecturas. Muestreo suspendido en pausa, segundo plano y recogida.
+- Fuerza gradual en bolas y herramientas libres, agarres y monedas protegidos;
+  anuncio de activación, daño visible y límites físicos conservados.
+- Estado del evento y velocidades libres guardados, RNG separado de las bolas,
+  balance v11 con v10 congelado y forzado/simulación temporal desde DEBUG.
+- Física/aspecto provisionales; daño por bolas y otros eventos simultáneos siguen abiertos.
+
+## 0.8.0+16 — M02: Bate de béisbol
+
+- Bate físico independiente, desbloqueable con tres niveles de potencia activa;
+  costes y parámetros configurables y provisionales.
+- Control rígido de uno/dos dedos compartido con la escoba. Impulso por velocidad
+  relativa y giro, rebote pasivo constante, contactos persistentes sin bonificación
+  repetida y límite final de velocidad compartido con paredes.
+- Feedback visual opcional, clic de impacto y vibración breve con preferencia
+  persistente y agrupación de impactos.
+- Pose y compras guardadas; balance v10 con v9 congelado. DEBUG aislado del progreso.
+
+## 0.7.0+15 — M01: Paredes rebotadoras
+
+- Tres niveles de potencia de rebote, automáticos y persistentes, configurables
+  en CSV. Multiplicadores, precios y requisitos provisionales de prueba.
+- Límites de velocidad, resolución convencional de esquinas y captura de bolas
+  rápidas por recorrido/subpasos. Monedas y recogida final conservadas.
+- Líneas elásticas y ondas por impacto, con efectos transitorios acotados.
+- Balance v9; las jornadas anteriores conservan sus ajustes v8 congelados.
+
+## 0.6.0+14 — G01: Feed the Hole
+
+- Nuevo nombre visible en Android, interfaz y web: Feed the Hole.
+- Documentación vigente y PRD actualizados; referencias históricas conservadas.
+- Mismo identificador Android, repositorio, almacenamiento y migraciones.
+- Sin cambios de mecánicas, iconos ni gráficos.
+
+## 0.6.0+13
+
+- Agujero arriba y generador abajo, intercambiando sus posiciones. El generador emite hacia arriba y su salida visual sigue esa dirección.
+
+## 0.6.0+12
+
+- Jornada base de 20 segundos: 15 para generar bolas y 5 para recoger monedas.
+- Las mejoras de duración progresan ahora de 18 a 30 segundos de producción.
+- Las jornadas guardadas con balance v1–v6 conservan su configuración hasta finalizar; el nuevo balance se aplica al comenzar otra jornada.
+- El modo debug del árbol cuenta con pruebas para ambas vistas, compras y pantalla móvil.
+- Verificación local: 135 pruebas y análisis estático correctos. El APK requiere la pipeline Android porque este entorno no tiene Android SDK.
+
+## Combos y planificación del brainstorm — 2026-10-19 · 0.6.0+11 (sin entrega APK registrada)
+
+- Combos desde el inicio: ventana inclusiva de 1 s; ×2 desde la quinta captura y ×3 desde la décima. Feedback visual sin publicar la fórmula en la UI. Cuentan provisionalmente todas las capturas, incluidas las asistidas.
+- Recompensas ordenadas por captura combinan Valor vigente, dorada y combo; se generan como monedas que hay que recoger. Las rachas no modifican premios pasados y terminan al cerrar producción.
+- JSON v6 persiste racha, ventana y bonificación acumulada. Pausa y recarga no consumen ni reinician tiempo; las jornadas v1–v5 mantienen sus reglas hasta terminar.
+- Tiers, potenciadora, cartas, mecanismos de fábrica, pinball, duplicadora, bomba/impulso y controles quedan descritos con decisiones abiertas en cambios futuros. El árbol y balance vigentes no cambian.
+- Modo de depuración temporal: acceso desde el saldo del árbol tras 3 s, mapa completo o vista del jugador, compra gratuita de cualquier nodo con sus requisitos, compra total, monedas de prueba y reinicio. Se pueden jugar jornadas de prueba; salir o reabrir recupera el progreso normal.
+- 134 pruebas correctas; aceptación táctil y balance jugando pendientes.
 
 ## UI, monedas y economía CF-09 a CF-15 — 2026-10-19 · 0.5.0+10
 

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app/game_app.dart';
 import 'app/game_session.dart';
+import 'features/motion/android_motion_input.dart';
 import 'features/upgrades/domain/catalog.dart';
 import 'persistence/store_factory.dart';
+import 'persistence/save_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,24 +32,37 @@ class _BootstrapState extends State<Bootstrap> {
   Future<void> _load({bool fresh = false}) async {
     setState(() {
       error = null;
+      canReset = false;
     });
     try {
       final catalog = UpgradeCatalog.fromCsv(
         await rootBundle.loadString('docs/balance.csv'),
       );
       final store = await createSaveStore();
-      final next = GameSession(catalog, store);
+      final motion = AndroidMotionInput();
+      await motion.initialize();
+      final next = GameSession(catalog, store, motion: motion);
       try {
         if (!fresh) {
           await next.load();
         } else {
+          if (store is PrestigeStore &&
+              (await (store as PrestigeStore).loadPrestigeCandidates())
+                  .isNotEmpty) {
+            throw const FormatException(
+              'Hay datos permanentes de prestigio. No se ha creado un perfil vacío sobre ellos.',
+            );
+          }
           await next.save();
         }
       } on FormatException {
         next.dispose();
-        canReset = true;
+        canReset =
+            store is! PrestigeStore ||
+            (await (store as PrestigeStore).loadPrestigeCandidates()).isEmpty;
         rethrow;
       }
+      await next.feedback.prepare();
       if (!mounted) {
         next.dispose();
         return;
@@ -90,7 +105,7 @@ class _BootstrapState extends State<Bootstrap> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Text(
-                          'No pudimos abrir el jardín',
+                          'No pudimos abrir Feed the Hole',
                           style: TextStyle(fontSize: 24),
                         ),
                         const SizedBox(height: 16),

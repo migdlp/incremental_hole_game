@@ -18,32 +18,26 @@ class SkillTree {
   SkillTree(UpgradeCatalog catalog) {
     List<(double, double)> line(int x, int y, int dx, int dy, int count) => [
       for (var i = 0; i < count; i++)
-        (48.0 + (x + dx * i + 2) * spacing, 48.0 + (y + dy * i + 6) * spacing),
+        (48.0 + (x + dx * i + 2) * spacing, 48.0 + (y + dy * i + 2) * spacing),
     ];
     final routes = {
+      'prestige': [(48.0, 48.0)],
       'hand': [...line(5, 3, 0, 0, 1), ...line(6, 4, 1, 1, 4)],
-      'hand_grip': [...line(6, 3, 0, 0, 1), ...line(7, 2, 1, -1, 4)],
-      'g1_auto': line(4, 2, 0, 0, 1),
-      'g1_auto_speed': line(3, 1, -1, -1, 4),
-      'g1_aim': line(3, 2, -1, 0, 5),
-      'g2_unlock': line(4, -3, 0, 0, 1),
-      'g2_auto': line(3, -3, 0, 0, 1),
-      'g2_auto_speed': line(2, -3, -1, 0, 2),
-      'g2_aim': line(4, -4, 0, -1, 3),
-      'g3_unlock': line(6, -3, 0, 0, 1),
-      'g3_auto': line(7, -3, 0, 0, 1),
-      'g3_auto_speed': line(8, -3, 1, 0, 2),
-      'g3_aim': line(6, -4, 0, -1, 3),
-      'g4_unlock': line(8, -5, 0, 0, 1),
-      'g4_auto': line(9, -5, 0, 0, 1),
-      'g4_auto_speed': line(10, -5, 0, 1, 2),
-      'g4_aim': line(8, -6, 1, 0, 3),
+      'generator': line(4, 2, -1, -1, 5),
+      'launcher': line(3, -1, 0, 0, 1),
+      'launcher_rate': line(2, -2, 1, 0, 3),
       'duration': line(2, 1, -1, 0, 5),
+      'double_spawn': line(-2, 0, 0, 0, 1),
       'reward': line(5, 2, 0, -1, 5),
-      'sweep': line(4, 4, 0, 0, 1),
-      'collection': line(4, 3, -1, 0, 5),
-      'magnet': line(2, 4, 0, 0, 1),
-      'attraction': line(1, 5, -1, 1, 3),
+      'walls': line(5, 4, 0, 1, 3),
+      'bat': [...line(2, 6, 0, 1, 2), ...line(3, 7, 0, 0, 1)],
+      'combo': line(6, 2, 0, 0, 1),
+      'capture_all': line(7, 3, 0, 0, 1),
+      'capture_recharge': line(8, 3, 1, 0, 2),
+      'boost': line(3, 2, 0, 0, 1),
+      'boost_power': line(2, 2, 0, 0, 1),
+      'boost_duration': line(3, 4, 0, 1, 2),
+      'boost_recharge': line(3, 0, 1, 0, 2),
       'broom': line(6, 5, 0, 0, 1),
       'paddle': line(6, 6, 0, 1, 5),
       'broom_v': line(7, 6, 0, 0, 1),
@@ -79,8 +73,7 @@ class SkillTree {
     }
   }
   static const spacing = 64.0;
-  static const canvasWidth = 864.0;
-  static const canvasHeight = 1120.0;
+  static const canvasSize = 864.0;
   final Map<(String, String), List<(double, double)>> paths = {};
   final List<SkillNode> nodes = [];
   SkillNode get root => nodes.firstWhere((n) => n.id == 'hand:1');
@@ -109,7 +102,10 @@ class SkillTree {
     }
 
     final start = (parent.x, parent.y), end = (child.x, child.y);
-    if (clear(start, end)) return [start, end];
+    final dx = (end.$1 - start.$1).abs(), dy = (end.$2 - start.$2).abs();
+    if ((dx == 0 || dy == 0 || dx == dy) && clear(start, end)) {
+      return [start, end];
+    }
     (double, double) point((int, int) cell) =>
         (48.0 + cell.$1 * 32, 48.0 + cell.$2 * 32);
     final source = (
@@ -181,6 +177,7 @@ class SkillTree {
     }
 
     for (final node in nodes) {
+      if (node.definition.id == 'prestige') ids.add(node.id);
       if (node.owned(levels)) reveal(node);
       if (unlocked(node, levels)) ids.add(node.id);
     }

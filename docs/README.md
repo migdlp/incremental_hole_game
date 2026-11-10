@@ -1,14 +1,52 @@
-# Documentación de Jardín mecánico
+# Documentación de Feed the Hole
 
-Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` hasta `1720fba`, incluido el árbol progresivo. La documentación distingue implementación, evidencias de prueba y objetivos pendientes.
+## BAL-TOOLS — Laboratorio de balance (29/10/2026)
+
+[Estado y tickets #21–#26](balance/BAL-TOOLS/README.md) ·
+[Contrato v1](balance/BAL-TOOLS/contrato-v1.md) · [Uso](balance/BAL-TOOLS/uso.md) ·
+[Entrega y evidencias](balance/BAL-TOOLS/entrega.md).
+Build instrumentada0.24.0+38, JSON v17/balance20. Exportación local DEBUG,
+runner de GameSession y comparador disponibles. BAL01 puede iniciar recogida;
+04 y referencia humana de06 pendientes de testers Android. Sin cambios de
+cuotas/precios/físicas. AUD01 sigue siendo histórico de0.23.0+36.
+
+> **27/10/2026 — Cuotas vigentes:** 25 → 50 → 100 → 500 → 1.000 → 10.000
+> → 100.000 → 1.000.000 → ×10. [Curva y migración](cuotas-progresion-inicial.md).
+> JSON v17; se conservan el plazo de cuatro jornadas y las cartas E03 actuales.
+
+
+> **AJ-005B:** [cuotas infinitas por bolas capturadas](aj-005b-cuotas-infinitas.md), sin vencimiento ni
+> derrota por cuotas, con excedentes, crecimiento AJ-005A y eventos P01. JSON v14.
+> Esta actualización prevalece sobre las reglas históricas de alimentación.
+
+
+- [AJ-001 a AJ-005 · Ajustes actuales, compatibilidad y aclaración pendiente](ajustes-version-actual.md).
+
+- [P01 · Estrellas, burbujas físicas, persistencia y parámetros DEBUG](p01-estrellas-burbujas.md).
+
+- [S03 · Derrota, prestigio, checkpoints y dependencias P01/P02/BAL01](s03-prestigio-metaprogresion.md).
+
+- [C01 · Cobro automático, persistencia, DEBUG y medición pendiente](c01-cobro-automatico.md).
+
+Referencias de relevo actualizadas el **21/10/2026** para el último APK **0.16.0+24**. Empieza por [relevo de contexto](relevo-contexto.md), [estado actual](estado-actual.md) y [cambios futuros](cambios-futuros-arbol-mejoras.md). Los planes y evidencias de entregas anteriores se conservan como historia; sus cifras pueden estar reemplazadas.
+
+[G01 — cambio de nombre a Feed the Hole y bloqueo de firma](g01-feed-the-hole.md).
+
+[M01 — paredes rebotadoras, balance provisional y pruebas](m01-paredes-rebotadoras.md).
+
+[M02 — bate de béisbol, controles y física configurable](m02-bate-beisbol.md).
+
+[E01 — Gravedad: sensores, evento temporal y pruebas](e01-gravedad.md).
 
 ## Empieza por tu tarea
 
 | Quiero… | Leer |
 | --- | --- |
+| Continuar en otro chat o dar relevo | [Relevo de contexto](relevo-contexto.md) |
+| Inspeccionar el árbol completo y probar mejoras gratis | [Modo de depuración](modo-debug.md) |
+| Dar contexto rápido y pedir ideas | [Resumen para compartir](contexto-proyecto-para-ideas.md) |
 | Saber qué está terminado y qué falta | [Estado actual](estado-actual.md) |
-| Implementar los generadores-cañón (plan por tareas) | [Plan generadores-cañón](plan/canones/README.md) |
-| Preparar los cambios de la siguiente iteración | [Seguimiento de agarre, escobas y balance](plan-cambios-agarre-escoba.md) |
+| Preparar los cambios de la siguiente iteración | [Cambios futuros y decisiones abiertas](cambios-futuros-arbol-mejoras.md) |
 | Explorar herramientas para recoger y lanzar bolas | [Ideas de herramientas](ideas-herramientas-bolas.md) |
 | Ejecutar el proyecto y completar una primera partida | [Guía de desarrollo](guia-desarrollo.md) |
 | Descargar o generar un APK | [Pipeline manual](ci.md) |
@@ -22,7 +60,7 @@ Actualizada el 18 de octubre de 2026. Describe `0.2.1+3`, con código en `main` 
 | Actualizar esta documentación | [Guía para documentar](guia-documentacion.md) |
 | Consultar la evolución de la entrega | [Historial de cambios](../CHANGELOG.md) |
 
-Para incorporarse al desarrollo: estado actual → guía de desarrollo → implementación → persistencia → decisiones. Para probar el APK, basta con la guía de CI y los escenarios manuales de la guía de desarrollo.
+Para incorporarse al desarrollo: relevo → estado actual → cambios futuros; después consultar las referencias técnicas que requiera la tarea. Para probar el APK, basta con la guía de CI y los escenarios manuales de la guía de desarrollo.
 
 ## Producto y diseño objetivo
 
@@ -45,3 +83,9 @@ El PRD define lo que se quiere construir; [implementación](implementacion.md) y
 - **Fuera de alcance:** el PRD lo excluye de este MVP; no es una tarea pendiente de esta entrega.
 
 La estructura adapta [Diátaxis](https://diataxis.fr/) a este repositorio: recorrido inicial, guías para tareas, referencia y explicación. Los criterios y las fuentes consultadas están en la [guía de documentación](guia-documentacion.md).
+
+- [E02 · Agujero negro: prototipo y guía de prueba](e02-agujero-negro.md).
+
+- [M03 · Generador lanzador: prototipo y guía física](m03-generador-lanzador.md).
+
+- [S01 · Alimentación y cuotas: integración, DEBUG y dependencias](s01-alimentacion-cuotas.md).

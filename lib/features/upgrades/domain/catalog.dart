@@ -1,3 +1,23 @@
+import 'legacy_balance.dart';
+import '../../prestige/domain/star_rewards.dart';
+import 'balance_v4.dart';
+import 'balance_v5.dart';
+import 'balance_v6.dart';
+import 'balance_v7.dart';
+import 'balance_v8.dart';
+import 'balance_v9.dart';
+import 'balance_v10.dart';
+import 'balance_v11.dart';
+import 'balance_v12.dart';
+import 'balance_v13.dart';
+import 'balance_v14.dart';
+import 'balance_v15.dart';
+import 'balance_v16.dart';
+import 'balance_v17.dart';
+import 'balance_v18.dart';
+import 'balance_v19.dart';
+import '../../rewards/domain/reward_visual_config.dart';
+
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
   final int cost;
@@ -21,7 +41,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 7});
+  DaySettings(this.values, {this.balanceVersion = 20});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -36,34 +56,28 @@ class UpgradeCatalog {
   final Map<String, double> base;
   final List<UpgradeDefinition> definitions;
   static const labels = {
+    'prestige': ['Prestigio', 'Prestigio'],
     'hand': ['Capacidad de la mano', 'Control'],
-    'hand_grip': ['Fuerza de agarre', 'Control'],
+    'walls': ['Paredes rebotadoras', 'Control'],
+    'bat': ['Bate de béisbol', 'Control'],
     'broom': ['Escoba recta', 'Control'],
     'paddle': ['Escoba más ancha', 'Control'],
     'broom_v': ['Escoba en V', 'Control'],
-    'sweep': ['Recogida por barrido', 'Recolección'],
-    'collection': ['Área de recogida', 'Recolección'],
-    'magnet': ['Imán', 'Recolección'],
-    'attraction': ['Alcance del imán', 'Recolección'],
-    'g1_auto': ['Cañón 1 · Automático', 'Producción'],
-    'g1_auto_speed': ['Cañón 1 · Ritmo automático', 'Producción'],
-    'g1_aim': ['Cañón 1 · Puntería', 'Producción'],
-    'g2_unlock': ['Cañón 2', 'Producción'],
-    'g2_auto': ['Cañón 2 · Automático', 'Producción'],
-    'g2_auto_speed': ['Cañón 2 · Ritmo automático', 'Producción'],
-    'g2_aim': ['Cañón 2 · Puntería', 'Producción'],
-    'g3_unlock': ['Cañón 3', 'Producción'],
-    'g3_auto': ['Cañón 3 · Automático', 'Producción'],
-    'g3_auto_speed': ['Cañón 3 · Ritmo automático', 'Producción'],
-    'g3_aim': ['Cañón 3 · Puntería', 'Producción'],
-    'g4_unlock': ['Cañón 4', 'Producción'],
-    'g4_auto': ['Cañón 4 · Automático', 'Producción'],
-    'g4_auto_speed': ['Cañón 4 · Ritmo automático', 'Producción'],
-    'g4_aim': ['Cañón 4 · Puntería', 'Producción'],
+    'double_spawn': ['Doble emisión', 'Producción'],
+    'generator': ['Generador rápido', 'Producción'],
+    'launcher': ['Generador lanzador', 'Producción'],
+    'launcher_rate': ['Frecuencia del lanzador', 'Producción'],
     'reward': ['Mayor recompensa', 'Valor'],
     'duration': ['Día más largo', 'Tiempo'],
     'robot': ['Robot ayudante', 'Automatización'],
     'robot_speed': ['Velocidad del robot', 'Automatización'],
+    'combo': ['Racha de capturas', 'Valor'],
+    'capture_all': ['Captura total', 'Control'],
+    'capture_recharge': ['Recarga de captura total', 'Control'],
+    'boost': ['Aceleración especial', 'Producción'],
+    'boost_power': ['Potencia de aceleración', 'Producción'],
+    'boost_duration': ['Duración de aceleración', 'Producción'],
+    'boost_recharge': ['Recarga de aceleración', 'Producción'],
   };
 
   factory UpgradeCatalog.fromCsv(String csv) {
@@ -75,7 +89,13 @@ class UpgradeCatalog {
         throw const FormatException('Fila de balance inválida');
       }
       final value = double.parse(cells[5]);
-      if (!value.isFinite || value <= 0) {
+      if (!value.isFinite ||
+          (value <= 0 &&
+              !(cells[0] == 'base' &&
+                  (cells[4] == 'gravity_probability' ||
+                      cells[4] == 'black_hole_probability' ||
+                      cells[4] == 'closing_duration') &&
+                  value == 0))) {
         throw const FormatException('Efecto inválido');
       }
       if (cells[0] == 'base') {
@@ -120,9 +140,14 @@ class UpgradeCatalog {
         ),
       );
     }
+    RewardVisualConfig.fromMap(base);
     for (final key in [
       'production_duration',
+      'reward_delay',
+      'reward_visual_limit',
+      'reward_ledger_limit',
       'closing_duration',
+      'spawn_interval',
       'ball_value',
       'paddle_radius',
       'collection_radius',
@@ -133,23 +158,95 @@ class UpgradeCatalog {
       'coin_pile_limit',
       'particle_limit',
       'hand_capacity',
-      'max_ball_speed',
+      'balls_per_spawn',
       'wall_restitution',
-      'hole_capture_speed',
-      'cannon_cooldown',
-      'cannon_sweep_period',
-      'cannon_shot_speed',
-      'g1_arc',
-      'g1_auto_interval',
-      'g2_arc',
-      'g2_auto_interval',
-      'g3_arc',
-      'g3_auto_interval',
-      'g4_arc',
-      'g4_auto_interval',
+      'ball_speed_limit',
+      'bat_half_length',
+      'bat_thickness',
+      'bat_restitution',
+      'bat_manual_gain',
+      'bat_move_speed',
+      'bat_angular_speed',
+      'gravity_probability',
+      'gravity_duration',
+      'gravity_object_speed',
+      'gravity_acceleration',
+      'gravity_response',
+      'gravity_ball_damping',
+      'gravity_tool_damping',
+      'feeding_quota_initial',
+      'feeding_quota_step',
+      'launcher_interval',
+      'launcher_speed',
+      'launcher_body_radius',
+      'launcher_barrel_length',
+      'launcher_barrel_radius',
+      'launcher_pressure_threshold',
+      'launcher_contact_pressure_limit',
+      'launcher_pressure_stiffness',
+      'launcher_pressure_response',
+      'launcher_mass',
+      'launcher_damping',
+      'launcher_pressure_speed',
+      'launcher_restitution',
+      'launcher_obstruction_force',
+      'launcher_move_speed',
+      'launcher_angular_speed',
+      'black_hole_probability',
+      'black_hole_interval',
+      'black_hole_duration',
+      'black_hole_radius',
+      'black_hole_acceleration',
+      'black_hole_curve',
+      'black_hole_object_speed',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }
+    if (base['gravity_probability']! > 1 || base['gravity_duration']! > 10) {
+      throw const FormatException('Límites de Gravedad inválidos');
+    }
+    if (base['black_hole_probability']! > 1 ||
+        base['black_hole_interval']! < .25 ||
+        base['black_hole_duration']! > 10 ||
+        base['black_hole_radius']! <= base['hole_capture_radius']! + 15) {
+      throw const FormatException('Límites de Agujero negro inválidos');
+    }
+    if (base['launcher_pressure_threshold']! <=
+            3 * base['launcher_contact_pressure_limit']! ||
+        base['launcher_speed']! > base['ball_speed_limit']! ||
+        base['launcher_interval']! < .25 ||
+        base['launcher_body_radius']! * 2 >= 140 ||
+        2 *
+                (base['launcher_barrel_length']! +
+                    base['launcher_barrel_radius']!) >=
+            140) {
+      throw const FormatException('Límites del lanzador inválidos');
+    }
+    var previousLauncherInterval = base['launcher_interval']!;
+    for (final level
+        in definitions.firstWhere((d) => d.id == 'launcher_rate').levels) {
+      if (level.value < .25 || level.value >= previousLauncherInterval) {
+        throw const FormatException('Frecuencia del lanzador inválida');
+      }
+      previousLauncherInterval = level.value;
+    }
+    for (final key in [
+      'feeding_quota_initial',
+      'feeding_quota_step',
+      'reward_visual_limit',
+      'reward_ledger_limit',
+    ]) {
+      if (base[key]! != base[key]!.roundToDouble()) {
+        throw const FormatException('Cuota de prueba no entera');
+      }
+    }
+    if (!base.containsKey('hole_y_ratio') ||
+        base['hole_y_ratio']! < .2 ||
+        base['hole_y_ratio']! > .75 ||
+        base['hand_grip_strength'] != 4) {
+      throw const FormatException('Posición del hoyo o agarre inválidos');
+    }
+    StarConfig(base);
     return UpgradeCatalog._(base, definitions);
   }
 
@@ -160,30 +257,196 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned) {
-    final values = Map.of(base);
-    for (final definition in definitions) {
-      final level = owned[definition.id] ?? 0;
-      if (level > 0) {
-        values[definition.effect] = definition.levels[level - 1].value;
+  DaySettings settings(Map<String, int> owned, {int balanceVersion = 20}) {
+    final values = balanceVersion <= 19 ? <String, double>{} : Map.of(base);
+    if (balanceVersion <= 19) {
+      final historicalCsv = balanceVersion == 19
+          ? balanceV19Csv
+          : balanceVersion == 18
+          ? balanceV18Csv
+          : balanceVersion == 17
+          ? balanceV17Csv
+          : balanceVersion == 16
+          ? balanceV16Csv
+          : balanceVersion == 15
+          ? balanceV15Csv
+          : balanceVersion == 14
+          ? balanceV14Csv
+          : balanceVersion == 13
+          ? balanceV13Csv
+          : balanceVersion == 12
+          ? balanceV12Csv
+          : balanceVersion == 11
+          ? balanceV11Csv
+          : balanceVersion == 10
+          ? balanceV10Csv
+          : balanceVersion == 9
+          ? balanceV9Csv
+          : balanceVersion == 8
+          ? balanceV8Csv
+          : balanceVersion == 7
+          ? balanceV7Csv
+          : balanceVersion == 6
+          ? balanceV6Csv
+          : balanceVersion == 5
+          ? balanceV5Csv
+          : balanceVersion == 4
+          ? balanceV4Csv
+          : legacyBalanceCsv;
+      for (final line in historicalCsv.trim().split('\n').skip(1)) {
+        final cells = line.split(',');
+        if (cells[0] == 'base' ||
+            (cells[0] == 'upgrade' &&
+                (owned[cells[1]] ?? 0) == int.parse(cells[2]))) {
+          values[cells[4]] = double.parse(cells[5]);
+        }
+      }
+    } else {
+      for (final definition in definitions) {
+        final level = owned[definition.id] ?? 0;
+        if (level > 0) {
+          values[definition.effect] = definition.levels[level - 1].value;
+        }
       }
     }
-    return DaySettings(values);
+    // Historical values keep in-progress v1/v2 saves playable until that day ends.
+    if (balanceVersion == 1) {
+      values['production_duration'] = const [
+        60.0,
+        65.0,
+        70.0,
+        75.0,
+      ][owned['duration'] ?? 0];
+      values['spawn_interval'] = const [
+        .75,
+        .65,
+        .55,
+        .45,
+      ][owned['generator'] ?? 0];
+    }
+    if (balanceVersion == 2) {
+      values['spawn_interval'] = const [
+        3.0,
+        2.6,
+        2.2,
+        1.8,
+      ][owned['generator'] ?? 0];
+    }
+    return DaySettings(values, balanceVersion: balanceVersion);
   }
 
-  void validateLevels(Map<String, int> levels) {
+  static const retiredIds = {
+    'sweep',
+    'collection',
+    'magnet',
+    'attraction',
+    'hand_grip',
+  };
+  static UpgradeDefinition? retiredDefinition(String id) {
+    if (!retiredIds.contains(id)) return null;
+    final rows = (id == 'hand_grip' ? balanceV17Csv : balanceV14Csv)
+        .trim()
+        .split('\n')
+        .skip(1)
+        .map((s) => s.split(','))
+        .where((r) => r[0] == 'upgrade' && r[1] == id)
+        .toList();
+    return UpgradeDefinition(id, id, '', rows.first[4], rows.first[6], [
+      for (final row in rows)
+        UpgradeLevel(int.parse(row[3]), double.parse(row[5]), row[7]),
+    ]);
+  }
+
+  void validateLevels(
+    Map<String, int> levels, {
+    Map<String, int> grandfathered = const {},
+    bool legacy = false,
+    bool retiredRemoved = false,
+    Map<String, int> previousTree = const {},
+    int balanceVersion = 20,
+  }) {
+    bool met(UpgradeLevel level) => level.requirements.every(
+      (requirement) =>
+          (retiredRemoved &&
+              retiredIds.contains(requirement.split(':').first)) ||
+          requirementsMet(UpgradeLevel(0, 1, requirement), levels),
+    );
+    if (previousTree.isNotEmpty) {
+      validateLevels(
+        previousTree,
+        grandfathered: grandfathered,
+        balanceVersion: 5,
+        retiredRemoved: retiredRemoved,
+      );
+      for (final entry in previousTree.entries) {
+        if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
+          throw const FormatException('Compras del árbol anterior inválidas');
+        }
+      }
+    }
+    if (!legacy && grandfathered.isNotEmpty) {
+      validateLevels(
+        grandfathered,
+        legacy: true,
+        retiredRemoved: retiredRemoved,
+      );
+    }
+    for (final entry in grandfathered.entries) {
+      if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
+        throw const FormatException('Compras anteriores inválidas');
+      }
+    }
     for (final entry in levels.entries) {
-      final definition = definitions
-          .where((d) => d.id == entry.key)
-          .firstOrNull;
+      final definition =
+          definitions.where((d) => d.id == entry.key).firstOrNull ??
+          (balanceVersion <= 14 ||
+                  (entry.key == 'hand_grip' && balanceVersion <= 17) ||
+                  legacy
+              ? retiredDefinition(entry.key)
+              : null);
       if (definition == null ||
           entry.value < 0 ||
           entry.value > definition.levels.length) {
         throw const FormatException('Mejoras guardadas inválidas');
       }
-      if (entry.value > 0 &&
-          !requirementsMet(definition.levels[entry.value - 1], levels)) {
-        throw const FormatException('Requisito guardado incumplido');
+      if (legacy) {
+        final oldRows = legacyBalanceCsv
+            .trim()
+            .split('\n')
+            .skip(1)
+            .map((line) => line.split(','));
+        final row = oldRows
+            .where(
+              (r) =>
+                  r[0] == 'upgrade' &&
+                  r[1] == entry.key &&
+                  int.parse(r[2]) == entry.value,
+            )
+            .firstOrNull;
+        if (entry.value > 0 &&
+            (row == null || !met(UpgradeLevel(0, 1, row[7])))) {
+          throw const FormatException('Compra anterior inválida');
+        }
+      } else if (entry.value > (grandfathered[entry.key] ?? 0) &&
+          entry.value > (previousTree[entry.key] ?? 0)) {
+        var next = definition.levels[entry.value - 1];
+        if (balanceVersion == 5) {
+          final row = balanceV5Csv
+              .trim()
+              .split('\n')
+              .skip(1)
+              .map((line) => line.split(','))
+              .firstWhere(
+                (r) =>
+                    r[0] == 'upgrade' &&
+                    r[1] == entry.key &&
+                    int.parse(r[2]) == entry.value,
+              );
+          next = UpgradeLevel(0, 1, row[7]);
+        }
+        if (!met(next)) {
+          throw const FormatException('Requisito guardado incumplido');
+        }
       }
     }
   }

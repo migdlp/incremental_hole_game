@@ -28,7 +28,7 @@ void main() {
     final second = addBall(board, const Vec(155, 200));
     board.touch(const Vec(100, 200), time: 0);
     board.drag(const Vec(150, 200), time: .1);
-    simulate(board, .1);
+    simulate(board, .2); // enough travel time at the shared 380 u/s cap
     expect(board.heldBall, same(first));
     expect(
       second.position.x,
@@ -90,15 +90,15 @@ void main() {
     'capture held ball once and never reacquire during the same gesture',
     () {
       final board = Board(catalog.settings({}));
-      final ball = addBall(board, const Vec(180, 360));
+      final ball = addBall(board, Board.hole + const Vec(0, 52));
       board.touch(ball.position);
       board.drag(Board.hole);
       simulate(board, .2);
       expect(board.captured, 1);
       expect(board.heldBall, isNull);
       expect(board.balls, isEmpty);
-      addBall(board, const Vec(180, 350));
-      board.drag(const Vec(180, 350));
+      addBall(board, Board.hole + const Vec(0, 62));
+      board.drag(Board.hole + const Vec(0, 62));
       simulate(board, .1);
       expect(board.heldBall, isNull);
       board.releasePointer();
@@ -106,28 +106,23 @@ void main() {
     },
   );
 
-  test(
-    'broom follows perpendicular, limits rotation and holds still on stop',
-    () {
-      final board = Board(catalog.settings({'broom': 1}), tool: BallTool.broom);
-      board.broomPosition = const Vec(180, 180);
-      board.touch(const Vec(180, 180));
-      final initial = board.toolAngle;
-      board.drag(const Vec(230, 180));
-      board.update(1 / 60, producing: false);
-      expect(
-        (board.toolAngle - initial).abs(),
-        lessThanOrEqualTo(3 / 60 + 1e-6),
-      );
-      simulate(board, .7);
-      final segment = board.segments.single;
-      expect((segment.b - segment.a).unit.x.abs(), lessThan(.001));
-      final angle = board.toolAngle;
-      board.drag(const Vec(230.1, 180.1));
-      simulate(board, .4);
-      expect(board.toolAngle, closeTo(angle, .001));
-    },
-  );
+  test('one finger translates the broom without changing its orientation', () {
+    final board = Board(catalog.settings({'broom': 1}), tool: BallTool.broom);
+    board.broomPosition = const Vec(180, 180);
+    board.touch(const Vec(180, 180));
+    final initial = board.toolAngle;
+    board.drag(const Vec(230, 180));
+    board.update(1 / 60, producing: false);
+    expect((board.toolAngle - initial).abs(), lessThanOrEqualTo(3 / 60 + 1e-6));
+    simulate(board, .7);
+    final segment = board.segments.single;
+    expect((segment.b - segment.a).unit.y.abs(), lessThan(.001));
+    expect(board.toolAngle, initial);
+    final angle = board.toolAngle;
+    board.drag(const Vec(230.1, 180.1));
+    simulate(board, .4);
+    expect(board.toolAngle, closeTo(angle, .001));
+  });
 
   test('straight broom carries a front group without radial scatter', () {
     final board = Board(catalog.settings({'broom': 1}), tool: BallTool.broom);
@@ -171,33 +166,39 @@ void main() {
       catalog.settings({'broom': 1, 'paddle': 1, 'broom_v': 1}),
       tool: BallTool.vee,
     );
-    final left = addBall(board, const Vec(150, 215));
-    final right = addBall(board, const Vec(210, 215));
-    final outside = addBall(board, const Vec(50, 220));
-    board.broomPosition = const Vec(180, 180);
-    board.touch(const Vec(180, 180));
+    final left = addBall(board, const Vec(150, 257));
+    final right = addBall(board, const Vec(210, 257));
+    final outside = addBall(board, const Vec(50, 252));
+    board.broomPosition = const Vec(180, 292);
+    board.toolAngle = -math.pi / 2;
+    board.touch(board.broomPosition);
     expect(board.segments.length, 2);
     for (var i = 1; i <= 120; i++) {
-      board.drag(Vec(180, 180 + i * .6));
+      board.drag(Vec(180, 292 - i * .6));
       board.update(1 / 60, producing: false);
     }
     expect(left.position.x, greaterThan(150));
     expect(right.position.x, lessThan(210));
     expect(right.position.x - left.position.x, lessThan(60));
     expect(outside.position.x, 50);
-    expect(outside.position.y, 220);
+    expect(outside.position.y, 252);
     expect(board.captured, 0);
     for (var i = 121; i <= 450; i++) {
-      board.drag(Vec(180, 180 + i * .6));
+      board.drag(Vec(180, 292 - i * .6));
       board.update(1 / 60, producing: false);
     }
     board.releasePointer();
+    // Deliver both gathered balls to the relocated hole with the same physical tool.
+    for (final item in [left, right]) {
+      item.position = board.holePosition;
+    }
+    board.update(1 / 60, producing: false);
     expect(board.captured, 2);
     expect(board.balls, [outside]);
   });
 
   test('tap commits on release; drag starting on coin cannot collect free', () {
-    final board = Board(catalog.settings({}));
+    final board = Board(catalog.settings({}, balanceVersion: 14));
     board.coins.add(Coin(board.nextId++, const Vec(100, 250), 7, landing: 0));
     expect(board.touch(const Vec(100, 250)), 0);
     expect(board.drag(const Vec(200, 250)), 0);
@@ -240,17 +241,12 @@ void main() {
     'tool purchase and selection persist; locked tool cannot be selected',
     () {
       final session = GameSession(catalog, MemoryStore());
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       session.selectTool(BallTool.vee);
       expect(session.selectedTool, BallTool.hand);
       session.economy.balance = 500;
-      for (final id in [
-        'hand',
-        'hand',
-        'broom',
-        'paddle',
-        'broom_v',
-        'sweep',
-      ]) {
+      for (final id in ['hand', 'hand', 'broom', 'paddle', 'broom_v']) {
         expect(
           session.purchase(catalog.definitions.firstWhere((d) => d.id == id)),
           isTrue,
@@ -262,7 +258,7 @@ void main() {
       expect(restored.selectedTool, BallTool.vee);
       restored.startDay();
       expect(restored.board!.tool, BallTool.vee);
-      expect(restored.board!.sweepEnabled, isTrue);
+      expect(restored.board!.sweepEnabled, isFalse);
       restored.selectTool(BallTool.hand);
       expect(restored.board!.tool, BallTool.hand);
     },
@@ -311,6 +307,39 @@ void main() {
       expect(restored.board!.balls.single.velocity.length, 0);
       expect(restored.board!.heldBall, isNull);
       expect(restored.paused, isTrue);
+    },
+  );
+
+  test(
+    'legacy v1 migrates savings and old width purchases without free sweep',
+    () {
+      final session = GameSession(catalog, MemoryStore());
+      session.levels.addAll({'broom': 1, 'paddle': 1, 'robot': 1});
+      session.economy.balance = 123;
+      session.startDay();
+      final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
+      data['version'] = 1;
+      data['run']['board'].remove('combo');
+      data['run']['board'].remove('specials');
+      data['run']['board'].remove('captureAllIds');
+      data['run']['settings'] = catalog
+          .settings(session.levels, balanceVersion: 1)
+          .toJson();
+      data['run'].remove('balanceVersion');
+      data.remove('tool');
+      data['levels'].remove('broom');
+      data['run']['settings'].remove('broom_unlocked');
+      final restored = GameSession(catalog, MemoryStore())
+        ..restore(jsonEncode(data));
+      expect(restored.economy.balance, 123);
+      expect(restored.levels['paddle'], 1);
+      expect(restored.levels['robot'], 1);
+      expect(restored.levels['broom'], 1);
+      expect(restored.selectedTool, BallTool.broom);
+      expect(restored.board!.settings['robot_count'], 1);
+      expect(restored.board!.sweepEnabled, isFalse);
+      expect(restored.paused, isTrue);
+      expect(jsonDecode(restored.snapshot())['version'], 17);
     },
   );
 

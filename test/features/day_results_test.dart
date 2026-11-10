@@ -57,12 +57,12 @@ void main() {
       expect((tester.widget(gameFinder) as GameWidget).game, same(game));
       expect(game.paused, isTrue);
       expect(
-        find.descendant(of: popup, matching: find.text('Dinero ganado')),
+        find.descendant(of: popup, matching: find.text('Monedas conseguidas')),
         findsOneWidget,
       );
       expect(
         find.descendant(of: popup, matching: find.text('4')),
-        findsOneWidget,
+        findsWidgets,
       );
       expect(
         find.descendant(of: popup, matching: find.text('Bolas al hoyo')),
@@ -72,17 +72,17 @@ void main() {
       expect(session.board, isNull);
       expect(jsonDecode(session.snapshot())['run'], isNull);
       final position = board.balls.single.position;
-      final spawn = board.cannonClock;
+      final spawn = board.spawnClock;
       await tester.tapAt(const Offset(5, 5));
       await tester.binding.handlePopRoute();
       await tester.pump(const Duration(seconds: 4));
       expect(popup, findsOneWidget);
       expect(board.balls.single.position, position);
-      expect(board.cannonClock, spawn);
+      expect(board.spawnClock, spawn);
       expect(session.selectedTool, BallTool.hand);
       expect(session.economy.balance, 104);
-      expect(session.progress.day, 2);
-      await tester.tap(find.text('Ir al árbol de mejoras'));
+      expect(session.progress.day, 1);
+      await tester.tap(find.text('Tienda'));
       await tester.pumpAndSettle();
       expect(popup, findsNothing);
       expect(find.byKey(const ValueKey('node-hand:1')), findsOneWidget);
@@ -126,7 +126,7 @@ void main() {
       session.finishDay();
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Ir al árbol de mejoras'));
+      await tester.tap(find.text('Tienda'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('node-hand:1')));
       await tester.pumpAndSettle();
@@ -166,7 +166,7 @@ void main() {
       await tester.pumpWidget(GardenApp(session: session));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('day-results-popup')), findsOneWidget);
-      await tester.tap(find.text('Ir al árbol de mejoras'));
+      await tester.tap(find.text('Tienda'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('node-hand:1')));
       await tester.pumpAndSettle();

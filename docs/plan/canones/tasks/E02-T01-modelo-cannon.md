@@ -2,7 +2,7 @@
 id: E02-T01
 title: Modelo de dominio Cannon
 epic: E02
-status: todo
+status: done
 depends_on: [E01-T02]
 requirements: [RF-01, RF-13]
 size: S
@@ -39,8 +39,8 @@ Existe `lib/features/board/domain/cannon.dart`, con los cuatro huecos fijos y la
 
 ## Criterios de aceptación
 
-- [ ] Las seis pruebas pasan.
-- [ ] `cannon.dart` no importa nada de `upgrades` ni de `presentation`.
+- [x] Las seis pruebas pasan.
+- [x] `cannon.dart` no importa nada de `upgrades` ni de `presentation`.
 
 ## Verificación
 
@@ -57,3 +57,8 @@ flutter test test/features/cannon_test.dart
 ## Si te bloqueas
 
 - Si `Vec` no tiene un constructor `const` o los operadores indicados, para y repórtalo. No modifiques `vec.dart`.
+
+## Notas de implementación
+
+- `cannon.dart` sigue el contrato de la arquitectura al pie de la letra, más `Cannon.fromJson`, que valida hueco y valores finitos ≥ 0.
+- Seis pruebas nuevas en `cannon_test.dart`. Sin desviaciones. Total: 127 pruebas.

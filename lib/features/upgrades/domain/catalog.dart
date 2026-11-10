@@ -125,6 +125,10 @@ class UpgradeCatalog {
       'max_ball_speed',
       'wall_restitution',
       'hole_capture_speed',
+      'cannon_cooldown',
+      'cannon_sweep_period',
+      'cannon_shot_speed',
+      'g1_arc',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }

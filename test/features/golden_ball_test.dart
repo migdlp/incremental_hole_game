@@ -20,32 +20,22 @@ class RollsBoard extends Board {
 void main() {
   final catalog = testCatalog();
 
-  test('golden chance is one percent per successfully emitted ball', () {
+  test('golden chance is one percent per successfully fired ball', () {
     for (final roll in [.0, .009999, .01, .5, .99999]) {
       final board = RollsBoard(catalog.settings({}), [roll]);
-      board.spawnClock = board.settings['spawn_interval'];
-      board.update(1 / 60, producing: true);
+      expect(board.fireCannon(board.cannons.first), isTrue);
       expect(board.balls.single.golden, roll < .01);
     }
-    final pair = RollsBoard(catalog.settings({'double_spawn': 1}), [
-      .5,
-      .5,
-      .009,
-      .5,
-      .02,
-    ]);
-    pair.spawnClock = pair.settings['spawn_interval'];
-    pair.update(1 / 60, producing: true);
-    expect(pair.balls.map((b) => b.golden), [true, false]);
     final full = RollsBoard(catalog.settings({})..values['ball_limit'] = 1, [
       .001,
     ]);
     full.balls.add(Ball(full.nextId++, const Vec(50, 300), Vec.zero));
-    full.spawnClock = full.settings['spawn_interval'];
-    full.update(1 / 60, producing: true);
+    expect(full.fireCannon(full.cannons.first), isFalse);
     expect(full.balls.single.golden, isFalse);
-    full.enterClosing();
+    expect(full.index, 0); // a blocked shot does not consume a roll
     full.balls.clear();
+    full.enterClosing();
+    expect(full.fireCannon(full.cannons.first), isFalse);
     full.update(1, producing: true);
     expect(full.balls, isEmpty);
   });
@@ -130,9 +120,9 @@ void main() {
       for (var i = 0; i < 300; i++) {
         board.balls.clear();
         a.balls.clear();
-        board.spawnClock = a.spawnClock = board.settings['spawn_interval'];
-        board.update(1 / 60, producing: true);
-        a.update(1 / 60, producing: true);
+        board.cannons.first.cooldown = a.cannons.first.cooldown = 0;
+        board.fireCannon(board.cannons.first);
+        a.fireCannon(a.cannons.first);
         expect(a.balls.single.golden, board.balls.single.golden);
         expect(a.randomState, board.randomState);
       }

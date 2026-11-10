@@ -2,7 +2,7 @@
 id: E02-T02
 title: Integrar G1 en Board y sustituir el generador
 epic: E02
-status: todo
+status: done
 depends_on: [E02-T01]
 requirements: [RF-02, RF-03, RF-04, RF-05, RF-17, RF-24, RF-27, RNF-02]
 size: L
@@ -80,9 +80,9 @@ Es tamaño L porque la emisión automática desaparece y varias pruebas existent
 
 ## Criterios de aceptación
 
-- [ ] `grep -rn "spawnClock\|Board.generator" lib test` no devuelve nada.
-- [ ] Las siete pruebas nuevas pasan y la suite completa está en verde.
-- [ ] Sin toques, una jornada completa de 13 s no crea ninguna bola.
+- [x] `grep -rn "spawnClock\|Board.generator" lib test` no devuelve nada.
+- [x] Las siete pruebas nuevas pasan y la suite completa está en verde.
+- [x] Sin toques, una jornada completa de 13 s no crea ninguna bola.
 
 ## Verificación
 
@@ -100,3 +100,9 @@ flutter test
 ## Si te bloqueas
 
 - Si alguna otra parte de `lib/` usa `Board.generator` o `spawnClock`, para y lista los usos en una sección «Bloqueo».
+
+## Notas de implementación
+
+- `Board` crea G1, expone `cannonAngle`, `cannonAutomatic`, `fireCannon`, `cannonAt` y `_shoot`, y guarda `cannonClock` y `cannons` con las validaciones de la arquitectura. El bloque de emisión se sustituye por el bucle de cañones. Se añaden al CSV y a `fromCsv` `cannon_cooldown`, `cannon_sweep_period`, `cannon_shot_speed` y `g1_arc`. `garden_game.dart` solo cambia la línea indicada.
+- Pruebas adaptadas: `spawnClock` → `cannonClock` (day_results, priority_gameplay); golden_ball usa disparos; balance_test espera 0 bolas sin toques y conserva la comprobación de duración (sustituye a la de cadencia, que se borra con «first ball waits…»); se borra `double emission produces…` de future_tree_test (prueba la mecánica retirada en T03).
+- Pruebas nuevas en `cannon_test.dart`: las siete pedidas más otras cuatro (dos disparos separados por la recarga, rechazo de guardados inválidos, recarga congelada fuera de producción y día completo sin toques). Total: 136 pruebas. Sin desviaciones.

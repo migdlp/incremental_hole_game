@@ -170,7 +170,7 @@ class GardenGame extends FlameGame {
       radius + 14 + pulse * 3,
       paint(const Color(0x15247d73), stroke: 2),
     );
-    final generator = offset(Board.generator);
+    final generator = offset(board.cannons.first.slot.position);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromCenter(

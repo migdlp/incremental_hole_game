@@ -72,13 +72,13 @@ void main() {
       expect(session.board, isNull);
       expect(jsonDecode(session.snapshot())['run'], isNull);
       final position = board.balls.single.position;
-      final spawn = board.spawnClock;
+      final spawn = board.cannonClock;
       await tester.tapAt(const Offset(5, 5));
       await tester.binding.handlePopRoute();
       await tester.pump(const Duration(seconds: 4));
       expect(popup, findsOneWidget);
       expect(board.balls.single.position, position);
-      expect(board.spawnClock, spawn);
+      expect(board.cannonClock, spawn);
       expect(session.selectedTool, BallTool.hand);
       expect(session.economy.balance, 104);
       expect(session.progress.day, 2);

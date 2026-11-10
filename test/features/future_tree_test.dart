@@ -111,36 +111,6 @@ void main() {
     expect(restored.board!.settings['production_duration'], 13);
   });
 
-  test(
-    'double emission produces a spaced pair and respects technical limits',
-    () {
-      final settings = catalog.settings({'double_spawn': 1});
-      final board = Board(settings);
-      for (var i = 0; i < 40; i++) {
-        board.update(1 / 60, producing: true);
-      }
-      expect(board.balls, hasLength(2));
-      expect(
-        (board.balls[0].position - board.balls[1].position).length,
-        greaterThan(board.radius * 2),
-      );
-      settings.values['ball_limit'] = 3;
-      board.balls.clear();
-      board.balls.addAll([
-        Ball(board.nextId++, const Vec(50, 300), Vec.zero),
-        Ball(board.nextId++, const Vec(90, 300), Vec.zero),
-      ]);
-      for (var i = 0; i < 40; i++) {
-        board.update(1 / 60, producing: true);
-      }
-      expect(board.balls, hasLength(3));
-      board.enterClosing();
-      final count = board.balls.length;
-      board.update(1, producing: true);
-      expect(board.balls, hasLength(count));
-    },
-  );
-
   test('attraction increases coin reach only while the pointer is active', () {
     final board = Board(catalog.settings({'magnet': 1, 'attraction': 3}));
     final coin = Coin(board.nextId++, const Vec(190, 250), 2, landing: 0);

@@ -2,6 +2,14 @@
 
 Se registran entregas y cambios observables. La versión actual del paquete se declara en `pubspec.yaml`; no hay una release de tienda o etiqueta de distribución certificada por este archivo.
 
+## Generadores-cañón — 2026-11-10 · 0.6.0+11
+
+- El generador fijo y las mejoras «Generador rápido» y «Doble emisión» se sustituyen por cañones que oscilan en un arco de 150° (barrido de ida y vuelta en 2 s) y disparan a 520 u/s con recarga de 1 s. Al principio se toca el cañón para disparar; el cuerpo del cañón es sólido.
+- Mejoras por cañón: Automático, Ritmo automático y Puntería. Se pueden comprar los cañones 2, 3 y 4 en huecos fijos. El árbol pasa a 28 tipos y 74 nodos, con un lienzo de 864 × 1120. «Día más largo» exige «Cañón 1 · Ritmo automático I». Precios provisionales.
+- El hoyo solo captura bolas libres a ≤ 140 u/s (las agarradas se capturan por posición). Rebote en paredes de 0,55 y velocidad máxima de bola de 600 u/s, configurables en `docs/balance.csv`.
+- Guardado v6 sin migraciones: las partidas anteriores se descartan sin aviso y se borran el código de migración y los balances congelados. Balance 7.
+- 169 pruebas correctas, análisis sin incidencias y compilación web. Validación en Android físico y ajuste de precios jugando pendientes. Las PR son #28 a #31 y la PR 5 de cierre.
+
 ## UI, monedas y economía CF-09 a CF-15 — 2026-10-19 · 0.5.0+10
 
 - Todos los importes de la UI se muestran con icono de moneda y sin `$`. Las cinco denominaciones tienen la misma geometría, sin cifras sobre su cara.

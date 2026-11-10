@@ -2,7 +2,7 @@
 id: E05-T02
 title: Documentación y versión 0.6.0+11
 epic: E05
-status: todo
+status: done
 depends_on: [E05-T01]
 requirements: [RNF-03]
 size: M
@@ -44,8 +44,8 @@ La documentación del repositorio describe el juego con cañones y la versión d
 
 ## Criterios de aceptación
 
-- [ ] `grep -rn "1,5 bolas\|Doble emisión\|Generador rápido\|JSON v5" README.md docs/*.md` no devuelve nada fuera de `CHANGELOG.md`, de los planes históricos (`docs/plan-*.md`) ni de `docs/cambios-futuros-arbol-mejoras.md`.
-- [ ] `pubspec.yaml` tiene `0.6.0+11`.
+- [x] `grep -rn "1,5 bolas\|Doble emisión\|Generador rápido\|JSON v5" README.md docs/*.md` no devuelve nada fuera de `CHANGELOG.md`, de los planes históricos (`docs/plan-*.md`) ni de `docs/cambios-futuros-arbol-mejoras.md`.
+- [x] `pubspec.yaml` tiene `0.6.0+11`.
 
 ## Verificación
 
@@ -61,3 +61,9 @@ flutter test
 ## Si te bloqueas
 
 - Si un documento mezcla hechos históricos y actuales, añade una nota al principio («Actualización 0.6.0+11:» seguida del cambio) en lugar de reescribir el historial.
+
+## Notas de implementación
+
+- `pubspec.yaml` a `0.6.0+11`. `persistencia.md` se reescribe para v6 (sin las secciones de migración); `README.md`, `economia.md`, `arbol-de-mejoras.md`, `estado-actual.md` e `implementacion.md` se actualizan en las partes vigentes, y el `CHANGELOG` recibe la sección nueva con 169 pruebas.
+- Donde los documentos mezclan historia y estado actual (`estado-actual.md`, `arbol-de-mejoras.md`, `implementacion.md`) se añade una nota «Actualización 0.6.0+11» y se reescriben solo las líneas que contradecían el estado vigente. Las notas históricas de APK anteriores se conservan.
+- La validación en Android físico queda como «Pendiente». El README no cambia en «Ejecutar» ni «Validar» (el texto de «Validar» con cifras históricas de pruebas sigue como estaba).

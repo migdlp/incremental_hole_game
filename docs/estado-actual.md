@@ -1,5 +1,7 @@
 # Estado actual del prototipo
 
+> **Actualización 0.6.0+11 — generadores-cañón:** el generador fijo desaparece. Cuatro cañones en huecos fijos (G1 siempre; G2–G4 por compra) oscilan en un arco de 150° y disparan a 520 u/s: al principio se tocan para disparar y con mejoras disparan solos y apuntan mejor. El hoyo solo captura bolas libres a ≤ 140 u/s. 28 tipos y 74 nodos de mejora, guardado v6 sin migraciones (las partidas anteriores se descartan) y balance 7 con precios provisionales. 169 pruebas. **Pendiente:** validación en Android físico y ajuste de precios jugando. Las notas históricas inferiores describen versiones anteriores y esta prevalece.
+
 > Actualización 0.3.3+8: cabecera sin oscurecer durante la recogida final; 1 % de bolas doradas con recompensa ×10 (base $10), guardado y contabilidad por tipo. Conserva la mano con peso de 0.3.2+7. Los enlaces de APK inferiores corresponden a sus versiones históricas.
 
 > **Entrega Android — 19 de octubre de 2026:** PR #15 integrada en `main`, commit `27b3950146389f2db3f63cf708ffb289ed908859`. Versión **0.3.1+6**. [Pipeline 39181076818](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818) correcta: formato, análisis, 88 pruebas, compilación Android y firma verificada. [Descargar APK y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39181076818/artifacts/12155843676), disponible hasta el 2 de noviembre de 2026. Descomprimir e instalar `jardin-mecanico-debug.apk`. La prueba en Android físico y el ajuste de balance siguen pendientes. Las notas de preparación inferiores conservan el estado anterior a esta entrega.
@@ -7,24 +9,24 @@
 
 > Revisión 0.3.1+6 preparada para integrar: CF-01 a CF-04, monedas sin cifras, $1 por captura base, 3 s de recogida final y recorrido estadísticas → árbol → comenzar día. La implementación se verifica con pruebas y compilación web; Android físico pendiente. Ver [economía](economia.md), [árbol](arbol-de-mejoras.md) y [compatibilidad](persistencia.md). Esta nota prevalece sobre las cifras históricas inferiores.
 
-> Actualización vigente — 19 de octubre: se implementa el [mapa futuro v0.6](cambios-futuros-arbol-mejoras.md) en 0.3.0+5: 44 nodos, cuatro ramas, cinco niveles, seis colores, Doble emisión y alcance del imán. Mano inicial de una bola, mejoras a 2/3/4/5/6 y escoba solo tras comprarla. Guardado/balance v4 conserva las compras y jornadas antiguas. Esta nota sustituye estados anteriores que la contradigan; ver [árbol actual](arbol-de-mejoras.md) y [historial](../CHANGELOG.md).
+> Nota histórica — 19 de octubre: se implementó el [mapa futuro v0.6](cambios-futuros-arbol-mejoras.md) en 0.3.0+5 (44 nodos, cuatro ramas, cinco niveles y seis colores). Esa estructura la sustituye el mapa de 0.6.0+11.
 
-Corte: 18 de octubre de 2026, aplicación `0.2.2+4`, con resultados modales y generación inicial de 1,5 bolas/s. La evidencia histórica de APK se identifica debajo por commit. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está pendiente.
+Corte histórico: 18 de octubre de 2026, aplicación `0.2.2+4`, con resultados modales. La evidencia histórica de APK se identifica debajo por commit. Existe una versión jugable y un APK de depuración generado por CI. La aceptación final del MVP en un teléfono físico está **pendiente**.
 
 ## Qué está implementado
 
 | Área | Comportamiento actual | Código principal | Evidencia y límite |
 | --- | --- | --- | --- |
 | Arranque | Carga el balance, abre el guardado y muestra el taller o una jornada restaurada pausada | [main.dart](../lib/main.dart) | Apertura y restauración revisadas en navegador |
-| Tablero | Arena 360 × 560, un generador, un hoyo, bolas circulares, mano individual y escobas recta/en V con un puntero | [Board](../lib/features/board/domain/board.dart), [GardenGame](../lib/features/board/presentation/garden_game.dart) | Empuje y recogida observados; sensación en móvil pendiente |
+| Tablero | Arena 360 × 560, hasta cuatro cañones, un hoyo, bolas circulares, mano individual y escobas recta/en V con un puntero | [Board](../lib/features/board/domain/board.dart), [GardenGame](../lib/features/board/presentation/garden_game.dart) | Empuje y recogida observados; sensación en móvil pendiente |
 | Física | Fricción, bordes, separación e impulso entre bolas mediante rejilla espacial | [Board](../lib/features/board/domain/board.dart) | Pruebas de agarre, inercia, orientación, anchura, V y límites; no certifican comodidad en móvil |
 | Monedas | Captura genera valor físico, aterrizaje, pulsación inicial y barrido comprado, fusión y límite de pilas | [Board](../lib/features/board/domain/board.dart) | Pruebas de cobro único y conservación del valor |
-| Ciclo | Producción, cierre, pausa y noche; 10 + 3 s como base; emisión de 1,5 bolas/s; noche sin límite | [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart), [GameSession](../lib/app/game_session.dart) | Diez ciclos controlados y límite temporal probados |
+| Ciclo | Producción, cierre, pausa y noche; 10 + 3 s como base; disparo manual con recarga de 1 s (o automático por mejora); noche sin límite | [DayCycle](../lib/features/day_cycle/domain/day_cycle.dart), [GameSession](../lib/app/game_session.dart) | Diez ciclos controlados y límite temporal probados |
 | Economía | Enteros; ingreso diario separado del ahorro; cierre único; pendientes perdidos | [Economy](../lib/features/economy/domain/economy.dart), [GameSession](../lib/app/game_session.dart) | Cierre repetido y compras inválidas probados |
-| Mejoras | Catorce tipos, 44 nodos, costes, niveles y requisitos; efectos al siguiente día | [Catálogo](../lib/features/upgrades/domain/catalog.dart), [CSV](balance.csv) | Validación de catálogo, dependencias y compras |
+| Mejoras | 28 tipos, 74 nodos, costes, niveles y requisitos; efectos al siguiente día | [Catálogo](../lib/features/upgrades/domain/catalog.dart), [CSV](balance.csv) | Validación de catálogo, dependencias y compras |
 | Automatización | Un robot que empuja, velocidad mejorable e imán alrededor del dedo activo | [Robot](../lib/features/automation/domain/robot.dart), [Board](../lib/features/board/domain/board.dart) | Casos controlados de robot e imán superados |
 | Progreso | Ahorro, niveles, día, récord, último resultado y comparación con el anterior | [Progress](../lib/features/progression/domain/progress.dart) | Guardado/restauración y ciclos probados; no hay historial completo |
-| Persistencia | JSON v4, migración v1/v2/v3 y balance 5 con restauración histórica de balances 1–4; cola de escrituras; principal y copia; restauración pausada | [Referencia](persistencia.md) | Recuperación en archivos temporales Linux; falta ensayo en Android real |
+| Persistencia | JSON v6 y balance 7, sin migraciones (las versiones anteriores se descartan); cola de escrituras; principal y copia; restauración pausada | [Referencia](persistencia.md) | Recuperación en archivos temporales Linux; falta ensayo en Android real |
 | Interfaz | Jornada, pausa, resultados en pop-up bloqueante y árbol progresivo con arrastre/zoom, ficha y compra de 3 s | [game_app.dart](../lib/app/game_app.dart) | Pruebas de widgets de descubrimiento y compra/cancelación; Android físico pendiente |
 | Sonido | Clic del sistema al cobrar/comprar, con opción de silencio | [game_app.dart](../lib/app/game_app.dart) | Sin audio propio ni volumen independiente; sonido real no certificado en todos los destinos |
 | Entrega | Android vertical y web de apoyo; SDK fijado y lockfile versionado | [Configuración](../pubspec.yaml), [.fvmrc](../.fvmrc) | APK y web compilados; sin validación en teléfono |

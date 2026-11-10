@@ -1,7 +1,3 @@
-import 'legacy_balance.dart';
-import 'balance_v4.dart';
-import 'balance_v5.dart';
-
 class UpgradeLevel {
   const UpgradeLevel(this.cost, this.value, this.requirement);
   final int cost;
@@ -25,7 +21,7 @@ class UpgradeDefinition {
 }
 
 class DaySettings {
-  DaySettings(this.values, {this.balanceVersion = 6});
+  DaySettings(this.values, {this.balanceVersion = 7});
   final int balanceVersion;
   final Map<String, double> values;
   double operator [](String key) => values[key] ?? 0;
@@ -126,6 +122,9 @@ class UpgradeCatalog {
       'particle_limit',
       'hand_capacity',
       'balls_per_spawn',
+      'max_ball_speed',
+      'wall_restitution',
+      'hole_capture_speed',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }
@@ -139,83 +138,18 @@ class UpgradeCatalog {
     });
   }
 
-  DaySettings settings(Map<String, int> owned, {int balanceVersion = 6}) {
-    final values = balanceVersion <= 5 ? <String, double>{} : Map.of(base);
-    if (balanceVersion <= 5) {
-      final historicalCsv = balanceVersion == 5
-          ? balanceV5Csv
-          : balanceVersion == 4
-          ? balanceV4Csv
-          : legacyBalanceCsv;
-      for (final line in historicalCsv.trim().split('\n').skip(1)) {
-        final cells = line.split(',');
-        if (cells[0] == 'base' ||
-            (cells[0] == 'upgrade' &&
-                (owned[cells[1]] ?? 0) == int.parse(cells[2]))) {
-          values[cells[4]] = double.parse(cells[5]);
-        }
-      }
-    } else {
-      for (final definition in definitions) {
-        final level = owned[definition.id] ?? 0;
-        if (level > 0) {
-          values[definition.effect] = definition.levels[level - 1].value;
-        }
+  DaySettings settings(Map<String, int> owned) {
+    final values = Map.of(base);
+    for (final definition in definitions) {
+      final level = owned[definition.id] ?? 0;
+      if (level > 0) {
+        values[definition.effect] = definition.levels[level - 1].value;
       }
     }
-    // Historical values keep in-progress v1/v2 saves playable until that day ends.
-    if (balanceVersion == 1) {
-      values['production_duration'] = const [
-        60.0,
-        65.0,
-        70.0,
-        75.0,
-      ][owned['duration'] ?? 0];
-      values['spawn_interval'] = const [
-        .75,
-        .65,
-        .55,
-        .45,
-      ][owned['generator'] ?? 0];
-    }
-    if (balanceVersion == 2) {
-      values['spawn_interval'] = const [
-        3.0,
-        2.6,
-        2.2,
-        1.8,
-      ][owned['generator'] ?? 0];
-    }
-    return DaySettings(values, balanceVersion: balanceVersion);
+    return DaySettings(values);
   }
 
-  void validateLevels(
-    Map<String, int> levels, {
-    Map<String, int> grandfathered = const {},
-    bool legacy = false,
-    Map<String, int> previousTree = const {},
-    int balanceVersion = 6,
-  }) {
-    if (previousTree.isNotEmpty) {
-      validateLevels(
-        previousTree,
-        grandfathered: grandfathered,
-        balanceVersion: 5,
-      );
-      for (final entry in previousTree.entries) {
-        if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
-          throw const FormatException('Compras del árbol anterior inválidas');
-        }
-      }
-    }
-    if (!legacy && grandfathered.isNotEmpty) {
-      validateLevels(grandfathered, legacy: true);
-    }
-    for (final entry in grandfathered.entries) {
-      if (entry.value < 0 || entry.value > (levels[entry.key] ?? 0)) {
-        throw const FormatException('Compras anteriores inválidas');
-      }
-    }
+  void validateLevels(Map<String, int> levels) {
     for (final entry in levels.entries) {
       final definition = definitions
           .where((d) => d.id == entry.key)
@@ -225,45 +159,9 @@ class UpgradeCatalog {
           entry.value > definition.levels.length) {
         throw const FormatException('Mejoras guardadas inválidas');
       }
-      if (legacy) {
-        final oldRows = legacyBalanceCsv
-            .trim()
-            .split('\n')
-            .skip(1)
-            .map((line) => line.split(','));
-        final row = oldRows
-            .where(
-              (r) =>
-                  r[0] == 'upgrade' &&
-                  r[1] == entry.key &&
-                  int.parse(r[2]) == entry.value,
-            )
-            .firstOrNull;
-        if (entry.value > 0 &&
-            (row == null ||
-                !requirementsMet(UpgradeLevel(0, 1, row[7]), levels))) {
-          throw const FormatException('Compra anterior inválida');
-        }
-      } else if (entry.value > (grandfathered[entry.key] ?? 0) &&
-          entry.value > (previousTree[entry.key] ?? 0)) {
-        var next = definition.levels[entry.value - 1];
-        if (balanceVersion == 5) {
-          final row = balanceV5Csv
-              .trim()
-              .split('\n')
-              .skip(1)
-              .map((line) => line.split(','))
-              .firstWhere(
-                (r) =>
-                    r[0] == 'upgrade' &&
-                    r[1] == entry.key &&
-                    int.parse(r[2]) == entry.value,
-              );
-          next = UpgradeLevel(0, 1, row[7]);
-        }
-        if (!requirementsMet(next, levels)) {
-          throw const FormatException('Requisito guardado incumplido');
-        }
+      if (entry.value > 0 &&
+          !requirementsMet(definition.levels[entry.value - 1], levels)) {
+        throw const FormatException('Requisito guardado incumplido');
       }
     }
   }

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flame/components.dart' show Vector2;
 import 'package:incremental_hole_game/features/board/presentation/garden_game.dart';
@@ -306,21 +305,6 @@ void main() {
       await pixel(unlocked: false, point: background),
       await pixel(unlocked: true, point: background),
     );
-  });
-
-  test('bug-era saves load with single hand and no free broom', () {
-    final session = GameSession(catalog, MemoryStore())..startDay();
-    final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
-    json['version'] = 3;
-    json['run']['balanceVersion'] = 3;
-    json['run']['settings'] = catalog.settings({}, balanceVersion: 3).toJson();
-    json['tool'] = 'broom';
-    json['run']['settings'].remove('hand_capacity');
-    final restored = GameSession(catalog, MemoryStore())
-      ..restore(jsonEncode(json));
-    expect(restored.selectedTool, BallTool.hand);
-    expect(restored.board!.handCapacity, 1);
-    expect(restored.board!.segments, isEmpty);
   });
 
   test(

@@ -75,58 +75,6 @@ void main() {
     },
   );
 
-  test('old v2 run survives reload until next day adopts the new balance', () {
-    final session = GameSession(catalog, MemoryStore());
-    session.levels.addAll({'generator': 1, 'duration': 2});
-    session.economy.balance = 123;
-    session.startDay();
-    final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
-    data['version'] = 2;
-    data['run'].remove('balanceVersion');
-    data['run']['settings'] = catalog
-        .settings(session.levels, balanceVersion: 1)
-        .toJson();
-    data['run']['remaining'] = 72.0;
-    final restored = GameSession(catalog, MemoryStore())
-      ..restore(jsonEncode(data));
-    expect(restored.cycle!.remaining, 72);
-    expect(restored.board!.settings['production_duration'], 70);
-    expect(restored.board!.settings['spawn_interval'], .65);
-    expect(restored.economy.balance, 123);
-    final reopened = GameSession(catalog, MemoryStore())
-      ..restore(restored.snapshot());
-    expect(reopened.board!.settings.balanceVersion, 1);
-    expect(reopened.board!.settings['production_duration'], 70);
-    reopened.finishDay();
-    reopened.startDay();
-    expect(reopened.cycle!.remaining, 19);
-    expect(
-      reopened.board!.settings['spawn_interval'],
-      closeTo(1 / 1.875, 1e-9),
-    );
-    expect(reopened.board!.settings.balanceVersion, 6);
-    expect(reopened.economy.balance, 123);
-    expect(reopened.levels, session.levels);
-  });
-
-  test('saved balance 2 keeps its cadence until the next day', () {
-    final session = GameSession(catalog, MemoryStore())..startDay();
-    final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
-    json['run']['balanceVersion'] = 2;
-    json['run']['settings'] = catalog.settings({}, balanceVersion: 2).toJson();
-    final restored = GameSession(catalog, MemoryStore())
-      ..restore(jsonEncode(json));
-    expect(restored.paused, isTrue);
-    expect(restored.board!.settings['spawn_interval'], 3);
-    final reloaded = GameSession(catalog, MemoryStore())
-      ..restore(restored.snapshot());
-    expect(reloaded.board!.settings.balanceVersion, 2);
-    reloaded.finishDay();
-    reloaded.startDay();
-    expect(1 / reloaded.board!.settings['spawn_interval'], closeTo(1.5, 1e-9));
-    expect(reloaded.board!.settings.balanceVersion, 6);
-  });
-
   test(
     'unknown balance and unpurchased configuration are rejected atomically',
     () {
@@ -134,7 +82,7 @@ void main() {
       final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
       data['run']['balanceVersion'] = 999;
       expect(() => session.restore(jsonEncode(data)), throwsFormatException);
-      data['run']['balanceVersion'] = 2;
+      data['run']['balanceVersion'] = 7;
       data['run']['settings']['production_duration'] = 75;
       expect(() => session.restore(jsonEncode(data)), throwsFormatException);
       expect(session.cycle!.remaining, 13);

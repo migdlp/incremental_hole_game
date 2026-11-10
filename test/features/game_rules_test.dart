@@ -299,4 +299,76 @@ void main() {
     }
     expect(collected, 2);
   });
+
+  group('save version 6', () {
+    test('old version saves are ignored and a new game starts', () async {
+      final store = MemoryStore()
+        ..candidates = ['{"version":5,"day":9,"balance":500}'];
+      final session = GameSession(catalog, store);
+      await session.load();
+      expect(session.progress.day, 1);
+      expect(session.economy.balance, 0);
+      expect(session.levels, isEmpty);
+      expect(session.recoveryMessage, isNull);
+    });
+
+    test('current version roundtrip keeps progress', () async {
+      final session = GameSession(catalog, MemoryStore());
+      session.economy.balance = 40;
+      session.progress.day = 3;
+      final store = MemoryStore()..candidates = [session.snapshot()];
+      final fresh = GameSession(catalog, store);
+      await fresh.load();
+      expect(fresh.economy.balance, 40);
+      expect(fresh.progress.day, 3);
+    });
+
+    test('damaged current save still raises the explicit reset error', () {
+      final store = MemoryStore()..candidates = ['{"version":6,"day":-1}'];
+      expect(GameSession(catalog, store).load(), throwsFormatException);
+    });
+
+    test('damaged main save falls back to a valid v6 backup', () async {
+      final good = GameSession(catalog, MemoryStore());
+      good.economy.balance = 7;
+      final store = MemoryStore()
+        ..candidates = ['{"version":6,"day":-1}', good.snapshot()];
+      final session = GameSession(catalog, store);
+      await session.load();
+      expect(session.economy.balance, 7);
+      expect(session.recoveryMessage, contains('copia de seguridad'));
+    });
+
+    test('valid main save wins over an old backup', () async {
+      final good = GameSession(catalog, MemoryStore());
+      good.economy.balance = 9;
+      final store = MemoryStore()
+        ..candidates = [good.snapshot(), '{"version":5,"day":2}'];
+      final session = GameSession(catalog, store);
+      await session.load();
+      expect(session.economy.balance, 9);
+      expect(session.recoveryMessage, isNull);
+    });
+
+    test('non-JSON text counts as a damaged current save', () {
+      final store = MemoryStore()..candidates = ['not json'];
+      expect(GameSession(catalog, store).load(), throwsFormatException);
+    });
+
+    test('a coin with an invalid value makes the board save invalid', () {
+      final board = Board(catalog.settings({}));
+      board.coins.add(Coin(board.nextId++, const Vec(100, 300), 3, landing: 0));
+      expect(
+        () => Board.fromJson(catalog.settings({}), board.toJson()),
+        throwsFormatException,
+      );
+    });
+
+    test('snapshot writes version 6 and balance version 7', () {
+      final session = GameSession(catalog, MemoryStore())..startDay();
+      final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
+      expect(json['version'], 6);
+      expect(json['run']['balanceVersion'], 7);
+    });
+  });
 }

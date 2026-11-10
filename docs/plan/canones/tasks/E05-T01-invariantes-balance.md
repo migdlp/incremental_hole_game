@@ -2,7 +2,7 @@
 id: E05-T01
 title: Pruebas de invariantes de balance
 epic: E05
-status: todo
+status: done
 depends_on: [E04-T02]
 requirements: [RNF-04]
 size: S
@@ -38,7 +38,7 @@ Un archivo de pruebas fija los invariantes del balance nuevo para detectar cambi
 
 ## Criterios de aceptación
 
-- [ ] Las seis pruebas pasan.
+- [x] Las seis pruebas pasan.
 
 ## Verificación
 
@@ -54,3 +54,8 @@ flutter test
 ## Si te bloqueas
 
 - Si `perfectShots` da 11 porque se dispara también en t = 10 exacto, comprueba que el bucle se detiene cuando el tiempo acumulado llega a 10 − 1e-9. No cambies la recarga.
+
+## Notas de implementación
+
+- `cannon_balance_test.dart` con las seis pruebas pedidas. `perfectShots` dispara en cada paso durante `production_duration` y devuelve 10 sin tocar la recarga. Vacía `board.balls` en cada paso para que ninguna bola tape la boca: solo se mide la recarga.
+- El CSV coincide con la arquitectura, sin cambios. Total: 169 pruebas. Sin desviaciones.

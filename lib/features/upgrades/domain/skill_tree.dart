@@ -18,11 +18,14 @@ class SkillTree {
   SkillTree(UpgradeCatalog catalog) {
     List<(double, double)> line(int x, int y, int dx, int dy, int count) => [
       for (var i = 0; i < count; i++)
-        (48.0 + (x + dx * i + 2) * spacing, 48.0 + (y + dy * i + 2) * spacing),
+        (48.0 + (x + dx * i + 2) * spacing, 48.0 + (y + dy * i + 6) * spacing),
     ];
     final routes = {
       'hand': [...line(5, 3, 0, 0, 1), ...line(6, 4, 1, 1, 4)],
       'hand_grip': [...line(6, 3, 0, 0, 1), ...line(7, 2, 1, -1, 4)],
+      'g1_auto': line(4, 2, 0, 0, 1),
+      'g1_auto_speed': line(3, 1, -1, -1, 4),
+      'g1_aim': line(3, 2, -1, 0, 5),
       'duration': line(2, 1, -1, 0, 5),
       'reward': line(5, 2, 0, -1, 5),
       'sweep': line(4, 4, 0, 0, 1),
@@ -64,7 +67,8 @@ class SkillTree {
     }
   }
   static const spacing = 64.0;
-  static const canvasSize = 864.0;
+  static const canvasWidth = 864.0;
+  static const canvasHeight = 1120.0;
   final Map<(String, String), List<(double, double)>> paths = {};
   final List<SkillNode> nodes = [];
   SkillNode get root => nodes.firstWhere((n) => n.id == 'hand:1');

@@ -122,6 +122,9 @@ class UpgradeCatalog {
       'particle_limit',
       'hand_capacity',
       'balls_per_spawn',
+      'max_ball_speed',
+      'wall_restitution',
+      'hole_capture_speed',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }

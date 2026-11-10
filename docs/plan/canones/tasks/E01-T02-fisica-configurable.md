@@ -2,7 +2,7 @@
 id: E01-T02
 title: Física configurable y captura por velocidad
 epic: E01
-status: todo
+status: done
 depends_on: [E01-T01]
 requirements: [RF-06, RF-07]
 size: M
@@ -67,9 +67,9 @@ La velocidad máxima de las bolas libres, el rebote en paredes y la velocidad m�
 
 ## Criterios de aceptación
 
-- [ ] Las cuatro pruebas nuevas pasan.
-- [ ] `grep -n "limit(380)" lib/features/board/domain/board.dart` solo aparece en `releasePointer`, `_releaseVelocity`, `_moveTool`, `_contactBroom` y `_push`.
-- [ ] Todas las pruebas existentes pasan.
+- [x] Las cuatro pruebas nuevas pasan.
+- [x] `grep -n "limit(380)" lib/features/board/domain/board.dart` solo aparece en `releasePointer`, `_releaseVelocity`, `_moveTool`, `_contactBroom` y `_push`.
+- [x] Todas las pruebas existentes pasan.
 
 ## Verificación
 
@@ -87,3 +87,9 @@ flutter test
 ## Si te bloqueas
 
 - Si más de tres pruebas existentes fallan por la captura por velocidad, para y anota sus nombres en una sección «Bloqueo»: podría indicar que la atracción del hoyo no frena como se espera.
+
+## Notas de implementación
+
+- Añadidas las tres bases al CSV y a la lista obligatoria de `fromCsv`. En `board.dart`, la integración libre usa `max_ball_speed`, el rebote usa `wall_restitution` y la captura exige `≤ hole_capture_speed` salvo para bolas agarradas.
+- Desviación menor: el plan habla de «cuatro» `.limit(380)` en `_collide`, pero el código real tiene dos; se cambiaron ambos. Los límites de mano, escoba y robot (incluido el de `_moveTool`) no cambian.
+- Pruebas: las cuatro pedidas más una de borde (bola a exactamente 140 u/s dentro del radio). Ninguna prueba existente necesitó ajustes. Total: 121 pruebas.

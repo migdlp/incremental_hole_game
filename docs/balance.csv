@@ -13,6 +13,9 @@ base,coin_pile_limit,0,0,coin_pile_limit,1000,objects,,1000
 base,particle_limit,0,0,particle_limit,150,objects,,150
 base,hand_capacity,0,0,hand_capacity,1,balls,,6
 base,balls_per_spawn,0,0,balls_per_spawn,1,balls_per_spawn,,2
+base,max_ball_speed,0,0,max_ball_speed,600,logical_units_per_second,,
+base,wall_restitution,0,0,wall_restitution,0.55,ratio,,
+base,hole_capture_speed,0,0,hole_capture_speed,140,logical_units_per_second,,
 upgrade,hand,1,13,hand_capacity,2,balls,,
 upgrade,hand,2,30,hand_capacity,3,balls,,
 upgrade,hand,3,50,hand_capacity,4,balls,,

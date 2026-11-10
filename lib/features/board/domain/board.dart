@@ -380,15 +380,22 @@ class Board {
         if (toHole.length < settings['hole_capture_radius'] + 15) {
           ball.velocity = ball.velocity + toHole.unit * (220 * step);
         }
-        ball.velocity = ball.velocity.limit(380) * friction;
+        ball.velocity =
+            ball.velocity.limit(settings['max_ball_speed']) * friction;
         if (ball.velocity.length < 1) ball.velocity = Vec.zero;
         ball.position = ball.position + ball.velocity * step;
         final bounded = ball.position.inside(radius);
         if (bounded.x != ball.position.x) {
-          ball.velocity = Vec(-ball.velocity.x * .4, ball.velocity.y);
+          ball.velocity = Vec(
+            -ball.velocity.x * settings['wall_restitution'],
+            ball.velocity.y,
+          );
         }
         if (bounded.y != ball.position.y) {
-          ball.velocity = Vec(ball.velocity.x, -ball.velocity.y * .4);
+          ball.velocity = Vec(
+            ball.velocity.x,
+            -ball.velocity.y * settings['wall_restitution'],
+          );
         }
         ball.position = bounded;
       }
@@ -399,6 +406,10 @@ class Board {
     var captures = 0, goldenCaptures = 0;
     balls.removeWhere((ball) {
       if ((ball.position - hole).length > settings['hole_capture_radius']) {
+        return false;
+      }
+      if (!_heldBalls.containsKey(ball) &&
+          ball.velocity.length > settings['hole_capture_speed']) {
         return false;
       }
       _heldBalls.remove(ball);
@@ -591,11 +602,11 @@ class Board {
                 math.max(0.0, relative.x * n.x + relative.y * n.y) * .65;
             if (!heldA) {
               ball.velocity = (ball.velocity - n * impulse * (heldB ? 2 : 1))
-                  .limit(380);
+                  .limit(settings['max_ball_speed']);
             }
             if (!heldB) {
               other.velocity = (other.velocity + n * impulse * (heldA ? 2 : 1))
-                  .limit(380);
+                  .limit(settings['max_ball_speed']);
             }
           }
         }

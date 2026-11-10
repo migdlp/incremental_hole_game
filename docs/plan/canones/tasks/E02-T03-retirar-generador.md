@@ -2,7 +2,7 @@
 id: E02-T03
 title: Retirar Generador rápido y Doble emisión
 epic: E02
-status: todo
+status: blocked
 depends_on: [E02-T02]
 requirements: [RF-15]
 size: M
@@ -62,3 +62,20 @@ flutter test
 ## Si te bloqueas
 
 - Si alguna otra mejora del CSV requiere `generator` o `double_spawn`, cámbiale el requisito a `hand:1` y anótalo en «Notas de implementación».
+
+## Bloqueo
+
+Al aplicar el paso 1 (`duration` pasa a `requires = hand:1`), la prueba existente `all node dependencies and routed segments use eight directions without passing through nodes` (`test/features/next_improvements_test.dart`) falla con `hand:1 → duration:1`.
+
+- Causa: esa prueba exige que cada nodo esté alineado (horizontal, vertical o diagonal de 45°) con cada uno de sus padres. `hand:1` está en la celda lógica (5, 3) y `duration:1` en (2, 1): el desfase es (−3, −2), que no está alineado. Hoy el padre es `generator:2` en (3, 1), que sí lo está. Los criterios de aceptación de esta tarea exigen que las pruebas de geometría del árbol sigan pasando.
+- El plan no resuelve el conflicto: «Día más largo» sigue en `line(2, 1, -1, 0, 5)` («sin cambios» en la arquitectura) y E03-T02 no la mueve.
+- El resto de fallos de la suite (recuentos 15→13 tipos y 49→43 nodos, y pruebas que compran `generator`) son los ajustes esperados por la tarea. Lo único que no se puede resolver sin decidir es la geometría.
+
+Opciones:
+
+1. Mover `duration` a otra ruta alineada con `hand:1` (5, 3). Es una decisión de diseño del árbol; las celdas cercanas están reservadas para E03-T02/E04-T02 (`g1_auto` en (4, 2), `g1_auto_speed` desde (3, 1)).
+2. Elegir otro requisito temporal que sí esté alineado con (2, 1), p. ej. `reward:2` (5, 1). Cambia el balance temporal («Día más largo» exigiría 2 niveles de «Mayor recompensa»).
+3. Relajar la prueba de alineación solo para `duration:1` hasta E03-T02, que lo reubica en `g1_auto_speed:1`. Toca una prueba que la tarea no lista.
+4. Fusionar el cambio de requisito de `duration` en E03-T02 y dejar en E02-T03 un requisito que no rompa la geometría.
+
+El trabajo hecho (CSV, catálogo, rutas, pantalla del árbol y parte de las pruebas) está guardado en un parche local fuera de la rama y no se ha commiteado; la rama conserva la suite en verde.

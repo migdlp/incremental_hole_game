@@ -208,4 +208,108 @@ void main() {
       expect(board.balls, isEmpty);
     });
   });
+
+  group('touch and body', () {
+    final g1 = cannonSlots[0].position;
+
+    test('touching the cannon fires instead of grabbing', () {
+      final board = Board(catalog.settings({}));
+      board.balls.add(Ball(board.nextId++, const Vec(168, 66), Vec.zero));
+      board.touch(g1);
+      expect(board.balls.length, 2);
+      expect(board.heldBalls, isEmpty);
+      expect(board.releasePointer(), 0);
+    });
+
+    test('touching the cannon never collects coins', () {
+      final board = Board(catalog.settings({'sweep': 1}));
+      board.coins.add(Coin(board.nextId++, const Vec(180, 70), 2, landing: 0));
+      expect(board.touch(g1), 0);
+      expect(board.drag(const Vec(180, 90)), 0);
+      expect(board.releasePointer(), 0);
+      expect(board.coins.length, 1);
+    });
+
+    test('closing touch on the cannon collects coins normally', () {
+      final board = Board(catalog.settings({}));
+      board.enterClosing();
+      board.coins.add(Coin(board.nextId++, const Vec(190, 60), 2, landing: 0));
+      board.touch(g1);
+      expect(board.releasePointer(), 2);
+      expect(board.balls, isEmpty);
+    });
+
+    test('balls bounce off the cannon body', () {
+      final board = Board(catalog.settings({}));
+      board.balls.add(
+        Ball(board.nextId++, const Vec(180, 120), const Vec(0, -300)),
+      );
+      for (var i = 0; i < 30; i++) {
+        board.update(1 / 60, producing: false);
+        expect(
+          (board.balls.single.position - g1).length,
+          greaterThanOrEqualTo(22 - 1e-6),
+        );
+      }
+    });
+
+    test(
+      'fast shots stay inside the board and outside bodies at 30, 60 and 120 fps',
+      () {
+        for (final dt in [1 / 30, 1 / 60, 1 / 120]) {
+          final board = Board(catalog.settings({}));
+          for (var shot = 0; shot < 50; shot++) {
+            board.cannons.first.cooldown = 0;
+            board.fireCannon(board.cannons.first);
+            for (var t = 0.0; t < .2 - 1e-9; t += dt) {
+              board.update(dt, producing: true);
+              for (final ball in board.balls) {
+                expect(ball.position.x, inInclusiveRange(0, 360));
+                expect(ball.position.y, inInclusiveRange(0, 560));
+                expect((ball.position - g1).length, greaterThanOrEqualTo(21.5));
+              }
+            }
+          }
+        }
+      },
+    );
+
+    test('fast ball does not knock a held ball out of the hand', () {
+      final board = Board(catalog.settings({}));
+      final held = Ball(board.nextId++, const Vec(180, 300), Vec.zero);
+      board.balls.add(held);
+      board.touch(const Vec(180, 300));
+      expect(board.heldBalls, contains(held));
+      board.balls.add(
+        Ball(board.nextId++, const Vec(180, 200), const Vec(0, 520)),
+      );
+      for (var i = 0; i < 20; i++) {
+        board.update(1 / 60, producing: true);
+      }
+      expect(board.heldBalls, contains(held));
+    });
+
+    test('touch at exactly 28 units fires and at 29 grabs the ball', () {
+      final board = Board(catalog.settings({}));
+      board.touch(g1 + const Vec(28, 0));
+      expect(board.balls.length, 1);
+      board.releasePointer();
+      final other = Board(catalog.settings({}));
+      other.balls.add(Ball(other.nextId++, g1 + const Vec(29, 0), Vec.zero));
+      other.touch(g1 + const Vec(29, 0));
+      expect(other.balls.length, 1);
+      expect(other.heldBalls, isNotEmpty);
+    });
+
+    test('a drag that starts on the cannon grabs and collects nothing', () {
+      final board = Board(catalog.settings({'sweep': 1}));
+      board.balls.add(Ball(board.nextId++, const Vec(180, 120), Vec.zero));
+      board.coins.add(Coin(board.nextId++, const Vec(180, 100), 2, landing: 0));
+      board.touch(g1);
+      board.drag(const Vec(180, 120));
+      expect(board.heldBalls, isEmpty);
+      expect(board.releasePointer(), 0);
+      expect(board.coins.length, 1);
+    });
+  });
 }

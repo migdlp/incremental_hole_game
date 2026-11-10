@@ -30,10 +30,7 @@ void main() {
     expect(catalog.settings({})['production_duration'], 10);
     for (var level = 1; level <= 3; level++) {
       expect(
-        catalog.settings({
-          'generator': 1,
-          'duration': level,
-        })['production_duration'],
+        catalog.settings({'duration': level})['production_duration'],
         10 + level * 3,
       );
     }

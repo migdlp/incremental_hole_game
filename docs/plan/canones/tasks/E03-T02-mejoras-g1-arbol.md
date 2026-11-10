@@ -35,12 +35,12 @@ El árbol ofrece «Cañón 1 · Automático», «Cañón 1 · Ritmo automático�
 ## Archivos
 
 - Modificar: `docs/balance.csv`, `lib/features/upgrades/domain/catalog.dart`, `lib/features/upgrades/domain/skill_tree.dart`, `lib/features/upgrades/presentation/skill_tree_screen.dart`
-- Modificar o ampliar pruebas: `test/features/future_tree_test.dart`, `test/features/skill_tree_test.dart` y `test/features/next_improvements_test.dart` (recuentos y lienzo)
+- Modificar o ampliar pruebas: `test/features/future_tree_test.dart`, `test/features/skill_tree_test.dart` (recuentos y límite Y del lienzo) y `test/features/next_improvements_test.dart` (recuentos)
 - No tocar: `board.dart`
 
 ## Pasos
 
-1. Añade las 10 filas de G1 al final de `docs/balance.csv`. En las cinco filas `upgrade,duration,…`, cambia `requires` de `hand:1` a `g1_auto_speed:1`.
+1. Añade las 10 filas de G1 al final de `docs/balance.csv`. En las cinco filas `upgrade,duration,…`, cambia `requires` de `reward:2` a `g1_auto_speed:1`. `duration:1` (2, 1) y `g1_auto_speed:1` (3, 1) quedan alineados en horizontal.
 2. En `catalog.dart`, añade a `labels`, justo antes de `'reward'`:
    ```dart
    'g1_auto': ['Cañón 1 · Automático', 'Producción'],
@@ -63,13 +63,15 @@ El árbol ofrece «Cañón 1 · Automático», «Cañón 1 · Ritmo automático�
       - `*_unlock` → `'Añade el cañón $n al tablero. Llega manual'`
 
       Implementa con `if (_isCannon(id)) { final n = id[1]; return switch (id.substring(3)) { 'auto' => …, 'auto_speed' => …, 'aim' => …, 'unlock' => …, _ => '' }; }` antes del `switch` existente, convirtiendo la función en cuerpo de bloque.
-   5. En `_summary`, la misma estructura para cañones:
+   5. En `_details()`, la línea `final isInterval = node.definition.effect.endsWith('_interval');` (de E02-T03) pasa a `final isInterval = node.definition.effect.endsWith('_interval') || node.definition.effect.endsWith('_arc');`, porque la Puntería también es «menor es mejor» y si no mostraría un porcentaje negativo. Renombrar la variable es opcional; si lo haces, usa `lowerIsBetter`.
+   6. En `_summary`, la misma estructura para cañones:
       - `auto` → `('', 'Dispara solo', ' y comparte la recarga contigo.')`
       - `auto_speed` → `('Dispara solo cada ', number(value), ' s.')`
       - `aim` → `('Arco de ', '${number(value)}°', '.')`
       - `unlock` → `('', 'Cañón $n', ' en el tablero.')`
-6. Pruebas:
+7. Pruebas:
    - Actualiza los recuentos a **16 tipos y 53 nodos**.
+   - En `test/features/skill_tree_test.dart` (líneas ~16–17), el límite `expect(node.y, inInclusiveRange(32, 1056));` pasa a `expect(node.y, inInclusiveRange(32, SkillTree.canvasHeight - 48));` (= 1072). Con el desplazamiento de +6 filas, la fila lógica 10 (nivel 5 de `paddle`, «Escoba más ancha») queda en y = 1072 y el nodo, de radio 32, sigue dentro del lienzo de 1120. El límite de X (`40, 840`) no cambia.
    - Añade a `future_tree_test.dart` `G1 upgrades follow the planned values`: niveles de `g1_auto_speed` = [1.3, 1.1, 0.95, 0.8] y de `g1_aim` = [135, 120, 110, 100, 90], `g1_auto` nivel 1 requiere `hand:1` y `duration` nivel 1 requiere `g1_auto_speed:1`.
    - Añade `buying G1 automatic makes the next day automatic`: sesión con saldo 60 y `hand:1`. Compra `g1_auto`, `startDay()` y `board.cannonAutomatic(board.cannons.first)` es `true`.
    - Las pruebas existentes de geometría (ocho direcciones, sin solapes y dentro del lienzo) deben pasar con el lienzo nuevo.

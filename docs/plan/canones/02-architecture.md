@@ -108,7 +108,7 @@ Fuera de producción no se llama a `tick`: recarga y destellos quedan congelados
 
 ## Cambios de física en `Board.update`
 
-- En la integración de bolas libres, `ball.velocity.limit(380)` pasa a `limit(settings['max_ball_speed'])`. Los cuatro `.limit(380)` de `_collide` pasan a usar el mismo valor. Los límites 380 de la mano, la escoba y el robot (`releasePointer`, `_releaseVelocity`, `_contactBroom`, `_push` y `_moveTool`) no cambian.
+- En la integración de bolas libres, `ball.velocity.limit(380)` pasa a `limit(settings['max_ball_speed'])`. Los dos `.limit(380)` de `_collide` pasan a usar el mismo valor. Los límites 380 de la mano, la escoba y el robot (`releasePointer`, `_releaseVelocity`, `_contactBroom`, `_push` y `_moveTool`) no cambian.
 - En el rebote, los dos `* .4` de `bounded` pasan a `* settings['wall_restitution']`.
 - Obstáculo: tras el rebote en paredes y para cada cañón activo, si `d = ball.position - c.slot.position` cumple `d.length < Cannon.bodyRadius + radius`, se recoloca la bola en `c.slot.position + d.unit * (Cannon.bodyRadius + radius)`. Si `vn = v·n < 0`, se aplica `v = v - n * vn * (1 + wall_restitution)`. Si `d.length < 0.0001`, `n = Vec(cos(baseAngle), sin(baseAngle))`.
 - Captura: en `balls.removeWhere`, una bola libre (no está en `_heldBalls`) solo se captura si además `ball.velocity.length <= settings['hole_capture_speed']`.
@@ -140,7 +140,7 @@ base,g4_arc,0,0,g4_arc,150,degrees,,
 base,g4_auto_interval,0,0,g4_auto_interval,1.5,seconds,,
 ```
 
-Se eliminan las bases `spawn_interval` y `balls_per_spawn` y todas las filas `upgrade,generator,…` y `upgrade,double_spawn,…`. La fila `duration` pasa a `requires = g1_auto_speed:1` en sus cinco niveles.
+Se eliminan las bases `spawn_interval` y `balls_per_spawn` y todas las filas `upgrade,generator,…` y `upgrade,double_spawn,…`. La fila `duration` pasa a `requires = reward:2` en E02-T03 (temporal) y a `requires = g1_auto_speed:1` en E03-T02 (definitivo), en sus cinco niveles. Motivo: la prueba de geometría exige que cada nodo esté alineado con todos sus padres. `duration:1` (2, 1) está alineado con `reward:2` (5, 1) y con `g1_auto_speed:1` (3, 1), pero no con `hand:1` (5, 3).
 
 Mejoras nuevas (precios provisionales, SUPUESTO-1):
 
@@ -217,7 +217,11 @@ Coordenadas lógicas `line(x, y, dx, dy, count)` de las rutas nuevas (las de `ge
 | `g4_auto_speed` | `line(10, -5, 0, 1, 2)` |
 | `g4_aim` | `line(8, -6, 1, 0, 3)` |
 
-Se eliminan las claves `generator` y `double_spawn` de `routes`. Resultado: 28 tipos de mejora y 74 nodos (43 actuales que se conservan + 31 nuevos).
+Se eliminan las claves `generator` y `double_spawn` de `routes`.
+
+**Regla de geometría (obligatoria para cualquier cambio futuro):** cada nodo debe estar alineado en ocho direcciones con cada padre (nivel anterior y requisitos) y el segmento recto no puede pasar a menos de 30 px de otro nodo. Las rutas de esta tabla se han comprobado con esa regla en los estados tras E02-T03, E03-T02 y E04-T02.
+
+En `skill_tree_screen.dart` (`_details()`), el porcentaje «menor es mejor» se detecta con `effect.endsWith('_interval')` (E02-T03) y `|| effect.endsWith('_arc')` (E03-T02). Resultado: 28 tipos de mejora y 74 nodos (43 actuales que se conservan + 31 nuevos).
 
 ## Guardado (versión 6)
 

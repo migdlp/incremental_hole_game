@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
@@ -17,7 +16,7 @@ void main() {
   test(
     'map has six initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(49));
+      expect(tree.nodes, hasLength(43));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -25,30 +24,18 @@ void main() {
             .where((n) => !n.owned({'hand': 1}))
             .map((n) => n.id)
             .toSet(),
-        {
-          'generator:1',
-          'reward:1',
-          'sweep:1',
-          'collection:1',
-          'hand:2',
-          'hand_grip:1',
-        },
+        {'reward:1', 'sweep:1', 'collection:1', 'hand:2', 'hand_grip:1'},
       );
       expect(tree.byId('broom:1').parents, ['hand:2']);
       expect(tree.byId('paddle:1').parents, ['broom:1']);
       expect(tree.byId('broom_v:1').parents, ['paddle:1']);
-      expect(tree.byId('duration:1').parents, ['generator:2']);
+      expect(tree.byId('duration:1').parents, ['reward:2']);
       expect(tree.byId('collection:1').parents, ['hand:1']);
       expect(tree.byId('magnet:1').parents, ['collection:3']);
       expect(tree.byId('attraction:1').parents, ['magnet:1']);
       expect(tree.byId('robot:1').parents.toSet(), {'paddle:2', 'sweep:1'});
-      expect(tree.byId('double_spawn:1').parents.toSet(), {
-        'generator:3',
-        'paddle:3',
-      });
       for (final id in [
         'hand',
-        'generator',
         'reward',
         'collection',
         'paddle',
@@ -66,21 +53,13 @@ void main() {
   test('session enforces every path and crossing, and purchases persist', () {
     final session = GameSession(catalog, MemoryStore())
       ..economy.balance = 100000;
-    for (final id in [
-      'generator',
-      'reward',
-      'sweep',
-      'broom',
-      'robot',
-      'double_spawn',
-      'attraction',
-    ]) {
+    for (final id in ['reward', 'sweep', 'broom', 'robot', 'attraction']) {
       expect(buy(session, id), isFalse, reason: id);
     }
     expect(buy(session, 'hand'), isTrue);
-    expect(buy(session, 'generator'), isTrue);
+    expect(buy(session, 'reward'), isTrue);
     expect(buy(session, 'duration'), isFalse);
-    expect(buy(session, 'generator'), isTrue);
+    expect(buy(session, 'reward'), isTrue);
     expect(buy(session, 'duration'), isTrue);
     expect(buy(session, 'hand'), isTrue);
     expect(buy(session, 'broom'), isTrue);
@@ -90,10 +69,7 @@ void main() {
     expect(buy(session, 'robot'), isFalse);
     expect(buy(session, 'sweep'), isTrue);
     expect(buy(session, 'robot'), isTrue);
-    expect(buy(session, 'generator'), isTrue);
-    expect(buy(session, 'double_spawn'), isFalse);
     expect(buy(session, 'paddle'), isTrue);
-    expect(buy(session, 'double_spawn'), isTrue);
     for (var i = 0; i < 3; i++) {
       expect(buy(session, 'collection'), isTrue);
     }
@@ -106,9 +82,18 @@ void main() {
       ..restore(session.snapshot());
     expect(restored.levels, session.levels);
     expect(restored.economy.balance, session.economy.balance);
-    expect(restored.board!.settings['balls_per_spawn'], 2);
     expect(restored.board!.settings['magnet_radius'], 95);
     expect(restored.board!.settings['production_duration'], 13);
+  });
+
+  test('retired production upgrades are gone', () {
+    final ids = testCatalog().definitions.map((d) => d.id);
+    expect(ids, isNot(contains('generator')));
+    expect(ids, isNot(contains('double_spawn')));
+    final duration = testCatalog().definitions.firstWhere(
+      (d) => d.id == 'duration',
+    );
+    expect(duration.levels.first.requirements, ['reward:2']);
   });
 
   test('attraction increases coin reach only while the pointer is active', () {
@@ -165,10 +150,6 @@ void main() {
         expect(b.velocity.length.isFinite, isTrue);
       }
       expect(settings['ball_value'], 13);
-      expect(
-        settings['spawn_interval'],
-        closeTo(1 / (1.5 * math.pow(1.25, 5)), 1e-9),
-      );
     },
   );
 

@@ -66,3 +66,4 @@ Ninguna. PA-1 (precio de Mano I) se revisa jugando el APK.
 ## Historial
 
 - 2026-11-10: versión inicial, tras tres rondas de entrevista con el usuario.
+- 2026-11-10: bloqueo de E02-T03 resuelto con la opción 2. «Día más largo» requiere `reward:2` de forma temporal (E02-T03) y `g1_auto_speed:1` de forma definitiva (E03-T02). Se ha simulado la prueba de geometría del árbol en los tres estados intermedios y pasa. Corrección: `_collide` tenía dos `.limit(380)`, no cuatro. `isInterval` pasa a `effect.endsWith('_interval')` (E02-T03) y E03-T02 añade `_arc`. E03-T02 también actualiza el límite Y de `skill_tree_test.dart` (1056 → `canvasHeight - 48`).

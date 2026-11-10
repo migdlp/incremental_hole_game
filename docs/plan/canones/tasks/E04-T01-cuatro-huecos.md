@@ -2,7 +2,7 @@
 id: E04-T01
 title: Tablero con cuatro huecos
 epic: E04
-status: todo
+status: done
 depends_on: [E03-T02]
 requirements: [RF-13, RF-14]
 size: M
@@ -58,7 +58,7 @@ size: M
 
 ## Criterios de aceptación
 
-- [ ] Las cinco pruebas nuevas y la suite completa pasan.
+- [x] Las cinco pruebas nuevas y la suite completa pasan.
 
 ## Verificación
 
@@ -75,3 +75,8 @@ flutter test
 ## Si te bloqueas
 
 - Si una prueba antigua del árbol falla por las bases nuevas, no cambies las bases: anota el nombre de la prueba y para.
+
+## Notas de implementación
+
+- Seis bases nuevas (`g2`–`g4` arco e intervalo) en el CSV y en `fromCsv`; el constructor de `Board` crea G1 y los huecos habilitados en orden. `fromJson` ya comparaba el hueco por posición, sin cambios.
+- Cinco pruebas nuevas en `cannon_test.dart`. En la de «arco y automático propios», la distancia de la bola a la boca se comprueba con tolerancia de un paso (la bola ya se ha movido en el paso en que nace). Total: 160 pruebas. Sin desviaciones.

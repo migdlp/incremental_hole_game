@@ -129,6 +129,12 @@ class UpgradeCatalog {
       'cannon_shot_speed',
       'g1_arc',
       'g1_auto_interval',
+      'g2_arc',
+      'g2_auto_interval',
+      'g3_arc',
+      'g3_auto_interval',
+      'g4_arc',
+      'g4_auto_interval',
     ]) {
       if (!base.containsKey(key)) throw FormatException('Falta $key');
     }

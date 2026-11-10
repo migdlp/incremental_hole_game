@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
 import 'package:incremental_hole_game/features/board/domain/cannon.dart';
+import 'package:incremental_hole_game/features/upgrades/domain/catalog.dart';
 import '../test_support.dart';
 
 void main() {
@@ -395,6 +396,68 @@ void main() {
       final clock = board.cannons.first.autoClock;
       board.update(1, producing: true);
       expect(board.cannons.first.autoClock, clock);
+    });
+  });
+
+  group('four slots', () {
+    DaySettings withValues(Map<String, double> extra) {
+      final settings = catalog.settings({});
+      settings.values.addAll(extra);
+      return settings;
+    }
+
+    test('only G1 exists without purchases', () {
+      expect(Board(catalog.settings({})).cannons.length, 1);
+    });
+
+    test('enabled slots appear in order', () {
+      final board = Board(withValues({'g2_enabled': 1, 'g4_enabled': 1}));
+      expect(board.cannons.map((c) => c.slot.index), [1, 2, 4]);
+      expect(board.cannons.last.slot.position.x, 180);
+      expect(board.cannons.last.slot.position.y, 540);
+    });
+
+    test('each cannon uses its own arc and automation', () {
+      final board = Board(
+        withValues({'g2_enabled': 1, 'g2_automatic': 1, 'g1_arc': 90}),
+      );
+      final g2 = board.cannons[1];
+      var shots = 0;
+      for (var step = 0; step < 180; step++) {
+        final before = board.balls.length;
+        board.update(1 / 60, producing: true);
+        final angle = board.cannonAngle(g2);
+        expect(angle, inInclusiveRange(-deg(75) - 1e-9, deg(75) + 1e-9));
+        if (board.balls.length > before) {
+          shots++;
+          final fresh = board.balls.last;
+          // The ball moved at most one step away from the muzzle.
+          expect(
+            (fresh.position - g2.slot.position).length,
+            closeTo(24, 520 / 60 + .01),
+          );
+        }
+      }
+      expect(shots, 2);
+      expect(board.balls.length, 2);
+      expect(board.cannons.first.cooldown, 0);
+    });
+
+    test('side cannon shots point inwards', () {
+      final board = Board(withValues({'g2_enabled': 1, 'g3_enabled': 1}));
+      expect(board.fireCannon(board.cannons[1]), isTrue);
+      expect(board.balls.last.velocity.x, greaterThan(0));
+      expect(board.fireCannon(board.cannons[2]), isTrue);
+      expect(board.balls.last.velocity.x, lessThan(0));
+    });
+
+    test('saved board with a different cannon count is rejected', () {
+      final board = Board(withValues({'g2_enabled': 1}));
+      expect(board.cannons.length, 2);
+      expect(
+        () => Board.fromJson(catalog.settings({}), board.toJson()),
+        throwsFormatException,
+      );
     });
   });
 }

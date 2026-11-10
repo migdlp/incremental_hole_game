@@ -1,11 +1,11 @@
 {
-  "name": "Jardín mecánico",
-  "short_name": "Jardín",
+  "name": "Feed the Hole",
+  "short_name": "Feed the Hole",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#111c2e",
   "theme_color": "#111c2e",
-  "description": "Empuja piedras, recoge monedas y mejora tu jardín.",
+  "description": "Feed the Hole: dirige bolas al agujero, recoge monedas y compra mejoras.",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [

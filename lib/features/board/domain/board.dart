@@ -1,21 +1,41 @@
+import '../../balance/domain/balance_metrics.dart';
 import 'dart:math' as math;
+import '../../prestige/domain/star_bubbles.dart';
+import '../../evolution/domain/evolution.dart';
+import '../../prestige/domain/permanent_skills.dart';
 import '../../../core/vec.dart';
 import '../../automation/domain/robot.dart';
-import 'cannon.dart';
 import 'tool.dart';
+import 'two_point_grip.dart';
+import 'bat_impact.dart';
 import 'coin_denomination.dart';
+import 'capture_combo.dart';
+import '../../feedback/domain/absorption_effects.dart';
+import 'special_abilities.dart';
+import 'gravity_event.dart';
+import 'black_hole_event.dart';
+import 'launcher.dart';
+import 'wall_impact.dart';
 import '../../upgrades/domain/catalog.dart';
 
 class Ball {
-  Ball(this.id, this.position, this.velocity, {this.golden = false});
+  Ball(
+    this.id,
+    this.position,
+    this.velocity, {
+    this.golden = false,
+    this.heavy = false,
+  });
   final int id;
-  final bool golden;
+  final bool golden, heavy;
+  double get mass => heavy ? EvolutionSkill.ramMass : 1;
   Vec position, velocity;
   Map<String, dynamic> toJson() => {
     'id': id,
     'p': position.toJson(),
     'v': velocity.toJson(),
     'golden': golden,
+    if (heavy) 'heavy': true,
   };
 }
 
@@ -34,33 +54,356 @@ class Coin {
 }
 
 class BoardEvents {
-  const BoardEvents(this.captured, this.collected, {this.goldenCaptured = 0});
+  const BoardEvents(
+    this.captured,
+    this.collected, {
+    this.goldenCaptured = 0,
+    this.rewards = const [],
+    this.normalFood = 0,
+    this.instantFood = 0,
+  });
   final int captured, collected, goldenCaptured;
+  final List<int> rewards;
+  final int normalFood, instantFood;
 }
 
 class Board {
-  Board(this.settings, {this.randomState = 42, this.tool = BallTool.hand}) {
+  Board(
+    this.settings, {
+    this.randomState = 42,
+    bool metricsEnabled = true,
+    this.tool = BallTool.hand,
+    bool? combosEnabled,
+    this.gravitySupported = false,
+    bool forceGravity = false,
+    int? gravitySeed,
+    int? blackHoleSeed,
+    int forcedBlackHoles = 0,
+    Vec? launcherPosition,
+    double? launcherAngle,
+    AbsorptionEffects? absorption,
+  }) : metrics = BoardMetrics(enabled: metricsEnabled),
+       absorption = absorption ?? AbsorptionEffects(),
+       specials = SpecialAbilities(settings),
+       combo = CaptureCombo(
+         enabled:
+             combosEnabled ??
+             (settings.balanceVersion < 8 || settings['combo_unlocked'] > 0),
+       ) {
     broomPosition = Vec(width - broomHalfWidth - 20, 100);
-    for (final slot in cannonSlots) {
-      if (slot.index == 1 || settings['g${slot.index}_enabled'] > 0) {
-        cannons.add(Cannon(slot));
-      }
-    }
+    gravity = GravityEvent(
+      settings,
+      seed: gravitySeed ?? randomState,
+      available: gravitySupported,
+      force: forceGravity,
+    );
+    blackHole = BlackHoleEvent(
+      settings,
+      seed: blackHoleSeed ?? randomState,
+      forcedObjects: forcedBlackHoles,
+    );
+    launcher = Launcher(
+      settings,
+      position: launcherPosition,
+      angle: launcherAngle,
+      seed: randomState,
+    );
   }
   static const width = 360.0, height = 560.0;
-  static const hole = Vec(180, 412);
+  static const hole = Vec(180, 123.2);
+  late final Vec holePosition = Vec(
+    180,
+    settings.balanceVersion >= 18 ? height * settings['hole_y_ratio'] : 50,
+  );
+  double? _grownCaptureRadius;
+  int _holeGrowths = 0;
+  int get holeGrowths => _holeGrowths;
+  double get baseCaptureRadius =>
+      _grownCaptureRadius ?? settings['hole_capture_radius'];
+  double get captureRadius =>
+      baseCaptureRadius *
+      (1 +
+          ((evolution?.hunger.remaining ?? 0) > 0
+              ? EvolutionSkill.of(
+                  EvolutionId.hunger,
+                ).value(evolution!.hunger.level)
+              : 0));
+  void syncHoleGrowth(int growths) {
+    if (growths < 0) throw ArgumentError('Crecimiento negativo');
+    if (growths == _holeGrowths) return;
+    // Area grows by 16%, so the radius grows by sqrt(1.16).
+    // Beyond full board coverage, larger radii have identical capture behavior.
+    // Bound only the physical projection; the persistent growth count is unlimited.
+    final coverage = math.sqrt(
+      math.pow(math.max(holePosition.x, width - holePosition.x), 2) +
+          math.pow(math.max(holePosition.y, height - holePosition.y), 2),
+    );
+    final base = settings['hole_capture_radius'];
+    final logRadius = math.log(base) + growths * math.log(1.16) / 2;
+    final grown = logRadius >= math.log(coverage)
+        ? coverage
+        : base * math.pow(1.16, growths / 2);
+    _holeGrowths = growths;
+    _grownCaptureRadius = grown;
+  }
+
+  static const generator = Vec(180, 480);
   final DaySettings settings;
+  final AbsorptionEffects absorption;
+  int contactSerial = 0;
+  double contactStrength = 0;
+  final _audioWalls = <(int, int)>{};
+  final _audioPairs = <(int, int)>{};
+  final _audioBroom = <int>{}, _audioLauncher = <int>{};
+  void _soundContact(double speed) {
+    if (speed < absorption.config['impactThreshold']) return;
+    contactSerial++;
+    contactStrength = (speed / maximumSpeed).clamp(0, 1);
+  }
+
+  double get rollingActivity {
+    var energy = 0.0;
+    for (final ball in balls) {
+      if (!_heldBalls.containsKey(ball)) {
+        energy +=
+            ball.velocity.x * ball.velocity.x +
+            ball.velocity.y * ball.velocity.y;
+      }
+    }
+    return (1 - math.exp(-math.sqrt(energy) / 600)).clamp(0, 1);
+  }
+
+  StarBubbles? starBubbles;
+  final _bubbleCells = <List<int>>[];
+  final _bubbleCandidates = <int>[];
+  PermanentRun? permanentRun;
+  EvolutionRun? evolution;
+  int evolutionBonus = 0;
+  bool productionEcho = false;
+  int get ordinaryBallLimit =>
+      settings['ball_limit'].toInt() -
+      (permanentRun?.goldenAt != null && !permanentRun!.goldenSpawned ? 1 : 0);
+  Vec _broomVelocity = Vec.zero;
+  double _broomRotation = 0;
+  // Experimental interactions stay separate from ordinary-ball ability rules.
+  bool bubbleGravity = false, bubbleBlackHole = false;
+
+  final CaptureCombo combo;
+  final SpecialAbilities specials;
+  late GravityEvent gravity;
+  late BlackHoleEvent blackHole;
+  late Launcher launcher;
+  bool _holdingLauncher = false;
+  bool get holdingLauncher => _toolGrip != null && _holdingLauncher;
+  Vec _launcherVelocity = Vec.zero;
+  double _launcherRotation = 0;
+  int? _blackHoleTap;
+  bool gravitySupported;
+  Vec gravityTilt = Vec.zero;
+  Vec broomGravityVelocity = Vec.zero, batGravityVelocity = Vec.zero;
+  bool _gravityTap = false;
+  bool get gravityObjectVisible =>
+      gravitySupported && !coinOnly && gravity.hasObject;
+  final _captureAllIds = <int>{};
+  final wallImpacts = <WallImpact>[];
+  static const maximumWallImpacts = 32;
+  double get wallRestitution =>
+      settings['wall_restitution'] > 0 ? settings['wall_restitution'] : .4;
+  double get maximumSpeed =>
+      settings['ball_speed_limit'] > 0 ? settings['ball_speed_limit'] : 380;
+
+  void _wallImpact(WallSide wall, double coordinate, double speed) {
+    if (wallRestitution <= 1 || speed < 1) return;
+    if (wallImpacts.length == maximumWallImpacts) wallImpacts.removeAt(0);
+    wallImpacts.add(
+      WallImpact(wall, coordinate, (speed / maximumSpeed).clamp(0.0, 1.0)),
+    );
+  }
+
+  void _bounceWalls(Ball ball) {
+    final position = ball.position;
+    if (position.x > radius + .5) _audioWalls.remove((ball.id, 0));
+    if (position.x < width - radius - .5) _audioWalls.remove((ball.id, 1));
+    if (position.y > radius + .5) _audioWalls.remove((ball.id, 2));
+    if (position.y < height - radius - .5) _audioWalls.remove((ball.id, 3));
+    var vx = ball.velocity.x, vy = ball.velocity.y;
+    var wallContacts = 0;
+    if (position.x <= radius && vx < 0) {
+      if (_audioWalls.add((ball.id, 0))) {
+        wallContacts++;
+        _soundContact(-vx);
+      }
+      _wallImpact(WallSide.left, position.y, -vx);
+      vx = -vx * wallRestitution;
+    } else if (position.x >= width - radius && vx > 0) {
+      if (_audioWalls.add((ball.id, 1))) {
+        wallContacts++;
+        _soundContact(vx);
+      }
+      _wallImpact(WallSide.right, position.y, vx);
+      vx = -vx * wallRestitution;
+    }
+    if (position.y <= radius && vy < 0) {
+      if (_audioWalls.add((ball.id, 2))) {
+        wallContacts++;
+        _soundContact(-vy);
+      }
+      _wallImpact(WallSide.top, position.x, -vy);
+      vy = -vy * wallRestitution;
+    } else if (position.y >= height - radius && vy > 0) {
+      if (_audioWalls.add((ball.id, 3))) {
+        wallContacts++;
+        _soundContact(vy);
+      }
+      _wallImpact(WallSide.bottom, position.x, vy);
+      vy = -vy * wallRestitution;
+    }
+    // Limit once after both normals: a corner never applies the multiplier twice
+    // to the whole vector. Inward/stationary contacts only get position correction.
+    ball.velocity = Vec(vx, vy).limit(maximumSpeed);
+    final evo = evolution;
+    if (evo != null && evo.level(EvolutionId.directed) > 0) {
+      for (var wall = 0; wall < wallContacts; wall++) {
+        if (evo.random() < evo.value(EvolutionId.directed)) {
+          final speed = ball.velocity.length;
+          ball.velocity =
+              (ball.velocity.unit * (1 - EvolutionSkill.steering) +
+                      (holePosition - ball.position).unit *
+                          EvolutionSkill.steering)
+                  .unit *
+              speed;
+        }
+      }
+    }
+    ball.position = position.inside(radius);
+  }
+
+  bool activateSpecial(SpecialAbility ability) {
+    metrics.add('ability_attempts.${ability.name}');
+    if (coinOnly || (ability == SpecialAbility.captureAll && balls.isEmpty)) {
+      return false;
+    }
+    if (!specials.activate(ability)) return false;
+    metrics.add('ability_activations.${ability.name}');
+    if (ability == SpecialAbility.captureAll) {
+      _captureAllIds.addAll(balls.map((ball) => ball.id));
+    }
+    return true;
+  }
+
   final balls = <Ball>[];
   final coins = <Coin>[];
+  bool? _automaticCoins;
+  bool get automaticCoins => _automaticCoins ?? settings.balanceVersion >= 15;
+  void enableAutomaticCoins() {
+    _automaticCoins = true;
+    coins.clear();
+    _queuedCoins.clear();
+    collectedCoins = null;
+  }
+
   // Only five denomination counters are queued if the visible-object cap fills.
   final _queuedCoins = <int, int>{};
   Map<int, int>? collectedCoins = <int, int>{};
-  bool get canCollectCoins => _heldBalls.isEmpty;
+  bool get canCollectCoins =>
+      !automaticCoins &&
+      starBubbles?.held == null &&
+      _heldBalls.isEmpty &&
+      !holdingBat &&
+      !holdingLauncher &&
+      !_gravityTap &&
+      _blackHoleTap == null;
   final robot = Robot();
   Vec? paddle, target;
   late Vec broomPosition;
-  Vec _broomGrabOffset = Vec.zero;
-  bool holdingBroom = false;
+  TwoPointGrip? _toolGrip;
+  bool get holdingBroom =>
+      _toolGrip != null && !_holdingLauncher && tool != BallTool.bat;
+  bool get holdingBat =>
+      _toolGrip != null && !_holdingLauncher && tool == BallTool.bat;
+  bool get holdingPhysicalTool => _toolGrip != null;
+  bool get hasSecondBroomPoint => _toolGrip?.second != null;
+  List<Vec> get broomHandles =>
+      segments.isEmpty ? const [] : [segments.first.a, segments.last.b];
+  Vec batPosition = const Vec(80, 300);
+  double batAngle = 0;
+  bool get batUnlocked => settings['bat_power'] > 0;
+  double get batHalfLength => settings['bat_half_length'];
+  double get batThickness => settings['bat_thickness'];
+  ToolSegment get batSegment {
+    final axis = Vec(math.cos(batAngle), math.sin(batAngle)) * batHalfLength;
+    return ToolSegment(batPosition - axis, batPosition + axis);
+  }
+
+  Vec _boundBat(Vec center, double angle) {
+    final x = math.cos(angle).abs() * batHalfLength + batThickness;
+    final y = math.sin(angle).abs() * batHalfLength + batThickness;
+    return Vec(center.x.clamp(x, width - x), center.y.clamp(y, height - y));
+  }
+
+  List<Vec> get batHandles => [batSegment.a, batSegment.b];
+  final batImpacts = <BatImpact>[];
+  final _batContacts = <int>{};
+  int batImpactSerial = 0;
+  double lastBatImpactStrength = 0;
+  Vec _batVelocity = Vec.zero;
+  double _batRotation = 0;
+
+  Vec get _grippedCenter => holdingLauncher
+      ? launcher.position
+      : holdingBat
+      ? batPosition
+      : broomPosition;
+  double get _grippedAngle => holdingLauncher
+      ? launcher.angle
+      : holdingBat
+      ? batAngle
+      : toolAngle;
+  bool _onBroom(Vec point, double tolerance) =>
+      segments.any(
+        (segment) => (segment.closest(point) - point).length <= tolerance,
+      ) ||
+      broomHandles.any((handle) => (handle - point).length <= 22);
+  bool _onBat(Vec point, double tolerance) =>
+      batUnlocked && (batSegment.closest(point) - point).length <= tolerance;
+
+  // Keep the established input entry points; both tools use TwoPointGrip.
+  bool grabSecondBroomPoint(Vec point) {
+    if (coinOnly ||
+        !holdingPhysicalTool ||
+        target == null ||
+        hasSecondBroomPoint ||
+        !(holdingLauncher
+            ? launcher.contains(point, extra: 22)
+            : holdingBat
+            ? _onBat(point, 22)
+            : _onBroom(point, 22)) ||
+        (point - target!).length < 18) {
+      return false;
+    }
+    _toolGrip!.addSecond(point, target!, _grippedCenter, _grippedAngle);
+    return true;
+  }
+
+  void dragSecondBroomPoint(Vec point) {
+    if (hasSecondBroomPoint) _toolGrip!.second = point.inside(0);
+  }
+
+  void releaseSecondBroomPoint() {
+    if (_toolGrip != null && target != null) {
+      _toolGrip!.releaseSecond(target!, _grippedCenter, _grippedAngle);
+    }
+  }
+
+  void promoteSecondBroomPoint() {
+    final point = _toolGrip?.second;
+    if (point == null) return;
+    paddle = target = point;
+    _downPoint = point;
+    _samples.clear();
+    releaseSecondBroomPoint();
+  }
+
   bool coinOnly = false;
   BallTool get broomTool =>
       settings['v_unlocked'] > 0 ? BallTool.vee : BallTool.broom;
@@ -68,6 +411,12 @@ class Board {
   void enterClosing() {
     releasePointer(cancel: true);
     coinOnly = true;
+    gravity.finish();
+    blackHole.endProduction();
+    launcher.freeze();
+    broomGravityVelocity = batGravityVelocity = Vec.zero;
+    combo.end();
+    evolution?.finishDay();
   }
 
   BallTool tool;
@@ -86,11 +435,11 @@ class Board {
   double get gripStrength => math.max(1, settings['hand_grip_strength']);
   bool get broomUnlocked => settings['broom_unlocked'] > 0;
   Vec _grabOffset = Vec.zero;
-  Vec? _downPoint, _directionAnchor;
-  bool _dragged = false, _heldDuringGesture = false, _cannonGesture = false;
+  Vec? _downPoint;
+  bool _dragged = false, _heldDuringGesture = false;
   double _clock = 0;
   final _samples = <({double time, Vec point})>[];
-  double toolAngle = math.pi / 2, _desiredAngle = math.pi / 2;
+  double toolAngle = math.pi / 2;
   static const broomThickness = 3.5;
   double get broomHalfWidth => settings['paddle_radius'] * 2;
   bool get sweepEnabled => settings['coin_sweep'] > 0;
@@ -102,20 +451,24 @@ class Board {
     BallTool.hand => true,
     BallTool.broom => broomUnlocked,
     BallTool.vee => settings['v_unlocked'] > 0,
+    BallTool.bat => batUnlocked,
   };
 
   void selectTool(BallTool value) {
     if (!canUse(value)) return;
     releasePointer(cancel: true);
     tool = value;
+    metrics.add('tool_selected.${value.name}');
   }
 
   int nextId = 1;
   int randomState;
   int captured = 0;
+  int normalFood = 0, instantFood = 0;
+  int spawned = 0;
+  BoardMetrics metrics;
   int goldenCaptured = 0;
-  final cannons = <Cannon>[];
-  double cannonClock = 0;
+  double spawnClock = 0;
   double get radius => settings['ball_radius'];
   int get pending =>
       coins.fold(0, (sum, coin) => sum + coin.value) +
@@ -129,27 +482,43 @@ class Board {
   }
 
   int releasePointer({bool cancel = false, double? time}) {
+    metrics.add(cancel ? 'input_cancelled_releases' : 'input_releases');
     var collected = 0;
     final velocity = cancel ? Vec.zero : _releaseVelocity(time ?? _clock);
+    if (_gravityTap &&
+        !cancel &&
+        !_dragged &&
+        target != null &&
+        gravityObjectVisible &&
+        gravity.contains(target!)) {
+      gravity.hit(available: gravitySupported);
+    }
+    final tapped = _blackHoleTap;
+    if (tapped != null && !cancel && !_dragged && !coinOnly && target != null) {
+      final object = blackHole.objects.where((o) => o.id == tapped).firstOrNull;
+      if (object != null && object.contains(target!)) blackHole.hit(tapped);
+    }
     for (final ball in _heldBalls.keys) {
       ball.velocity = cancel
           ? Vec.zero
           : ball == _manualBall
           ? velocity
-          : ball.velocity.limit(380);
+          : ball.velocity.limit(maximumSpeed);
     }
     if (!cancel && !_dragged && !_heldDuringGesture && _downPoint != null) {
       collected = _collect(_downPoint!, _downPoint!);
     }
+    starBubbles?.release(velocity);
     _heldBalls.clear();
     _manualBall = null;
     _slippedBalls.clear();
-    holdingBroom = false;
-    _cannonGesture = false;
+    _toolGrip = null;
+    _holdingLauncher = false;
+    _gravityTap = false;
+    _blackHoleTap = null;
     paddle = null;
     target = null;
     _downPoint = null;
-    _directionAnchor = null;
     _samples.clear();
     return collected;
   }
@@ -177,7 +546,7 @@ class Board {
     final elapsed = end.time - start.time;
     if (elapsed < .008) return Vec.zero;
     final velocity = (end.point - start.point) * (1 / elapsed);
-    return velocity.length < 18 ? Vec.zero : velocity.limit(380);
+    return velocity.length < 18 ? Vec.zero : velocity.limit(maximumSpeed);
   }
 
   void _sample(Vec point, double time) {
@@ -190,42 +559,84 @@ class Board {
   }
 
   int touch(Vec point, {double? time}) {
+    metrics.add('input_touches');
     if (target != null) return 0;
     paddle = point.inside(0);
     target = paddle;
     _downPoint = paddle;
-    _directionAnchor = paddle;
     _dragged = false;
     _heldDuringGesture = false;
     _samples.clear();
     _sample(paddle!, time ?? _clock);
-    final cannon = coinOnly ? null : cannonAt(paddle!);
-    if (cannon != null) {
-      _cannonGesture = true;
-      _heldDuringGesture = true; // release must not count as a coin tap
-      fireCannon(cannon);
+    _blackHoleTap = null;
+    _gravityTap = gravityObjectVisible && gravity.contains(paddle!);
+    if (_gravityTap) {
+      _heldDuringGesture = true;
       return 0;
     }
-    _desiredAngle = toolAngle;
-    final onCoin = coins.any(
-      (c) => c.landing <= 0 && (c.position - paddle!).length <= 12,
-    );
+    _blackHoleTap = !coinOnly && !blackHole.ended
+        ? blackHole.objectAt(paddle!)?.id
+        : null;
+    if (_blackHoleTap != null) {
+      _heldDuringGesture = true;
+      return 0;
+    }
+    final onCoin =
+        !automaticCoins &&
+        coins.any((c) => c.landing <= 0 && (c.position - paddle!).length <= 12);
     final handle =
         broomPosition - Vec(math.cos(toolAngle), math.sin(toolAngle)) * 21;
-    holdingBroom =
+    final grabBat =
+        !coinOnly &&
+        _onBat(paddle!, batThickness + 8) &&
+        (tool == BallTool.bat || !_onBroom(paddle!, 12));
+    final grabBroom =
         !coinOnly &&
         broomUnlocked &&
+        !grabBat &&
         !onCoin &&
-        (segments.any(
-              (segment) => (segment.closest(paddle!) - paddle!).length <= 12,
-            ) ||
+        (_onBroom(paddle!, 12) ||
             segmentDistance(paddle!, broomPosition, handle) <= 12);
-    tool = holdingBroom ? broomTool : BallTool.hand;
-    if (holdingBroom) {
-      _broomGrabOffset = broomPosition - paddle!;
+    // Broom/bat render above the launcher and keep their established grips.
+    final grabLauncher =
+        !coinOnly &&
+        !onCoin &&
+        !grabBat &&
+        !grabBroom &&
+        launcher.contains(paddle!);
+    tool = grabBat
+        ? BallTool.bat
+        : grabBroom
+        ? broomTool
+        : BallTool.hand;
+    if (grabLauncher || grabBat || grabBroom) {
+      _holdingLauncher = grabLauncher;
+      _toolGrip = TwoPointGrip(
+        grabLauncher
+            ? launcher.position
+            : grabBat
+            ? batPosition
+            : broomPosition,
+        grabLauncher
+            ? launcher.angle
+            : grabBat
+            ? batAngle
+            : toolAngle,
+        paddle!,
+      );
+      if (grabLauncher) launcher.freeze();
+      if (grabBat) batGravityVelocity = Vec.zero;
+      if (grabBroom) broomGravityVelocity = Vec.zero;
       _heldDuringGesture = true;
     }
-    if (!coinOnly && !holdingBroom && !onCoin) {
+    if (!coinOnly &&
+        !holdingPhysicalTool &&
+        !onCoin &&
+        (starBubbles?.grab(paddle!) ?? false)) {
+      _heldDuringGesture = true;
+      return 0;
+    }
+    if (!coinOnly && !holdingPhysicalTool && !onCoin) {
       Ball? nearest;
       var distance = radius + 12;
       for (final ball in balls) {
@@ -247,18 +658,10 @@ class Board {
   }
 
   int drag(Vec point, {double? time}) {
+    metrics.add('input_drags');
     if (target == null) return 0;
-    if (_cannonGesture) {
-      target = point.inside(0);
-      return 0;
-    }
     final destination = point.inside(0);
     if ((destination - _downPoint!).length > 8) _dragged = true;
-    final direction = destination - _directionAnchor!;
-    if (direction.length >= 3) {
-      _desiredAngle = math.atan2(direction.y, direction.x);
-      _directionAnchor = destination;
-    }
     final amount = sweepEnabled ? _collect(target!, destination) : 0;
     target = destination;
     // Closing still tracks the coin-collection cursor, not physical objects.
@@ -293,6 +696,7 @@ class Board {
   }
 
   void releaseCoin(int value) {
+    if (automaticCoins) return;
     if (value <= 0) throw ArgumentError.value(value, 'value');
     for (final stack in CoinDenomination.split(value)) {
       _queuedCoins.update(
@@ -305,17 +709,19 @@ class Board {
   }
 
   void _flushCoins() {
+    if (automaticCoins) return;
     for (final denomination in CoinDenomination.values.reversed) {
       final value = denomination.amount;
       var count = _queuedCoins[value] ?? 0;
       while (count > 0 && coins.length < settings['coin_pile_limit']) {
         // Coins never merge: each visible coin pays exactly its color's value.
-        var point = hole;
+        var point = holePosition;
         for (var attempt = 0; attempt < 6; attempt++) {
           final angle = random() * math.pi * 2;
           final distance = 40 + random() * (36 + attempt * 20);
-          point = (hole + Vec(math.cos(angle), math.sin(angle)) * distance)
-              .inside(14);
+          point =
+              (holePosition + Vec(math.cos(angle), math.sin(angle)) * distance)
+                  .inside(14);
           if (coins.every((coin) => (coin.position - point).length >= 22)) {
             break;
           }
@@ -331,83 +737,165 @@ class Board {
     }
   }
 
-  double cannonAngle(Cannon cannon) => cannon.angleAt(
-    cannonClock,
-    arcDegrees: settings['g${cannon.slot.index}_arc'],
-    period: settings['cannon_sweep_period'],
-  );
-
-  bool cannonAutomatic(Cannon cannon) =>
-      settings['g${cannon.slot.index}_automatic'] > 0;
-
-  /// Manual shot. Returns false when it is not allowed or the muzzle is blocked.
-  bool fireCannon(Cannon cannon) {
-    if (coinOnly || cannon.cooldown > 0) return false;
-    return _shoot(cannon);
-  }
-
-  Cannon? cannonAt(Vec point) {
-    Cannon? nearest;
-    var best = Cannon.touchRadius;
-    for (final cannon in cannons) {
-      final distance = (point - cannon.slot.position).length;
-      if (distance <= best) {
-        best = distance;
-        nearest = cannon;
-      }
+  bool _emitMain(
+    Vec spawn, {
+    bool forceGolden = false,
+    bool heavy = false,
+    String source = 'main',
+    bool probe = false,
+  }) {
+    metrics.add(probe ? 'outlet_probes' : 'attempts.$source');
+    String? reason;
+    // Preserve the original short-circuit order and evaluate geometry once.
+    if (balls.length >=
+        (forceGolden ? settings['ball_limit'] : ordinaryBallLimit)) {
+      reason = 'population';
+    } else if (starBubbles?.bodies.any(
+          (b) => (b.position - spawn).length < radius + starBubbles!.radius(b),
+        ) ??
+        false) {
+      reason = 'bubble';
+    } else if (launcher.contact(spawn, radius) != null) {
+      reason = 'launcher';
+    } else if (balls.any((b) => (b.position - spawn).length <= radius * 2.2)) {
+      reason = 'ball';
     }
-    return nearest;
-  }
-
-  bool _shoot(Cannon cannon) {
-    final angle = cannonAngle(cannon);
-    final muzzle = cannon.muzzle(angle);
-    if (balls.length >= settings['ball_limit'] ||
-        balls.any((b) => (b.position - muzzle).length < radius * 2.2)) {
-      cannon.blockedFlash = Cannon.blockedSeconds;
+    if (reason != null) {
+      metrics.add(probe ? 'probe_blocked.$reason' : 'blocked.$source.$reason');
       return false;
     }
+    spawned++;
     balls.add(
       Ball(
         nextId++,
-        muzzle,
-        Vec(math.cos(angle), math.sin(angle)) * settings['cannon_shot_speed'],
-        golden: random() < .01,
+        spawn,
+        Vec((random() - .5) * 36, -EvolutionSkill.standardLaunchSpeed),
+        golden:
+            forceGolden ||
+            random() <
+                (.01 + (evolution?.value(EvolutionId.midas) ?? 0)).clamp(0, 1),
+        heavy: heavy,
       ),
     );
-    cannon.cooldown = cannonAutomatic(cannon)
-        ? math.min(
-            settings['cannon_cooldown'],
-            settings['g${cannon.slot.index}_auto_interval'],
-          )
-        : settings['cannon_cooldown'];
-    cannon.autoClock = 0;
-    cannon.recoil = Cannon.recoilSeconds;
+    metrics.birth(balls.last.id, source, balls.length);
+    if (!probe) metrics.add('successful.$source');
     return true;
   }
 
+  bool _emitExtra({
+    bool forceGolden = false,
+    bool heavy = false,
+    required String source,
+  }) {
+    metrics.add('attempts.$source');
+    // Same factory and probabilities as ordinary production. Probe a small
+    // deterministic grid at its outlet; no overlapping bodies or off-board spawn.
+    for (var row = 0; row < 3; row++) {
+      for (var column = 0; column < 7; column++) {
+        final point =
+            generator +
+            Vec((column - 3) * radius * 2.4, -30 - row * radius * 2.4);
+        if (_emitMain(
+          point,
+          forceGolden: forceGolden,
+          heavy: heavy,
+          source: source,
+          probe: true,
+        )) {
+          metrics.add('successful.$source');
+          return true;
+        }
+      }
+    }
+    metrics.add('blocked.$source.outlet_exhausted');
+    return false;
+  }
+
   BoardEvents update(double dt, {required bool producing}) {
+    metrics.advance(dt, captureRadius, tool.name, balls.length);
     var collected = 0;
+    for (final impact in batImpacts) {
+      impact.age += dt;
+    }
+    batImpacts.removeWhere((impact) => impact.age >= BatImpact.lifetime);
+    for (final impact in wallImpacts) {
+      impact.age += dt;
+    }
+    wallImpacts.removeWhere((impact) => impact.age >= WallImpact.lifetime);
     _flushCoins();
     for (final coin in coins) {
       coin.landing = math.max(0, coin.landing - dt);
     }
     if (producing && !coinOnly) {
-      cannonClock += dt;
-      for (final cannon in cannons) {
-        cannon.tick(dt);
-        if (!cannonAutomatic(cannon)) continue;
-        cannon.autoClock += dt;
-        if (cannon.autoClock + 1e-9 >=
-                settings['g${cannon.slot.index}_auto_interval'] &&
-            cannon.cooldown <= 0) {
-          _shoot(cannon); // on failure autoClock is kept, so it retries
+      final acceleratedTime = math.min(dt, specials.boostRemaining);
+      final evo = evolution;
+      final duration = settings['production_duration'];
+      spawnClock +=
+          (evo?.productionTime(dt, duration) ?? dt) +
+          (evo?.productionTime(acceleratedTime, duration) ?? acceleratedTime) *
+              (specials.generationMultiplier - 1);
+      specials.advance(dt);
+      while (spawnClock + 1e-9 >= settings['spawn_interval']) {
+        spawnClock = math.max(0, spawnClock - settings['spawn_interval']);
+        metrics.add('main_cycles');
+        final echoBefore = permanentRun?.pendingEcho ?? 0;
+        final ramBefore = evolution?.pendingRam ?? 0;
+        final rationBefore = evolution?.pendingRation ?? 0;
+        permanentRun?.cycle(echo: productionEcho);
+        evolution?.cycle();
+        metrics.add(
+          'requests.p02_echo',
+          (permanentRun?.pendingEcho ?? 0) - echoBefore,
+        );
+        metrics.add(
+          'requests.e03_ram',
+          (evolution?.pendingRam ?? 0) - ramBefore,
+        );
+        metrics.add(
+          'requests.e03_ration',
+          (evolution?.pendingRation ?? 0) - rationBefore,
+        );
+        final count = math.max(1, settings['balls_per_spawn'].toInt());
+        metrics.add('requests.main', count);
+        final center = generator + Vec((random() - .5) * 42, -30);
+        for (var index = 0; index < count; index++) {
+          _emitMain(
+            center + Vec((index - (count - 1) / 2) * (radius * 2.4), 0),
+          );
         }
+      }
+      final permanent = permanentRun;
+      if (permanent != null) {
+        permanent.elapsed += dt;
+        if (!permanent.goldenSpawned &&
+            permanent.goldenAt != null &&
+            permanent.elapsed + 1e-9 >= permanent.goldenAt!) {
+          permanent.goldenSpawned = _emitExtra(
+            forceGolden: true,
+            source: 'p02_golden',
+          );
+        }
+        // Retry blocked extras safely, without turning them into normal cycles.
+        var emitted = 0;
+        while (permanent.pendingEcho > 0 && emitted < 5) {
+          if (!_emitExtra(source: 'p02_echo')) break;
+          permanent.pendingEcho--;
+          emitted++;
+        }
+      }
+    }
+    if (producing && !coinOnly && evolution != null) {
+      final evo = evolution!;
+      if (evo.pendingRam > 0 && _emitExtra(heavy: true, source: 'e03_ram')) {
+        evo.pendingRam--;
+      }
+      if (evo.pendingRation > 0 && _emitExtra(source: 'e03_ration')) {
+        evo.pendingRation--;
       }
     }
     if (paddle != null && target != null) {
       final start = paddle!;
-      if (!_cannonGesture && canCollectCoins && settings['magnet_radius'] > 0) {
+      if (canCollectCoins && settings['magnet_radius'] > 0) {
         for (final coin in coins) {
           if (coin.landing <= 0 &&
               (coin.position - start).length <= settings['magnet_radius']) {
@@ -419,10 +907,14 @@ class Board {
       }
     }
     if (coinOnly) return BoardEvents(0, collected);
+    absorption.advance(dt);
+    starBubbles?.advanceVisuals(dt);
+    if (producing) starBubbles?.populate(dt);
+    combo.advance(dt);
     if (settings['robot_count'] > 0) {
       final goal = robot.direction(dt, [
         for (final ball in balls) (id: ball.id, position: ball.position),
-      ], hole);
+      ], holePosition);
       if (goal != null) {
         final movement = (goal - robot.position).limit(
           settings['robot_speed'] * dt,
@@ -431,86 +923,217 @@ class Board {
         _push(robot.position, 15, movement * (1 / dt), 2);
       }
     }
+    final sweptCaptures = <int>{};
+    var captures = 0, goldenCaptures = 0;
+    var normalFeeding = 0, instantFeeding = 0;
+    final rewards = <int>[];
+    void captureBalls() {
+      balls.removeWhere((ball) {
+        if (!_captureAllIds.contains(ball.id) &&
+            !sweptCaptures.contains(ball.id) &&
+            (ball.position - holePosition).length > captureRadius) {
+          return false;
+        }
+        _heldBalls.remove(ball);
+        if (ball == _manualBall) _manualBall = null;
+        _slippedBalls.remove(ball);
+        absorption.capture(
+          ball.id,
+          ball.position,
+          ball.velocity,
+          radius,
+          ball.golden,
+        );
+        for (var side = 0; side < 4; side++) {
+          _audioWalls.remove((ball.id, side));
+        }
+        captures++;
+        if (ball.golden) goldenCaptures++;
+        final baseReward =
+            settings['ball_value'].toInt() * combo.capture(golden: ball.golden);
+        final reward = evolution?.capture(baseReward) ?? baseReward;
+        evolutionBonus += reward - baseReward;
+        metrics.capture(
+          ball.id,
+          instant: _captureAllIds.contains(ball.id),
+          golden: ball.golden,
+          heavy: ball.heavy,
+          base: settings['ball_value'].toInt(),
+          combo: baseReward,
+          reward: reward,
+        );
+        if (_captureAllIds.contains(ball.id)) {
+          instantFeeding += reward;
+        } else {
+          normalFeeding += reward;
+        }
+        rewards.add(reward);
+        return true;
+      });
+    }
+
     // Small steps bound translation and rotating tips below a ball diameter.
     final steps = math.max(1, (dt / (1 / 240)).ceil());
     final step = dt / steps;
     for (var i = 0; i < steps; i++) {
+      if (producing) evolution?.advance(step);
+      final gravityImpulse = gravity.advance(
+        step,
+        producing: producing,
+        available: gravitySupported,
+        tilt: gravityTilt,
+      );
+      blackHole.advance(step, producing: producing);
       _moveTool(step);
-      final friction = math.exp(-1.6 * step);
+      _advanceLauncher(step, producing: producing);
+      _moveGravityTools(step, gravityImpulse);
+      final friction = math.exp(
+        -1.6 * step -
+            settings['gravity_ball_damping'] *
+                (gravitySupported ? gravity.lastActiveTime : 0),
+      );
       for (final ball in balls) {
         if (_heldBalls.containsKey(ball)) continue;
-        final toHole = hole - ball.position;
-        if (toHole.length < settings['hole_capture_radius'] + 15) {
-          ball.velocity = ball.velocity + toHole.unit * (220 * step);
-        }
-        ball.velocity =
-            ball.velocity.limit(settings['max_ball_speed']) * friction;
-        if (ball.velocity.length < 1) ball.velocity = Vec.zero;
-        ball.position = ball.position + ball.velocity * step;
-        final bounded = ball.position.inside(radius);
-        if (bounded.x != ball.position.x) {
-          ball.velocity = Vec(
-            -ball.velocity.x * settings['wall_restitution'],
-            ball.velocity.y,
-          );
-        }
-        if (bounded.y != ball.position.y) {
-          ball.velocity = Vec(
-            ball.velocity.x,
-            -ball.velocity.y * settings['wall_restitution'],
-          );
-        }
-        ball.position = bounded;
-        for (final cannon in cannons) {
-          final d = ball.position - cannon.slot.position;
-          final minDistance = Cannon.bodyRadius + radius;
-          if (d.length >= minDistance) continue;
-          final n = d.length < .0001
-              ? Vec(
-                  math.cos(cannon.slot.baseAngle),
-                  math.sin(cannon.slot.baseAngle),
-                )
-              : d.unit;
-          ball.position = (cannon.slot.position + n * minDistance).inside(
-            radius,
-          );
-          final vn = ball.velocity.x * n.x + ball.velocity.y * n.y;
-          if (vn < 0) {
+        ball.velocity = ball.velocity + gravityImpulse;
+        final evo = evolution;
+        final toHole = holePosition - ball.position;
+        if (producing && evo != null) {
+          var acceleration = 0.0;
+          if (evo.whirlpool.remaining > 0 &&
+              toHole.length <=
+                  captureRadius *
+                      EvolutionSkill.of(
+                        EvolutionId.whirlpool,
+                      ).value(evo.whirlpool.level)) {
+            acceleration +=
+                settings['gravity_acceleration'] *
+                EvolutionSkill.gravityFraction;
+          }
+          if (evo.gravity.remaining > 0) {
+            acceleration +=
+                settings['gravity_acceleration'] *
+                EvolutionSkill.of(EvolutionId.gravity).value(evo.gravity.level);
+          }
+          ball.velocity = ball.velocity + toHole.unit * (acceleration * step);
+          if (evo.pulseNow && toHole.length <= captureRadius * 3) {
             ball.velocity =
-                ball.velocity - n * (vn * (1 + settings['wall_restitution']));
+                ball.velocity +
+                toHole.unit *
+                    (EvolutionSkill.standardLaunchSpeed *
+                        evo.value(EvolutionId.pulse));
           }
         }
+        final baseAttraction = toHole.length < captureRadius + 15 ? 220.0 : 0.0;
+        final expandedAttraction = blackHole.lastActiveTime > 0
+            ? blackHole.accelerationAt(toHole.length)
+            : 0.0;
+        final suctionImpulse =
+            baseAttraction * step +
+            math.max(0.0, expandedAttraction - baseAttraction) *
+                blackHole.lastActiveTime;
+        if (suctionImpulse > 0) {
+          ball.velocity = ball.velocity + toHole.unit * suctionImpulse;
+        }
+        ball.velocity = ball.velocity.limit(maximumSpeed) * friction;
+        if (ball.velocity.length < 1 &&
+            gravityImpulse.length == 0 &&
+            expandedAttraction <= baseAttraction) {
+          ball.velocity = Vec.zero;
+        }
+        final previous = ball.position;
+        ball.position = ball.position + ball.velocity * step;
+        _bounceWalls(ball);
+        if (segmentDistance(holePosition, previous, ball.position) <=
+            captureRadius) {
+          sweptCaptures.add(ball.id);
+        }
       }
+      captureBalls();
       _collide();
       _contactBroom(Vec.zero, 0);
+      _contactBat();
+      _contactLauncher(step);
+      _stepBubbles(step, gravityImpulse);
+      captureBalls();
+      sweptCaptures.clear();
     }
     _clock += dt;
-    var captures = 0, goldenCaptures = 0;
-    balls.removeWhere((ball) {
-      if ((ball.position - hole).length > settings['hole_capture_radius']) {
-        return false;
-      }
-      if (!_heldBalls.containsKey(ball) &&
-          ball.velocity.length > settings['hole_capture_speed']) {
-        return false;
-      }
-      _heldBalls.remove(ball);
-      if (ball == _manualBall) _manualBall = null;
-      _slippedBalls.remove(ball);
-      captures++;
-      if (ball.golden) goldenCaptures++;
-      return true;
-    });
+    _captureAllIds.clear();
     captured += captures;
     goldenCaptured += goldenCaptures;
-    return BoardEvents(captures, collected, goldenCaptured: goldenCaptures);
+    normalFood += normalFeeding;
+    instantFood += instantFeeding;
+    return BoardEvents(
+      captures,
+      collected,
+      goldenCaptured: goldenCaptures,
+      rewards: rewards,
+      normalFood: normalFeeding,
+      instantFood: instantFeeding,
+    );
+  }
+
+  void _moveGravityTools(double dt, Vec impulse) {
+    if (settings.balanceVersion < 11) return;
+    final damping = math.exp(-settings['gravity_tool_damping'] * dt);
+    ({Vec center, Vec velocity}) freeMotion(
+      Vec center,
+      Vec velocity,
+      Vec Function(Vec) bound,
+    ) {
+      velocity = (velocity + impulse).limit(maximumSpeed) * damping;
+      if (velocity.length < .01) velocity = Vec.zero;
+      final next = center + velocity * dt;
+      final position = bound(next);
+      return (
+        center: position,
+        velocity: Vec(
+          position.x != next.x ? -velocity.x * .35 : velocity.x,
+          position.y != next.y ? -velocity.y * .35 : velocity.y,
+        ),
+      );
+    }
+
+    if (broomUnlocked &&
+        !holdingBroom &&
+        (impulse.length > 0 || broomGravityVelocity.length > 0)) {
+      final before = broomPosition;
+      final motion = freeMotion(
+        before,
+        broomGravityVelocity,
+        (p) => p.inside(broomHalfWidth + broomThickness),
+      );
+      broomPosition = motion.center;
+      broomGravityVelocity = motion.velocity;
+      _broomVelocity = (broomPosition - before) * (1 / dt);
+      _contactBroom(_broomVelocity, 0);
+    }
+    if (batUnlocked &&
+        !holdingBat &&
+        (impulse.length > 0 || batGravityVelocity.length > 0)) {
+      final before = batPosition;
+      final motion = freeMotion(
+        before,
+        batGravityVelocity,
+        (p) => _boundBat(p, batAngle),
+      );
+      batPosition = motion.center;
+      batGravityVelocity = motion.velocity;
+      _batVelocity = (batPosition - before) * (1 / dt);
+    }
   }
 
   void _moveTool(double dt) {
+    _broomVelocity = Vec.zero;
+    _broomRotation = 0;
+    _batVelocity = Vec.zero;
+    _batRotation = 0;
+    _launcherVelocity = Vec.zero;
+    _launcherRotation = 0;
     if (paddle == null || target == null) return;
     final start = paddle!;
     paddle = start + (target! - start).limit(900 * dt);
-    if (_heldBalls.isNotEmpty && !holdingBroom) {
+    if (_heldBalls.isNotEmpty && !holdingPhysicalTool) {
       // The first grip is manual. Only an existing grip can attract neighbours.
       while (_heldBalls.length < handCapacity) {
         Ball? nearest;
@@ -531,8 +1154,10 @@ class Board {
       if (_manualBall case final Ball ball) {
         final goal = (target! + _grabOffset).inside(radius);
         final previous = ball.position;
-        ball.position = previous + (goal - previous).limit(700 * dt);
-        ball.velocity = (ball.position - previous) * (1 / dt);
+        ball.position = previous + (goal - previous).limit(maximumSpeed * dt);
+        ball.velocity = ((ball.position - previous) * (1 / dt)).limit(
+          maximumSpeed,
+        );
       }
       final anchor = _manualBall == null
           ? paddle!
@@ -552,7 +1177,7 @@ class Board {
             (stretch * (_gripStiffness * gripStrength) -
                     ball.velocity * (_gripDamping * math.sqrt(gripStrength)))
                 .limit(_gripAcceleration * gripStrength);
-        ball.velocity = (ball.velocity + acceleration * dt).limit(380);
+        ball.velocity = (ball.velocity + acceleration * dt).limit(maximumSpeed);
         final next = ball.position + ball.velocity * dt;
         ball.position = next.inside(radius);
         if (ball.position.x != next.x) ball.velocity = Vec(0, ball.velocity.y);
@@ -564,20 +1189,450 @@ class Board {
         _slippedBalls.add(ball);
       }
     }
-    if (!holdingBroom) return;
-    final previousBroom = broomPosition;
-    final goal = (target! + _broomGrabOffset).inside(
-      broomHalfWidth + broomThickness,
-    );
-    broomPosition = previousBroom + (goal - previousBroom).limit(900 * dt);
-    var angle = (_desiredAngle - toolAngle + math.pi) % (2 * math.pi) - math.pi;
-    if (broomTool == BallTool.broom) {
-      if (angle > math.pi / 2) angle -= math.pi;
-      if (angle < -math.pi / 2) angle += math.pi;
+    if (!holdingPhysicalTool) return;
+    if (holdingLauncher) {
+      final desired = _toolGrip!.move(
+        target!,
+        launcher.position,
+        launcher.angle,
+        dt,
+        margin: 0,
+        speed: settings['launcher_move_speed'],
+        angularSpeed: settings['launcher_angular_speed'],
+      );
+      final previous = launcher.position;
+      launcher.move(desired.center, desired.angle);
+      _launcherVelocity = (launcher.position - previous) * (1 / dt);
+      _launcherRotation = desired.angularVelocity;
+      return;
     }
-    final turn = angle.clamp(-3 * dt, 3 * dt);
-    toolAngle = (toolAngle + turn) % (2 * math.pi);
-    _contactBroom((broomPosition - previousBroom) * (1 / dt), turn / dt);
+    final pose = _toolGrip!.move(
+      target!,
+      _grippedCenter,
+      _grippedAngle,
+      dt,
+      margin: holdingBat
+          ? batHalfLength + batThickness
+          : broomHalfWidth + broomThickness,
+      speed: holdingBat ? settings['bat_move_speed'] : 900,
+      angularSpeed: holdingBat ? settings['bat_angular_speed'] : 3,
+      symmetric: holdingBroom && broomTool == BallTool.broom,
+      constrain: holdingBat ? _boundBat : null,
+    );
+    if (holdingBat) {
+      batPosition = pose.center;
+      batAngle = pose.angle;
+      _batVelocity = pose.velocity;
+      _batRotation = pose.angularVelocity;
+    } else {
+      broomPosition = pose.center;
+      toolAngle = pose.angle;
+      _broomVelocity = pose.velocity;
+      _broomRotation = pose.angularVelocity;
+      _contactBroom(pose.velocity, pose.angularVelocity);
+    }
+  }
+
+  void _advanceLauncher(double dt, {required bool producing}) {
+    if (!launcher.unlocked) return;
+    launcher.flash = math.max(0.0, launcher.flash - dt);
+    launcher.boundaryFlash = math.max(0.0, launcher.boundaryFlash - dt);
+    if (!producing) return;
+    launcher.clock += dt;
+    while (launcher.clock + 1e-9 >= launcher.interval) {
+      launcher.clock = math.max(0.0, launcher.clock - launcher.interval);
+      launcher.attempts++;
+      metrics.add('requests.launcher');
+      metrics.add('attempts.launcher');
+      if (balls.length >= ordinaryBallLimit) {
+        metrics.add('blocked.launcher.population');
+        continue;
+      }
+      final exit =
+          launcher.muzzle +
+          launcher.axis * (launcher.barrelRadius + radius + .5);
+      if ((exit - exit.inside(radius)).length > 1e-6 ||
+          launcher.contact(exit, radius) != null ||
+          segments.any(
+            (s) =>
+                (s.closest(exit) - exit).length < radius + broomThickness ||
+                (s.closest(launcher.muzzle) - launcher.muzzle).length <
+                    radius + broomThickness ||
+                segmentDistance(s.a, launcher.muzzle, exit) <
+                    radius + broomThickness ||
+                segmentDistance(s.b, launcher.muzzle, exit) <
+                    radius + broomThickness,
+          ) ||
+          (batUnlocked &&
+              ((batSegment.closest(exit) - exit).length <
+                      radius + batThickness ||
+                  (batSegment.closest(launcher.muzzle) - launcher.muzzle)
+                          .length <
+                      radius + batThickness ||
+                  segmentDistance(batSegment.a, launcher.muzzle, exit) <
+                      radius + batThickness ||
+                  segmentDistance(batSegment.b, launcher.muzzle, exit) <
+                      radius + batThickness))) {
+        metrics.add('blocked.launcher.geometry');
+        continue;
+      }
+      if (starBubbles?.bodies.any(
+            (b) =>
+                segmentDistance(b.position, launcher.muzzle, exit) <
+                radius + starBubbles!.radius(b),
+          ) ??
+          false) {
+        metrics.add('blocked.launcher.bubble');
+        continue;
+      }
+      final blockers = balls
+          .where(
+            (b) =>
+                segmentDistance(b.position, launcher.muzzle, exit) <
+                radius * 2 + .1,
+          )
+          .toList();
+      if (blockers.isNotEmpty) {
+        for (final ball in blockers) {
+          if (!_heldBalls.containsKey(ball)) {
+            ball.velocity =
+                (ball.velocity +
+                        launcher.axis * settings['launcher_obstruction_force'])
+                    .limit(maximumSpeed);
+          }
+        }
+        metrics.add('blocked.launcher.ball');
+        continue; // Consume the attempt; never queue a delayed volley.
+      }
+      balls.add(
+        Ball(
+          nextId++,
+          exit,
+          launcher.axis * math.min(maximumSpeed, launcher.speed),
+          golden: launcher.random() < .01,
+        ),
+      );
+      spawned++;
+      launcher.shots++;
+      metrics.add('successful.launcher');
+      metrics.birth(balls.last.id, 'launcher', balls.length);
+      launcher.flash = .15;
+    }
+  }
+
+  void _contactLauncher(double dt) {
+    if (!launcher.unlocked) return;
+    final contacts = <int>{};
+    var pressure = Vec.zero;
+    for (final ball in balls) {
+      if (_heldBalls.containsKey(ball)) continue;
+      final contact = launcher.contact(ball.position, radius);
+      if (contact == null) continue;
+      final arm = contact.point - launcher.position;
+      final surface = holdingLauncher
+          ? _launcherVelocity + Vec(-arm.y, arm.x) * _launcherRotation
+          : launcher.velocity;
+      final relative = surface - ball.velocity;
+      final closing = math.max(
+        0.0,
+        relative.x * contact.normal.x + relative.y * contact.normal.y,
+      );
+      // Saturation models finite transmitted stress and guarantees <=3 impacts
+      // cannot defeat static resistance, regardless of their incoming speed.
+      if (contacts.add(ball.id) && !_audioLauncher.contains(ball.id)) {
+        _soundContact(closing);
+      }
+      final stress = math.min(
+        settings['launcher_contact_pressure_limit'],
+        contact.depth * settings['launcher_pressure_stiffness'] + closing,
+      );
+      pressure = pressure - contact.normal * stress;
+      ball.position = (ball.position + contact.normal * (contact.depth + .01))
+          .inside(radius);
+      if (closing > 0) {
+        ball.velocity =
+            (ball.velocity +
+                    contact.normal *
+                        (closing * (1 + settings['launcher_restitution'])))
+                .limit(maximumSpeed);
+      }
+      _bounceWalls(ball);
+    }
+    _audioLauncher
+      ..clear()
+      ..addAll(contacts);
+    launcher.applyPressure(pressure, dt, held: holdingLauncher);
+  }
+
+  void _contactBat() {
+    if (!batUnlocked) return;
+    final segment = batSegment;
+    final touching = <int>{};
+    for (final ball in balls) {
+      if (_heldBalls.containsKey(ball)) continue;
+      final contact = segment.closest(ball.position);
+      final delta = ball.position - contact;
+      final reach = radius + batThickness;
+      if (delta.length > reach + .75) continue;
+      if (_batContacts.contains(ball.id)) touching.add(ball.id);
+      if (delta.length >= reach) continue;
+      final arm = contact - batPosition;
+      final surface = _batVelocity + Vec(-arm.y, arm.x) * _batRotation;
+      // At an exact overlap use the approach direction, never an arbitrary boost.
+      final normal = delta.length > .0001
+          ? delta.unit
+          : (surface - ball.velocity).length > .0001
+          ? (surface - ball.velocity).unit
+          : Vec(-math.sin(batAngle), math.cos(batAngle));
+      final surfaceNormal = surface.x * normal.x + surface.y * normal.y;
+      final closing =
+          surfaceNormal -
+          (ball.velocity.x * normal.x + ball.velocity.y * normal.y);
+      ball.position = (ball.position + normal * (reach - delta.length + .01))
+          .inside(radius);
+      if (closing <= .001) continue;
+      touching.add(ball.id);
+      final newImpact = !_batContacts.contains(ball.id);
+      final bonus = newImpact
+          ? math.max(0.0, surfaceNormal) *
+                settings['bat_manual_gain'] *
+                settings['bat_power']
+          : 0.0;
+      final impulse =
+          closing * (newImpact ? 1 + settings['bat_restitution'] : 1) + bonus;
+      ball.velocity = (ball.velocity + normal * impulse).limit(maximumSpeed);
+      _bounceWalls(ball);
+      if (newImpact && closing >= 8) {
+        final strength = (impulse / maximumSpeed).clamp(0.0, 1.0);
+        if (batImpacts.length >= 24) batImpacts.removeAt(0);
+        batImpacts.add(BatImpact(contact, strength));
+        batImpactSerial++;
+        lastBatImpactStrength = strength;
+      }
+    }
+    _batContacts
+      ..clear()
+      ..addAll(touching);
+  }
+
+  void _stepBubbles(double dt, Vec gravityImpulse) {
+    final system = starBubbles;
+    if (system == null) return;
+    system.beginAudioContacts();
+    if (system.held != null && target != null) system.moveHeld(target!, dt);
+    // Bodies are ledger-backed; P02 admits every new quota reward immediately.
+    for (var i = system.bodies.length - 1; i >= 0; i--) {
+      final b = system.bodies[i];
+      var impulse = bubbleGravity ? gravityImpulse : Vec.zero;
+      if (bubbleBlackHole && blackHole.lastActiveTime > 0 && b != system.held) {
+        final toHole = holePosition - b.position;
+        impulse =
+            impulse +
+            toHole.unit *
+                blackHole.accelerationAt(toHole.length) *
+                blackHole.lastActiveTime;
+      }
+      system.integrate(b, dt, impulse);
+    }
+    // Use precomputed tool poses and surface velocities, including rotation.
+    bool toolContact(StarBubble b, Vec point, Vec surface, double thickness) {
+      final delta = b.position - point;
+      final reach = system.radius(b) + thickness;
+      if (delta.length >= reach) return false;
+      final relative = surface - b.velocity;
+      final normal = delta.length > .0001 ? delta.unit : relative.unit;
+      final closing = relative.x * normal.x + relative.y * normal.y;
+      if (closing > 0 && system.impact(b, normal, closing, point)) return true;
+      b.position = (b.position + normal * (reach - delta.length + .01)).inside(
+        system.radius(b),
+      );
+      if (closing > 0) {
+        b.velocity =
+            (b.velocity +
+                    normal *
+                        (closing * (1 + system.config['star_restitution'])))
+                .limit(maximumSpeed);
+      }
+      return false;
+    }
+
+    for (var i = system.bodies.length - 1; i >= 0; i--) {
+      final b = system.bodies[i];
+      var popped = false;
+      for (final segment in segments) {
+        final point = segment.closest(b.position);
+        final arm = point - broomPosition;
+        if (toolContact(
+          b,
+          point,
+          _broomVelocity + Vec(-arm.y, arm.x) * _broomRotation,
+          broomThickness,
+        )) {
+          popped = true;
+          break;
+        }
+      }
+      if (popped) continue;
+      if (batUnlocked) {
+        final point = batSegment.closest(b.position);
+        final arm = point - batPosition;
+        if (toolContact(
+          b,
+          point,
+          _batVelocity + Vec(-arm.y, arm.x) * _batRotation,
+          batThickness,
+        )) {
+          continue;
+        }
+      }
+      final contact = launcher.contact(b.position, system.radius(b));
+      if (contact != null) {
+        final arm = contact.point - launcher.position;
+        final surface = holdingLauncher
+            ? _launcherVelocity + Vec(-arm.y, arm.x) * _launcherRotation
+            : launcher.velocity;
+        final relative = surface - b.velocity;
+        final closing =
+            relative.x * contact.normal.x + relative.y * contact.normal.y;
+        if (closing > 0 &&
+            system.impact(b, contact.normal, closing, contact.point)) {
+          continue;
+        }
+        b.position = (b.position + contact.normal * (contact.depth + .01))
+            .inside(system.radius(b));
+        if (closing > 0) {
+          b.velocity =
+              (b.velocity +
+                      contact.normal *
+                          closing *
+                          (1 + system.config['star_restitution']))
+                  .limit(maximumSpeed);
+        }
+      }
+      for (final ball in balls) {
+        final reach = system.radius(b) + radius;
+        // Exact broad-phase rejection avoids vectors/square roots for distant
+        // pairs when Astral admits many bodies; collision response is unchanged.
+        if ((b.position.x - ball.position.x).abs() >= reach ||
+            (b.position.y - ball.position.y).abs() >= reach) {
+          continue;
+        }
+        final delta = b.position - ball.position;
+        final overlap = reach - delta.length;
+        if (overlap <= 0) continue;
+        final n = delta.unit;
+        final heldBubble = b == system.held,
+            heldBall = _heldBalls.containsKey(ball);
+        if (heldBubble && heldBall) continue;
+        if (!heldBubble) {
+          b.position = (b.position + n * (overlap * (heldBall ? 1 : .7) + .01))
+              .inside(system.radius(b));
+        }
+        if (!heldBall) {
+          ball.position =
+              (ball.position - n * (overlap * (heldBubble ? 1 : .3) + .01))
+                  .inside(radius);
+        }
+        final relative = ball.velocity - b.velocity;
+        final closing = math.max(0.0, relative.x * n.x + relative.y * n.y);
+        if (!heldBubble) {
+          b.velocity = (b.velocity + n * closing * (heldBall ? 1.4 : 1.05))
+              .limit(maximumSpeed);
+        }
+        if (!heldBall) {
+          ball.velocity =
+              (ball.velocity - n * closing * (heldBubble ? 1.4 : .45)).limit(
+                maximumSpeed,
+              );
+        }
+      }
+    }
+    // Uniform broad phase, rebuilt after motion and tool/ball contacts.
+    // Reuse buckets and candidate storage; keep deterministic pair order. As in
+    // discrete physics, positional corrections are indexed again next step.
+    final useGrid = system.bodies.length > 24;
+    var cellSize = 1.0, columns = 1, rows = 1;
+    if (useGrid) {
+      for (final body in system.bodies) {
+        cellSize = math.max(cellSize, 2 * system.radius(body));
+      }
+      columns = (width / cellSize).ceil();
+      rows = (height / cellSize).ceil();
+      while (_bubbleCells.length < columns * rows) {
+        _bubbleCells.add(<int>[]);
+      }
+      for (final cell in _bubbleCells) {
+        cell.clear();
+      }
+      for (var i = 0; i < system.bodies.length; i++) {
+        final p = system.bodies[i].position;
+        final x = (p.x / cellSize).floor().clamp(0, columns - 1);
+        final y = (p.y / cellSize).floor().clamp(0, rows - 1);
+        _bubbleCells[y * columns + x].add(i);
+      }
+    }
+    for (var i = 0; i < system.bodies.length; i++) {
+      final a = system.bodies[i];
+      _bubbleCandidates.clear();
+      if (useGrid) {
+        final x = (a.position.x / cellSize).floor().clamp(0, columns - 1);
+        final y = (a.position.y / cellSize).floor().clamp(0, rows - 1);
+        for (
+          var cy = math.max(0, y - 1);
+          cy <= math.min(rows - 1, y + 1);
+          cy++
+        ) {
+          for (
+            var cx = math.max(0, x - 1);
+            cx <= math.min(columns - 1, x + 1);
+            cx++
+          ) {
+            for (final j in _bubbleCells[cy * columns + cx]) {
+              if (j > i) _bubbleCandidates.add(j);
+            }
+          }
+        }
+        _bubbleCandidates.sort();
+      } else {
+        for (var j = i + 1; j < system.bodies.length; j++) {
+          _bubbleCandidates.add(j);
+        }
+      }
+      for (final j in _bubbleCandidates) {
+        final b = system.bodies[j];
+        final reach = system.radius(a) + system.radius(b);
+        if ((b.position.x - a.position.x).abs() >= reach ||
+            (b.position.y - a.position.y).abs() >= reach) {
+          continue;
+        }
+        final delta = b.position - a.position;
+        final overlap = reach - delta.length;
+        if (overlap <= 0) continue;
+        final n = delta.unit;
+        final ah = a == system.held, bh = b == system.held;
+        if (!ah) {
+          a.position = (a.position - n * (overlap * (bh ? 1 : .5) + .01))
+              .inside(system.radius(a));
+        }
+        if (!bh) {
+          b.position = (b.position + n * (overlap * (ah ? 1 : .5) + .01))
+              .inside(system.radius(b));
+        }
+        final relative = a.velocity - b.velocity;
+        final speed = math.max(0.0, relative.x * n.x + relative.y * n.y);
+        if (!ah) {
+          a.velocity = (a.velocity - n * speed * (bh ? 1.5 : .75)).limit(
+            maximumSpeed,
+          );
+        }
+        if (!bh) {
+          b.velocity = (b.velocity + n * speed * (ah ? 1.5 : .75)).limit(
+            maximumSpeed,
+          );
+        }
+      }
+    }
+    system.endAudioContacts();
   }
 
   Vec _nextGripOffset() {
@@ -602,6 +1657,7 @@ class Board {
   }
 
   void _contactBroom(Vec velocity, double rotation) {
+    final contacts = <int>{};
     for (final segment in segments) {
       for (final ball in balls) {
         if (_heldBalls.containsKey(ball)) continue;
@@ -615,14 +1671,22 @@ class Board {
         ball.position = (ball.position + normal * overlap).inside(radius);
         final arm = contact - broomPosition;
         final rotating = Vec(-arm.y, arm.x) * rotation;
-        final surface = (velocity + rotating.limit(80)).limit(380);
+        final surface = (velocity + rotating.limit(80)).limit(maximumSpeed);
         final relative = surface - ball.velocity;
         final impulse = relative.x * normal.x + relative.y * normal.y;
+        if (contacts.add(ball.id) && !_audioBroom.contains(ball.id)) {
+          _soundContact(impulse);
+        }
         if (impulse > 0) {
-          ball.velocity = (ball.velocity + normal * impulse).limit(380);
+          ball.velocity = (ball.velocity + normal * impulse).limit(
+            maximumSpeed,
+          );
         }
       }
     }
+    _audioBroom
+      ..clear()
+      ..addAll(contacts);
   }
 
   void _push(Vec point, double size, Vec velocity, double correction) {
@@ -639,12 +1703,13 @@ class Board {
         velocity.x * normal.x + velocity.y * normal.y,
       );
       ball.velocity = (ball.velocity + normal * (projected * .7 + 18)).limit(
-        380,
+        maximumSpeed,
       );
     }
   }
 
   void _collide() {
+    final contacts = <(int, int)>{};
     const cell = 20.0;
     final grid = <(int, int), List<Ball>>{};
     for (final ball in balls) {
@@ -664,47 +1729,85 @@ class Board {
             final difference = other.position - ball.position;
             final overlap = radius * 2 - difference.length;
             if (overlap <= 0) continue;
+            final pair = (ball.id, other.id);
+            contacts.add(pair);
             final n = difference.unit;
+            if (!_audioPairs.contains(pair)) {
+              _soundContact(
+                (ball.velocity.x - other.velocity.x) * n.x +
+                    (ball.velocity.y - other.velocity.y) * n.y,
+              );
+            }
             final heldA = _heldBalls.containsKey(ball),
                 heldB = _heldBalls.containsKey(other);
             if (heldA && heldB) continue;
             final distance = overlap + .01;
+            final inverseA = heldA ? 0.0 : 1 / ball.mass,
+                inverseB = heldB ? 0.0 : 1 / other.mass;
+            final inverseSum = inverseA + inverseB;
             if (!heldA) {
               ball.position =
-                  (ball.position - n * (heldB ? distance : distance * .5))
+                  (ball.position - n * (distance * inverseA / inverseSum))
                       .inside(radius);
             }
             if (!heldB) {
               other.position =
-                  (other.position + n * (heldA ? distance : distance * .5))
+                  (other.position + n * (distance * inverseB / inverseSum))
                       .inside(radius);
             }
             final relative = ball.velocity - other.velocity;
             final impulse =
-                math.max(0.0, relative.x * n.x + relative.y * n.y) * .65;
+                math.max(0.0, relative.x * n.x + relative.y * n.y) *
+                1.3 /
+                inverseSum;
             if (!heldA) {
-              ball.velocity = (ball.velocity - n * impulse * (heldB ? 2 : 1))
-                  .limit(settings['max_ball_speed']);
+              ball.velocity = (ball.velocity - n * impulse * inverseA).limit(
+                maximumSpeed,
+              );
             }
             if (!heldB) {
-              other.velocity = (other.velocity + n * impulse * (heldA ? 2 : 1))
-                  .limit(settings['max_ball_speed']);
+              other.velocity = (other.velocity + n * impulse * inverseB).limit(
+                maximumSpeed,
+              );
             }
           }
         }
       }
     }
+    _audioPairs
+      ..clear()
+      ..addAll(contacts);
   }
 
   Map<String, dynamic> toJson() => {
+    if (automaticCoins) 'automaticCoins': true,
     'random': randomState,
     'nextId': nextId,
     'captured': captured,
+    'balanceMetrics': metrics.toJson(),
+    if (evolutionBonus > 0) 'evolutionBonus': evolutionBonus,
     'goldenCaptured': goldenCaptured,
-    'cannonClock': cannonClock,
-    'cannons': [for (final c in cannons) c.toJson()],
+    'combo': combo.toJson(),
+    if (settings.balanceVersion >= 8) ...{
+      'specials': specials.toJson(),
+      'captureAllIds': _captureAllIds.toList(),
+    },
+    'spawnClock': spawnClock,
+    if (settings.balanceVersion >= 12) 'blackHole': blackHole.toJson(),
+    if (settings.balanceVersion >= 14)
+      'feeding': {'normal': normalFood, 'instant': instantFood},
+    if (settings.balanceVersion >= 13) 'launcher': launcher.toJson(),
+    if (settings.balanceVersion >= 11) ...{
+      'gravity': gravity.toJson(),
+      'broomGravityVelocity': broomGravityVelocity.toJson(),
+      'batGravityVelocity': batGravityVelocity.toJson(),
+    },
     'broomPosition': broomPosition.toJson(),
     'broomAngle': toolAngle,
+    if (settings.balanceVersion >= 10) ...{
+      'batPosition': batPosition.toJson(),
+      'batAngle': batAngle,
+    },
     'balls': balls
         .map(
           (b) => _heldBalls.containsKey(b)
@@ -722,7 +1825,31 @@ class Board {
   };
 
   factory Board.fromJson(DaySettings settings, Map<String, dynamic> json) {
-    final board = Board(settings, randomState: json['random'] as int);
+    final bonus = json['evolutionBonus'] ?? 0;
+    if (bonus is! int || bonus < 0) {
+      throw const FormatException('Bonus E03 inválido');
+    }
+    final goldenCaptured = json['goldenCaptured'] ?? 0;
+    if (goldenCaptured is! int) {
+      throw const FormatException('Capturas doradas inválidas');
+    }
+    final combo = json['combo'] == null
+        ? CaptureCombo(enabled: false)
+        : CaptureCombo.fromJson(
+            json['combo'] as Map<String, dynamic>,
+            captured: json['captured'] as int,
+            goldenCaptured: goldenCaptured,
+          );
+    final board = Board(
+      settings,
+      randomState: json['random'] as int,
+      combosEnabled: combo.enabled,
+    );
+    board.evolutionBonus = bonus;
+    board.combo
+      ..streak = combo.streak
+      ..remaining = combo.remaining
+      ..bonusUnits = combo.bonusUnits;
     if (json.containsKey('broomPosition')) {
       board.broomPosition = Vec.fromJson(json['broomPosition']);
     }
@@ -731,7 +1858,60 @@ class Board {
       if (angle is! num || !angle.isFinite) {
         throw const FormatException('Invalid broom angle');
       }
-      board.toolAngle = board._desiredAngle = angle.toDouble() % (2 * math.pi);
+      board.toolAngle = angle.toDouble() % (2 * math.pi);
+    }
+    if (settings.balanceVersion >= 10) {
+      board.batPosition = Vec.fromJson(json['batPosition']);
+      final angle = json['batAngle'];
+      if (angle is! num || !angle.isFinite) {
+        throw const FormatException('Invalid bat angle');
+      }
+      board.batAngle = angle.toDouble() % (2 * math.pi);
+      final bounded = board._boundBat(board.batPosition, board.batAngle);
+      if ((bounded - board.batPosition).length > .0001) {
+        throw const FormatException('Invalid bat position');
+      }
+    }
+    if (settings.balanceVersion >= 11) {
+      final savedGravity = json['gravity'];
+      if (savedGravity is! Map<String, dynamic>) {
+        throw const FormatException('Falta el estado de Gravedad');
+      }
+      board.gravity = GravityEvent.fromJson(settings, savedGravity);
+      board.broomGravityVelocity = Vec.fromJson(json['broomGravityVelocity']);
+      board.batGravityVelocity = Vec.fromJson(json['batGravityVelocity']);
+      if (board.broomGravityVelocity.length > board.maximumSpeed + 1e-6 ||
+          board.batGravityVelocity.length > board.maximumSpeed + 1e-6 ||
+          (!board.broomUnlocked && board.broomGravityVelocity.length > 0) ||
+          (!board.batUnlocked && board.batGravityVelocity.length > 0)) {
+        throw const FormatException('Velocidad de herramienta inválida');
+      }
+    }
+    if (settings.balanceVersion >= 12) {
+      final saved = json['blackHole'];
+      if (saved is! Map<String, dynamic>) {
+        throw const FormatException('Falta Agujero negro');
+      }
+      board.blackHole = BlackHoleEvent.fromJson(settings, saved);
+    }
+    if (settings.balanceVersion >= 13) {
+      final saved = json['launcher'];
+      if (saved is! Map<String, dynamic>) {
+        throw const FormatException('Falta el lanzador');
+      }
+      board.launcher = Launcher.fromJson(settings, saved);
+    }
+    if (settings.balanceVersion >= 14) {
+      final food = json['feeding'];
+      if (food is! Map<String, dynamic> ||
+          food['normal'] is! int ||
+          food['instant'] is! int ||
+          food['normal'] < 0 ||
+          food['instant'] < 0) {
+        throw const FormatException('Capturas de alimentación inválidas');
+      }
+      board.normalFood = food['normal'] as int;
+      board.instantFood = food['instant'] as int;
     }
     final margin = board.broomHalfWidth + broomThickness;
     final boundedBroom = board.broomPosition.inside(margin);
@@ -740,22 +1920,8 @@ class Board {
     }
     board.nextId = json['nextId'] as int;
     board.captured = json['captured'] as int;
-    final goldenCaptured = json['goldenCaptured'] ?? 0;
-    if (goldenCaptured is! int) {
-      throw const FormatException('Capturas doradas inválidas');
-    }
     board.goldenCaptured = goldenCaptured;
-    board.cannonClock = (json['cannonClock'] as num).toDouble();
-    final savedCannons = json['cannons'] as List;
-    if (savedCannons.length != board.cannons.length) {
-      throw const FormatException('Tablero guardado inválido');
-    }
-    for (var i = 0; i < savedCannons.length; i++) {
-      board.cannons[i] = Cannon.fromJson(
-        board.cannons[i].slot,
-        savedCannons[i] as Map<String, dynamic>,
-      );
-    }
+    board.spawnClock = (json['spawnClock'] as num).toDouble();
     for (final row in json['balls'] as List) {
       final golden = row['golden'] ?? false;
       if (golden is! bool) throw const FormatException('Bola dorada inválida');
@@ -763,8 +1929,9 @@ class Board {
         Ball(
           row['id'] as int,
           Vec.fromJson(row['p']),
-          Vec.fromJson(row['v']),
+          Vec.fromJson(row['v']).limit(board.maximumSpeed),
           golden: golden,
+          heavy: row['heavy'] == true,
         ),
       );
     }
@@ -796,13 +1963,29 @@ class Board {
               c.landing < 0 ||
               c.landing > .2,
         ) ||
-        !board.cannonClock.isFinite ||
-        board.cannonClock < 0 ||
-        board.cannons.any((c) => c.cooldown > settings['cannon_cooldown']) ||
+        !board.spawnClock.isFinite ||
+        board.spawnClock < 0 ||
         board.captured < 0 ||
         board.goldenCaptured < 0 ||
         board.goldenCaptured > board.captured) {
       throw const FormatException('Tablero guardado inválido');
+    }
+    if (settings.balanceVersion >= 14 &&
+        (board.normalFood + board.instantFood !=
+                (board.captured +
+                            9 * board.goldenCaptured +
+                            board.combo.bonusUnits) *
+                        settings['ball_value'].toInt() +
+                    board.evolutionBonus ||
+            board.normalFood % settings['ball_value'].toInt() != 0 ||
+            board.instantFood % settings['ball_value'].toInt() != 0)) {
+      throw const FormatException('Contabilidad de alimentación inválida');
+    }
+    final ordinary =
+        (board.captured + 9 * board.goldenCaptured + board.combo.bonusUnits) *
+        settings['ball_value'].toInt();
+    if (board.evolutionBonus > ordinary * 5) {
+      throw const FormatException('Bonus E03 fuera de rango');
     }
     final ids = [
       ...board.balls.map((b) => b.id),
@@ -812,12 +1995,54 @@ class Board {
         ids.any((id) => id <= 0 || id >= board.nextId)) {
       throw const FormatException('IDs de tablero inválidos');
     }
-    if (board.coins.any(
-      (coin) => !CoinDenomination.values.any((d) => d.amount == coin.value),
-    )) {
-      throw const FormatException('Tablero guardado inválido');
+    if (settings.balanceVersion >= 8) {
+      final specials = json['specials'];
+      final pending = json['captureAllIds'];
+      if (specials is! Map<String, dynamic> ||
+          pending is! List ||
+          pending.any(
+            (id) => id is! int || !board.balls.any((ball) => ball.id == id),
+          ) ||
+          pending.toSet().length != pending.length ||
+          (pending.isNotEmpty &&
+              !board.specials.unlocked(SpecialAbility.captureAll))) {
+        throw const FormatException('Estado de habilidades inválido');
+      }
+      board.specials.restore(specials);
+      board._captureAllIds.addAll(pending.cast<int>());
+    } else if (json['specials'] != null || json['captureAllIds'] != null) {
+      throw const FormatException('Habilidades en una jornada anterior');
+    }
+    // Old saves used arbitrary-value piles. Split them once without changing
+    // pending money; overflow is emitted as individual coins when space frees.
+    final oldPiles = board.coins
+        .where(
+          (coin) => !CoinDenomination.values.any((d) => d.amount == coin.value),
+        )
+        .toList();
+    board.coins.removeWhere(oldPiles.contains);
+    for (final pile in oldPiles) {
+      for (final stack in CoinDenomination.split(pile.value)) {
+        board._queuedCoins.update(
+          stack.denomination.amount,
+          (n) => n + stack.count,
+          ifAbsent: () => stack.count,
+        );
+      }
     }
     board._flushCoins();
+    if (json['automaticCoins'] == true || settings.balanceVersion >= 15) {
+      if (board.coins.isNotEmpty || board._queuedCoins.isNotEmpty) {
+        throw const FormatException('Monedas físicas en cobro automático');
+      }
+      board.enableAutomaticCoins();
+    }
+    board.metrics = BoardMetrics.restore(
+      json['balanceMetrics'],
+      liveIds: board.balls.map((b) => b.id).toList(),
+      captured: board.captured,
+    );
+    board.spawned = board.metrics.emitted;
     return board;
   }
 }

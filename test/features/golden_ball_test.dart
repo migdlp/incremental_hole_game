@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
-import 'package:incremental_hole_game/features/board/domain/coin_denomination.dart';
 import 'package:incremental_hole_game/features/board/presentation/garden_game.dart';
 import '../test_support.dart';
 
@@ -20,22 +19,32 @@ class RollsBoard extends Board {
 void main() {
   final catalog = testCatalog();
 
-  test('golden chance is one percent per successfully fired ball', () {
+  test('golden chance is one percent per successfully emitted ball', () {
     for (final roll in [.0, .009999, .01, .5, .99999]) {
       final board = RollsBoard(catalog.settings({}), [roll]);
-      expect(board.fireCannon(board.cannons.first), isTrue);
+      board.spawnClock = board.settings['spawn_interval'];
+      board.update(1 / 60, producing: true);
       expect(board.balls.single.golden, roll < .01);
     }
+    final pair = RollsBoard(catalog.settings({'double_spawn': 1}), [
+      .5,
+      .5,
+      .009,
+      .5,
+      .02,
+    ]);
+    pair.spawnClock = pair.settings['spawn_interval'];
+    pair.update(1 / 60, producing: true);
+    expect(pair.balls.map((b) => b.golden), [true, false]);
     final full = RollsBoard(catalog.settings({})..values['ball_limit'] = 1, [
       .001,
     ]);
     full.balls.add(Ball(full.nextId++, const Vec(50, 300), Vec.zero));
-    expect(full.fireCannon(full.cannons.first), isFalse);
+    full.spawnClock = full.settings['spawn_interval'];
+    full.update(1 / 60, producing: true);
     expect(full.balls.single.golden, isFalse);
-    expect(full.index, 0); // a blocked shot does not consume a roll
-    full.balls.clear();
     full.enterClosing();
-    expect(full.fireCannon(full.cannons.first), isFalse);
+    full.balls.clear();
     full.update(1, producing: true);
     expect(full.balls, isEmpty);
   });
@@ -52,15 +61,8 @@ void main() {
       expect(board.captured, 1);
       expect(board.goldenCaptured, 1);
       expect(session.economy.generated, 10);
-      final coin = board.coins.single;
-      expect(coin.value, 10);
-      final split = CoinDenomination.split(coin.value);
-      expect(split.single.denomination, CoinDenomination.ten);
-      expect(split.single.count, 1);
-      session.touch(coin.position);
-      session.release();
-      session.touch(coin.position);
-      session.release();
+      expect(session.rewards.outstanding, 10);
+      expect(board.coins, isEmpty);
       session.finishDay();
       session.finishDay();
       expect(session.economy.balance, 10);
@@ -84,7 +86,7 @@ void main() {
       expect(board.captured, 4);
       expect(board.goldenCaptured, 2);
       expect(session.economy.generated, (2 + 20) * 3);
-      expect(board.pending, 66);
+      expect(session.rewards.outstanding, 66);
       final restored = GameSession(catalog, MemoryStore())
         ..restore(session.snapshot());
       expect(restored.economy.generated, 66);
@@ -120,9 +122,9 @@ void main() {
       for (var i = 0; i < 300; i++) {
         board.balls.clear();
         a.balls.clear();
-        board.cannons.first.cooldown = a.cannons.first.cooldown = 0;
-        board.fireCannon(board.cannons.first);
-        a.fireCannon(a.cannons.first);
+        board.spawnClock = a.spawnClock = board.settings['spawn_interval'];
+        board.update(1 / 60, producing: true);
+        a.update(1 / 60, producing: true);
         expect(a.balls.single.golden, board.balls.single.golden);
         expect(a.randomState, board.randomState);
       }

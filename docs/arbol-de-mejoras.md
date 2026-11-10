@@ -1,69 +1,79 @@
 # Árbol de mejoras progresivo
 
-> **Actualización 0.6.0+11 — generadores-cañón:** el generador fijo y sus dos mejoras de producción se sustituyen por cañones. Hay 28 tipos y 74 nodos, en un lienzo de 864 × 1120. Cada cañón tiene sus mejoras propias. Guardado v6 y balance 7; los precios de cañón son provisionales. Las notas históricas inferiores describen entregas anteriores y esta prevalece.
+## Nodo especial S03
 
-> **Entrega CF-09 a CF-15 — 19 de octubre de 2026:** [PR #18](https://github.com/migdlp/incremental_hole_game/pull/18) integrada en `main`, código `34ea6d66e884903e6fd4d47c02883e3f31b48f74`. **[Descargar APK 0.5.0+10 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120/artifacts/12206371751)**, disponible hasta el 2 de noviembre de 2026. [Pipeline 39292311120](https://github.com/migdlp/incremental_hole_game/actions/runs/39292311120) correcta: formato, análisis, **116 pruebas**, compilación Android y firma v2 verificada. Descomprimir e instalar `jardin-mecanico-debug.apk`. No incluye las ideas de bolas duplicadoras/bomba. Validación en Android físico y ajuste de precios jugando pendientes.
+Prestigio es un rombo mayor girado 45°, siempre descubierto, en la esquina
+avanzada (48,48). Comprar tras confirmar termina inmediatamente la partida.
+Precio de prueba 10.000; requiere Generador V, Valor V y Duración V. Posición,
+precio y dependencias pendientes de BAL01. 60 nodos / 23 tipos. Comprar todo en
+DEBUG excluye este nodo. [Contrato](s03-prestigio-metaprogresion.md).
 
-> **Referencia actualizada a 0.5.0+10:** CF-09 a CF-15 implementados: Mano I de 13, Área manual desde Mano I e Imán de 300 tras Área III. Guardado v5 y balance 6; los precios en la UI usan icono de moneda.
+## Retirada C01
 
-> **Tanda anterior 0.4.0+9:** CF-06 a CF-08 implementados. El árbol usa una cuadrícula de 64 unidades y objetivos de 64 × 64, con posiciones/conexiones en ocho direcciones y rutas que evitan otros nodos. Se conservan los 44 nodos previos y se añaden cinco niveles de fuerza de mano. Ver [próximas mejoras](cambios-futuros-arbol-mejoras.md). Las notas de preparación anteriores se conservan como historia.
+Barrido, Área, Imán y Atracción no están en el catálogo activo. Compras antiguas
+retiradas sin reembolso por autorización del usuario. Robot mantiene únicamente
+Escoba ancha II. 59 nodos / 22 tipos; no se rediseña la rama liberada.
 
+Código **0.14.0+22**, 21/10/2026; consultar el último APK verificado en estado actual. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos. El [estado actual](estado-actual.md) describe el juego entregado y [cambios futuros](cambios-futuros-arbol-mejoras.md) recoge solo lo pendiente.
 
-> **Entrega CF-05 — 19 de octubre de 2026:** PR #16 integrada en `main`, commit `91b10cb0d5ff57ee0c69e02e17c1145d48d53c4d`. [APK 0.3.3+8 y SHA-256 (ZIP)](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655/artifacts/12156897149), disponible hasta el 2 de noviembre de 2026. [Pipeline 39182903655](https://github.com/migdlp/incremental_hole_game/actions/runs/39182903655) correcta sobre ese commit: formato, análisis, **101 pruebas**, compilación Android y firma v2 verificadas. Incluye el árbol compacto, ficha al seleccionar y compra de 1 s, junto con los cambios que ya había en `main`. Las notas de preparación inferiores son históricas. Prueba en Android físico pendiente.
+**Debug:** pulsar el botón DEBUG, arriba a la izquierda, para ver el mapa completo, comprar gratis o alternar la Vista del jugador. El progreso de prueba es temporal. [Instrucciones](modo-debug.md).
 
+## Ampliación M03 · prototipo
 
-> **Revisión de interfaz CF-05 preparada para integrar:** cabecera solo con saldo, sin título, atrás ni barra de zoom. Sin ficha hasta tocar un nodo, resumen con cantidades en verde y compra exclusivamente desde el botón manteniendo 1 s. Mapa compacto y conexiones de tramos rectos; ramas y balance conservados. Ver [referencia CF-05](cambios-futuros-arbol-mejoras.md#cf-05--árbol-compacto-y-ficha-bajo-demanda--19-de-octubre-de-2026).
-
-
-Referencia actual del código **0.6.0+11**, a partir del [referencia de cambios futuros v0.7](cambios-futuros-arbol-mejoras.md), autorizado el 19 de octubre de 2026. El [CSV](balance.csv) es la fuente de costes, efectos y requisitos de compra.
+M03 añadió cuatro nodos; C01 retira después la recolección manual. Rama independiente de
+Producción: Generador II → Generador lanzador (120) → Frecuencia I/II/III
+(100/180/300), intervalos 2,4/1,8/1,2/0,8 s. Sin mejoras de potencia. Requisito,
+precios y niveles son provisionales, pendientes de balance; CSV como fuente
+configurable. [Comportamiento y pruebas](m03-generador-lanzador.md).
 
 ## Mapa actual
 
-28 tipos y **74 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las ramas iniciales se pueden desarrollar conjuntamente.
+Veintitrés tipos y **60 nodos**, uno por nivel comprable. Cada nivel requiere el anterior. Las siete ramas iniciales se pueden desarrollar conjuntamente.
 
 ```text
-🟣 MANO I · 13 dólares · 2 bolas
+🟣 MANO I · 13 monedas · 2 bolas
 │
 ├─ 🟣 FUERZA DE AGARRE I → II → III → IV → V
 │
-├─ 🟢 CAÑÓN 1 · AUTOMÁTICO · 60
-│  ├─ Ritmo automático I → II → III → IV · 1,3 / 1,1 / 0,95 / 0,8 s
-│  │  └─ 🟠 DÍA MÁS LARGO I → II → III → IV → V
-│  ├─ Puntería I → II → III → IV → V · arco 135° → 90°
-│  └─ 🟢 CAÑÓN 2 (requiere Cañón 1 · Automático) · 250
-│     ├─ Automático · Ritmo automático I → II · Puntería I → II → III
-│     └─ 🟢 CAÑÓN 3 · 600 (mismas tres mejoras)
-│        └─ 🟢 CAÑÓN 4 · 1400 (mismas tres mejoras)
+├─ 🟢 GENERADOR I
+│  ├─ ACELERACIÓN · 100 → POTENCIA / DURACIÓN I–II / RECARGA I–II
+│  └─ Generador II
+│     ├─ 🟢 GENERADOR LANZADOR → FRECUENCIA I → II → III
+│     ├─ Generador III → IV → V
+│     │  └─ 🟢 DOBLE EMISIÓN (+ Anchura III)
+│     └─ 🟠 DÍA MÁS LARGO I → II → III → IV → V
+│
+├─ 🟣 PAREDES REBOTADORAS I → II → III
+│
+├─ 🟣 BATE DE BÉISBOL I → II → III
 │
 ├─ 🟡 VALOR I → II → III → IV → V
-├─ 🔵 BARRIDO DE MONEDAS (opcional)
-├─ 🔵 ÁREA I → II → III
-│                 ├─ Área IV → V
-│                 └─ IMÁN · 300 dólares → ATRACCIÓN I → II → III
+│
+├─ 🟡 RACHA · 40 monedas
+│  └─ CAPTURA TOTAL · 120 → RECARGA I → II
+│
 └─ 🟣 MANO II · 3 bolas
    ├─ Mano III → IV → V · 4 → 5 → 6 bolas
-   └─ DESBLOQUEAR ESCOBA · 20 dólares
+   └─ DESBLOQUEAR ESCOBA · 20 monedas
       └─ ANCHURA I
          ├─ Anchura II
          │  ├─ Anchura III → IV → V
-         │  └─ 🔴 ROBOT (+ Barrido)
+         │  └─ 🔴 ROBOT
          │     └─ VELOCIDAD I → II → III → IV → V
          └─ ESCOBA EN V
 ```
-
-Los cañones ocupan huecos fijos del tablero: G1 arriba (180, 60), G2 a la izquierda (20, 150), G3 a la derecha (340, 150) y G4 abajo (180, 540). Cada uno oscila en un arco de 150° con un barrido de ida y vuelta de 2 s, recarga 1 s y dispara a 520 u/s. Al principio se dispara tocando el cañón; «Automático» lo hace disparar solo (cada 1,5 s) y «Ritmo automático» acorta ese intervalo; «Puntería» estrecha el arco. Los precios de las mejoras de cañón están en el [CSV](balance.csv) y son provisionales. «Día más largo» exige «Cañón 1 · Ritmo automático I».
 
 La mano inicial lleva una bola. Siempre se agarra la primera manualmente; solo una mano que ya sostiene alguna atrae otras a menos de 36 unidades de la primera sostenida, hasta llenar la capacidad. La primera bola sigue el agarre manual. Las adicionales se acercan con fuerza limitada e inercia, tardan unas décimas en acomodarse y siguen al dedo con retraso. Un tirón fuerte puede romper ese agarre; las bolas sueltas conservan su velocidad y no se reenganchan hasta un gesto nuevo. Al levantar el dedo, cada bola adicional conserva su propia inercia. Pausa y cierre cancelan todos los agarres sin lanzarlos. Esta mecánica no recoge monedas.
 
 La escoba no se dibuja, no se puede agarrar y no colisiona hasta comprar su desbloqueo. Después es un objeto físico que conserva posición y orientación. Anchura y V modifican esa misma escoba. La V no añade otro selector.
 
-El robot empuja bolas; no cobra monedas. Imán y Atracción actúan sobre monedas alrededor del dedo activo solo con la mano vacía; no son el imán de bolas de la mano. Los cuerpos de los cañones (radio 16) son sólidos para las bolas; la escoba y el robot pasan por encima.
+Doble emisión intenta crear dos bolas separadas en cada emisión; mantiene el intervalo y respeta obstáculos de salida y el límite técnico de 200 bolas. El robot empuja bolas; no cobra monedas. Imán y Atracción actúan sobre monedas alrededor del dedo activo solo con la mano vacía; no son el imán de bolas de la mano.
 
 ## Colores y estados
 
 | Tipo | Color |
 | --- | --- |
-| Cañones | Verde `#22C55E` |
+| Generación | Verde `#22C55E` |
 | Valor | Amarillo `#EAB308` |
 | Recogida de monedas | Azul `#3B82F6` |
 | Control de bolas | Violeta `#A855F7` |
@@ -74,8 +84,8 @@ Los nodos comprados muestran su icono y color de tipo, con marca de compra. Los 
 
 ## Recorrido e interacción
 
-1. El pop-up de estadísticas tiene un solo botón: «Ir al árbol de mejoras», que abre su pantalla independiente.
-2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Cañón 1 · Automático, Valor I, Barrido, Área I, Fuerza I y Mano II.
+1. El pop-up de estadísticas tiene un solo botón: «Tienda», que abre su pantalla independiente.
+2. Una partida nueva muestra únicamente Mano I. Al comprarla se abren Generador I, Valor I, Racha, Barrido, Área I, Fuerza I, Paredes I, Bate I y Mano II.
 3. Pulsar un nodo consulta su efecto y coste; mantener pulsado un segundo en el botón de compra de la ficha compra una sola vez. El nodo solo consulta, incluso al mantenerlo pulsado.
 4. Soltar antes, arrastrar, añadir otro dedo o pasar a segundo plano cancela la compra sin gastar.
 5. «Comenzar día» está fijo en la pantalla del árbol: cancela cualquier compra incompleta, inicia directamente la jornada y cierra esa pantalla. Atrás puede volver al resumen, que no permite empezar el día. La bienvenida de una partida nueva conserva su inicio directo.
@@ -84,18 +94,34 @@ El catálogo y la sesión comprueban los mismos requisitos que el árbol, inclui
 
 ## Balance y compatibilidad
 
-Base: disparo manual con recarga de 1 s, $1 por bola, diez segundos de producción y tres de recogida final. Mano I cuesta 13 dólares; Valor sigue 2/3/5/8/13 y el imán cuesta 300 tras Área III; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas.
+Base: 1,5 emisiones/s, valor normal 1 por bola, 15 segundos de producción y 5 de recogida final. Día más largo I–V aumenta la producción a 18/21/24/27/30 segundos; el cierre sigue en 5. Mano I cuesta 13 monedas; Valor sigue 2/3/5/8/13 y el imán cuesta 300 tras Área III; los precios y multiplicadores del mapa siguen pendientes de ajuste jugando. Los cinco niveles de mano alcanzan seis bolas, conforme a la última instrucción de aumentar la capacidad de una en una.
 
-El guardado v6 no acepta versiones anteriores: se descartan sin aviso y comienza una partida nueva. Las jornadas usan balance 7. Ver [persistencia](persistencia.md) y [economía](economia.md).
+El guardado JSON v7 conserva compras, saldo y jornadas activas de versiones anteriores. Las jornadas con balance 1–7 mantienen su configuración hasta terminar; la siguiente jornada usa balance 8. Los balances históricos están congelados. El imán comprado antes del cambio conserva su acceso sin regalar Área II/III; las nuevas compras requieren Área III. Las pilas antiguas se descomponen en monedas válidas sin alterar su importe pendiente. Ver [persistencia](persistencia.md).
 
 ## Verificación
 
-Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alcance, cañones, tablero de 200 bolas, geometría del árbol, colores, pantalla pequeña y cancelación de compra. En esta revisión pasan 169 pruebas, análisis sin incidencias, formato y compilación web con Flutter 3.35.7 / Dart 3.9.2. Las pruebas de pantalla pequeña incluyen 320 × 568. No hay aceptación táctil ni medición de FPS en Android físico en esta entrega.
+Las pruebas cubren recorrido de compra y restauración, requisitos cruzados, alcance, emisión doble, tablero de 200 bolas, colores, pantalla pequeña y cancelación de compra. La entrega 0.6.0+13 pasa 135 pruebas, análisis, formato, compilación Android y firma con Flutter 3.35.7 / Dart 3.9.2. Las pruebas de debug incluyen presencia y encuadre de los 49 nodos y compra de un nodo profundo. Las pruebas de pantalla pequeña incluyen 320 × 568. No hay aceptación táctil ni medición de FPS en Android físico en esta entrega.
 
 La evidencia histórica del árbol anterior sigue en [validación](validacion-prototipo.md) y [CI](ci.md); sus APK no contienen automáticamente este mapa nuevo.
 
-CF-01 a CF-04 y las monedas sin cifras se implementan en esta revisión. El historial de decisiones sigue en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, las denominaciones y el valor base se explican en [economía](economia.md).
+Los cambios pendientes se consultan en [cambios futuros](cambios-futuros-arbol-mejoras.md). La paleta de monedas, las denominaciones y el valor base se explican en [economía](economia.md).
 
 ## Fuerza de agarre de la mano
 
 `hand_grip` requiere Mano I y se amplía hasta cinco niveles. Aumenta la rapidez con la que las bolas adicionales se acercan y la resistencia de su sujeción; la primera se sigue agarrando a mano, la capacidad y el alcance no cambian. Se distingue del imán de monedas. Los costes y factores están en el CSV. El agarre conserva movimiento físico, inercia al soltar y cancelación segura al pausar o entrar en recogida final.
+
+## Racha y especiales (balance de prueba)
+
+Racha deja de ser gratuita. Conserva ventana y multiplicadores, con indicador
+desde la primera captura. Captura total requiere Racha; Aceleración requiere
+Generador I. El CSV define los costes, recargas y mejoras. La recarga de Captura
+total baja de 12 a 10/8 s; Aceleración pasa de ×2 a ×3, dura 4 → 5/6 s y carga en
+10 → 8/6 s. Estas cifras son provisionales para probar. No cambian saldo ni
+compras anteriores. Las jornadas antiguas se completan con su configuración.
+
+## M02 · Bate
+
+Bate I desbloquea un objeto independiente de la escoba. II y III solo aumentan
+la potencia adicional del golpe manual, sin cambiar tamaño, movimiento ni rebote
+pasivo. Rama de Control tras Mano I, con precios provisionales 60/120/240 y
+potencias ×1/×1,35/×1,70. [Controles, física y pruebas](m02-bate-beisbol.md).

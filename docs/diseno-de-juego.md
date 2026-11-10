@@ -59,7 +59,7 @@ stateDiagram-v2
     Pausa --> Cierre: Continuar fase de cierre
 ```
 
-La pausa conserva la fase anterior; no reinicia tiempo. El día base dura 15 s en total: 10 de producción y 5 de cierre. La primera bola se intenta emitir a los 3 s. El cierre mantiene herramienta y robot, detiene el generador y muestra «Últimos segundos: recoge las monedas». No es una fase de compras.
+La pausa conserva la fase anterior; no reinicia tiempo. El día base dura 20 s en total: 15 de producción y 5 de cierre. La primera bola se intenta emitir a los ⅔ s. El cierre mantiene herramienta y robot, detiene el generador y muestra «Últimos segundos: recoge las monedas». No es una fase de compras.
 
 Al agotarse el tiempo, procesar solo la fracción de simulación anterior al límite; después bloquear entrada y liquidar. Los efectos visuales pueden terminar, pero no conceden ingresos posteriores. Toda moneda pendiente, incluso en animación de salida, cuenta como perdida. Regla acordada: retirar también todas las bolas restantes al pasar a la noche. Cada día nuevo empieza sin bolas ni monedas. El ahorro ya recogido y los niveles de mejora se conservan. La verificación está desglosada en el [seguimiento de cambios](plan-cambios-agarre-escoba.md).
 

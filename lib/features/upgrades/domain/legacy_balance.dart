@@ -1,0 +1,44 @@
+// Frozen balance for restoring active days created before the new tree.
+const legacyBalanceCsv =
+    r'''kind,id,level,cost,effect,effect_value,unit,requires,cap
+base,production_duration,0,0,production_duration,10,seconds,,25
+base,closing_duration,0,0,closing_duration,5,seconds,,5
+base,spawn_interval,0,0,spawn_interval,0.6666666666666666,seconds,,
+base,ball_value,0,0,ball_value,2,coins,,5
+base,paddle_radius,0,0,paddle_radius,20,logical_units,,32
+base,collection_radius,0,0,collection_radius,18,logical_units,,36
+base,ball_radius,0,0,ball_radius,6,logical_units,,
+base,hole_capture_radius,0,0,hole_capture_radius,22,logical_units,,
+base,robot_speed,0,0,robot_speed,45,logical_units_per_second,,85
+base,ball_limit,0,0,ball_limit,200,objects,,200
+base,coin_pile_limit,0,0,coin_pile_limit,100,objects,,100
+base,particle_limit,0,0,particle_limit,150,objects,,150
+base,hand_capacity,0,0,hand_capacity,1,balls,,5
+upgrade,hand,1,10,hand_capacity,2,balls,,5
+upgrade,hand,2,40,hand_capacity,3,balls,,5
+upgrade,hand,3,100,hand_capacity,4,balls,,5
+upgrade,hand,4,220,hand_capacity,5,balls,,5
+upgrade,broom,1,20,broom_unlocked,1,unlock,,1
+upgrade,paddle,1,20,paddle_radius,24,broom_width,broom:1,32
+upgrade,paddle,2,70,paddle_radius,28,broom_width,broom:1,32
+upgrade,paddle,3,160,paddle_radius,32,broom_width,broom:1,32
+upgrade,broom_v,1,80,v_unlocked,1,unlock,paddle:1,1
+upgrade,sweep,1,20,coin_sweep,1,unlock,,1
+upgrade,collection,1,25,collection_radius,24,logical_units,,36
+upgrade,collection,2,80,collection_radius,30,logical_units,,36
+upgrade,collection,3,180,collection_radius,36,logical_units,,36
+upgrade,magnet,1,120,magnet_radius,65,logical_units,collection:1,65
+upgrade,generator,1,30,spawn_interval,0.5777777777777777,seconds,,
+upgrade,generator,2,100,spawn_interval,0.4888888888888889,seconds,,
+upgrade,generator,3,220,spawn_interval,0.4,seconds,,
+upgrade,reward,1,40,ball_value,3,coins,,5
+upgrade,reward,2,140,ball_value,4,coins,,5
+upgrade,reward,3,300,ball_value,5,coins,,5
+upgrade,duration,1,60,production_duration,15,seconds,generator:1,25
+upgrade,duration,2,160,production_duration,20,seconds,generator:1,25
+upgrade,duration,3,320,production_duration,25,seconds,generator:1,25
+upgrade,robot,1,160,robot_count,1,robots,paddle:1,1
+upgrade,robot_speed,1,80,robot_speed,55,logical_units_per_second,robot:1,85
+upgrade,robot_speed,2,200,robot_speed,70,logical_units_per_second,robot:1,85
+upgrade,robot_speed,3,400,robot_speed,85,logical_units_per_second,robot:1,85
+''';

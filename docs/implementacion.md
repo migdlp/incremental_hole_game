@@ -1,6 +1,134 @@
 # Cómo está implementado el juego
 
-Referencia de `0.6.0+11`: cañones en lugar de generador, captura por velocidad y guardado v6. Parte del texto describe versiones anteriores y se indica donde corresponde. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md); para el contrato de los cañones, el [plan](plan/canones/02-architecture.md).
+> **AJ-005B:** [cuotas infinitas por bolas capturadas](aj-005b-cuotas-infinitas.md), sin vencimiento ni
+> derrota por cuotas, con excedentes, crecimiento AJ-005A y eventos P01. JSON v14.
+> Esta actualización prevalece sobre las reglas históricas de alimentación.
+
+
+## Ajustes actuales · AJ-001 a AJ-004 (0.16.0+24)
+
+Fuerza de agarre alta desde el inicio, sin niveles ni rama; capacidad 1–6
+conservada. Compras de fuerza anteriores devueltas una sola vez. Monedas con
+cara/canto/grabado y contador sin fondo. Hoyo en (180,414.4), aproximadamente al 75 % del tablero,
+con origen compartido por captura, succión, monedas y estrellas.
+
+JSON v12 / balance v18 con v17 congelado para jornadas ya empezadas. Su siguiente
+jornada aplica los cambios. Acercar el hoyo al generador hace posibles capturas
+rápidas automáticas: no se compensan cambiando otras mecánicas.
+**AJ-005 sigue pendiente de aclarar qué compras activan el crecimiento**: no
+existe todavía una rama de nivel del agujero. No inventar esa relación ni añadir
+funcionalidades futuras. [Estado y compatibilidad](ajustes-version-actual.md).
+
+## P01 · Estrellas y burbujas físicas (0.15.0+23)
+
+Completar una cuota expulsa burbujas físicas; agarrarlas y lanzarlas contra paredes
+o herramientas permite romperlas y cobrar estrellas permanentes. Un premio por
+cuota y un cobro por identidad, separados del vuelo visual. Pendientes reaparecen
+entre jornadas, con un límite de cuerpos activos que no elimina recompensas.
+**Al morir o prestigiar se pierden las pendientes; las cobradas se conservan.**
+Esta regla P01 sustituye la conservación opaca provisional descrita en la entrega
+S03 inferior. No se convierten pendientes en saldo automáticamente.
+
+JSON v11 / balance v17 con v16 congelado. DEBUG permite forzar premios y ajustar
+todos los parámetros provisionales. Gravedad/succión se comparan mediante
+interruptores experimentales en DEBUG; su integración final sigue abierta.
+P02 y BAL01 continúan pendientes. [Contrato y pruebas](p01-estrellas-burbujas.md).
+
+## Entrega anterior S03 · Prestigio y derrota (0.14.0+22)
+
+**Decisión expresa del usuario:** activar derrota en juego normal con las cuotas
+provisionales actuales. Al incumplir el quinto día se termina la partida y aparece
+**DERROTA**, sin estadísticas. Continuar abre la tienda de prestigio; Nueva partida
+vuelve al día 1. Se reinician monedas, mejoras, herramientas y alimentación, y se
+conservan estrellas cobradas, compras permanentes, descubrimientos y datos P01 pendientes.
+
+Nodo Prestigio visible desde el comienzo al explorar, mayor y girado 45°, tanto en
+normal como DEBUG. Su compra exige confirmación y reinicia inmediatamente, sin
+botón posterior. Configuración de prueba: 10.000 monedas, Generador V + Valor V +
+Duración V, esquina avanzada (48,48). **No son decisiones finales de BAL01.**
+
+La tienda muestra estrellas y permite nueva partida, sin catálogo P02 ni premios
+P01 inventados. Morir no concede estrellas. JSON v10 / balance v16, con v15 congelado.
+Checkpoint permanente independiente, dos copias actuales y barrera de revisión:
+una copia normal antigua no puede reabrir una partida terminada. DEBUG es temporal.
+[Contrato, integración y pruebas](s03-prestigio-metaprogresion.md).
+
+S03 sustituyó las cuotas sin derrota. P01 ya añade burbujas; P02 y BAL01 siguen pendientes.
+
+## C01 · Cobro automático vigente (0.13.0+21)
+
+Cada captura calcula una única recompensa completa (Valor, dorada y racha),
+alimenta inmediatamente y registra el importe garantizado. Tras aproximadamente
+1 s, una moneda decorativa salta del hoyo y vuela en curva al monedero; el saldo
+visible aumenta al recibirse. No hay colisiones, recogida manual ni fase final
+de recogida: producción base 15 s y cierre directo con liquidación íntegra.
+
+Barrido, Área, Imán y Atracción salen del catálogo activo. El usuario autorizó
+retirar sus compras **sin reembolso**; no se altera saldo ni otras mejoras.
+Robot conserva solo Escoba ancha II como requisito, confirmado por el usuario.
+JSON v9 / balance v15, con v14 congelado para física de jornadas antiguas.
+Registros económicos y pool visual independientes; agrupación u omisión visual
+no pierde dinero. Restaurar liquida directamente lo pendiente, una sola vez.
+[Implementación, DEBUG y medición pendiente](c01-cobro-automatico.md).
+
+Las referencias anteriores a recogida manual o fase final describen versiones
+históricas y quedan sustituidas por C01.
+
+Referencia de `0.2.2+4`: cadencia inicial de 1,5 bolas/s y resultados en un pop-up sobre el juego detenido. Para el diseño objetivo y su evolución, consultar [arquitectura](arquitectura.md); para las diferencias actuales, [estado](estado-actual.md).
+
+## Ampliación vigente · S01
+
+`Board.captureBalls` calcula una única recompensa por captura, incluyendo racha
+y dorada, y acredita ese mismo valor al contador normal o instantáneo.
+`GameSession` acredita `FeedingProgress` una vez por evento. Cobrar monedas es
+independiente: alimentar no cobra ni descuenta saldo. Períodos de cinco jornadas,
+reinicio al comenzar el siguiente y anillo bajo bolas/herramientas sin cambiar
+la física. Cuotas provisionales normales 10/+10; incumplir no causa derrota.
+DEBUG puede armar un fallo reversible. JSON v8 / balance v14, v13 congelado;
+validación de contadores y migración sin alimentación histórica.
+[Contrato y pruebas](s01-alimentacion-cuotas.md).
+
+## Ampliación vigente · M03
+
+`Launcher` concentra geometría, límites dependientes de orientación, RNG, reloj,
+pose y presión filtrada. `Board` reutiliza `TwoPointGrip`, resuelve contactos
+con bolas, suma presión vectorial saturada y emite solo si la salida está libre.
+El umbral supera tres esfuerzos máximos; masa/amortiguación limitan desplazamiento,
+sin torque ni retroceso. `GameSession.launcherPose` conserva pose entre jornadas;
+el tablero guarda reloj/RNG para reanudar sin repetir. JSON v7 / balance v13 con
+v12 congelado. Render y audio independientes de simulación. [Contrato M03](m03-generador-lanzador.md).
+
+## Ampliación vigente · E02
+
+`BlackHoleEvent` separa sorteos periódicos del frame y del RNG de emisión/E01.
+Gestiona varios objetos, daño y un único temporizador reiniciable. `Board` integra
+atracción gradual solo en bolas libres, sin cambiar captura ni fuerzas de monedas
+o herramientas. `GardenGame` dibuja succión bajo ellas y consume el sonido una
+vez por activación nueva. Recogida limpia todos los objetos/efectos. JSON v7,
+balance v12 con v11 congelado; DEBUG permite 1–3 apariciones iniciales temporales.
+[Contrato y calibración E02](e02-agujero-negro.md).
+
+## Ampliación vigente · E01
+
+`MotionSensorBridge` prueba sensores Android con lecturas reales y remite gravedad
+(o acelerómetro filtrado) por canales de plataforma. `AndroidMotionInput` valida,
+remapea ejes y anula lecturas obsoletas. La sesión activa el muestreo solo en
+producción visible y sin pausa. `GravityEvent` gestiona el único sorteo, objeto,
+daño y duración con RNG propio; `Board` integra su fuerza en bolas y herramientas
+libres. Los agarres y monedas conservan su control. El evento se guarda sin
+reactivarlo y se limpia al recoger; DEBUG permite forzar/simular con aislamiento.
+[Contrato, parámetros abiertos y verificación E01](e01-gravedad.md).
+
+## Ampliación M02
+
+El bate comparte `TwoPointGrip` con la escoba. `Board._contactBat` calcula velocidad
+superficial de traslación y giro, aproximación normal, restitución constante y
+bonificación manual según nivel. La física usa los subpasos del tablero y el
+límite de velocidad de M01. No hay física, cobro ni activación especial de monedas
+por contacto con el bate. `BatFeedback` agrupa contactos del frame y limita audio
+sistema/háptica respetando preferencias; `GardenGame` dibuja bate y destellos sin
+avanzar física al renderizar. Balance v10, JSON v7; v9 congelado para jornadas
+anteriores. [Contrato y pruebas M02](m02-bate-beisbol.md).
 
 ## Contexto y límites
 
@@ -82,17 +210,17 @@ En cada paso, `Board.update` procesa aterrizaje, emisión si hay producción, im
 
 ## Física e interacción
 
-El mundo mide `360 × 560`; hoyo `(180, 412)` y cañones en huecos fijos: G1 `(180, 60)`, G2 `(20, 150)`, G3 `(340, 150)` y G4 `(180, 540)`. El render escala uniformemente y centra el mundo. La entrada fuera del tablero no se transforma en una pulsación válida. Solo el primer puntero controla el tablero. Su `timeStamp` se pasa a dominio para calcular velocidad sin depender de la frecuencia de eventos.
+El mundo mide `360 × 560`; hoyo arriba en `(180, 60)` y generador abajo en `(180, 412)`, con salida y emisión de bolas hacia arriba. El render escala uniformemente y centra el mundo. La entrada fuera del tablero no se transforma en una pulsación válida. Solo el primer puntero controla el tablero. Su `timeStamp` se pasa a dominio para calcular velocidad sin depender de la frecuencia de eventos.
 
 - La herramienta inicial es `BallTool.hand`. `touch` selecciona una bola próxima y conserva su ID y desplazamiento respecto al dedo. La tolerancia es radio de bola + 12 unidades. Una moneda aterrizada en el radio de recogida tiene prioridad; un gesto vacío no agarra bolas al cruzarlas después.
 - La bola agarrada sigue el objetivo hasta 700 u/s y participa como cuerpo dirigido en los contactos. `releasePointer` usa la velocidad del tramo final de 80 ms, limitada a 380 u/s; por debajo de 18 u/s queda quieta. Parar antes de soltar elimina la inercia anterior. Cancelar no lanza ni confirma un cobro.
 - La escoba sigue el dedo hasta 900 u/s. Su frente es perpendicular al desplazamiento; cambios inferiores a 3 unidades no cambian la orientación objetivo. Gira como máximo 3 rad/s y conserva orientación al parar. Al tocar se orienta hacia el hoyo; la recta evita girar 180° cuando la línea equivalente ya sirve.
 - `broomSegments` produce un segmento o dos brazos en V abiertos hacia el movimiento, con vértice posterior. Contacto y dibujo comparten esos segmentos de grosor 7. La V reúne físicamente, sin atracción remota. La anchura completa es `paddle_radius * 4`: 80 base, 96/112/128 mejorada.
 - El impulso de escoba depende de velocidad relativa normal, sin impulso extra por contacto parado. La velocidad de contacto por giro se limita a 80 u/s para evitar golpes excesivos.
-- Bolas libres: rozamiento exponencial `exp(-1.6 * dt)`, velocidad máxima `max_ball_speed` (600 u/s), reposo por debajo de 1 u/s y rebote en bordes con `wall_restitution` (0,55). Los cuerpos de los cañones (radio 16) son sólidos y devuelven la bola con el mismo coeficiente. Las herramientas (mano, escoba y robot) conservan su límite de 380 u/s. Rejilla de celdas 20; cada pareja se procesa una vez por IDs en cada subpaso. No se ha certificado ausencia de todo atasco con cualquier carga.
-- El hoyo atrae localmente; captura retira la bola una vez y libera el agarre si corresponde. Una bola libre solo se captura si va a ≤ `hole_capture_speed` (140 u/s); las bolas agarradas se capturan por posición.
+- Bolas libres: rozamiento exponencial `exp(-1.6 * dt)`, velocidad máxima 380 u/s, reposo por debajo de 1 u/s y rebote amortiguado en bordes. Rejilla de celdas 20; cada pareja se procesa una vez por IDs en cada subpaso. No se ha certificado ausencia de todo atasco con cualquier carga.
+- El hoyo atrae localmente; captura retira la bola una vez y libera el agarre si corresponde.
 
-Los disparos los gestiona `Board` con los `Cannon` de [cannon.dart](../lib/features/board/domain/cannon.dart): cada cañón oscila como una onda triangular (arco `gN_arc`, periodo `cannon_sweep_period`), con recarga compartida entre disparo manual y automático. Tocar a ≤ 28 unidades de un cañón activo durante la producción lo dispara y no agarra bolas ni cobra monedas. Si la boca está tapada por otra bola o se alcanzó el máximo de bolas, el disparo no se produce y el cañón parpadea; el reloj automático se conserva y reintenta. Durante la recogida final los cañones quedan congelados.
+La primera emisión se intenta después de acumular `spawn_interval`; no es inmediata. Si está ocupada la salida o se alcanzó el máximo de bolas, se pierde ese intento y no se acumula una cola de producción.
 
 ## Entrada de monedas
 
@@ -130,7 +258,7 @@ El cierre descarta tablero y pendientes, conserva ahorro y niveles, actualiza r�
 
 `docs/balance.csv` es el único archivo editable del balance económico y se empaqueta directamente desde `pubspec.yaml`. `UpgradeCatalog` lee cada línea con `split(',')`: es un CSV simple de nueve columnas, sin soporte de campos entrecomillados con comas.
 
-El cargador comprueba estructura de fila, efectos positivos finitos, bases duplicadas, los IDs de mejora conocidos, niveles consecutivos, costes no negativos, referencias de requisitos reconocidas y presencia de parámetros base obligatorios. `validateLevels` verifica niveles y requisitos guardados. La columna `cap` es descriptiva: el parser actual no la usa como validador independiente; los límites efectivos proceden de los valores base y niveles disponibles.
+El cargador comprueba estructura de fila, efectos positivos finitos, bases duplicadas, once IDs de mejora conocidos, niveles consecutivos, costes no negativos, referencias de requisitos reconocidas y presencia de parámetros base obligatorios. `validateLevels` verifica niveles y requisitos guardados. La columna `cap` es descriptiva: el parser actual no la usa como validador independiente; los límites efectivos proceden de los valores base y niveles disponibles.
 
 | ID estable | Rama | Propiedad aplicada |
 | --- | --- | --- |
@@ -140,7 +268,7 @@ El cargador comprueba estructura de fila, efectos positivos finitos, bases dupli
 | `sweep` | Control | `coin_sweep` |
 | `collection` | Control | `collection_radius` |
 | `magnet` | Control | `magnet_radius` |
-| `g1_auto`, `g1_auto_speed`, `g1_aim` | Producción | `g1_automatic`, `g1_auto_interval`, `g1_arc` (y lo mismo para G2–G4, con `gN_unlock` → `gN_enabled`) |
+| `generator` | Producción | `spawn_interval` |
 | `reward` | Producción | `ball_value` |
 | `duration` | Producción | `production_duration` |
 | `robot` | Automatización | `robot_count` |
@@ -148,7 +276,7 @@ El cargador comprueba estructura de fila, efectos positivos finitos, bases dupli
 
 `purchaseBlock` comprueba noche, máximo de nivel, requisito y saldo. `purchase` descuenta y sube nivel como una operación síncrona de sesión; después encola el guardado. Los efectos se copian en `DaySettings` al comenzar la jornada, no se recalculan a mitad del día. Comprar escoba/V selecciona esa herramienta; `selectTool` permite cambiar entre herramientas disponibles y cancela el gesto activo. La elección se guarda.
 
-El balance actual (versión `7`) empieza con 10 s de producción + 3 s de cierre y disparo manual con recarga de 1 s. No se conservan balances históricos: el guardado v6 descarta las versiones anteriores. Ver [economía](economia.md) y [guardado v6](persistencia.md).
+El balance actual empieza con 10 s de producción + 5 s de cierre e cadencia de 1,5 bolas/s. `DaySettings.balanceVersion` distingue ese balance (`3`) de los históricos (`1` y `2`). Los valores históricos de duración/intervalo se conservan en catálogo exclusivamente para validar y terminar jornadas antiguas. Ver [economía](economia.md) y [guardado v3](persistencia.md).
 
 No todos los parámetros físicos están en el CSV. Geometría, fricción, impulsos, subpasos y heurísticas del robot están en `Board`/`Robot`; el paso fijo y los puntos de control están en `GameSession`. `particle_limit` se carga, pero no existe todavía un sistema que lo consuma.
 
@@ -160,7 +288,7 @@ El imán actúa sobre monedas aterrizadas dentro de su radio mientras el dedo es
 
 ## Presentación y mantenimiento
 
-`GardenGame.render` dibuja suelo, cañones (guías de arco, cañón girado, recarga y retroceso), bolas, hoyo, monedas, indicador de agarre, escobas y robot con primitivas; reutiliza un caché limitado de etiquetas. No hay atlas ni componentes Flame por objeto. El botón del pop-up abre `SkillTreeScreen` en una ruta independiente: 74 nodos de 28 tipos, conexiones, visibilidad derivada de niveles, visor con zoom y ficha. Mantener 3 s en la selección compra una vez; movimiento, segundo dedo o interrupción cancelan. La UI comprueba descubrimiento además de los requisitos de sesión. Ver [contrato del árbol](arbol-de-mejoras.md); no hay un segundo guardado de nodos visibles.
+`GardenGame.render` dibuja suelo, generador, bolas, hoyo, monedas, indicador de agarre, escobas y robot con primitivas; reutiliza un caché limitado de etiquetas. No hay atlas ni componentes Flame por objeto. El botón del pop-up abre `SkillTreeScreen` en una ruta independiente: 23 nodos de once tipos, conexiones, visibilidad derivada de niveles, visor con zoom y ficha. Mantener 3 s en la selección compra una vez; movimiento, segundo dedo o interrupción cancelan. La UI comprueba descubrimiento además de los requisitos de sesión. Ver [contrato del árbol](arbol-de-mejoras.md); no hay un segundo guardado de nodos visibles.
 
 `SessionScreen` observa el ciclo de vida y pausa al abandonar `resumed`. Los sonidos se solicitan desde la UI mediante `SystemSound`; no alteran la contabilidad. Las decisiones y sus consecuencias se resumen en [decisiones técnicas](decisiones.md).
 

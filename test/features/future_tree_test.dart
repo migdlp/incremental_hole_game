@@ -1,9 +1,10 @@
+import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
-import 'package:incremental_hole_game/features/upgrades/domain/catalog.dart';
 import 'package:incremental_hole_game/features/upgrades/domain/skill_tree.dart';
 import 'package:incremental_hole_game/features/upgrades/presentation/skill_tree_screen.dart';
 import '../test_support.dart';
@@ -15,9 +16,9 @@ void main() {
       session.purchase(catalog.definitions.firstWhere((d) => d.id == id));
 
   test(
-    'map has six initial paths, five-level lines and the agreed crossings',
+    'map has nine initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(74));
+      expect(tree.nodes, hasLength(55));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -26,26 +27,29 @@ void main() {
             .map((n) => n.id)
             .toSet(),
         {
-          'g1_auto:1',
+          'prestige:1',
+          'generator:1',
           'reward:1',
-          'sweep:1',
-          'collection:1',
           'hand:2',
-          'hand_grip:1',
+          'combo:1',
+          'walls:1',
+          'bat:1',
         },
       );
       expect(tree.byId('broom:1').parents, ['hand:2']);
       expect(tree.byId('paddle:1').parents, ['broom:1']);
       expect(tree.byId('broom_v:1').parents, ['paddle:1']);
-      expect(tree.byId('duration:1').parents, ['g1_auto_speed:1']);
-      expect(tree.byId('collection:1').parents, ['hand:1']);
-      expect(tree.byId('magnet:1').parents, ['collection:3']);
-      expect(tree.byId('attraction:1').parents, ['magnet:1']);
-      expect(tree.byId('robot:1').parents.toSet(), {'paddle:2', 'sweep:1'});
+      expect(tree.byId('duration:1').parents, ['generator:2']);
+      expect(tree.nodes.any((n) => n.definition.id == 'collection'), isFalse);
+      expect(tree.byId('robot:1').parents.toSet(), {'paddle:2'});
+      expect(tree.byId('double_spawn:1').parents.toSet(), {
+        'generator:3',
+        'paddle:3',
+      });
       for (final id in [
         'hand',
+        'generator',
         'reward',
-        'collection',
         'paddle',
         'duration',
         'robot_speed',
@@ -61,117 +65,166 @@ void main() {
   test('session enforces every path and crossing, and purchases persist', () {
     final session = GameSession(catalog, MemoryStore())
       ..economy.balance = 100000;
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     for (final id in [
-      'g1_auto',
-      'g1_auto_speed',
-      'g1_aim',
+      'generator',
       'reward',
-      'sweep',
       'broom',
       'robot',
-      'attraction',
+      'double_spawn',
     ]) {
       expect(buy(session, id), isFalse, reason: id);
     }
     expect(buy(session, 'hand'), isTrue);
-    expect(buy(session, 'g1_auto'), isTrue);
+    expect(buy(session, 'generator'), isTrue);
     expect(buy(session, 'duration'), isFalse);
-    expect(buy(session, 'g1_auto_speed'), isTrue);
+    expect(buy(session, 'generator'), isTrue);
     expect(buy(session, 'duration'), isTrue);
     expect(buy(session, 'hand'), isTrue);
     expect(buy(session, 'broom'), isTrue);
     expect(buy(session, 'paddle'), isTrue);
     expect(buy(session, 'broom_v'), isTrue);
     expect(buy(session, 'paddle'), isTrue);
-    expect(buy(session, 'robot'), isFalse);
-    expect(buy(session, 'sweep'), isTrue);
     expect(buy(session, 'robot'), isTrue);
+    expect(buy(session, 'generator'), isTrue);
+    expect(buy(session, 'double_spawn'), isFalse);
     expect(buy(session, 'paddle'), isTrue);
-    for (var i = 0; i < 3; i++) {
-      expect(buy(session, 'collection'), isTrue);
-    }
-    expect(buy(session, 'magnet'), isTrue);
-    for (var i = 0; i < 3; i++) {
-      expect(buy(session, 'attraction'), isTrue);
-    }
+    expect(buy(session, 'double_spawn'), isTrue);
     session.startDay();
     final restored = GameSession(catalog, MemoryStore())
       ..restore(session.snapshot());
     expect(restored.levels, session.levels);
     expect(restored.economy.balance, session.economy.balance);
-    expect(restored.board!.settings['magnet_radius'], 95);
-    expect(restored.board!.settings['production_duration'], 13);
+    expect(restored.board!.settings['balls_per_spawn'], 2);
+    expect(restored.board!.settings['magnet_radius'], 0);
+    expect(restored.board!.settings['production_duration'], 18);
   });
 
-  test('retired production upgrades are gone', () {
-    final ids = testCatalog().definitions.map((d) => d.id);
-    expect(ids, isNot(contains('generator')));
-    expect(ids, isNot(contains('double_spawn')));
-    final duration = testCatalog().definitions.firstWhere(
-      (d) => d.id == 'duration',
-    );
-    expect(duration.levels.first.requirements, ['g1_auto_speed:1']);
-  });
+  test(
+    'legacy purchases survive without free prerequisites and keep their active balance',
+    () {
+      final owned = {
+        'generator': 1,
+        'duration': 2,
+        'broom': 1,
+        'paddle': 1,
+        'robot': 1,
+        'collection': 1,
+        'magnet': 1,
+      };
+      for (var version = 1; version <= 3; version++) {
+        final historical = catalog.settings(
+          owned,
+          balanceVersion: version == 3 ? 3 : 1,
+        );
+        final board = Board(historical);
+        final json =
+            jsonDecode(GameSession(catalog, MemoryStore()).snapshot())
+                as Map<String, dynamic>;
+        json['version'] = version;
+        json.remove('grandfathered');
+        json['levels'] = Map.of(owned);
+        json['balance'] = 123;
+        json['run'] = {
+          'remaining': historical['production_duration'] + 5,
+          'collected': 0,
+          'generated': 0,
+          'settings': historical.toJson()..remove('hand_capacity'),
+          'balanceVersion': 3,
+          'board': board.toJson()..remove('combo'),
+        };
+        if (version == 1) {
+          for (final key in ['broom_unlocked', 'v_unlocked', 'coin_sweep']) {
+            json['run']['settings'].remove(key);
+          }
+        }
+        final migrated = GameSession(catalog, MemoryStore())
+          ..restore(jsonEncode(json));
+        expect(
+          migrated.levels,
+          Map.of(owned)
+            ..remove('collection')
+            ..remove('magnet'),
+        );
+        expect(
+          migrated.board!.settings['spawn_interval'],
+          historical['spawn_interval'],
+        );
+        final reopened = GameSession(catalog, MemoryStore())
+          ..restore(migrated.snapshot());
+        expect(
+          reopened.levels,
+          Map.of(owned)
+            ..remove('collection')
+            ..remove('magnet'),
+        );
+        reopened.finishDay();
+        expect(
+          buy(reopened, 'generator'),
+          isFalse,
+        ); // next purchase follows the new map
+        reopened.startDay();
+        expect(reopened.board!.settings.balanceVersion, 20);
+        expect(reopened.board!.settings['production_duration'], 21);
+        expect(reopened.levels.containsKey('hand'), isFalse);
+        expect(reopened.levels.containsKey('sweep'), isFalse);
+        expect(reopened.economy.balance, 123);
+        expect(
+          () =>
+              GameSession(catalog, MemoryStore()).restore(reopened.snapshot()),
+          returnsNormally,
+        );
+      }
+    },
+  );
 
-  test('G1 upgrades follow the planned values', () {
-    UpgradeDefinition find(String id) =>
-        catalog.definitions.firstWhere((d) => d.id == id);
-    expect(find('g1_auto_speed').levels.map((l) => l.value), [
-      1.3,
-      1.1,
-      .95,
-      .8,
-    ]);
-    expect(find('g1_aim').levels.map((l) => l.value), [135, 120, 110, 100, 90]);
-    expect(find('g1_auto').levels.first.requirements, ['hand:1']);
-    expect(find('duration').levels.first.requirements, ['g1_auto_speed:1']);
-  });
+  test(
+    'current saves cannot claim a new mechanic as an inherited purchase',
+    () {
+      final session = GameSession(catalog, MemoryStore());
+      final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
+      json['levels'] = {'double_spawn': 1};
+      json['grandfathered'] = {'double_spawn': 1};
+      expect(() => session.restore(jsonEncode(json)), throwsFormatException);
+      expect(session.levels, isEmpty);
+    },
+  );
 
-  test('buying G1 automatic makes the next day automatic', () {
-    final session = GameSession(catalog, MemoryStore())
-      ..economy.balance = 60
-      ..levels['hand'] = 1;
-    expect(buy(session, 'g1_auto'), isTrue);
-    session.startDay();
-    expect(
-      session.board!.cannonAutomatic(session.board!.cannons.first),
-      isTrue,
-    );
-  });
-
-  test('cannon unlocks follow G2 then G3 then G4', () {
-    UpgradeDefinition find(String id) =>
-        catalog.definitions.firstWhere((d) => d.id == id);
-    expect(find('g2_unlock').levels.first.requirements, ['g1_auto:1']);
-    expect(find('g3_unlock').levels.first.requirements, ['g2_unlock:1']);
-    expect(find('g4_unlock').levels.first.requirements, ['g3_unlock:1']);
-  });
-
-  test('per cannon upgrades are independent', () {
-    final settings = catalog.settings({
-      'hand': 1,
-      'g1_auto': 1,
-      'g1_aim': 1,
-      'g2_unlock': 1,
-    });
-    expect(settings['g1_arc'], 135);
-    expect(settings['g2_arc'], 150);
-  });
-
-  test('buying cannon 2 adds it to the next day', () {
-    final session = GameSession(catalog, MemoryStore())
-      ..economy.balance = 1000
-      ..levels.addAll({'hand': 1, 'g1_auto': 1});
-    expect(buy(session, 'g2_unlock'), isTrue);
-    session.startDay();
-    expect(session.board!.cannons.length, 2);
-    final restored = GameSession(catalog, MemoryStore())
-      ..restore(session.snapshot());
-    expect(restored.board!.cannons.length, 2);
-  });
+  test(
+    'double emission produces a spaced pair and respects technical limits',
+    () {
+      final settings = catalog.settings({'double_spawn': 1});
+      final board = Board(settings);
+      for (var i = 0; i < 40; i++) {
+        board.update(1 / 60, producing: true);
+      }
+      expect(board.balls, hasLength(2));
+      expect(
+        (board.balls[0].position - board.balls[1].position).length,
+        greaterThan(board.radius * 2),
+      );
+      settings.values['ball_limit'] = 3;
+      board.balls.clear();
+      board.balls.addAll([
+        Ball(board.nextId++, const Vec(50, 300), Vec.zero),
+        Ball(board.nextId++, const Vec(90, 300), Vec.zero),
+      ]);
+      for (var i = 0; i < 40; i++) {
+        board.update(1 / 60, producing: true);
+      }
+      expect(board.balls, hasLength(3));
+      board.enterClosing();
+      final count = board.balls.length;
+      board.update(1, producing: true);
+      expect(board.balls, hasLength(count));
+    },
+  );
 
   test('attraction increases coin reach only while the pointer is active', () {
-    final board = Board(catalog.settings({'magnet': 1, 'attraction': 3}));
+    final board = Board(
+      catalog.settings({'magnet': 1, 'attraction': 3}, balanceVersion: 14),
+    );
     final coin = Coin(board.nextId++, const Vec(190, 250), 2, landing: 0);
     board.coins.add(coin);
     board.update(.1, producing: false);
@@ -182,7 +235,7 @@ void main() {
       collected += board.update(1 / 60, producing: false).collected;
     }
     expect(collected, 2);
-    final locked = Board(catalog.settings({'magnet': 1}));
+    final locked = Board(catalog.settings({'magnet': 1}, balanceVersion: 14));
     final distant = Coin(locked.nextId++, const Vec(190, 250), 2, landing: 0);
     locked.coins.add(distant);
     locked.touch(const Vec(100, 250));
@@ -224,6 +277,10 @@ void main() {
         expect(b.velocity.length.isFinite, isTrue);
       }
       expect(settings['ball_value'], 13);
+      expect(
+        settings['spawn_interval'],
+        closeTo(1 / (1.5 * math.pow(1.25, 5)), 1e-9),
+      );
     },
   );
 
@@ -235,6 +292,8 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final session = GameSession(catalog, MemoryStore());
+      // Fixture after the mandatory opening jornada (P02).
+      prepareNormalShop(session);
       await tester.pumpWidget(
         MaterialApp(home: SkillTreeScreen(session: session)),
       );
@@ -276,6 +335,8 @@ void main() {
     tester,
   ) async {
     final session = GameSession(catalog, MemoryStore())..levels['hand'] = 1;
+    // Fixture after the mandatory opening jornada (P02).
+    prepareNormalShop(session);
     await tester.pumpWidget(
       MaterialApp(home: SkillTreeScreen(session: session)),
     );

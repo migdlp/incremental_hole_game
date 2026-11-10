@@ -1,0 +1,45 @@
+{
+  "schema_version": "bal_scenarios/1.0.0",
+  "balance_csv": "docs/balance.csv",
+  "seeds": [
+    42,
+    79,
+    2026
+  ],
+  "scenarios": [
+    {
+      "id": "controlled-current",
+      "days": 8,
+      "interaction": "hand_seek",
+      "purchase_priority": [
+        "generator",
+        "hand",
+        "reward",
+        "duration"
+      ]
+    },
+    {
+      "id": "controlled-curve-b",
+      "days": 8,
+      "interaction": "hand_seek",
+      "purchase_priority": [
+        "generator",
+        "hand",
+        "reward",
+        "duration"
+      ],
+      "quota_curve": [
+        "10",
+        "20",
+        "35",
+        "60",
+        "100",
+        "155",
+        "235",
+        "350",
+        "510",
+        "730"
+      ]
+    }
+  ]
+}

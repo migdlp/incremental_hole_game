@@ -1,0 +1,46 @@
+{
+  "physics_fingerprints": [
+    {
+      "seed": 42,
+      "extras": false,
+      "digest": "959763cf5f48d5266ecd20ba51ee4e65754e05af84660842beb9de404f62971f",
+      "captured": 74,
+      "spawned": 74
+    },
+    {
+      "seed": 42,
+      "extras": true,
+      "digest": "ce1036f2e2f6579851a17352f740c286adf0fa81cd9a63fd0f9bb8fbdff3ac1b",
+      "captured": 104,
+      "spawned": 104
+    },
+    {
+      "seed": 79,
+      "extras": false,
+      "digest": "ff5cb26902597589e8d77d92a0c5ef0195f6f9a5787979e65e38daaf68900353",
+      "captured": 66,
+      "spawned": 66
+    },
+    {
+      "seed": 79,
+      "extras": true,
+      "digest": "5603a45dc98a18e40dd2f68befec91e557850a9d5ead697b39b7973282e14e79",
+      "captured": 84,
+      "spawned": 84
+    },
+    {
+      "seed": 2026,
+      "extras": false,
+      "digest": "9bbf9a74e430b50647ac5fdc2b6b49e2ef35474440d10db7cdc05364be148ce2",
+      "captured": 75,
+      "spawned": 75
+    },
+    {
+      "seed": 2026,
+      "extras": true,
+      "digest": "c58d424da9dcc8436a22dd1ddd193fe94828ba6100f9af226f5c08ccbebdc619",
+      "captured": 86,
+      "spawned": 86
+    }
+  ]
+}

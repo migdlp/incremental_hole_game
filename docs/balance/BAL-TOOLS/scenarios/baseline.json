@@ -1,0 +1,14 @@
+{
+  "schema_version": "bal_scenarios/1.0.0",
+  "balance_csv": "docs/balance.csv",
+  "seeds": [42, 79, 2026],
+  "scenarios": [
+    {"id":"new-idle","days":8,"interaction":"idle"},
+    {"id":"new-hand","days":8,"interaction":"hand_seek","purchase_priority":["generator","hand","reward","duration"]},
+    {"id":"generation","days":8,"interaction":"hand_seek","normal_levels":{"generator":2,"double_spawn":1},"purchase_priority":["generator","double_spawn","duration"]},
+    {"id":"capture","days":8,"interaction":"abilities","normal_levels":{"capture_all":1},"purchase_priority":["capture_all","capture_recharge","hand"]},
+    {"id":"economy","days":8,"interaction":"hand_seek","normal_levels":{"reward":1},"purchase_priority":["reward","combo","generator"]},
+    {"id":"mixed-p02","days":8,"interaction":"hand_seek","p02":["H01","H02","H04","H13"],"e03":{"E03-07":2},"purchase_priority":["generator","hand","reward"]},
+    {"id":"curve-b-hypothesis","days":8,"interaction":"hand_seek","quota_curve":["10","20","35","60","100","155","235","350","510","730"]}
+  ]
+}

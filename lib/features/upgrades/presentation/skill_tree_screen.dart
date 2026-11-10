@@ -573,6 +573,18 @@ const _icons = {
   'g1_auto': Icons.autorenew,
   'g1_auto_speed': Icons.speed,
   'g1_aim': Icons.track_changes,
+  'g2_unlock': Icons.add_circle_outline,
+  'g2_auto': Icons.autorenew,
+  'g2_auto_speed': Icons.speed,
+  'g2_aim': Icons.track_changes,
+  'g3_unlock': Icons.add_circle_outline,
+  'g3_auto': Icons.autorenew,
+  'g3_auto_speed': Icons.speed,
+  'g3_aim': Icons.track_changes,
+  'g4_unlock': Icons.add_circle_outline,
+  'g4_auto': Icons.autorenew,
+  'g4_auto_speed': Icons.speed,
+  'g4_aim': Icons.track_changes,
 };
 
 String _description(SkillNode node) {

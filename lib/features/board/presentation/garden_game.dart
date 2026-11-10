@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import '../../../app/game_session.dart';
 import '../../../core/vec.dart';
 import '../domain/board.dart';
+import '../domain/cannon.dart';
 import '../domain/coin_denomination.dart';
 import 'coin_painter.dart';
 
@@ -64,6 +65,54 @@ class GardenGame extends FlameGame {
     session.tick(dt);
     if (session.running && !session.paused && !session.board!.coinOnly) {
       _time += dt;
+    }
+  }
+
+  void _drawCannon(Canvas canvas, Board board, Cannon cannon) {
+    final center = offset(cannon.slot.position);
+    final blocked = cannon.blockedFlash > 0;
+    final arc = board.settings['g${cannon.slot.index}_arc'] * math.pi / 180;
+    for (final side in [-1, 1]) {
+      final a = cannon.slot.baseAngle + side * arc / 2;
+      canvas.drawLine(
+        center,
+        center + Offset(math.cos(a), math.sin(a)) * 40,
+        paint(const Color(0x30247d73), stroke: 1.5),
+      );
+    }
+    canvas.drawCircle(
+      center + const Offset(0, 3),
+      18,
+      paint(const Color(0x30644c2d)),
+    );
+    final recoil = 4 * cannon.recoil / Cannon.recoilSeconds;
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(board.cannonAngle(cannon));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(13 - recoil, 0), width: 26, height: 10),
+        const Radius.circular(4),
+      ),
+      paint(blocked ? const Color(0xff697583) : const Color(0xff172333)),
+    );
+    canvas.restore();
+    canvas.drawCircle(
+      center,
+      Cannon.bodyRadius,
+      paint(blocked ? const Color(0xff697583) : const Color(0xff247d73)),
+    );
+    if (cannon.cooldown > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: 20),
+        -math.pi / 2,
+        2 * math.pi * (1 - cannon.cooldown / board.settings['cannon_cooldown']),
+        false,
+        paint(const Color(0xffd8e2dc), stroke: 3),
+      );
+    }
+    if (board.cannonAutomatic(cannon)) {
+      canvas.drawCircle(center, 23, paint(const Color(0xffe0a040), stroke: 2));
     }
   }
 
@@ -170,54 +219,9 @@ class GardenGame extends FlameGame {
       radius + 14 + pulse * 3,
       paint(const Color(0x15247d73), stroke: 2),
     );
-    final generator = offset(board.cannons.first.slot.position);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: generator + const Offset(0, 4),
-          width: 66,
-          height: 50,
-        ),
-        const Radius.circular(12),
-      ),
-      paint(const Color(0x30644c2d)),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: generator, width: 62, height: 48),
-        const Radius.circular(12),
-      ),
-      paint(const Color(0xff247d73)),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: generator + const Offset(0, -6),
-          width: 42,
-          height: 22,
-        ),
-        const Radius.circular(5),
-      ),
-      paint(const Color(0xff172333)),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: generator + const Offset(0, 21),
-          width: 26,
-          height: 12,
-        ),
-        const Radius.circular(4),
-      ),
-      paint(const Color(0xff697583)),
-    );
-    label(
-      canvas,
-      'GENERADOR',
-      generator + const Offset(0, -38),
-      color: const Color(0xff64573f),
-      fontSize: 10,
-    );
+    for (final cannon in board.cannons) {
+      _drawCannon(canvas, board, cannon);
+    }
     for (final ball in board.balls) {
       final p = offset(ball.position);
       canvas.drawCircle(

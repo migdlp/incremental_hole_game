@@ -2,7 +2,7 @@
 id: E02-T05
 title: Dibujo del cañón y textos de ayuda
 epic: E02
-status: todo
+status: done
 depends_on: [E02-T04]
 requirements: [RF-18, RF-19]
 size: M
@@ -49,9 +49,9 @@ El tablero dibuja cada cañón de `board.cannons` girado a su ángulo actual, co
 
 ## Criterios de aceptación
 
-- [ ] `grep -rn "GENERADOR" lib` no devuelve nada.
-- [ ] Pruebas de widget nuevas y suite completa en verde.
-- [ ] Revisión visual en `flutter run -d chrome`: el cañón gira, retrocede al disparar, muestra el anillo de recarga y se pone gris al taparle la boca con una bola.
+- [x] `grep -rn "GENERADOR" lib` no devuelve nada.
+- [x] Pruebas de widget nuevas y suite completa en verde.
+- [x] Revisión visual en `flutter run -d chrome`: el cañón gira, retrocede al disparar, muestra el anillo de recarga y se pone gris al taparle la boca con una bola.
 
 ## Verificación
 
@@ -72,3 +72,9 @@ Manual: `python3 -m http.server 8123 --directory build/web`, abrir `http://local
 ## Si te bloqueas
 
 - Si el orden de dibujo hace que la capa de recogida no oscurezca el cañón, mueve solo el bucle de cañones para que quede antes de la capa y anótalo.
+
+## Notas de implementación
+
+- `GardenGame` dibuja cada cañón con `_drawCannon` (guías de arco, sombra, cañón girado con retroceso, cuerpo, anillo de recarga y anillo automático) antes de las bolas, y desaparece el bloque «GENERADOR». `game_app.dart` muestra el primer consejo y el nuevo texto de inicio.
+- Revisión visual con Chromium sobre `flutter build web`: el cañón se dibuja con guías, tocarlo dispara una bola, aparece el anillo de recarga y el consejo cambia tras el primer disparo. No probé el estado bloqueado en el navegador (cubierto en pruebas de dominio).
+- Dos pruebas de widget nuevas. Ninguna prueba usaba el texto de inicio antiguo. Total: 147 pruebas.

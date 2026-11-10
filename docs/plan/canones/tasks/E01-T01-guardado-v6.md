@@ -2,7 +2,7 @@
 id: E01-T01
 title: Guardado v6 sin migraciones
 epic: E01
-status: todo
+status: done
 depends_on: []
 requirements: [RF-16]
 size: M
@@ -94,10 +94,10 @@ El juego solo lee y escribe guardados con `"version": 6`. Cualquier guardado ant
 
 ## Criterios de aceptación
 
-- [ ] `grep -rn "legacyBalanceCsv\|balanceV4Csv\|balanceV5Csv\|grandfathered\|previousTree" lib test` no devuelve nada.
-- [ ] `snapshot()` contiene `"version":6` y, con jornada activa, `"balanceVersion":7`.
-- [ ] Las tres pruebas nuevas y la tabla de casos límite pasan.
-- [ ] El juego arranca en web con almacenamiento vacío.
+- [x] `grep -rn "legacyBalanceCsv\|balanceV4Csv\|balanceV5Csv\|grandfathered\|previousTree" lib test` no devuelve nada.
+- [x] `snapshot()` contiene `"version":6` y, con jornada activa, `"balanceVersion":7`.
+- [x] Las tres pruebas nuevas y la tabla de casos límite pasan.
+- [x] El juego arranca en web con almacenamiento vacío.
 
 ## Verificación
 
@@ -116,3 +116,10 @@ flutter test
 
 - Si una prueba existente mezcla migración con otra regla y no puedes separarlas, conserva la regla con `'version': 6` y anota en «Notas de implementación» qué parte de migración quitaste.
 - No añadas un aviso de reinicio: el usuario lo descartó.
+
+## Notas de implementación
+
+- Borrados los tres balances congelados; `settings()` y `validateLevels()` quedan sin versiones antiguas, y `GameSession` solo lee y escribe `"version": 6` (balance 7). `load()` ignora los candidatos de versiones anteriores sin aviso.
+- `Board.fromJson` lanza `FormatException('Tablero guardado inválido')` ante monedas con valor fuera de 1/10/50/100/500.
+- Pruebas: eliminadas 8 pruebas que solo verificaban migración (v1–v5 y balances 1–6); añadidas 8 en `game_rules_test.dart` (las 3 pedidas más los casos límite de la tabla y el snapshot). La prueba `unknown balance…` se conserva con balance 7.
+- Sin desviaciones. Total: 116 pruebas.

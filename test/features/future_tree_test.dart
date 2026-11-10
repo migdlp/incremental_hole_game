@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -111,86 +110,6 @@ void main() {
     expect(restored.board!.settings['magnet_radius'], 95);
     expect(restored.board!.settings['production_duration'], 13);
   });
-
-  test(
-    'legacy purchases survive without free prerequisites and keep their active balance',
-    () {
-      final owned = {
-        'generator': 1,
-        'duration': 2,
-        'broom': 1,
-        'paddle': 1,
-        'robot': 1,
-        'collection': 1,
-        'magnet': 1,
-      };
-      for (var version = 1; version <= 3; version++) {
-        final historical = catalog.settings(
-          owned,
-          balanceVersion: version == 3 ? 3 : 1,
-        );
-        final board = Board(historical);
-        final json =
-            jsonDecode(GameSession(catalog, MemoryStore()).snapshot())
-                as Map<String, dynamic>;
-        json['version'] = version;
-        json.remove('grandfathered');
-        json['levels'] = Map.of(owned);
-        json['balance'] = 123;
-        json['run'] = {
-          'remaining': historical['production_duration'] + 5,
-          'collected': 0,
-          'generated': 0,
-          'settings': historical.toJson()..remove('hand_capacity'),
-          'balanceVersion': 3,
-          'board': board.toJson(),
-        };
-        if (version == 1) {
-          for (final key in ['broom_unlocked', 'v_unlocked', 'coin_sweep']) {
-            json['run']['settings'].remove(key);
-          }
-        }
-        final migrated = GameSession(catalog, MemoryStore())
-          ..restore(jsonEncode(json));
-        expect(migrated.levels, owned);
-        expect(
-          migrated.board!.settings['spawn_interval'],
-          historical['spawn_interval'],
-        );
-        final reopened = GameSession(catalog, MemoryStore())
-          ..restore(migrated.snapshot());
-        expect(reopened.levels, owned);
-        reopened.finishDay();
-        expect(
-          buy(reopened, 'generator'),
-          isFalse,
-        ); // next purchase follows the new map
-        reopened.startDay();
-        expect(reopened.board!.settings.balanceVersion, 6);
-        expect(reopened.board!.settings['production_duration'], 16);
-        expect(reopened.levels.containsKey('hand'), isFalse);
-        expect(reopened.levels.containsKey('sweep'), isFalse);
-        expect(reopened.economy.balance, 123);
-        expect(
-          () =>
-              GameSession(catalog, MemoryStore()).restore(reopened.snapshot()),
-          returnsNormally,
-        );
-      }
-    },
-  );
-
-  test(
-    'current saves cannot claim a new mechanic as an inherited purchase',
-    () {
-      final session = GameSession(catalog, MemoryStore());
-      final json = jsonDecode(session.snapshot()) as Map<String, dynamic>;
-      json['levels'] = {'double_spawn': 1};
-      json['grandfathered'] = {'double_spawn': 1};
-      expect(() => session.restore(jsonEncode(json)), throwsFormatException);
-      expect(session.levels, isEmpty);
-    },
-  );
 
   test(
     'double emission produces a spaced pair and respects technical limits',

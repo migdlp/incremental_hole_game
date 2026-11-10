@@ -17,8 +17,6 @@ class GameSession extends ChangeNotifier {
   final economy = Economy();
   final progress = Progress();
   final levels = <String, int>{};
-  final _grandfathered = <String, int>{};
-  final _previousTree = <String, int>{};
   BallTool selectedTool = BallTool.hand;
   Board? board;
   DayCycle? cycle;
@@ -35,12 +33,14 @@ class GameSession extends ChangeNotifier {
 
   Future<void> load() async {
     final candidates = await store.loadCandidates();
-    if (candidates.isEmpty) return;
-    for (var i = 0; i < candidates.length; i++) {
+    var current = 0;
+    for (final raw in candidates) {
+      if (!_isCurrentVersion(raw)) continue;
+      current++;
       try {
-        restore(candidates[i]);
-        _lastSaved = candidates[i];
-        if (i > 0) {
+        restore(raw);
+        _lastSaved = raw;
+        if (current > 1) {
           recoveryMessage = 'Partida recuperada desde la copia de seguridad.';
         }
         return;
@@ -48,9 +48,19 @@ class GameSession extends ChangeNotifier {
         // Try the previous complete snapshot before offering an explicit reset.
       }
     }
+    if (current == 0) return; // Only old or no saves: start a new game.
     throw const FormatException(
       'El guardado y su copia no se pueden leer. No se han sobrescrito.',
     );
+  }
+
+  static bool _isCurrentVersion(String raw) {
+    try {
+      final json = jsonDecode(raw);
+      return json is! Map || json['version'] is! int || json['version'] == 6;
+    } on FormatException {
+      return true; // Unparseable data is treated as a damaged current save.
+    }
   }
 
   void startDay() {
@@ -235,9 +245,7 @@ class GameSession extends ChangeNotifier {
   }
 
   String snapshot() => jsonEncode({
-    'version': 5,
-    'grandfathered': _grandfathered,
-    'previousTree': _previousTree,
+    'version': 6,
     'tool': selectedTool.name,
     'day': progress.day,
     'balance': economy.balance,
@@ -259,12 +267,7 @@ class GameSession extends ChangeNotifier {
 
   void restore(String raw) {
     final json = jsonDecode(raw) as Map<String, dynamic>;
-    final legacy = json['version'] == 1;
-    if (!legacy &&
-        json['version'] != 2 &&
-        json['version'] != 3 &&
-        json['version'] != 4 &&
-        json['version'] != 5) {
+    if (json['version'] != 6) {
       throw const FormatException('Versión de guardado no compatible');
     }
     final day = json['day'] as int,
@@ -276,31 +279,11 @@ class GameSession extends ChangeNotifier {
     final savedLevels = (json['levels'] as Map<String, dynamic>).map(
       (k, v) => MapEntry(k, v as int),
     );
-    // Old paddle purchases become width upgrades and retain access to the broom.
-    if (legacy && (savedLevels['paddle'] ?? 0) > 0) savedLevels['broom'] = 1;
-    final oldProgress = (json['version'] as int) < 4;
-    final grandfathered = oldProgress
-        ? Map<String, int>.of(savedLevels)
-        : (json['grandfathered'] as Map<String, dynamic>).map(
-            (key, value) => MapEntry(key, value as int),
-          );
-    final previousTree = json['version'] == 4
-        ? Map<String, int>.of(savedLevels)
-        : (json['previousTree'] as Map<String, dynamic>? ?? {}).map(
-            (key, value) => MapEntry(key, value as int),
-          );
-    catalog.validateLevels(
-      savedLevels,
-      grandfathered: grandfathered,
-      previousTree: previousTree,
-      legacy: oldProgress,
+    catalog.validateLevels(savedLevels);
+    var restoredTool = BallTool.values.firstWhere(
+      (tool) => tool.name == json['tool'],
+      orElse: () => throw const FormatException('Herramienta inválida'),
     );
-    var restoredTool = legacy
-        ? ((savedLevels['broom'] ?? 0) > 0 ? BallTool.broom : BallTool.hand)
-        : BallTool.values.firstWhere(
-            (tool) => tool.name == json['tool'],
-            orElse: () => throw const FormatException('Herramienta inválida'),
-          );
     final expectedSettings = catalog.settings(savedLevels);
     if (restoredTool == BallTool.broom &&
         expectedSettings['broom_unlocked'] == 0) {
@@ -334,28 +317,11 @@ class GameSession extends ChangeNotifier {
       final savedSettings = DaySettings.fromJson(
         run['settings'] as Map<String, dynamic>,
       );
-      final balanceVersion = !legacy && json['version'] != 2
-          ? run['balanceVersion']
-          : 1;
-      if (balanceVersion is! int ||
-          (balanceVersion < 1 || balanceVersion > 6)) {
+      if (run['balanceVersion'] != 7) {
         throw const FormatException('Versión de balance inválida');
       }
-      final settings = catalog.settings(
-        savedLevels,
-        balanceVersion: balanceVersion,
-      );
-      if (!savedSettings.values.containsKey('hand_capacity') &&
-          (savedLevels['hand'] ?? 0) == 0) {
-        savedSettings.values['hand_capacity'] = 1;
-      }
-      final expected = Map.of(settings.values);
-      if (legacy) {
-        expected.remove('broom_unlocked');
-        expected.remove('v_unlocked');
-        expected.remove('coin_sweep');
-      }
-      if (!mapEquals(savedSettings.values, expected)) {
+      final settings = catalog.settings(savedLevels);
+      if (!mapEquals(savedSettings.values, settings.values)) {
         throw const FormatException('Configuración de jornada inválida');
       }
       final remaining = (run['remaining'] as num).toDouble();
@@ -405,18 +371,7 @@ class GameSession extends ChangeNotifier {
     levels
       ..clear()
       ..addAll(savedLevels);
-    _grandfathered
-      ..clear()
-      ..addAll(grandfathered);
-    _previousTree
-      ..clear()
-      ..addAll(previousTree);
     selectedTool = restoredTool;
-    if (legacy) {
-      recoveryMessage =
-          'Partida actualizada: conservas saldo y mejoras. '
-          'Las monedas se recogen pulsando; el barrido se compra aparte.';
-    }
     board = restoredBoard;
     cycle = restoredCycle;
     sound = savedSound;

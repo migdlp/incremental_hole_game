@@ -314,36 +314,6 @@ void main() {
     },
   );
 
-  test(
-    'legacy v1 migrates savings and old width purchases without free sweep',
-    () {
-      final session = GameSession(catalog, MemoryStore());
-      session.levels.addAll({'broom': 1, 'paddle': 1, 'robot': 1});
-      session.economy.balance = 123;
-      session.startDay();
-      final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;
-      data['version'] = 1;
-      data['run']['settings'] = catalog
-          .settings(session.levels, balanceVersion: 1)
-          .toJson();
-      data['run'].remove('balanceVersion');
-      data.remove('tool');
-      data['levels'].remove('broom');
-      data['run']['settings'].remove('broom_unlocked');
-      final restored = GameSession(catalog, MemoryStore())
-        ..restore(jsonEncode(data));
-      expect(restored.economy.balance, 123);
-      expect(restored.levels['paddle'], 1);
-      expect(restored.levels['robot'], 1);
-      expect(restored.levels['broom'], 1);
-      expect(restored.selectedTool, BallTool.broom);
-      expect(restored.board!.settings['robot_count'], 1);
-      expect(restored.board!.sweepEnabled, isFalse);
-      expect(restored.paused, isTrue);
-      expect(jsonDecode(restored.snapshot())['version'], 5);
-    },
-  );
-
   test('current save rejects forged tool unlocks and settings atomically', () {
     final session = GameSession(catalog, MemoryStore())..startDay();
     final data = jsonDecode(session.snapshot()) as Map<String, dynamic>;

@@ -707,22 +707,10 @@ class Board {
         ids.any((id) => id <= 0 || id >= board.nextId)) {
       throw const FormatException('IDs de tablero inválidos');
     }
-    // Old saves used arbitrary-value piles. Split them once without changing
-    // pending money; overflow is emitted as individual coins when space frees.
-    final oldPiles = board.coins
-        .where(
-          (coin) => !CoinDenomination.values.any((d) => d.amount == coin.value),
-        )
-        .toList();
-    board.coins.removeWhere(oldPiles.contains);
-    for (final pile in oldPiles) {
-      for (final stack in CoinDenomination.split(pile.value)) {
-        board._queuedCoins.update(
-          stack.denomination.amount,
-          (n) => n + stack.count,
-          ifAbsent: () => stack.count,
-        );
-      }
+    if (board.coins.any(
+      (coin) => !CoinDenomination.values.any((d) => d.amount == coin.value),
+    )) {
+      throw const FormatException('Tablero guardado inválido');
     }
     board._flushCoins();
     return board;

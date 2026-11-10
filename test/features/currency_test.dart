@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -76,50 +75,6 @@ void main() {
       final restored = Board.fromJson(settings, board.toJson());
       expect(restored.coins.length, lessThanOrEqualTo(2));
       expect(restored.pending, 661000);
-    },
-  );
-
-  test(
-    'active v4 day retains value, collection time and accounting across reloads',
-    () {
-      final settings = catalog.settings({}, balanceVersion: 4);
-      final board = Board(settings)..captured = 1;
-      board.releaseCoin(2);
-      final json =
-          jsonDecode(GameSession(catalog, MemoryStore()).snapshot())
-              as Map<String, dynamic>;
-      json['balance'] = 123;
-      json['run'] = {
-        'remaining': 4.0,
-        'collected': 0,
-        'generated': 2,
-        'settings': settings.toJson(),
-        'balanceVersion': 4,
-        'board': board.toJson(),
-      };
-      final restored = GameSession(catalog, MemoryStore())
-        ..restore(jsonEncode(json));
-      final reopened = GameSession(catalog, MemoryStore())
-        ..restore(restored.snapshot());
-      expect(reopened.paused, isTrue);
-      expect(reopened.board!.settings['ball_value'], 2);
-      expect(reopened.cycle!.closing, 5);
-      expect(reopened.board!.pending, 2);
-      reopened.resume();
-      for (var i = 0; i < 16; i++) {
-        reopened.tick(1 / 60);
-      }
-      while (reopened.board!.coins.isNotEmpty) {
-        reopened.touch(reopened.board!.coins.first.position);
-        reopened.release();
-      }
-      reopened.finishDay();
-      reopened.startDay();
-      expect(reopened.economy.balance, 125);
-      expect(reopened.board!.settings.balanceVersion, 6);
-      expect(reopened.board!.settings['ball_value'], 1);
-      expect(reopened.cycle!.closing, 3);
-      expect(reopened.cycle!.remaining, 13);
     },
   );
 

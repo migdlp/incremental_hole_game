@@ -117,61 +117,6 @@ void main() {
     }
   });
 
-  test(
-    'v4 purchases and v5 active-day value survive the new magnet prerequisite',
-    () {
-      final owned = {
-        'hand': 1,
-        'sweep': 1,
-        'collection': 1,
-        'magnet': 1,
-        'reward': 5,
-      };
-      final settings = catalog.settings(owned, balanceVersion: 5);
-      final board = Board(settings)..captured = 1;
-      board.coins.add(
-        Coin(board.nextId++, const Vec(110, 300), 11, landing: 0),
-      );
-      final oldBoard = board.toJson()
-        ..remove('collectedCoins')
-        ..remove('queuedCoins');
-      final data =
-          jsonDecode(GameSession(catalog, MemoryStore()).snapshot())
-              as Map<String, dynamic>;
-      data['version'] = 4;
-      data.remove('previousTree');
-      data['levels'] = owned;
-      data['run'] = {
-        'remaining': 7.0,
-        'collected': 0,
-        'generated': 11,
-        'settings': settings.toJson(),
-        'balanceVersion': 5,
-        'board': oldBoard,
-      };
-      final session = GameSession(catalog, MemoryStore())
-        ..restore(jsonEncode(data));
-      expect(session.levels, owned);
-      expect(session.levels['collection'], 1);
-      expect(session.board!.settings['ball_value'], 11);
-      expect(session.board!.pending, 11);
-      expect(session.board!.coins.map((c) => c.value).toSet(), {10, 1});
-      expect(session.board!.collectedCoins, isNull);
-      final reopened = GameSession(catalog, MemoryStore())
-        ..restore(session.snapshot());
-      reopened.finishDay();
-      reopened.startDay();
-      expect(reopened.board!.settings.balanceVersion, 6);
-      expect(reopened.board!.settings['ball_value'], 13);
-      expect(reopened.board!.settings['magnet_radius'], 65);
-      expect(reopened.levels['collection'], 1);
-      expect(
-        GameSession(catalog, MemoryStore())..restore(reopened.snapshot()),
-        isA<GameSession>(),
-      );
-    },
-  );
-
   GameSession completedDay() {
     final session = GameSession(catalog, MemoryStore())
       ..levels.addAll({'hand': 1, 'reward': 3})

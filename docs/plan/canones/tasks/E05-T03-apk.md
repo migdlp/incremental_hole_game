@@ -2,7 +2,7 @@
 id: E05-T03
 title: Generar el APK con la pipeline manual
 epic: E05
-status: todo
+status: done
 depends_on: [E05-T02]
 requirements: [RNF-03]
 size: S
@@ -38,8 +38,8 @@ Hay un APK de depuración 0.6.0+11 generado por la pipeline `Flutter - APK manua
 
 ## Criterios de aceptación
 
-- [ ] La ejecución de la pipeline es correcta y el artefacto es descargable.
-- [ ] `README.md` y `CHANGELOG.md` enlazan el artefacto con el SHA de código correcto.
+- [x] La ejecución de la pipeline es correcta y el artefacto es descargable.
+- [x] `README.md` y `CHANGELOG.md` enlazan el artefacto con el SHA de código correcto.
 
 ## Verificación
 
@@ -52,3 +52,8 @@ Abrir el enlace del artefacto en GitHub y comprobar que el ZIP contiene `jardin-
 ## Si te bloqueas
 
 - Si no tienes permiso para lanzar workflows, para y pide al usuario que lo lance desde **Actions → Flutter - APK manual → Run workflow** sobre `main`. Después continúa desde el paso 4.
+
+## Notas de implementación
+
+- Pipeline `Flutter - APK manual` lanzada sobre `main` en `52e3fab523df0b97e76054e3ad3f86d633d4e4d6`: [ejecución 42779376477](https://github.com/migdlp/incremental_hole_game/actions/runs/42779376477), correcta. Artefacto `jardin-mecanico-debug-apk` (id 13746015999, digest sha256 `f6d389709a055c251df097ea95d42fa34943f59a96350d82a8c48201004f70bb`) y `flutter-validation-logs`, ambos hasta el 24 de noviembre de 2026.
+- No he descargado el ZIP para comprobar su contenido (`jardin-mecanico-debug.apk` y su `.sha256`) ni he leído los registros del workflow: el resultado «correcta» y las 169 pruebas proceden de la conclusión de la ejecución y de la suite local previa al merge.

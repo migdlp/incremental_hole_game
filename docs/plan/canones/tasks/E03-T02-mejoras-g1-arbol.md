@@ -2,7 +2,7 @@
 id: E03-T02
 title: Mejoras de G1 en balance y árbol
 epic: E03
-status: todo
+status: done
 depends_on: [E03-T01, E02-T03]
 requirements: [RF-11, RF-12, RF-20]
 size: M
@@ -78,7 +78,7 @@ El árbol ofrece «Cañón 1 · Automático», «Cañón 1 · Ritmo automático�
 
 ## Criterios de aceptación
 
-- [ ] Las pruebas nuevas, las de geometría y la suite completa pasan.
+- [x] Las pruebas nuevas, las de geometría y la suite completa pasan.
 - [ ] En `flutter run -d chrome`, el árbol muestra los tres nodos nuevos en verde con su icono, ficha y precio.
 
 ## Verificación
@@ -98,3 +98,10 @@ flutter test
 
 - Si una prueba de geometría falla por una ruta nueva que no se puede trazar en ocho direcciones, no muevas nodos existentes: para y anota la ruta fallida.
 - Si `switch` con patrón `final id when …` no compila en Dart 3.9 dentro de una expresión de `Color`, usa `if (_isCannon(node.definition.id)) return const Color(0xff22c55e);` antes del `switch` y anótalo.
+
+## Notas de implementación
+
+- Diez filas de G1 en el CSV, etiquetas, rutas (lienzo de 864 × 1120, `line()` con +6 filas) y pantalla del árbol (color verde, iconos, descripción, resumen y porcentaje «menor es mejor» también para `_arc`). `duration` pasa a requerir `g1_auto_speed:1`. Las pruebas de geometría pasan sin mover nodos.
+- Desviación menor: `_value` en `skill_tree_screen.dart` no conocía la unidad `degrees` y habría mostrado «135 u»; se añade `'degrees' => '…°'`.
+- Pruebas: recuentos a 16 tipos y 53 nodos, límite Y del lienzo con `canvasHeight - 48` y las dos pruebas nuevas pedidas. Total: 155 pruebas.
+- La comprobación visual en navegador del árbol (último criterio) no se ha hecho; queda cubierta por las pruebas de widget y geometría y se revisará al final con el APK.

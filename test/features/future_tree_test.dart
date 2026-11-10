@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:incremental_hole_game/app/game_session.dart';
 import 'package:incremental_hole_game/core/vec.dart';
 import 'package:incremental_hole_game/features/board/domain/board.dart';
+import 'package:incremental_hole_game/features/upgrades/domain/catalog.dart';
 import 'package:incremental_hole_game/features/upgrades/domain/skill_tree.dart';
 import 'package:incremental_hole_game/features/upgrades/presentation/skill_tree_screen.dart';
 import '../test_support.dart';
@@ -16,7 +17,7 @@ void main() {
   test(
     'map has six initial paths, five-level lines and the agreed crossings',
     () {
-      expect(tree.nodes, hasLength(43));
+      expect(tree.nodes, hasLength(53));
       expect(tree.root.id, 'hand:1');
       expect(
         tree
@@ -24,12 +25,19 @@ void main() {
             .where((n) => !n.owned({'hand': 1}))
             .map((n) => n.id)
             .toSet(),
-        {'reward:1', 'sweep:1', 'collection:1', 'hand:2', 'hand_grip:1'},
+        {
+          'g1_auto:1',
+          'reward:1',
+          'sweep:1',
+          'collection:1',
+          'hand:2',
+          'hand_grip:1',
+        },
       );
       expect(tree.byId('broom:1').parents, ['hand:2']);
       expect(tree.byId('paddle:1').parents, ['broom:1']);
       expect(tree.byId('broom_v:1').parents, ['paddle:1']);
-      expect(tree.byId('duration:1').parents, ['reward:2']);
+      expect(tree.byId('duration:1').parents, ['g1_auto_speed:1']);
       expect(tree.byId('collection:1').parents, ['hand:1']);
       expect(tree.byId('magnet:1').parents, ['collection:3']);
       expect(tree.byId('attraction:1').parents, ['magnet:1']);
@@ -53,13 +61,22 @@ void main() {
   test('session enforces every path and crossing, and purchases persist', () {
     final session = GameSession(catalog, MemoryStore())
       ..economy.balance = 100000;
-    for (final id in ['reward', 'sweep', 'broom', 'robot', 'attraction']) {
+    for (final id in [
+      'g1_auto',
+      'g1_auto_speed',
+      'g1_aim',
+      'reward',
+      'sweep',
+      'broom',
+      'robot',
+      'attraction',
+    ]) {
       expect(buy(session, id), isFalse, reason: id);
     }
     expect(buy(session, 'hand'), isTrue);
-    expect(buy(session, 'reward'), isTrue);
+    expect(buy(session, 'g1_auto'), isTrue);
     expect(buy(session, 'duration'), isFalse);
-    expect(buy(session, 'reward'), isTrue);
+    expect(buy(session, 'g1_auto_speed'), isTrue);
     expect(buy(session, 'duration'), isTrue);
     expect(buy(session, 'hand'), isTrue);
     expect(buy(session, 'broom'), isTrue);
@@ -93,7 +110,33 @@ void main() {
     final duration = testCatalog().definitions.firstWhere(
       (d) => d.id == 'duration',
     );
-    expect(duration.levels.first.requirements, ['reward:2']);
+    expect(duration.levels.first.requirements, ['g1_auto_speed:1']);
+  });
+
+  test('G1 upgrades follow the planned values', () {
+    UpgradeDefinition find(String id) =>
+        catalog.definitions.firstWhere((d) => d.id == id);
+    expect(find('g1_auto_speed').levels.map((l) => l.value), [
+      1.3,
+      1.1,
+      .95,
+      .8,
+    ]);
+    expect(find('g1_aim').levels.map((l) => l.value), [135, 120, 110, 100, 90]);
+    expect(find('g1_auto').levels.first.requirements, ['hand:1']);
+    expect(find('duration').levels.first.requirements, ['g1_auto_speed:1']);
+  });
+
+  test('buying G1 automatic makes the next day automatic', () {
+    final session = GameSession(catalog, MemoryStore())
+      ..economy.balance = 60
+      ..levels['hand'] = 1;
+    expect(buy(session, 'g1_auto'), isTrue);
+    session.startDay();
+    expect(
+      session.board!.cannonAutomatic(session.board!.cannons.first),
+      isTrue,
+    );
   });
 
   test('attraction increases coin reach only while the pointer is active', () {

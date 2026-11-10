@@ -14,7 +14,7 @@ void main() {
       for (var i = 0; i < nodes.length; i++) {
         final node = nodes[i];
         expect(node.x, inInclusiveRange(40, 840));
-        expect(node.y, inInclusiveRange(32, 1056));
+        expect(node.y, inInclusiveRange(32, SkillTree.canvasHeight - 48));
         for (final other in nodes.skip(i + 1)) {
           expect(
             (Offset(node.x, node.y) - Offset(other.x, other.y)).distance,
@@ -35,13 +35,18 @@ void main() {
         containsAll(['hand:2', 'reward:1']),
       );
       final first = tree.visible({'hand': 1}).map((n) => n.id);
-      expect(first, containsAll(['reward:1', 'sweep:1', 'hand:2']));
+      expect(
+        first,
+        containsAll(['g1_auto:1', 'reward:1', 'sweep:1', 'hand:2']),
+      );
       expect(first, isNot(contains('broom:1')));
       expect(first, contains('collection:1'));
       expect(first, isNot(contains('duration:1')));
       expect(tree.visible({'hand': 2}).map((n) => n.id), contains('broom:1'));
       expect(
-        tree.visible({'reward': 2}).map((n) => n.id),
+        tree
+            .visible({'hand': 1, 'g1_auto': 1, 'g1_auto_speed': 1})
+            .map((n) => n.id),
         contains('duration:1'),
       );
     },

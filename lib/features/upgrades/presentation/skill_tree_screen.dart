@@ -214,8 +214,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
                             minScale: .35,
                             maxScale: 1.8,
                             child: SizedBox(
-                              width: SkillTree.canvasSize,
-                              height: SkillTree.canvasSize,
+                              width: SkillTree.canvasWidth,
+                              height: SkillTree.canvasHeight,
                               child: CustomPaint(
                                 painter: _TreePainter(
                                   visible,
@@ -394,7 +394,9 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               : widget.session.catalog.base[node.definition.effect] ?? 0)
         : node.definition.levels[node.level - 2].value;
     final next = node.upgrade.value;
-    final isInterval = node.definition.effect.endsWith('_interval');
+    final isInterval =
+        node.definition.effect.endsWith('_interval') ||
+        node.definition.effect.endsWith('_arc');
     final percentage = current > 0
         ? ((isInterval ? current / next : next / current) - 1) * 100
         : null;
@@ -540,7 +542,10 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   }
 }
 
+bool _isCannon(String id) => RegExp(r'^g[1-4]_').hasMatch(id);
+
 Color _typeColor(SkillNode node) => switch (node.definition.id) {
+  final id when _isCannon(id) => const Color(0xff22c55e),
   'reward' => const Color(0xffeab308),
   'sweep' ||
   'collection' ||
@@ -565,32 +570,57 @@ const _icons = {
   'duration': Icons.more_time,
   'robot': Icons.smart_toy_outlined,
   'robot_speed': Icons.bolt,
+  'g1_auto': Icons.autorenew,
+  'g1_auto_speed': Icons.speed,
+  'g1_aim': Icons.track_changes,
 };
 
-String _description(SkillNode node) => switch (node.definition.id) {
-  'hand' =>
-    'Lleva hasta ${node.upgrade.value.toInt()} bolas: agarra una y acerca la mano a otras para atraerlas',
-  'hand_grip' =>
-    'Atrae y sujeta más rápido las bolas adicionales mientras llevas una bola',
-  'broom' => 'Desbloquea la escoba para empujar grupos de bolas',
-  'paddle' => 'Aumenta la anchura de la escoba',
-  'broom_v' => 'Reúne las bolas con una escoba en V',
-  'sweep' => 'Recoge monedas al deslizar el dedo',
-  'collection' => 'Recoge varias monedas cercanas en cada pulsación, sin imán',
-  'magnet' => 'Atrae monedas cerca del dedo solo con la mano vacía',
-  'attraction' => 'Amplía el alcance del imán de monedas',
-  'reward' => 'Obtén más monedas por cada bola',
-  'duration' => 'Aumenta el tiempo de producción del día',
-  'robot' => 'Un robot empuja bolas hacia el hoyo',
-  'robot_speed' => 'El robot se mueve más rápido',
-  _ => '',
-};
+String _description(SkillNode node) {
+  final id = node.definition.id;
+  if (_isCannon(id)) {
+    final n = id[1];
+    return switch (id.substring(3)) {
+      'auto' => 'El cañón $n dispara solo; puedes seguir tocándolo',
+      'auto_speed' => 'El cañón $n dispara solo más a menudo',
+      'aim' => 'Estrecha el arco del cañón $n para apuntar mejor',
+      'unlock' => 'Añade el cañón $n al tablero. Llega manual',
+      _ => '',
+    };
+  }
+  return switch (id) {
+    'hand' =>
+      'Lleva hasta ${node.upgrade.value.toInt()} bolas: agarra una y acerca la mano a otras para atraerlas',
+    'hand_grip' =>
+      'Atrae y sujeta más rápido las bolas adicionales mientras llevas una bola',
+    'broom' => 'Desbloquea la escoba para empujar grupos de bolas',
+    'paddle' => 'Aumenta la anchura de la escoba',
+    'broom_v' => 'Reúne las bolas con una escoba en V',
+    'sweep' => 'Recoge monedas al deslizar el dedo',
+    'collection' =>
+      'Recoge varias monedas cercanas en cada pulsación, sin imán',
+    'magnet' => 'Atrae monedas cerca del dedo solo con la mano vacía',
+    'attraction' => 'Amplía el alcance del imán de monedas',
+    'reward' => 'Obtén más monedas por cada bola',
+    'duration' => 'Aumenta el tiempo de producción del día',
+    'robot' => 'Un robot empuja bolas hacia el hoyo',
+    'robot_speed' => 'El robot se mueve más rápido',
+    _ => '',
+  };
+}
 
 TextSpan _summary(SkillNode node) {
   final value = node.upgrade.value;
   String number(double n) =>
       n == n.roundToDouble() ? '${n.toInt()}' : n.toStringAsFixed(2);
-  final (before, amount, after) = switch (node.definition.id) {
+  final id = node.definition.id;
+  final n = _isCannon(id) ? id[1] : '';
+  final (before, amount, after) = switch (_isCannon(id)
+      ? id.substring(3)
+      : id) {
+    'auto' => ('', 'Dispara solo', ' y comparte la recarga contigo.'),
+    'auto_speed' => ('Dispara solo cada ', number(value), ' s.'),
+    'aim' => ('Arco de ', '${number(value)}°', '.'),
+    'unlock' => ('', 'Cañón $n', ' en el tablero.'),
     'hand' => ('La mano agarra ', number(value), ' bolas.'),
     'hand_grip' => ('Fuerza de agarre ', '×${number(value)}', '.'),
     'paddle' => ('La escoba abarca ', number(value * 4), ' u.'),
@@ -633,6 +663,7 @@ String _value(SkillNode node, double value) {
     'multiplier' => '×${number(value == 0 ? 1 : value)}',
     'unlock' => value > 0 ? 'Desbloqueada' : 'Sin desbloquear',
     'seconds' => '${number(value)} s',
+    'degrees' => '${number(value)}°',
     'coins' => '${number(value)} monedas/bola',
     'balls' => '${number(value)} bolas',
     'robots' => '${number(value)} robot',

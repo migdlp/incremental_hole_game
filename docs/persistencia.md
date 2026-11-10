@@ -1,38 +1,19 @@
 # Referencia de guardado y recuperación
 
-## Actualización vigente — 0.5.0+10 · JSON v5 y balance 6
+## Contrato vigente — 0.6.0+11 · JSON v6 y balance 7
 
-Se escribe `version: 5` y se aceptan versiones 1–5. `grandfathered` mantiene las compras del catálogo antiguo; `previousTree` conserva los niveles que ya estaban comprados en v4 antes del nuevo requisito de Imán. Ambos mapas se validan contra sus requisitos históricos y no conceden niveles nuevos. Las compras posteriores cumplen el CSV actual.
+Se escribe `version: 6` y solo se lee esa versión. Las partidas de versiones anteriores se ignoran sin aviso y comienzan una partida nueva; se borraron las migraciones y los balances congelados anteriores (decisión ADR-01 del [plan de cañones](plan/canones/02-architecture.md)). Las jornadas guardadas llevan `run.balanceVersion = 7`; cualquier otro valor invalida el guardado. Ya no existen `grandfathered` ni `previousTree`.
 
-Las jornadas nuevas usan balance 6: Mano I cuesta 13, Valor da 2/3/5/8/13 y el imán requiere Área III y cuesta 300. Una jornada activa mantiene su balance 1–5 hasta terminar. El balance 5 queda congelado en [balance_v5.dart](../lib/features/upgrades/domain/balance_v5.dart), además de las copias históricas existentes.
+Implementación: [GameSession](../lib/app/game_session.dart), [Board](../lib/features/board/domain/board.dart), [Cannon](../lib/features/board/domain/cannon.dart) y adaptadores de [persistencia](../lib/persistence/). Este documento describe el contrato actual, no un servicio de sincronización.
 
-`board.coins` contiene monedas individuales de valor 1/10/50/100/500. Al restaurar una pila histórica de otro importe se descompone sin perder dinero. `board.queuedCoins` es un mapa denominación → cantidad que conserva las monedas pendientes de emitir si se llena el límite de objetos visibles. Se valida que solo tenga claves de las cinco denominaciones y cantidades enteras no negativas; forma parte del valor pendiente. El nuevo límite visible es 1000; las jornadas históricas conservan su límite original.
+Novedades del tablero guardado:
 
-`board.collectedCoins` registra denominación → cantidad recogida durante la jornada y se copia a `last.collectedCoins` al cerrarla. Se exige que su valor sumado coincida con el ingreso cobrado. `null` significa que ese desglose no se guardaba en la jornada histórica; se conserva el ingreso y se indica que falta el detalle, sin deducir un recuento ficticio de un total. Las claves se serializan como cadenas canónicas, por ejemplo `"50"`.
+- `board.cannonClock` (número finito ≥ 0) sustituye a `spawnClock`.
+- `board.cannons` es una lista, en orden de hueco, de `{slot, cooldown, autoClock}`. Su longitud y sus huecos deben coincidir con los cañones que la configuración habilita (G1 siempre; G2–G4 si `gN_enabled > 0`), y `cooldown` no puede superar `cannon_cooldown`. `blockedFlash` y `recoil` son solo de presentación y no se guardan.
+- `board.coins` contiene monedas individuales de valor 1/10/50/100/500; un valor distinto invalida el tablero. `board.queuedCoins` conserva las monedas pendientes de emitir si se llena el límite visible (1000) y `board.collectedCoins` el desglose recogido, que se copia a `last.collectedCoins` al cerrar y debe sumar el ingreso cobrado.
+- Cada bola guarda `golden`; `goldenCaptured` está entre cero y el total capturado.
 
-La restauración valida configuración, recuentos, IDs y contabilidad antes de modificar la sesión. Al cargar no se restaura un agarre ni se cobra el día dos veces. A partir de aquí se conserva la documentación histórica de los esquemas anteriores; esta sección prevalece para el contrato actual.
-
-## Bolas doradas — 0.3.3+8
-
-El esquema v4 añade `golden` a cada bola y `goldenCaptured` al tablero. En datos anteriores ausentes significan bola normal y cero capturas doradas. El contador dorado debe estar entre cero y el total capturado. La contabilidad valida `generated = ball_value × (captured + 9 × goldenCaptured)` además de `generated = collected + pending`. El estado aleatorio sigue guardado, así que cargar no vuelve a sortear una bola existente ni reinicia la secuencia de emisiones.
-
-## Historial — esquema v4 y balance 5
-
-La revisión 0.3.1+6 conserva el esquema JSON v4 y admite balances 1–5. Las jornadas nuevas usan **balance 5**: $1 por bola base y 3 segundos de recogida final. Las jornadas activas de balance 4 conservan sus tiempos y valores completos desde [balance_v4.dart](../lib/features/upgrades/domain/balance_v4.dart); los balances 1–3 siguen usando [legacy_balance.dart](../lib/features/upgrades/domain/legacy_balance.dart). No se modifica el ahorro ni se convierten los importes existentes.
-
-Las monedas siguen guardándose como pilas con `value` entero. La descomposición en denominaciones de $1/$10/$50/$100/$500 es presentación derivada; no añade otro saldo ni requiere migrar los objetos. Ningún agarre se restaura. Al terminar la jornada histórica, el siguiente día adopta el balance actual.
-
-La evidencia de compatibilidad incluye recargar dos veces una jornada de balance 4 con monedas pendientes, recoger y bancar su importe anterior una sola vez, y comenzar luego una jornada de balance 5. Las secciones históricas que siguen conservan el contrato de versiones anteriores; esta actualización prevalece para las versiones actuales.
-
-## Actualización del árbol — v4
-
-El formato actual escribe `version: 4` y `grandfathered`, un mapa de niveles heredados. Al leer v1/v2/v3 se validan sus requisitos históricos y se conservan sus compras sin conceder requisitos nuevos; al volver a guardar, esta procedencia queda persistida. Los niveles heredados deben ser compras válidas del catálogo anterior. Cualquier compra posterior sigue el CSV actual, incluidos requisitos cruzados separados por `&`.
-
-Las jornadas activas mantienen `balanceVersion` 1/2/3 y los valores congelados en `legacy_balance.dart` hasta terminar, también tras sucesivas restauraciones en v4. En la entrega del mapa las jornadas nuevas usaban balance 4; ahora usan balance 5. Se conserva la validación de configuración, contabilidad y objetos antes de modificar la sesión. Las referencias a v3 que siguen documentan el formato anterior.
-
-La capacidad de mano se guarda como nivel `hand` y efecto de jornada `hand_capacity`. Los guardados previos sin ese efecto se normalizan a capacidad 1 solo si no hay compras de mano. No se restauran agarres; todas las bolas sostenidas se serializan con velocidad cero. Una escoba seleccionada durante el bug de acceso gratuito vuelve a mano si no está comprada; su pose guardada no concede acceso físico.
-
-Formato actual: JSON, `version = 3`; se aceptan también versiones `1` y `2` mediante compatibilidad explícita. Implementación: [GameSession](../lib/app/game_session.dart), [Board](../lib/features/board/domain/board.dart) y adaptadores de [persistencia](../lib/persistence/). Este documento describe el contrato actual, no un servicio de sincronización.
+La restauración valida configuración, recuentos, IDs y contabilidad antes de modificar la sesión. Al cargar no se restaura un agarre ni se cobra el día dos veces.
 
 ## Dónde se guarda
 
@@ -49,21 +30,21 @@ En web, el plugin gestiona la representación de las preferencias en el almacena
 
 | Campo | Tipo | Significado |
 | --- | --- | --- |
-| `version` | entero | Se escribe `3`; se admiten `1`, `2` y `3` |
+| `version` | entero | Se escribe `6`; se rechaza cualquier otro |
 | `tool` | cadena | Herramienta seleccionada: `hand`, `broom` o `vee`; debe estar desbloqueada |
 | `day` | entero | Jornada actual si hay `run`, o siguiente jornada disponible de noche |
 | `balance` | entero | Ahorro bancado, separado del ingreso del día en curso |
 | `record` | entero | Mayor ingreso de una jornada finalizada |
 | `levels` | objeto ID → entero | Niveles comprados; un ID ausente equivale a nivel cero |
 | `sound` | booleano | Clics del sistema activados o silenciados |
-| `last` | objeto o `null` | Último resultado: `day`, `income`, `generated`, `captured`, `previousIncome` |
+| `last` | objeto o `null` | Último resultado: `day`, `income`, `generated`, `captured`, `previousIncome`, `collectedCoins` |
 | `run` | objeto o `null` | Jornada activa; `null` indica taller/noche |
 
-Ejemplo completo y válido de partida nueva, antes de comenzar el primer día:
+Ejemplo de partida nueva, antes de comenzar el primer día:
 
 ```json
 {
-  "version": 3,
+  "version": 6,
   "tool": "hand",
   "day": 1,
   "balance": 0,
@@ -79,29 +60,16 @@ No hay un campo de historial completo ni se guarda una fecha para generar progre
 
 ## Jornada activa
 
-`run` contiene `remaining` (segundos), `collected`, `generated`, `settings`, `balanceVersion` y `board`.
+`run` contiene `remaining` (segundos), `collected`, `generated`, `settings`, `balanceVersion` (siempre `7`) y `board`.
 
-- `settings` contiene las bases y efectos comprados al iniciar el día. La carga exige igualdad con el catálogo de esos niveles y de la versión de balance correspondiente.
-- `balanceVersion = 3` identifica el balance actual: 10 + 5 s y emisión base de 1,5 bolas/s. `2` conserva 10 + 5 s y emisión cada 3 s; `1`, 60 + 5 s y emisión cada 0,75 s. No es la versión del esquema JSON.
+- `settings` contiene las bases y efectos comprados al iniciar el día. La carga exige igualdad con el catálogo para los niveles guardados.
 - `board.random` conserva el estado entero del generador congruencial; la semilla inicial es `day * 7919`.
-- `board.nextId`, `captured` y `spawnClock` conservan identificadores, capturas y progreso del intervalo de emisión.
-- `board.balls` contiene objetos `{id, p: [x, y], v: [vx, vy]}`.
+- `board.nextId`, `captured` y `goldenCaptured` conservan identificadores y capturas; `cannonClock` y `cannons` el estado de los cañones.
+- `board.balls` contiene objetos `{id, p: [x, y], v: [vx, vy], golden}`.
 - `board.coins` contiene objetos `{id, p: [x, y], value, landing}`. `landing` es el tiempo restante de aterrizaje entre `0` y `0.2`.
 - `board.robot` es `[x, y]`; `robotTarget` es ID de bola o `null`.
 
-La posición del robot y su objetivo se conservan; sus temporizadores internos de decisión/atasco se reinician. El puntero, orientación de escoba y agarre activo no se serializan. Una bola agarrada se guarda en su posición como bola normal con velocidad cero; no se restaura un lanzamiento ficticio. Las animaciones cosméticas no constituyen una fuente de ingreso.
-
-## Compatibilidad entre versiones
-
-| Esquema leído | Tratamiento |
-| --- | --- |
-| v1 | No incluye herramienta. Quien tenía `paddle` comprado recibe `broom: 1` y selecciona escoba; el resto selecciona mano. No se concede barrido. Se valida la configuración original sin los desbloqueos nuevos |
-| v2 | Conserva herramienta y compras. La jornada activa pertenece al balance anterior |
-| v3 | Exige herramienta válida y `run.balanceVersion` entero, `1`, `2` o `3`; valida los valores exactos contra esa versión |
-
-Saldo, resultados, niveles y objetos de la misma jornada se conservan. Una jornada v1/v2 restaurada mantiene sus tiempos e intervalo originales hasta terminar, y se abre pausada. Al volver a guardar se escribe v3 con `balanceVersion: 1`, para poder reabrirla de nuevo. El siguiente `startDay` usa el balance actual (`3`). Un guardado nocturno antiguo comienza directamente con el balance nuevo.
-
-Los valores históricos de duración e intervalo están conservados en `UpgradeCatalog.settings` para `balanceVersion: 1` y `2` para validar partidas antiguas; no son una segunda tabla de balance para ajustar partidas nuevas. La validación completa precede a la aplicación del estado. `load` conserva como copia la instantánea leída; la escritura v3 ocurre al siguiente guardado normal.
+La posición del robot y su objetivo se conservan; sus temporizadores internos de decisión/atasco se reinician. El puntero, orientación de escoba y agarre activo no se serializan. Una bola agarrada se guarda en su posición con velocidad cero; no se restaura un lanzamiento ficticio. La recarga y el reloj automático de cada cañón sí se guardan.
 
 ## Cuándo y cómo se escribe
 
@@ -122,14 +90,15 @@ En web se escribe primero la preferencia de copia anterior y después la princip
 
 `loadCandidates()` devuelve principal y copia en ese orden. Para cada candidato, la sesión intenta decodificar y validar todo el estado antes de aplicarlo:
 
-- Versión admitida, tipos esperados, día/saldo/récord no negativos y resultado anterior coherente.
+- Versión 6 exacta, tipos esperados, día/saldo/récord no negativos y resultado anterior coherente.
 - IDs de mejora conocidos, niveles dentro del catálogo y requisitos satisfechos.
 - Configuración de jornada coincidente y tiempo finito, positivo y dentro de su duración.
 - Límites de bolas/pilas, valores de monedas positivos, aterrizaje válido y posiciones/velocidades finitas.
 - IDs de objetos únicos, positivos y anteriores a `nextId`.
-- `generated == collected + pending` y `generated == captured * ball_value`.
+- `generated == collected + pending` y `generated == (captured + 9 × goldenCaptured) * ball_value`.
+- Cañones: misma cantidad y hueco que los habilitados por la configuración, valores finitos ≥ 0 y `cooldown` ≤ `cannon_cooldown`.
 
-Si se rechaza el principal y la copia es válida, se restaura esa copia y se muestra un aviso. El aviso depende del índice del candidato: si el principal no existe y la copia es el único candidato, el código actual puede cargarla sin ese mensaje. Si los candidatos existentes fallan, `load()` informa del error sin sobrescribirlos. `Bootstrap` ofrece reintentar o crear una partida nueva con confirmación explícita. Si no hay ningún candidato, se inicia un progreso vacío.
+Si se rechaza el principal y la copia es válida, se restaura esa copia y se muestra un aviso. El aviso depende del índice del candidato: si el principal no existe y la copia es el único candidato, el código actual puede cargarla sin ese mensaje. Si los candidatos existentes fallan, `load()` informa del error sin sobrescribirlos. `Bootstrap` ofrece reintentar o crear una partida nueva con confirmación explícita. Si no hay ningún candidato, se inicia un progreso vacío. Los candidatos cuya `version` es un entero distinto de 6 se ignoran sin aviso: si todos son antiguos, empieza una partida nueva y el primer guardado sobrescribe `progress.json`. Un texto que no es JSON se trata como un guardado v6 dañado.
 
 La lectura nativa permite decodificar UTF-8 dañado para que el candidato pueda rechazarse y se intente la copia. Un error de acceso al directorio/archivo puede impedir obtener los candidatos; no se promete recuperación de todos los fallos del sistema de archivos. Estas comprobaciones son validación de consistencia, no protección criptográfica frente a edición de partidas.
 
@@ -145,7 +114,7 @@ Una segunda llamada a `finishDay()` se ignora al no haber jornada. Tras cargar u
 - No hay avance por tiempo real mientras está cerrada la aplicación; al volver hay que continuar explícitamente.
 - Un fallo de escritura no revierte las acciones en memoria. Se muestra un aviso y se permite reintentar; salir antes de un guardado correcto puede perderlas.
 - Modificar IDs, valores de balance, reglas o esquema puede invalidar una jornada guardada. La igualdad de `settings` es deliberadamente estricta; probar compatibilidad antes de distribuir un cambio de balance.
-- Hay compatibilidad explícita v1/v2 → v3 y conservación del balance anterior por jornada. Para cambios futuros hay que ampliar y probar esa política; incrementar el esquema no migra automáticamente configuraciones desconocidas.
+- No hay migraciones: una versión de esquema distinta de 6 se descarta. Cualquier cambio de esquema o de balance futuro exige decidir de nuevo si se migra o se reinicia.
 - Firma de APK y formato del guardado son asuntos distintos. Una APK con certificado diferente puede exigir desinstalar la anterior y borrar sus datos; consultar [desarrollo](guia-desarrollo.md) antes de hacerlo.
 
 La evidencia de archivo disponible procede de pruebas Linux y la de web de recargas en Chromium. La aceptación de recuperación y cierre forzado en Android físico sigue pendiente en [estado actual](estado-actual.md).

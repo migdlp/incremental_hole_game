@@ -1,6 +1,6 @@
 # Plan: generadores-cañón
 
-Estado: aprobado, pendiente de ejecución · Última actualización: 2026-11-10
+Estado: completado · Última actualización: 2026-11-10
 
 ## Resumen
 
@@ -36,11 +36,11 @@ Generado con `python3 .claude/skills/project-planner/scripts/validate_plan.py do
 
 | ID | Título | Tareas | Estado |
 | --- | --- | --- | --- |
-| [E01](epics/E01-cimientos.md) | Cimientos: guardado v6 y física configurable | 2 | Pendiente |
-| [E02](epics/E02-canon-manual.md) | Cañón principal manual | 5 | Pendiente |
-| [E03](epics/E03-automatico-punteria.md) | Automático y puntería del cañón 1 | 2 | Pendiente |
-| [E04](epics/E04-mas-canones.md) | Cañones 2, 3 y 4 | 2 | Pendiente |
-| [E05](epics/E05-cierre.md) | Cierre: balance, documentación y APK | 3 | Pendiente |
+| [E01](epics/E01-cimientos.md) | Cimientos: guardado v6 y física configurable | 2 | Completado |
+| [E02](epics/E02-canon-manual.md) | Cañón principal manual | 5 | Completado |
+| [E03](epics/E03-automatico-punteria.md) | Automático y puntería del cañón 1 | 2 | Completado |
+| [E04](epics/E04-mas-canones.md) | Cañones 2, 3 y 4 | 2 | Completado |
+| [E05](epics/E05-cierre.md) | Cierre: balance, documentación y APK | 3 | Completado |
 
 ## Decisiones clave
 
@@ -67,3 +67,4 @@ Ninguna. PA-1 (precio de Mano I) se revisa jugando el APK.
 
 - 2026-11-10: versión inicial, tras tres rondas de entrevista con el usuario.
 - 2026-11-10: bloqueo de E02-T03 resuelto con la opción 2. «Día más largo» requiere `reward:2` de forma temporal (E02-T03) y `g1_auto_speed:1` de forma definitiva (E03-T02). Se ha simulado la prueba de geometría del árbol en los tres estados intermedios y pasa. Corrección: `_collide` tenía dos `.limit(380)`, no cuatro. `isInterval` pasa a `effect.endsWith('_interval')` (E02-T03) y E03-T02 añade `_arc`. E03-T02 también actualiza el límite Y de `skill_tree_test.dart` (1056 → `canvasHeight - 48`).
+- 2026-11-10: plan ejecutado. PR 1–4: #28, #29, #30 y #31, fusionadas en `main`; PR 5 (E05, documentación y versión 0.6.0+11) abierta con este cambio. El APK se registra en la PR documental de E05-T03. 169 pruebas.

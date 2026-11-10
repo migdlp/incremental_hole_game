@@ -1,6 +1,6 @@
 # Economía y monedas
 
-Referencia de la implementación 0.5.0+10. La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
+Referencia de la implementación 0.6.0+11. Desde esta versión las bolas las disparan cañones (ver [árbol](arbol-de-mejoras.md)); el ritmo y los precios de las mejoras de cañón son provisionales (SUPUESTO-1 del plan). La única tabla editable de precios, efectos y requisitos es [balance.csv](balance.csv). El ritmo de compra sigue siendo provisional.
 
 ## Valor y denominaciones
 
@@ -16,19 +16,19 @@ Una bola capturada genera **$1 de base**. El dinero se ingresa al recoger la mon
 
 Solo existen esas cinco denominaciones. Cada moneda visible tiene exactamente uno de esos valores, la misma anchura/altura y ninguna cifra en su cara. Se retira la fusión por proximidad y el dibujo de pilas de distintas alturas. Una recompensa de $13 crea una moneda de $10 y tres de $1; nunca una moneda de $13. Una de $25 crea dos de $10 y cinco de $1.
 
-Cada moneda se cobra una sola vez. El límite visible nuevo es de 1000 objetos; si se llena, una reserva de cinco contadores por denominación conserva lo que falta por emitir y lo coloca cuando se libera espacio. No hay importes ocultos sumados a una moneda visible. La reserva cuenta como dinero pendiente y se guarda; al cerrar el día, lo no cobrado se pierde igual que las monedas del tablero. Las pilas históricas se descomponen al cargar conservando el valor total.
+Cada moneda se cobra una sola vez. El límite visible nuevo es de 1000 objetos; si se llena, una reserva de cinco contadores por denominación conserva lo que falta por emitir y lo coloca cuando se libera espacio. No hay importes ocultos sumados a una moneda visible. La reserva cuenta como dinero pendiente y se guarda; al cerrar el día, lo no cobrado se pierde igual que las monedas del tablero. Un guardado con una moneda de valor distinto de esas cinco denominaciones se rechaza.
 
 El resumen guarda el recuento real por denominación, ordenado 500 → 100 → 50 → 10 → 1, y omite cantidades cero. La barra verde anterior (cobrado/generado) se elimina. Un día histórico sin recuento conserva su ingreso y muestra que falta el desglose, sin inventarlo.
 
-Cada bola que emite el generador tiene una probabilidad independiente del 1 % de ser dorada. Al capturarla genera diez veces el valor normal de esa jornada: con la base de $1 produce una moneda de $10. Las mejoras de recompensa también se multiplican por diez. Las denominaciones superiores siguen representando el importe exacto, incluido el premio dorado. La mejora de recompensa existente mantiene sus efectos del CSV: aumenta el importe por captura, que se representa mediante denominaciones válidas. El ajuste definitivo de precios y posibles desbloqueos especiales siguen abiertos en [cambios futuros](cambios-futuros-arbol-mejoras.md).
+Cada bola que dispara un cañón tiene una probabilidad independiente del 1 % de ser dorada. Al capturarla genera diez veces el valor normal de esa jornada: con la base de $1 produce una moneda de $10. Las mejoras de recompensa también se multiplican por diez. Las denominaciones superiores siguen representando el importe exacto, incluido el premio dorado. La mejora de recompensa existente mantiene sus efectos del CSV: aumenta el importe por captura, que se representa mediante denominaciones válidas. El ajuste definitivo de precios y posibles desbloqueos especiales siguen abiertos en [cambios futuros](cambios-futuros-arbol-mejoras.md).
 
 ## Duración, producción y cobro
 
 La jornada base tiene **10 segundos de producción + 3 de recogida final = 13 segundos**. La barra del día mide solo producción; al agotarse, queda vacía y aparece una segunda barra para recogida. El contador muestra el tiempo de la fase activa. Estadísticas y árbol no tienen temporizador. La recogida final congela bolas, escoba y robot; solo permite cobrar monedas y conserva el oscurecimiento del tablero, manteniendo la cabecera y el tiempo sin oscurecer.
 
-La producción base sigue siendo 1,5 bolas/s. Sin bloqueos, intenta emitir quince bolas en diez segundos: **$15 generados con quince bolas normales** si se capturan todas. Las doradas aumentan ese importe; $15 ya no es un máximo absoluto. El ingreso se banca únicamente al cobrar las monedas. Bloqueos del generador, bolas sin capturar y monedas sin recoger reducen el ingreso. Estas cifras no miden la experiencia real del jugador.
+La producción ya no es un flujo automático: al principio solo se dispara tocando el cañón 1, con una recarga de 1 s. Un jugador perfecto dispara **10 bolas en los 10 s de producción** (en t = 0 s y cada segundo hasta t = 9 s): **$10 generados** si las captura y cobra todas. Las doradas aumentan ese importe. Mano I cuesta 13, así que se necesitan entre una y dos jornadas perfectas. Solo se captura una bola libre que llegue al hoyo a ≤ 140 u/s; las bolas agarradas se capturan por posición. El ingreso se banca únicamente al cobrar las monedas. Bolas que no llegan al hoyo, bolas rápidas que lo cruzan y monedas sin recoger reducen el ingreso. Estas cifras no miden la experiencia real del jugador.
 
-Generador, duración y recompensa son mejoras independientes. Los precios y efectos por nivel se consultan en el CSV; sus conexiones se explican en el [árbol actual](arbol-de-mejoras.md). Las compras se aplican al siguiente día. Mano I cuesta 13. Los niveles de Valor dan 2/3/5/8/13 por captura normal: multiplicar el valor entero anterior por 1,65 y redondear al entero más próximo. Los factores efectivos iniciales varían por el redondeo. Sus precios se mantienen en 40/70/110/180/300.
+Las mejoras de cañón (Automático, Ritmo automático y Puntería, por cañón), la duración y la recompensa son independientes. Los precios y efectos por nivel se consultan en el CSV; sus conexiones se explican en el [árbol actual](arbol-de-mejoras.md). Las compras se aplican al siguiente día. Mano I cuesta 13. Los niveles de Valor dan 2/3/5/8/13 por captura normal: multiplicar el valor entero anterior por 1,65 y redondear al entero más próximo. Los factores efectivos iniciales varían por el redondeo. Sus precios se mantienen en 40/70/110/180/300.
 
 ## Recogida y progresión del imán
 
@@ -44,8 +44,8 @@ Con una o más bolas agarradas se bloquean todos los cobros de monedas y su atra
 - La representación por denominaciones no cambia estos cálculos ni crea dinero.
 - No hay ingresos mientras el juego está cerrado.
 
-Las nuevas jornadas usan balance 6. Las jornadas guardadas con balance 1–5 mantienen su configuración original y su valor hasta terminar, aunque la presentación use ya los nuevos colores. El siguiente día adopta el CSV actual. Ver [persistencia](persistencia.md).
+Las nuevas jornadas usan balance 7 y el guardado v6 no conserva jornadas ni compras de versiones anteriores: se descartan sin aviso. Ver [persistencia](persistencia.md).
 
 ## Ajuste pendiente
 
-El cambio a $1 reduce el ingreso inicial respecto al balance 4, que daba dos monedas por captura. Mano I se reduce a 13 y el Imán pasa a 300; los demás precios se conservan y siguen pendientes de revisión jugando. Registrar capturas, valor generado/cobrado/perdido, duración y días entre compras antes de recalibrar. No se promete una compra en el primer día ni un plazo fijo para llegar al robot.
+Los precios de las mejoras de cañón son provisionales y se revisarán jugando el APK (PA-1: precio de Mano I). El cambio a $1 reduce el ingreso inicial respecto al balance 4, que daba dos monedas por captura. Mano I se reduce a 13 y el Imán pasa a 300; los demás precios se conservan y siguen pendientes de revisión jugando. Registrar capturas, valor generado/cobrado/perdido, duración y días entre compras antes de recalibrar. No se promete una compra en el primer día ni un plazo fijo para llegar al robot.
